@@ -16,7 +16,7 @@
 
                 <StackPanel>
                     <TextBlock Text="{Binding Name}" FontSize="20" FontWeight="SemiBold"/>
-                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                    <WrapPanel Margin="0,10,0,0">
                         <Border Background="{DynamicResource BrushAccentSoft}"
                                 BorderBrush="{DynamicResource BrushAccent}"
                                 BorderThickness="1"
@@ -48,8 +48,8 @@
                                 Padding="8,2">
                             <TextBlock Text="{Binding Version, StringFormat=バージョン {0}}" FontSize="12"/>
                         </Border>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    </WrapPanel>
+                    <WrapPanel Margin="0,8,0,0">
                         <Border Background="{DynamicResource BrushSurface}"
                                 BorderBrush="{DynamicResource BrushBorder}"
                                 BorderThickness="1"
@@ -73,7 +73,7 @@
                                 Padding="8,2">
                             <TextBlock Text="{Binding PlayerCountText, StringFormat=プレイヤー {0}}" FontSize="12"/>
                         </Border>
-                    </StackPanel>
+                    </WrapPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                         <TextBlock Text="最終起動" Style="{StaticResource MutedText}" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text="{Binding LastStartedAtText}" VerticalAlignment="Center"/>
@@ -108,6 +108,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <Border Style="{StaticResource SurfacePanel}">
@@ -122,16 +123,15 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBox Grid.Column="0" Text="{Binding CommandText, UpdateSourceTrigger=PropertyChanged}" Height="32"/>
                         <Button Grid.Column="1" Content="送信" Command="{Binding SendCommandCommand}" Margin="8,0,0,0" Width="90"/>
-                        <Button Grid.Column="2" Content="ログ出力" Command="{Binding ExportLogsCommand}" Margin="8,0,0,0"/>
-                        <Button Grid.Column="3" Content="ログフォルダ" Command="{Binding OpenLogsDirectoryCommand}" Margin="8,0,0,0"/>
-                        <Button Grid.Column="4" Content="クラッシュレポート" Command="{Binding OpenCrashReportsCommand}" Margin="8,0,0,0"/>
                     </Grid>
+                    <WrapPanel Grid.Row="2" Margin="0,8,0,0">
+                        <Button Content="ログ出力" Command="{Binding ExportLogsCommand}" Margin="0,0,8,0"/>
+                        <Button Content="ログフォルダ" Command="{Binding OpenLogsDirectoryCommand}" Margin="0,0,8,0"/>
+                        <Button Content="クラッシュレポート" Command="{Binding OpenCrashReportsCommand}"/>
+                    </WrapPanel>
                 </Grid>
             </TabItem>
 
@@ -290,9 +290,30 @@
                     <Border Style="{StaticResource SurfacePanel}" Grid.Column="0" Margin="0,0,12,0">
                         <StackPanel>
                             <TextBlock Text="ワールド一覧" FontWeight="SemiBold" FontSize="14"/>
-                            <ListBox ItemsSource="{Binding Worlds}" SelectedItem="{Binding SelectedWorld}" Margin="0,8,0,8" Height="220"/>
-                            <Button Content="切り替え" Command="{Binding SwitchWorldCommand}" Margin="0,0,0,6"/>
-                            <Button Content="削除" Command="{Binding DeleteWorldCommand}"/>
+                            <TextBlock Text="現在のワールド" Style="{StaticResource MutedText}" Margin="0,8,0,4"/>
+                            <Border Background="{DynamicResource BrushCard}"
+                                    BorderBrush="{DynamicResource BrushBorder}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Padding="10,6">
+                                <TextBlock Text="{Binding CurrentWorldName}" FontWeight="SemiBold"/>
+                            </Border>
+
+                            <TextBlock Text="切り替え先" Style="{StaticResource MutedText}" Margin="0,10,0,4"/>
+                            <ComboBox ItemsSource="{Binding Worlds}"
+                                      SelectedItem="{Binding SelectedWorld}"
+                                      MinWidth="220"/>
+                            <TextBlock Text="{Binding WorldSwitchHint}" Style="{StaticResource MutedText}" Margin="0,6,0,0"/>
+
+                            <WrapPanel Margin="0,10,0,0">
+                                <Button Content="このワールドに切り替え" Command="{Binding SwitchWorldCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8"/>
+                                <Button Content="フォルダを開く" Command="{Binding OpenSelectedWorldDirectoryCommand}" Margin="0,0,8,8"/>
+                                <Button Content="一覧更新" Command="{Binding RefreshWorldsCommand}" Margin="0,0,0,8"/>
+                            </WrapPanel>
+
+                            <ListBox ItemsSource="{Binding Worlds}" SelectedItem="{Binding SelectedWorld}" Margin="0,2,0,8" Height="160"/>
+
+                            <Button Content="削除" Command="{Binding DeleteWorldCommand}" Width="120"/>
 
                             <TextBlock Text="新規ワールド" Margin="0,12,0,4"/>
                             <TextBox Text="{Binding NewWorldName}" Height="28"/>

@@ -77,12 +77,14 @@ public sealed class ServerViewModel : ObservableObject
         ExportLogsCommand = new RelayCommand(_ => ExportLogs());
         SaveSettingsCommand = new RelayCommand(_ => SaveSettings());
         BrowseJavaCommand = new RelayCommand(_ => BrowseJava());
-        SwitchWorldCommand = new RelayCommand(_ => SwitchWorld(), _ => !string.IsNullOrWhiteSpace(SelectedWorld));
+        SwitchWorldCommand = new RelayCommand(_ => SwitchWorld(), _ => !string.IsNullOrWhiteSpace(SelectedWorld) && !IsSelectedWorldCurrent);
         DeleteWorldCommand = new RelayCommand(_ => DeleteWorld(), _ => !string.IsNullOrWhiteSpace(SelectedWorld));
         CreateWorldCommand = new RelayCommand(_ => CreateWorld(), _ => !string.IsNullOrWhiteSpace(NewWorldName));
         BackupWorldCommand = new RelayCommand(_ => BackupWorld(), _ => !string.IsNullOrWhiteSpace(SelectedWorld));
         RestoreWorldCommand = new RelayCommand(_ => RestoreWorld(), _ => SelectedBackup is not null);
         RefreshBackupsCommand = new RelayCommand(_ => LoadBackups());
+        RefreshWorldsCommand = new RelayCommand(_ => LoadWorlds());
+        OpenSelectedWorldDirectoryCommand = new RelayCommand(_ => OpenSelectedWorldDirectory(), _ => !string.IsNullOrWhiteSpace(SelectedWorld));
         OpenServerDirectoryCommand = new RelayCommand(_ => OpenServerDirectory());
         OpenLogsDirectoryCommand = new RelayCommand(_ => OpenLogsDirectory());
         OpenCrashReportsCommand = new RelayCommand(_ => OpenCrashReports());
@@ -216,7 +218,34 @@ public sealed class ServerViewModel : ObservableObject
                 SwitchWorldCommand.RaiseCanExecuteChanged();
                 DeleteWorldCommand.RaiseCanExecuteChanged();
                 BackupWorldCommand.RaiseCanExecuteChanged();
+                OpenSelectedWorldDirectoryCommand.RaiseCanExecuteChanged();
+                OnPropertyChanged(nameof(IsSelectedWorldCurrent));
+                OnPropertyChanged(nameof(WorldSwitchHint));
             }
+        }
+    }
+
+    public string CurrentWorldName => string.IsNullOrWhiteSpace(_config.WorldName) ? "-" : _config.WorldName;
+
+    public bool IsSelectedWorldCurrent
+        => !string.IsNullOrWhiteSpace(SelectedWorld)
+           && string.Equals(SelectedWorld, _config.WorldName, StringComparison.OrdinalIgnoreCase);
+
+    public string WorldSwitchHint
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(SelectedWorld))
+            {
+                return "切り替え先のワールドを選択してください。";
+            }
+
+            if (IsSelectedWorldCurrent)
+            {
+                return "このワールドが現在適用中です。";
+            }
+
+            return "切り替えは server.properties に保存され、次回再起動時に反映されます。";
         }
     }
 
@@ -383,6 +412,8 @@ public sealed class ServerViewModel : ObservableObject
     public RelayCommand BackupWorldCommand { get; }
     public RelayCommand RestoreWorldCommand { get; }
     public RelayCommand RefreshBackupsCommand { get; }
+    public RelayCommand RefreshWorldsCommand { get; }
+    public RelayCommand OpenSelectedWorldDirectoryCommand { get; }
     public RelayCommand OpenServerDirectoryCommand { get; }
     public RelayCommand OpenLogsDirectoryCommand { get; }
     public RelayCommand OpenCrashReportsCommand { get; }
@@ -588,6 +619,22 @@ public sealed class ServerViewModel : ObservableObject
 
         SelectedWorld = Worlds.FirstOrDefault(w => string.Equals(w, _config.WorldName, StringComparison.OrdinalIgnoreCase))
             ?? Worlds.FirstOrDefault();
+        OnPropertyChanged(nameof(CurrentWorldName));
+        OnPropertyChanged(nameof(IsSelectedWorldCurrent));
+        OnPropertyChanged(nameof(WorldSwitchHint));
+        SwitchWorldCommand.RaiseCanExecuteChanged();
+        OpenSelectedWorldDirectoryCommand.RaiseCanExecuteChanged();
+    }
+
+    private void OpenSelectedWorldDirectory()
+    {
+        if (string.IsNullOrWhiteSpace(SelectedWorld))
+        {
+            return;
+        }
+
+        var path = Path.Combine(ServerDirectory, SelectedWorld);
+        OpenDirectory(path, "選択したワールドフォルダが見つかりません。");
     }
 
     private void OpenServerDirectory()
@@ -657,6 +704,10 @@ public sealed class ServerViewModel : ObservableObject
         _services.Configs.Save(_config);
         Settings.Load(props);
         UpdateRestartRequired();
+        OnPropertyChanged(nameof(CurrentWorldName));
+        OnPropertyChanged(nameof(IsSelectedWorldCurrent));
+        OnPropertyChanged(nameof(WorldSwitchHint));
+        SwitchWorldCommand.RaiseCanExecuteChanged();
     }
 
     private void DeleteWorld()
@@ -684,6 +735,7 @@ public sealed class ServerViewModel : ObservableObject
             {
                 _config.WorldName = "world";
                 _services.Configs.Save(_config);
+                OnPropertyChanged(nameof(CurrentWorldName));
             }
             LoadWorlds();
         }
@@ -754,6 +806,7 @@ public sealed class ServerViewModel : ObservableObject
             var backupsDirectory = Path.Combine(ServerDirectory, "backups");
             _services.Worlds.RestoreBackup(ServerDirectory, backupsDirectory, SelectedBackup, targetWorld);
             LoadWorlds();
+            OnPropertyChanged(nameof(WorldSwitchHint));
         }
         catch (Exception ex)
         {
