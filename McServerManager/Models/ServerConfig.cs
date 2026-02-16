@@ -8,6 +8,9 @@ public sealed class ServerConfig
     public string Version { get; set; } = "latest";
     public string DirectoryPath { get; set; } = string.Empty;
     public string JavaPath { get; set; } = string.Empty;
+    public string JavaExtraArguments { get; set; } = string.Empty;
+    public string LaunchModeOverride { get; set; } = "Auto";
+    public string StartupPresetId { get; set; } = "Balanced";
     public int MemoryXmsMb { get; set; } = 1024;
     public int MemoryXmxMb { get; set; } = 2048;
     public int Port { get; set; } = 25565;
@@ -25,5 +28,6 @@ public sealed class ServerConfig
     public int AutoRestartDelaySeconds { get; set; } = 10;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? LastStartedAt { get; set; }
+    public bool HasCompletedInitialHealthCheck { get; set; }
     public FirewallRuleInfo Firewall { get; set; } = new();
 }

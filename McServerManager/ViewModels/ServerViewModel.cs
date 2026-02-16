@@ -44,6 +44,13 @@ public sealed class ServerViewModel : ObservableObject
     private TimeSpan _lastCpuTime;
     private DateTime _lastCpuCheck;
     private bool _upnpOpened;
+    private AddonEntry? _selectedAddon;
+    private string _addonStatus = string.Empty;
+    private LaunchModeOption? _selectedLaunchMode;
+    private StartupPresetOption? _selectedStartupPreset;
+    private string _javaExtraArguments = string.Empty;
+    private int _memoryXmsMb;
+    private int _memoryXmxMb;
 
     public ServerViewModel(AppServices services, ServerConfig config)
     {
@@ -65,10 +72,17 @@ public sealed class ServerViewModel : ObservableObject
         ExternalChecklist = new ObservableCollection<string>(_services.Network.GetExternalChecklist());
         Ops = new ObservableCollection<OpEntry>();
         Whitelist = new ObservableCollection<WhitelistEntry>();
+        Addons = new ObservableCollection<AddonEntry>();
+        LaunchModes = new ObservableCollection<LaunchModeOption>();
+        StartupPresets = new ObservableCollection<StartupPresetOption>();
 
         AutoRestartOnCrash = _config.AutoRestartOnCrash;
         AutoRestartDelaySeconds = _config.AutoRestartDelaySeconds;
         JavaPath = _config.JavaPath;
+        _memoryXmsMb = _config.MemoryXmsMb;
+        _memoryXmxMb = _config.MemoryXmxMb;
+        _javaExtraArguments = _config.JavaExtraArguments ?? string.Empty;
+        InitializeLaunchOptions();
 
         StartCommand = new AsyncRelayCommand(StartAsync, () => Status == ServerStatus.Stopped);
         StopCommand = new AsyncRelayCommand(StopAsync, () => Status != ServerStatus.Stopped);
@@ -101,11 +115,20 @@ public sealed class ServerViewModel : ObservableObject
         AddWhitelistCommand = new RelayCommand(_ => AddWhitelist(), _ => !string.IsNullOrWhiteSpace(NewWhitelistName));
         RemoveWhitelistCommand = new RelayCommand(_ => RemoveWhitelist(), _ => SelectedWhitelist is not null);
         ReloadPermissionsCommand = new RelayCommand(_ => LoadPermissions());
+        AddAddonsCommand = new RelayCommand(_ => BrowseAndAddAddons(), _ => SupportsAddonManagement);
+        RefreshAddonsCommand = new RelayCommand(_ => LoadAddons(), _ => SupportsAddonManagement);
+        OpenAddonsDirectoryCommand = new RelayCommand(_ => OpenAddonsDirectory(), _ => SupportsAddonManagement);
+        EnableAddonCommand = new RelayCommand(_ => EnableAddon(), _ => SelectedAddon is not null && !SelectedAddon.IsEnabled);
+        DisableAddonCommand = new RelayCommand(_ => DisableAddon(), _ => SelectedAddon is not null && SelectedAddon.IsEnabled);
+        DeleteAddonCommand = new RelayCommand(_ => DeleteAddon(), _ => SelectedAddon is not null);
+        ApplyStartupPresetCommand = new RelayCommand(_ => ApplyStartupPreset(), _ => SelectedStartupPreset is not null);
+        RunHealthCheckCommand = new RelayCommand(_ => RunHealthCheck(showEvenIfCompleted: true));
 
         LoadSettings();
         LoadWorlds();
         LoadBackups();
         LoadPermissions();
+        LoadAddons();
         _ = LoadVersionsAsync();
 
         _statsTimer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, (_, _) => UpdateStats(), WpfApplication.Current.Dispatcher);
@@ -129,6 +152,9 @@ public sealed class ServerViewModel : ObservableObject
     public ObservableCollection<string> ExternalChecklist { get; }
     public ObservableCollection<OpEntry> Ops { get; }
     public ObservableCollection<WhitelistEntry> Whitelist { get; }
+    public ObservableCollection<AddonEntry> Addons { get; }
+    public ObservableCollection<LaunchModeOption> LaunchModes { get; }
+    public ObservableCollection<StartupPresetOption> StartupPresets { get; }
 
     public ServerSettingsViewModel Settings
     {
@@ -246,6 +272,146 @@ public sealed class ServerViewModel : ObservableObject
             }
 
             return "切り替えは server.properties に保存され、次回再起動時に反映されます。";
+        }
+    }
+
+    public bool SupportsAddonManagement => _services.Addons.Supports(ServerType);
+
+    public string AddonCategoryName => _services.Addons.GetCategoryName(ServerType);
+
+    public string AddonActiveDirectory
+    {
+        get
+        {
+            if (!SupportsAddonManagement)
+            {
+                return "-";
+            }
+
+            return _services.Addons.GetActiveDirectoryPath(ServerDirectory, ServerType);
+        }
+    }
+
+    public string AddonDisabledDirectory
+    {
+        get
+        {
+            if (!SupportsAddonManagement)
+            {
+                return "-";
+            }
+
+            return _services.Addons.GetDisabledDirectoryPath(ServerDirectory, ServerType);
+        }
+    }
+
+    public string AddonStatus
+    {
+        get => _addonStatus;
+        private set => SetProperty(ref _addonStatus, value);
+    }
+
+    public LaunchModeOption? SelectedLaunchMode
+    {
+        get => _selectedLaunchMode;
+        set
+        {
+            if (SetProperty(ref _selectedLaunchMode, value) && value is not null)
+            {
+                _config.LaunchModeOverride = value.Id;
+                _services.Configs.Save(_config);
+                OnPropertyChanged(nameof(LaunchModeDescription));
+            }
+        }
+    }
+
+    public StartupPresetOption? SelectedStartupPreset
+    {
+        get => _selectedStartupPreset;
+        set
+        {
+            if (SetProperty(ref _selectedStartupPreset, value))
+            {
+                ApplyStartupPresetCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public string LaunchModeDescription
+    {
+        get
+        {
+            if (!string.Equals(ServerType, "Forge", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Forge 以外では通常は Auto / server.jar 固定を推奨します。";
+            }
+
+            return "Forge は Auto 推奨（run.bat / win_args.txt / server.jar を順に判定）。";
+        }
+    }
+
+    public string JavaExtraArguments
+    {
+        get => _javaExtraArguments;
+        set
+        {
+            if (SetProperty(ref _javaExtraArguments, value))
+            {
+                _config.JavaExtraArguments = value?.Trim() ?? string.Empty;
+                _services.Configs.Save(_config);
+            }
+        }
+    }
+
+    public int MemoryXmsMb
+    {
+        get => _memoryXmsMb;
+        set
+        {
+            var next = Math.Clamp(value, 256, 131072);
+            if (next > MemoryXmxMb)
+            {
+                next = MemoryXmxMb;
+            }
+
+            if (SetProperty(ref _memoryXmsMb, next))
+            {
+                _config.MemoryXmsMb = next;
+                _services.Configs.Save(_config);
+            }
+        }
+    }
+
+    public int MemoryXmxMb
+    {
+        get => _memoryXmxMb;
+        set
+        {
+            var next = Math.Clamp(value, 256, 131072);
+            if (next < MemoryXmsMb)
+            {
+                next = MemoryXmsMb;
+            }
+
+            if (SetProperty(ref _memoryXmxMb, next))
+            {
+                _config.MemoryXmxMb = next;
+                _services.Configs.Save(_config);
+            }
+        }
+    }
+
+    public AddonEntry? SelectedAddon
+    {
+        get => _selectedAddon;
+        set
+        {
+            if (SetProperty(ref _selectedAddon, value))
+            {
+                EnableAddonCommand.RaiseCanExecuteChanged();
+                DisableAddonCommand.RaiseCanExecuteChanged();
+                DeleteAddonCommand.RaiseCanExecuteChanged();
+            }
         }
     }
 
@@ -430,6 +596,14 @@ public sealed class ServerViewModel : ObservableObject
     public RelayCommand AddWhitelistCommand { get; }
     public RelayCommand RemoveWhitelistCommand { get; }
     public RelayCommand ReloadPermissionsCommand { get; }
+    public RelayCommand AddAddonsCommand { get; }
+    public RelayCommand RefreshAddonsCommand { get; }
+    public RelayCommand OpenAddonsDirectoryCommand { get; }
+    public RelayCommand EnableAddonCommand { get; }
+    public RelayCommand DisableAddonCommand { get; }
+    public RelayCommand DeleteAddonCommand { get; }
+    public RelayCommand ApplyStartupPresetCommand { get; }
+    public RelayCommand RunHealthCheckCommand { get; }
 
     private void LoadSettings()
     {
@@ -443,12 +617,49 @@ public sealed class ServerViewModel : ObservableObject
         RestartRequired = Settings.IsDirty;
     }
 
+    private void InitializeLaunchOptions()
+    {
+        LaunchModes.Clear();
+        LaunchModes.Add(new LaunchModeOption("Auto", "Auto（推奨）"));
+        LaunchModes.Add(new LaunchModeOption("ForceServerJar", "server.jar 固定"));
+        LaunchModes.Add(new LaunchModeOption("ForceForgeRunBat", "Forge run.bat 固定"));
+        LaunchModes.Add(new LaunchModeOption("ForceForgeWinArgs", "Forge win_args.txt 固定"));
+
+        StartupPresets.Clear();
+        StartupPresets.Add(new StartupPresetOption("Balanced", "Balanced（推奨）", 2048, 4096, "-XX:+UseG1GC -XX:+ParallelRefProcEnabled"));
+        StartupPresets.Add(new StartupPresetOption("MemorySaver", "Memory Saver", 1024, 2048, "-XX:+UseG1GC"));
+        StartupPresets.Add(new StartupPresetOption("Throughput", "Throughput", 4096, 8192, "-XX:+UseG1GC -XX:MaxGCPauseMillis=100"));
+
+        SelectedLaunchMode = LaunchModes.FirstOrDefault(item => string.Equals(item.Id, _config.LaunchModeOverride, StringComparison.OrdinalIgnoreCase))
+            ?? LaunchModes.FirstOrDefault(item => string.Equals(item.Id, "Auto", StringComparison.OrdinalIgnoreCase));
+
+        SelectedStartupPreset = StartupPresets.FirstOrDefault(item => string.Equals(item.Id, _config.StartupPresetId, StringComparison.OrdinalIgnoreCase))
+            ?? StartupPresets.FirstOrDefault(item => string.Equals(item.Id, "Balanced", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void ApplyStartupPreset()
+    {
+        if (SelectedStartupPreset is null)
+        {
+            return;
+        }
+
+        MemoryXmsMb = SelectedStartupPreset.MemoryXmsMb;
+        MemoryXmxMb = SelectedStartupPreset.MemoryXmxMb;
+        JavaExtraArguments = SelectedStartupPreset.JavaExtraArguments;
+        _config.StartupPresetId = SelectedStartupPreset.Id;
+        _services.Configs.Save(_config);
+        WpfMessageBox.Show($"起動プリセット「{SelectedStartupPreset.Label}」を適用しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
     private async Task StartAsync()
     {
         if (Status != ServerStatus.Stopped)
         {
             return;
         }
+
+        RunHealthCheck(showEvenIfCompleted: false);
 
         WarnIfJavaVersionMismatch();
 
@@ -476,6 +687,66 @@ public sealed class ServerViewModel : ObservableObject
         {
             WpfMessageBox.Show($"起動に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+
+    private void RunHealthCheck(bool showEvenIfCompleted)
+    {
+        if (!showEvenIfCompleted && _config.HasCompletedInitialHealthCheck)
+        {
+            return;
+        }
+
+        var issues = new List<string>();
+        var fixes = new List<string>();
+
+        if (string.Equals(ServerType, "Paper", StringComparison.OrdinalIgnoreCase))
+        {
+            var pluginsDir = Path.Combine(ServerDirectory, "plugins");
+            if (!Directory.Exists(pluginsDir))
+            {
+                Directory.CreateDirectory(pluginsDir);
+                fixes.Add("plugins フォルダを作成しました。");
+            }
+        }
+
+        if (string.Equals(ServerType, "Fabric", StringComparison.OrdinalIgnoreCase))
+        {
+            var modsDir = Path.Combine(ServerDirectory, "mods");
+            if (!Directory.Exists(modsDir))
+            {
+                Directory.CreateDirectory(modsDir);
+                fixes.Add("mods フォルダを作成しました。");
+            }
+        }
+
+        if (string.Equals(ServerType, "Forge", StringComparison.OrdinalIgnoreCase))
+        {
+            var runBat = Path.Combine(ServerDirectory, "run.bat");
+            var hasRunBat = File.Exists(runBat);
+            var hasWinArgs = Directory.Exists(ServerDirectory)
+                && Directory.EnumerateFiles(ServerDirectory, "win_args.txt", SearchOption.AllDirectories).Any();
+            if (!hasRunBat && !hasWinArgs)
+            {
+                issues.Add("Forge の起動補助ファイル (run.bat / win_args.txt) が見つかりません。\nバージョン再ダウンロードまたは Forge の再インストールを推奨します。");
+            }
+        }
+
+        _config.HasCompletedInitialHealthCheck = true;
+        _services.Configs.Save(_config);
+
+        if (issues.Count == 0 && fixes.Count == 0)
+        {
+            if (showEvenIfCompleted)
+            {
+                WpfMessageBox.Show("ヘルスチェックで問題は見つかりませんでした。", "ヘルスチェック", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+
+            return;
+        }
+
+        var message = string.Join(Environment.NewLine + Environment.NewLine, issues.Concat(fixes));
+        var image = issues.Count > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information;
+        WpfMessageBox.Show(message, "初回ヘルスチェック", MessageBoxButton.OK, image);
     }
 
     private void WarnIfJavaVersionMismatch()
@@ -973,6 +1244,195 @@ public sealed class ServerViewModel : ObservableObject
         {
             Whitelist.Add(entry);
         }
+    }
+
+    private void LoadAddons()
+    {
+        Addons.Clear();
+        SelectedAddon = null;
+
+        if (!SupportsAddonManagement)
+        {
+            AddonStatus = "このサーバー種別はMOD/プラグイン管理の対象外です。";
+            RaiseAddonCommandsCanExecuteChanged();
+            OnPropertyChanged(nameof(SupportsAddonManagement));
+            OnPropertyChanged(nameof(AddonCategoryName));
+            OnPropertyChanged(nameof(AddonActiveDirectory));
+            OnPropertyChanged(nameof(AddonDisabledDirectory));
+            return;
+        }
+
+        try
+        {
+            foreach (var addon in _services.Addons.GetAddons(ServerDirectory, ServerType))
+            {
+                Addons.Add(addon);
+            }
+
+            AddonStatus = Addons.Count == 0
+                ? $"{AddonCategoryName}ファイルがまだありません。"
+                : $"{AddonCategoryName} {Addons.Count} 件";
+
+            var warnings = _services.Addons.AnalyzeCompatibilityWarnings(ServerType, Addons);
+            if (warnings.Count > 0)
+            {
+                AddonStatus += $" / 警告 {warnings.Count} 件";
+            }
+        }
+        catch (Exception ex)
+        {
+            AddonStatus = "一覧取得に失敗しました。";
+            WpfMessageBox.Show($"一覧取得に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        RaiseAddonCommandsCanExecuteChanged();
+        OnPropertyChanged(nameof(SupportsAddonManagement));
+        OnPropertyChanged(nameof(AddonCategoryName));
+        OnPropertyChanged(nameof(AddonActiveDirectory));
+        OnPropertyChanged(nameof(AddonDisabledDirectory));
+    }
+
+    private void BrowseAndAddAddons()
+    {
+        if (!SupportsAddonManagement)
+        {
+            return;
+        }
+
+        var dialog = new OpenFileDialog
+        {
+            Filter = "jarファイル|*.jar",
+            Multiselect = true,
+            CheckFileExists = true
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            ImportAddons(dialog.FileNames);
+        }
+    }
+
+    public void ImportAddons(IEnumerable<string> sourcePaths)
+    {
+        if (!SupportsAddonManagement)
+        {
+            return;
+        }
+
+        try
+        {
+            var count = _services.Addons.AddFiles(ServerDirectory, ServerType, sourcePaths);
+            if (count > 0)
+            {
+                AddonStatus = $"{count} 件を追加しました。";
+            }
+            else
+            {
+                AddonStatus = "追加できるjarファイルが見つかりませんでした。";
+            }
+
+            LoadAddons();
+            ShowAddonCompatibilityWarnings();
+        }
+        catch (Exception ex)
+        {
+            WpfMessageBox.Show($"追加に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void ShowAddonCompatibilityWarnings()
+    {
+        var warnings = _services.Addons.AnalyzeCompatibilityWarnings(ServerType, Addons);
+        if (warnings.Count == 0)
+        {
+            return;
+        }
+
+        var lines = string.Join(Environment.NewLine, warnings.Select((warning, index) => $"{index + 1}. {warning}"));
+        WpfMessageBox.Show(
+            $"追加した {AddonCategoryName} に互換性の注意点があります。{Environment.NewLine}{Environment.NewLine}{lines}",
+            "互換性チェック",
+            MessageBoxButton.OK,
+            MessageBoxImage.Warning);
+    }
+
+    private void DisableAddon()
+    {
+        if (SelectedAddon is null)
+        {
+            return;
+        }
+
+        try
+        {
+            _services.Addons.Disable(ServerDirectory, ServerType, SelectedAddon);
+            LoadAddons();
+        }
+        catch (Exception ex)
+        {
+            WpfMessageBox.Show($"無効化に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void EnableAddon()
+    {
+        if (SelectedAddon is null)
+        {
+            return;
+        }
+
+        try
+        {
+            _services.Addons.Enable(ServerDirectory, ServerType, SelectedAddon);
+            LoadAddons();
+        }
+        catch (Exception ex)
+        {
+            WpfMessageBox.Show($"有効化に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void DeleteAddon()
+    {
+        if (SelectedAddon is null)
+        {
+            return;
+        }
+
+        if (WpfMessageBox.Show($"{SelectedAddon.FileName} を削除します。", "確認", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            _services.Addons.Delete(SelectedAddon);
+            LoadAddons();
+        }
+        catch (Exception ex)
+        {
+            WpfMessageBox.Show($"削除に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void OpenAddonsDirectory()
+    {
+        if (!SupportsAddonManagement)
+        {
+            return;
+        }
+
+        OpenDirectory(AddonActiveDirectory, $"{AddonCategoryName}フォルダが見つかりません。");
+    }
+
+    private void RaiseAddonCommandsCanExecuteChanged()
+    {
+        AddAddonsCommand.RaiseCanExecuteChanged();
+        RefreshAddonsCommand.RaiseCanExecuteChanged();
+        OpenAddonsDirectoryCommand.RaiseCanExecuteChanged();
+        EnableAddonCommand.RaiseCanExecuteChanged();
+        DisableAddonCommand.RaiseCanExecuteChanged();
+        DeleteAddonCommand.RaiseCanExecuteChanged();
     }
 
     private void AddOp()

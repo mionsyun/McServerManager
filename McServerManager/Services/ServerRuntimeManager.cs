@@ -42,20 +42,8 @@ public sealed class ServerRuntimeManager
 
         runtime.SetStatus(ServerStatus.Starting);
         runtime.AddLog("起動中...");
-
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = javaPath,
-            Arguments = $"-Xms{config.MemoryXmsMb}M -Xmx{config.MemoryXmxMb}M -jar \"{jarPath}\" nogui",
-            WorkingDirectory = serverDirectory,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            RedirectStandardInput = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            StandardOutputEncoding = Encoding.UTF8,
-            StandardErrorEncoding = Encoding.UTF8
-        };
+        var (startInfo, strategyLabel) = BuildStartInfo(config, serverDirectory, javaPath, jarPath);
+        runtime.AddLog($"起動方式: {strategyLabel}");
 
         var process = new Process
         {
@@ -80,6 +68,116 @@ public sealed class ServerRuntimeManager
         process.BeginErrorReadLine();
 
         await Task.Delay(300).ConfigureAwait(false);
+    }
+
+    private static (ProcessStartInfo StartInfo, string StrategyLabel) BuildStartInfo(
+        ServerConfig config,
+        string serverDirectory,
+        string javaPath,
+        string jarPath)
+    {
+        var extraJavaArgs = string.IsNullOrWhiteSpace(config.JavaExtraArguments)
+            ? string.Empty
+            : $" {config.JavaExtraArguments.Trim()}";
+
+        if (string.Equals(config.LaunchModeOverride, "ForceForgeRunBat", StringComparison.OrdinalIgnoreCase))
+        {
+            var forcedRunBat = Path.Combine(serverDirectory, "run.bat");
+            if (!File.Exists(forcedRunBat))
+            {
+                throw new FileNotFoundException("起動方式が run.bat 固定ですが run.bat が見つかりません。", forcedRunBat);
+            }
+
+            return (CreateBaseStartInfo(
+                    "cmd.exe",
+                    $"/c \"\"{forcedRunBat}\"\"",
+                    serverDirectory),
+                "手動固定: Forge run.bat");
+        }
+
+        if (string.Equals(config.LaunchModeOverride, "ForceForgeWinArgs", StringComparison.OrdinalIgnoreCase))
+        {
+            var forcedWinArgs = FindForgeWinArgsFile(serverDirectory);
+            if (string.IsNullOrWhiteSpace(forcedWinArgs))
+            {
+                throw new FileNotFoundException("起動方式が win_args 固定ですが win_args.txt が見つかりません。", serverDirectory);
+            }
+
+            return (CreateBaseStartInfo(
+                    javaPath,
+                    $"-Xms{config.MemoryXmsMb}M -Xmx{config.MemoryXmxMb}M{extraJavaArgs} @\"{forcedWinArgs}\" nogui",
+                    serverDirectory),
+                "手動固定: Forge win_args.txt");
+        }
+
+        if (string.Equals(config.LaunchModeOverride, "ForceServerJar", StringComparison.OrdinalIgnoreCase))
+        {
+            return (CreateBaseStartInfo(
+                    javaPath,
+                    $"-Xms{config.MemoryXmsMb}M -Xmx{config.MemoryXmxMb}M{extraJavaArgs} -jar \"{jarPath}\" nogui",
+                    serverDirectory),
+                "手動固定: 標準 server.jar");
+        }
+
+        if (string.Equals(config.Type, "Forge", StringComparison.OrdinalIgnoreCase))
+        {
+            var runBat = Path.Combine(serverDirectory, "run.bat");
+            if (File.Exists(runBat))
+            {
+                return (CreateBaseStartInfo(
+                        "cmd.exe",
+                        $"/c \"\"{runBat}\"\"",
+                        serverDirectory),
+                    "Forge run.bat");
+            }
+
+            var winArgsPath = FindForgeWinArgsFile(serverDirectory);
+            if (!string.IsNullOrWhiteSpace(winArgsPath))
+            {
+                return (CreateBaseStartInfo(
+                        javaPath,
+                    $"-Xms{config.MemoryXmsMb}M -Xmx{config.MemoryXmxMb}M{extraJavaArgs} @\"{winArgsPath}\" nogui",
+                        serverDirectory),
+                    "Forge win_args.txt");
+            }
+        }
+
+        return (CreateBaseStartInfo(
+                javaPath,
+                $"-Xms{config.MemoryXmsMb}M -Xmx{config.MemoryXmxMb}M{extraJavaArgs} -jar \"{jarPath}\" nogui",
+                serverDirectory),
+            "標準 server.jar");
+    }
+
+    private static ProcessStartInfo CreateBaseStartInfo(string fileName, string arguments, string workingDirectory)
+    {
+        return new ProcessStartInfo
+        {
+            FileName = fileName,
+            Arguments = arguments,
+            WorkingDirectory = workingDirectory,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            RedirectStandardInput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding = Encoding.UTF8
+        };
+    }
+
+    private static string? FindForgeWinArgsFile(string serverDirectory)
+    {
+        try
+        {
+            return Directory.EnumerateFiles(serverDirectory, "win_args.txt", SearchOption.AllDirectories)
+                .OrderByDescending(path => File.GetLastWriteTimeUtc(path))
+                .FirstOrDefault();
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     public async Task StopAsync(ServerConfig config, int timeoutSeconds = 10)

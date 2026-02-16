@@ -229,6 +229,47 @@
                         </Border>
 
                         <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
+                            <StackPanel>
+                                <TextBlock Text="起動安定化" FontWeight="SemiBold" FontSize="14"/>
+                                <TextBlock Text="起動方式を手動指定したり、プリセットでメモリ/GC引数を適用できます。" Style="{StaticResource MutedText}" Margin="0,4,0,0"/>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                    <TextBlock Text="起動方式" VerticalAlignment="Center" Width="120"/>
+                                    <ComboBox ItemsSource="{Binding LaunchModes}"
+                                              SelectedItem="{Binding SelectedLaunchMode}"
+                                              DisplayMemberPath="Label"
+                                              Width="300"/>
+                                </StackPanel>
+                                <TextBlock Text="{Binding LaunchModeDescription}" Style="{StaticResource MutedText}" Margin="120,4,0,0"/>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                    <TextBlock Text="プリセット" VerticalAlignment="Center" Width="120"/>
+                                    <ComboBox ItemsSource="{Binding StartupPresets}"
+                                              SelectedItem="{Binding SelectedStartupPreset}"
+                                              DisplayMemberPath="Label"
+                                              Width="300"/>
+                                    <Button Content="適用" Command="{Binding ApplyStartupPresetCommand}" Margin="8,0,0,0"/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                    <TextBlock Text="Xms (MB)" VerticalAlignment="Center" Width="120"/>
+                                    <TextBox Text="{Binding MemoryXmsMb}" Width="120"/>
+                                    <TextBlock Text="Xmx (MB)" VerticalAlignment="Center" Margin="16,0,8,0"/>
+                                    <TextBox Text="{Binding MemoryXmxMb}" Width="120"/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                    <TextBlock Text="追加Java引数" VerticalAlignment="Center" Width="120"/>
+                                    <TextBox Text="{Binding JavaExtraArguments}" Width="480"/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                    <Button Content="ヘルスチェック実行" Command="{Binding RunHealthCheckCommand}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -347,6 +388,84 @@
                                 <Button Content="一覧更新" Command="{Binding RefreshBackupsCommand}" Margin="8,0,0,0"/>
                             </StackPanel>
                         </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="MOD/プラグイン">
+                <Grid Margin="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Style="{StaticResource SurfacePanel}">
+                        <StackPanel>
+                            <TextBlock Text="管理対象" FontWeight="SemiBold" FontSize="14"/>
+                            <TextBlock Text="{Binding AddonStatus}" Style="{StaticResource MutedText}" Margin="0,4,0,0"/>
+                            <TextBlock Text="{Binding AddonCategoryName, StringFormat=種別: {0}}" Style="{StaticResource MutedText}" Margin="0,6,0,0"/>
+                            <TextBlock Text="{Binding AddonActiveDirectory, StringFormat=有効: {0}}" Style="{StaticResource MutedText}" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding AddonDisabledDirectory, StringFormat=無効: {0}}" Style="{StaticResource MutedText}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="1" Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <WrapPanel>
+                                <Button Content="追加" Command="{Binding AddAddonsCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8"/>
+                                <Button Content="有効化" Command="{Binding EnableAddonCommand}" Margin="0,0,8,8"/>
+                                <Button Content="無効化" Command="{Binding DisableAddonCommand}" Margin="0,0,8,8"/>
+                                <Button Content="削除" Command="{Binding DeleteAddonCommand}" Margin="0,0,8,8"/>
+                                <Button Content="フォルダを開く" Command="{Binding OpenAddonsDirectoryCommand}" Margin="0,0,8,8"/>
+                                <Button Content="一覧更新" Command="{Binding RefreshAddonsCommand}" Margin="0,0,0,8"/>
+                            </WrapPanel>
+
+                            <ListBox Grid.Row="1" ItemsSource="{Binding Addons}" SelectedItem="{Binding SelectedAddon}" Margin="0,8,0,0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,2,0,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding FileSizeBytes, StringFormat=サイズ: {0:N0} bytes}" Style="{StaticResource MutedText}"/>
+                                                <TextBlock Text="{Binding LastUpdatedAt, StringFormat=更新: {0:yyyy/MM/dd HH:mm}}" Style="{StaticResource MutedText}"/>
+                                            </StackPanel>
+                                            <Border Grid.Column="1"
+                                                    Background="{DynamicResource BrushSurface}"
+                                                    BorderBrush="{DynamicResource BrushBorder}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="10"
+                                                    Padding="8,2"
+                                                    Margin="8,0,0,0"
+                                                    VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding EnabledText}" FontSize="12"/>
+                                            </Border>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="2"
+                            Style="{StaticResource SurfacePanel}"
+                            Margin="0,12,0,0"
+                            AllowDrop="True"
+                            DragOver="AddonDropZone_OnDragOver"
+                            Drop="AddonDropZone_OnDrop">
+                        <TextBlock Text="ここに .jar ファイル（またはフォルダ）をドラッグ＆ドロップして追加"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Style="{StaticResource MutedText}"/>
                     </Border>
                 </Grid>
             </TabItem>

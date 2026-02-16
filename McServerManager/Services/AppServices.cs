@@ -17,7 +17,8 @@ public sealed class AppServices
         NetworkService network,
         UpnpService upnp,
         ThemeService theme,
-        JavaService java)
+        JavaService java,
+        AddonManagementService addons)
     {
         Paths = paths;
         Settings = settings;
@@ -34,6 +35,7 @@ public sealed class AppServices
         Upnp = upnp;
         Theme = theme;
         Java = java;
+        Addons = addons;
     }
 
     public AppPathsService Paths { get; }
@@ -51,4 +53,5 @@ public sealed class AppServices
     public UpnpService Upnp { get; }
     public ThemeService Theme { get; }
     public JavaService Java { get; }
+    public AddonManagementService Addons { get; }
 }

@@ -30,6 +30,7 @@ public partial class App : System.Windows.Application
             var upnpService = new UpnpService();
             var themeService = new ThemeService();
             var javaService = new JavaService();
+            var addonManagementService = new AddonManagementService();
             var jarService = new ServerJarService(versionService, javaService);
             var provisioningService = new ServerProvisioningService(paths, propertiesService, configService, jarService);
 
@@ -51,7 +52,8 @@ public partial class App : System.Windows.Application
                 networkService,
                 upnpService,
                 themeService,
-                javaService);
+                javaService,
+                addonManagementService);
 
             var mainWindow = new MainWindow
             {

@@ -7,7 +7,9 @@ Minecraft サーバーを Windows 上で管理するための WPF デスクト�
 - ランタイム管理: 起動/停止/再起動、起動ログのリアルタイム表示、コマンド送信
 - 設定編集: `server.properties` の主要項目を GUI で編集、実行中の変更は再起動で反映
 - ワールド管理: ワールド一覧/切替/削除/新規作成、バックアップ/復元
+- MOD/プラグイン管理: サーバー種別に応じて `mods` / `plugins` をGUI管理、追加・有効化・無効化・削除、ドラッグ＆ドロップ追加
 - バージョン管理: Minecraft バージョン取得、server.jar の再取得、変更前バックアップ
+- 起動安定化: 初回ヘルスチェック、Forge起動方式の自動判定/手動上書き、起動プリセット適用
 - ネットワーク支援: LAN IP/グローバル IP の表示、待受チェック、公開チェックリスト
 - Firewall: 受信ルールの作成/削除/再作成 (TCP/UDP)
 - UPnP: ルーターの自動ポート開放 (Open.NAT)
@@ -53,6 +55,18 @@ Minecraft サーバーを Windows 上で管理するための WPF デスクト�
 - ワールド検出: `level.dat` または `region/` が存在するフォルダを対象
 - バックアップ: `backups/` に ZIP 保存、`.json` メタデータと `backup-info.txt` を同梱
 - 復元: 既存ワールドを削除後に展開 (必要なら復元前バックアップ作成)
+
+## MOD/プラグイン管理仕様
+- 対象種別: Forge/Fabric (MOD), Spigot/Paper/Purpur (プラグイン)
+- 管理先: `mods` または `plugins` フォルダ
+- 無効化方式: `mods/disabled` または `plugins/disabled` へ移動
+- 追加方式: ファイル選択 (`.jar`) またはドラッグ＆ドロップ
+- 互換性チェック: 重複候補と Loader 不一致候補（Forge/Fabric/Plugin系）を警告
+
+## 起動安定化仕様
+- 初回ヘルスチェック: 種別ごとに必要フォルダ/補助ファイルを確認し、不足時はガイド表示
+- 起動方式: `Auto` / `server.jar 固定` / `Forge run.bat 固定` / `Forge win_args 固定`
+- 起動プリセット: メモリ (`Xms/Xmx`) と Java追加引数 (GC設定含む) をテンプレート適用
 
 ## ネットワーク/公開
 - LAN IP 一覧表示
