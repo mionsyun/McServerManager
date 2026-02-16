@@ -1,0 +1,437 @@
+﻿<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BlockPilot | Setup Notes</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0f17;
+        --panel: #121a2a;
+        --panel-2: #162038;
+        --text: #e6eefb;
+        --muted: #9fb0c8;
+        --accent: #66ff88;
+        --accent-2: #33a8ff;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Noto Sans JP", "Segoe UI", sans-serif;
+        background: radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%);
+        color: var(--text);
+        padding: 32px 16px;
+      }
+      .wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        display: grid;
+        gap: 20px;
+      }
+      header {
+        display: grid;
+        gap: 10px;
+      }
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+      }
+      .back-link {
+        color: var(--accent-2);
+        text-decoration: none;
+        font-weight: 700;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(24px, 3.2vw, 34px);
+      }
+      .tag {
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(102, 255, 136, 0.15);
+        color: var(--accent);
+        font-weight: 700;
+        font-size: 12px;
+      }
+      .lang-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .lang-label {
+        font-size: 12px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .lang-btn {
+        border: 1px solid rgba(126, 157, 201, 0.35);
+        background: transparent;
+        color: var(--muted);
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .lang-btn.active {
+        color: #03110a;
+        background: linear-gradient(135deg, var(--accent), #1bd760);
+        border-color: transparent;
+      }
+      .notice {
+        padding: 10px 14px;
+        border-radius: 10px;
+        background: rgba(255, 209, 102, 0.12);
+        color: #ffd166;
+        font-weight: 700;
+        font-size: 13px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid rgba(126, 157, 201, 0.25);
+        border-radius: 16px;
+        padding: 20px;
+      }
+      h2 {
+        margin: 0 0 10px;
+        font-size: 20px;
+      }
+      ul,
+      ol {
+        margin: 8px 0 0 18px;
+        color: var(--muted);
+      }
+      a {
+        color: var(--accent-2);
+      }
+      .lang {
+        display: grid;
+        gap: 16px;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      footer {
+        text-align: center;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .help-grid {
+        display: grid;
+        gap: 12px;
+      }
+      .help-tip {
+        background: var(--panel-2);
+        border-radius: 12px;
+        padding: 12px 14px;
+        color: var(--muted);
+      }
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .section-title span {
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="nav">
+          <div class="brand">
+            <span>BlockPilot</span>
+            <span class="tag">Windows 10/11</span>
+          </div>
+          <a class="back-link" href="/">
+            <span data-lang-block="ja" data-lang-display="inline">← トップへ戻る</span>
+            <span data-lang-block="en" data-lang-display="inline">← Back to main</span>
+          </a>
+        </div>
+        <h1>
+          <span data-lang-block="ja" data-lang-display="inline">セットアップノート</span>
+          <span data-lang-block="en" data-lang-display="inline">Setup Notes</span>
+        </h1>
+        <div class="notice" data-lang-block="ja" data-lang-display="block">
+          ※本ページにはプロモーション（PR）を含む場合があります
+        </div>
+        <div class="notice" data-lang-block="en" data-lang-display="block">
+          This page may include promotional links (PR).
+        </div>
+        <div class="lang-toggle" role="group" aria-label="Language toggle">
+          <span class="lang-label">Language</span>
+          <button class="lang-btn" type="button" data-lang="ja">日本語</button>
+          <button class="lang-btn" type="button" data-lang="en">English</button>
+        </div>
+      </header>
+
+      <section class="card lang" data-lang-block="ja">
+        <div>
+          <h2 class="section-title"><span>セットアップ手順</span></h2>
+          <ol>
+            <li>インストーラーを実行してインストールします。</li>
+            <li>アプリを起動し、新規サーバー作成ウィザードを進めます。</li>
+            <li>Java パスを指定し、メモリやポートを設定します。</li>
+            <li>起動ボタンでサーバーを開始します。</li>
+          </ol>
+          <p class="muted">※ 起動前に Java バージョンを自動チェックします。</p>
+        </div>
+      </section>
+
+      <section class="card lang" data-lang-block="en">
+        <div>
+          <h2 class="section-title"><span>Quick Setup</span></h2>
+          <ol>
+            <li>Run the installer and finish setup.</li>
+            <li>Open the app and follow the new server wizard.</li>
+            <li>Select your java.exe, set memory and port.</li>
+            <li>Press Start to launch the server.</li>
+          </ol>
+          <p class="muted">Java version compatibility is checked before start.</p>
+        </div>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>動作環境</h2>
+        <ul>
+          <li>Windows 10/11</li>
+          <li>Java (server.jar 実行用)</li>
+          <li>ネット接続 (バージョン取得/公開IP確認)</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>Requirements</h2>
+        <ul>
+          <li>Windows 10/11</li>
+          <li>Java (for server.jar)</li>
+          <li>Network connection (version info / public IP checks)</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>注意点</h2>
+        <ul>
+          <li>設定の一部は保存できますが、反映は再起動後です。</li>
+          <li>UPnP/Firewall は環境により失敗する場合があります。</li>
+          <li>クラッシュ時はログフォルダや crash-reports を確認してください。</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>Notes</h2>
+        <ul>
+          <li>Some settings require a server restart to take effect.</li>
+          <li>UPnP/Firewall actions may fail depending on the environment.</li>
+          <li>If a crash happens, check logs and crash-reports.</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>まず詰まりやすい点</h2>
+        <div class="help-grid">
+          <div class="help-tip">Java が古いと起動しません。起動前の警告を確認してください。</div>
+          <div class="help-tip">友だちが入れない場合は「ネットワーク」タブで公開チェックを実行。</div>
+          <div class="help-tip">エラー時は「ログフォルダ」「クラッシュレポート」を開くと原因が分かります。</div>
+        </div>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>Quick fixes</h2>
+        <div class="help-grid">
+          <div class="help-tip">If Java is too old, the server will not start. Check the warning before launch.</div>
+          <div class="help-tip">If friends cannot join, run the public check in the Network tab.</div>
+          <div class="help-tip">For errors, open the Logs or Crash Reports folder.</div>
+        </div>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>セキュリティ/プライバシー</h2>
+        <ul>
+          <li>データは端末内のみ保存。クラウド送信なし。</li>
+          <li>解析/テレメトリは行いません。ログの自動送信なし。</li>
+          <li>管理者権限は Firewall/UPnP 操作時のみ。理由を表示します。</li>
+          <li>保存先/ログ/クラッシュレポートはワンクリックで開けます。</li>
+          <li>インストーラーの SHA256 を配布ページに掲載し、改ざん検知が可能です。</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>Security & Privacy</h2>
+        <ul>
+          <li>Data stays on your PC. No cloud storage.</li>
+          <li>No telemetry. Logs are not sent automatically.</li>
+          <li>Admin rights are requested only for Firewall/UPnP actions with reasons shown.</li>
+          <li>Data, logs, and crash reports are one click away.</li>
+          <li>SHA256 hashes are posted on the download page for integrity checks.</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>通信先の一覧</h2>
+        <ul>
+          <li>launchermeta.mojang.com: Minecraft バージョン一覧</li>
+          <li>api.papermc.io: Paper バージョン/ダウンロード</li>
+          <li>api.purpurmc.org: Purpur バージョン/ダウンロード</li>
+          <li>meta.fabricmc.net: Fabric Loader/Installer</li>
+          <li>maven.minecraftforge.net: Forge メタデータ/インストーラ</li>
+          <li>hub.spigotmc.org: Spigot BuildTools.jar の取得</li>
+          <li>api.ipify.org: 公開 IP の取得</li>
+        </ul>
+        <p class="muted">※ BuildTools は追加で Git/SpigotMC などへアクセスする場合があります。</p>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>Network Endpoints</h2>
+        <ul>
+          <li>launchermeta.mojang.com: Minecraft version manifest</li>
+          <li>api.papermc.io: Paper versions/downloads</li>
+          <li>api.purpurmc.org: Purpur versions/downloads</li>
+          <li>meta.fabricmc.net: Fabric Loader/Installer</li>
+          <li>maven.minecraftforge.net: Forge metadata/installer</li>
+          <li>hub.spigotmc.org: Spigot BuildTools.jar</li>
+          <li>api.ipify.org: Public IP lookup</li>
+        </ul>
+        <p class="muted">BuildTools may access Git/SpigotMC sources for builds.</p>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>関連ページ</h2>
+        <ul>
+          <li><a href="/docs/privacy-and-network">通信・権限・保存先（詳細）</a></li>
+          <li><a href="/docs/port-forwarding">ポート開放チェックリスト</a></li>
+          <li><a href="/docs/lan">同じWi-Fiで遊ぶ（LAN）</a></li>
+          <li><a href="/docs/troubleshooting">トラブルシュート</a></li>
+          <li><a href="/docs/24-7-hosting" data-event="docs_24_7_hosting_click">24時間運用の選択肢（PR）</a></li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>More Docs</h2>
+        <ul>
+          <li><a href="/docs/privacy-and-network">Network, permissions, storage</a></li>
+          <li><a href="/docs/port-forwarding">Port-forwarding checklist</a></li>
+          <li><a href="/docs/lan">Play on the same Wi-Fi (LAN)</a></li>
+          <li><a href="/docs/troubleshooting">Troubleshooting</a></li>
+          <li><a href="/docs/24-7-hosting" data-event="docs_24_7_hosting_click">24/7 hosting options (PR)</a></li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>サポート</h2>
+        <p class="muted">不具合や要望があれば配布ページの連絡先をご確認ください。</p>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>Support</h2>
+        <p class="muted">For bugs or requests, check the contact details on the distribution page.</p>
+      </section>
+
+      <footer>BlockPilot</footer>
+    </div>
+    <script>
+      const buttons = document.querySelectorAll("[data-lang]");
+      const blocks = document.querySelectorAll("[data-lang-block]");
+      const storageKey = "mcsm-docs-lang";
+
+      const applyLang = (lang) => {
+        blocks.forEach((block) => {
+          const blockLang = block.getAttribute("data-lang-block");
+          const display = block.getAttribute("data-lang-display") || "block";
+          block.style.display = blockLang === lang ? display : "none";
+        });
+        buttons.forEach((button) => {
+          button.classList.toggle("active", button.getAttribute("data-lang") === lang);
+        });
+        try {
+          localStorage.setItem(storageKey, lang);
+        } catch (error) {
+          // ignore
+        }
+      };
+
+      const trackEvent = ({ event_name, link_url, link_text, source }) => {
+        const win = window;
+        if (typeof win.gtag === "function") {
+          win.gtag("event", event_name, {
+            event_category: source || "cta",
+            event_label: link_text || link_url || "",
+            link_url: link_url,
+          });
+          return;
+        }
+        if (Array.isArray(win.dataLayer)) {
+          win.dataLayer.push({
+            event: event_name,
+            link_url: link_url,
+            link_text: link_text,
+            source: source || "cta",
+          });
+        }
+      };
+
+      const handleTrackedClick = (event) => {
+        const target = event.target;
+        if (!target || !target.closest) {
+          return;
+        }
+        const link = target.closest("a");
+        if (!link) {
+          return;
+        }
+        const eventName = link.getAttribute("data-event");
+        const href = link.getAttribute("href") || "";
+        const text = link.textContent ? link.textContent.trim() : "";
+        if (eventName) {
+          trackEvent({
+            event_name: eventName,
+            link_url: href,
+            link_text: text,
+            source: "cta",
+          });
+        }
+        const rel = (link.getAttribute("rel") || "").toLowerCase();
+        if (rel.includes("sponsored") && eventName !== "outbound_affiliate_click") {
+          trackEvent({
+            event_name: "outbound_affiliate_click",
+            link_url: href,
+            link_text: text,
+            source: "affiliate",
+          });
+        }
+      };
+
+      const saved = (() => {
+        try {
+          return localStorage.getItem(storageKey);
+        } catch (error) {
+          return null;
+        }
+      })();
+
+      const browserLang = navigator.language && navigator.language.toLowerCase().startsWith("ja") ? "ja" : "en";
+      const initialLang = saved || browserLang;
+      applyLang(initialLang);
+
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => applyLang(button.getAttribute("data-lang")));
+      });
+
+      document.addEventListener("click", handleTrackedClick, { passive: true });
+    </script>
+  </body>
+</html>
+

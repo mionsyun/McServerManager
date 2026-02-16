@@ -1,0 +1,307 @@
+﻿<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BlockPilot | 通信と権限</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0f17;
+        --panel: #121a2a;
+        --panel-2: #162038;
+        --text: #e6eefb;
+        --muted: #9fb0c8;
+        --accent: #66ff88;
+        --accent-2: #33a8ff;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Noto Sans JP", "Segoe UI", sans-serif;
+        background: radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%);
+        color: var(--text);
+        padding: 32px 16px;
+      }
+      .wrap {
+        max-width: 960px;
+        margin: 0 auto;
+        display: grid;
+        gap: 20px;
+      }
+      header {
+        display: grid;
+        gap: 10px;
+      }
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+      }
+      .back-link {
+        color: var(--accent-2);
+        text-decoration: none;
+        font-weight: 700;
+      }
+      .tag {
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(102, 255, 136, 0.15);
+        color: var(--accent);
+        font-weight: 700;
+        font-size: 12px;
+      }
+      .lang-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .lang-label {
+        font-size: 12px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .lang-btn {
+        border: 1px solid rgba(126, 157, 201, 0.35);
+        background: transparent;
+        color: var(--muted);
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .lang-btn.active {
+        color: #03110a;
+        background: linear-gradient(135deg, var(--accent), #1bd760);
+        border-color: transparent;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(24px, 3.2vw, 34px);
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid rgba(126, 157, 201, 0.25);
+        border-radius: 16px;
+        padding: 20px;
+      }
+      h2 {
+        margin: 0 0 10px;
+        font-size: 20px;
+      }
+      ul,
+      ol {
+        margin: 8px 0 0 18px;
+        color: var(--muted);
+      }
+      .muted {
+        color: var(--muted);
+      }
+      a {
+        color: var(--accent-2);
+      }
+      footer {
+        text-align: center;
+        color: var(--muted);
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="nav">
+          <div class="brand">
+            <span>BlockPilot</span>
+            <span class="tag">Privacy</span>
+          </div>
+          <div>
+            <a class="back-link" href="/docs">← Docs</a>
+            <span class="muted"> / </span>
+            <a class="back-link" href="/">Home</a>
+          </div>
+        </div>
+        <h1>
+          <span data-lang-block="ja" data-lang-display="inline">通信・権限・保存先</span>
+          <span data-lang-block="en" data-lang-display="inline">Network, Permissions, Storage</span>
+        </h1>
+        <div class="lang-toggle" role="group" aria-label="Language toggle">
+          <span class="lang-label">Language</span>
+          <button class="lang-btn" type="button" data-lang="ja">日本語</button>
+          <button class="lang-btn" type="button" data-lang="en">English</button>
+        </div>
+      </header>
+
+      <section class="card" data-lang-block="ja">
+        <h2>外部通信先一覧</h2>
+        <ul>
+          <li>launchermeta.mojang.com: Minecraft バージョン取得</li>
+          <li>api.papermc.io: Paper バージョン/ダウンロード</li>
+          <li>api.purpurmc.org: Purpur バージョン/ダウンロード</li>
+          <li>meta.fabricmc.net: Fabric Loader/Installer</li>
+          <li>maven.minecraftforge.net: Forge メタデータ/インストーラ</li>
+          <li>hub.spigotmc.org: Spigot BuildTools.jar 取得</li>
+          <li>api.ipify.org: 公開 IP 取得</li>
+        </ul>
+        <p class="muted">※ BuildTools は Git/SpigotMC などへ追加アクセスが発生する場合があります。</p>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>Network endpoints</h2>
+        <ul>
+          <li>launchermeta.mojang.com: Minecraft version manifest</li>
+          <li>api.papermc.io: Paper versions/downloads</li>
+          <li>api.purpurmc.org: Purpur versions/downloads</li>
+          <li>meta.fabricmc.net: Fabric Loader/Installer</li>
+          <li>maven.minecraftforge.net: Forge metadata/installer</li>
+          <li>hub.spigotmc.org: Spigot BuildTools.jar</li>
+          <li>api.ipify.org: Public IP lookup</li>
+        </ul>
+        <p class="muted">BuildTools may access Git/SpigotMC sources for builds.</p>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>管理者権限が必要な操作</h2>
+        <ul>
+          <li>Firewall 受信ルールの作成/削除/再作成</li>
+          <li>UPnP によるポート開放/閉鎖</li>
+        </ul>
+        <p class="muted">実行前に説明を表示し、UACで昇格します。</p>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>Operations requiring admin rights</h2>
+        <ul>
+          <li>Create/delete firewall inbound rules</li>
+          <li>UPnP port open/close</li>
+        </ul>
+        <p class="muted">We show a reason before requesting UAC elevation.</p>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>データ保存場所</h2>
+        <ul>
+          <li>%APPDATA%\\BlockPilot</li>
+          <li>servers/&lt;serverId&gt;/config.json</li>
+          <li>servers/&lt;serverId&gt;/server.properties</li>
+          <li>servers/&lt;serverId&gt;/logs / backups</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>Data storage</h2>
+        <ul>
+          <li>%APPDATA%\\BlockPilot</li>
+          <li>servers/&lt;serverId&gt;/config.json</li>
+          <li>servers/&lt;serverId&gt;/server.properties</li>
+          <li>servers/&lt;serverId&gt;/logs / backups</li>
+        </ul>
+      </section>
+
+      <footer>BlockPilot</footer>
+    </div>
+
+    <script>
+      const buttons = document.querySelectorAll("[data-lang]");
+      const blocks = document.querySelectorAll("[data-lang-block]");
+      const storageKey = "mcsm-docs-lang";
+
+      const applyLang = (lang) => {
+        blocks.forEach((block) => {
+          const blockLang = block.getAttribute("data-lang-block");
+          const display = block.getAttribute("data-lang-display") || "block";
+          block.style.display = blockLang === lang ? display : "none";
+        });
+        buttons.forEach((button) => {
+          button.classList.toggle("active", button.getAttribute("data-lang") === lang);
+        });
+        try {
+          localStorage.setItem(storageKey, lang);
+        } catch (error) {
+          // ignore
+        }
+      };
+
+      const trackEvent = ({ event_name, link_url, link_text, source }) => {
+        const win = window;
+        if (typeof win.gtag === "function") {
+          win.gtag("event", event_name, {
+            event_category: source || "cta",
+            event_label: link_text || link_url || "",
+            link_url: link_url,
+          });
+          return;
+        }
+        if (Array.isArray(win.dataLayer)) {
+          win.dataLayer.push({
+            event: event_name,
+            link_url: link_url,
+            link_text: link_text,
+            source: source || "cta",
+          });
+        }
+      };
+
+      const handleTrackedClick = (event) => {
+        const target = event.target;
+        if (!target || !target.closest) {
+          return;
+        }
+        const link = target.closest("a");
+        if (!link) {
+          return;
+        }
+        const eventName = link.getAttribute("data-event");
+        const href = link.getAttribute("href") || "";
+        const text = link.textContent ? link.textContent.trim() : "";
+        if (eventName) {
+          trackEvent({
+            event_name: eventName,
+            link_url: href,
+            link_text: text,
+            source: "cta",
+          });
+        }
+        const rel = (link.getAttribute("rel") || "").toLowerCase();
+        if (rel.includes("sponsored") && eventName !== "outbound_affiliate_click") {
+          trackEvent({
+            event_name: "outbound_affiliate_click",
+            link_url: href,
+            link_text: text,
+            source: "affiliate",
+          });
+        }
+      };
+
+      const saved = (() => {
+        try {
+          return localStorage.getItem(storageKey);
+        } catch (error) {
+          return null;
+        }
+      })();
+
+      const browserLang = navigator.language && navigator.language.toLowerCase().startsWith("ja") ? "ja" : "en";
+      const initialLang = saved || browserLang;
+      applyLang(initialLang);
+
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => applyLang(button.getAttribute("data-lang")));
+      });
+
+      document.addEventListener("click", handleTrackedClick, { passive: true });
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,327 @@
+﻿<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BlockPilot | ポート開放チェックリスト</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0f17;
+        --panel: #121a2a;
+        --panel-2: #162038;
+        --text: #e6eefb;
+        --muted: #9fb0c8;
+        --accent: #66ff88;
+        --accent-2: #33a8ff;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Noto Sans JP", "Segoe UI", sans-serif;
+        background: radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%);
+        color: var(--text);
+        padding: 32px 16px;
+      }
+      .wrap {
+        max-width: 960px;
+        margin: 0 auto;
+        display: grid;
+        gap: 20px;
+      }
+      header {
+        display: grid;
+        gap: 10px;
+      }
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+      }
+      .back-link {
+        color: var(--accent-2);
+        text-decoration: none;
+        font-weight: 700;
+      }
+      .tag {
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(102, 255, 136, 0.15);
+        color: var(--accent);
+        font-weight: 700;
+        font-size: 12px;
+      }
+      .lang-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .lang-label {
+        font-size: 12px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .lang-btn {
+        border: 1px solid rgba(126, 157, 201, 0.35);
+        background: transparent;
+        color: var(--muted);
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .lang-btn.active {
+        color: #03110a;
+        background: linear-gradient(135deg, var(--accent), #1bd760);
+        border-color: transparent;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(24px, 3.2vw, 34px);
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid rgba(126, 157, 201, 0.25);
+        border-radius: 16px;
+        padding: 20px;
+      }
+      h2 {
+        margin: 0 0 10px;
+        font-size: 20px;
+      }
+      ul,
+      ol {
+        margin: 8px 0 0 18px;
+        color: var(--muted);
+      }
+      .muted {
+        color: var(--muted);
+      }
+      a {
+        color: var(--accent-2);
+      }
+      footer {
+        text-align: center;
+        color: var(--muted);
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="nav">
+          <div class="brand">
+            <span>BlockPilot</span>
+            <span class="tag">Port Forwarding</span>
+          </div>
+          <div>
+            <a class="back-link" href="/docs">← Docs</a>
+            <span class="muted"> / </span>
+            <a class="back-link" href="/">Home</a>
+          </div>
+        </div>
+        <h1>
+          <span data-lang-block="ja" data-lang-display="inline">ポート開放チェックリスト</span>
+          <span data-lang-block="en" data-lang-display="inline">Port Forwarding Checklist</span>
+        </h1>
+        <div class="lang-toggle" role="group" aria-label="Language toggle">
+          <span class="lang-label">Language</span>
+          <button class="lang-btn" type="button" data-lang="ja">日本語</button>
+          <button class="lang-btn" type="button" data-lang="en">English</button>
+        </div>
+      </header>
+
+      <section class="card" data-lang-block="ja">
+        <h2>まず確認すること</h2>
+        <ul>
+          <li>サーバーは起動中か</li>
+          <li>ポート番号は正しいか</li>
+          <li>同一ポートを他のアプリが使用していないか</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>First checks</h2>
+        <ul>
+          <li>Is the server running?</li>
+          <li>Is the port number correct?</li>
+          <li>Is another app using the same port?</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>UPnPが失敗する場合</h2>
+        <ul>
+          <li>ルーター側でUPnPが無効</li>
+          <li>二重ルーターでUPnPが届かない</li>
+          <li>IPv6/CGNAT環境で外部公開できない</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>If UPnP fails</h2>
+        <ul>
+          <li>UPnP is disabled on the router</li>
+          <li>Double router setup blocks UPnP</li>
+          <li>IPv6/CGNAT prevents inbound access</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>ルーター設定のチェック</h2>
+        <ol>
+          <li>ポート開放先が正しいPCのIPか確認。</li>
+          <li>TCP/UDP両方が必要な場合は両方開放。</li>
+          <li>LAN IPが変わらないように固定化。</li>
+        </ol>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>Router checklist</h2>
+        <ol>
+          <li>Port forwarding points to the correct PC IP.</li>
+          <li>Open TCP/UDP as needed.</li>
+          <li>Use a fixed LAN IP if possible.</li>
+        </ol>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>Firewallの確認</h2>
+        <ul>
+          <li>アプリのFirewallルールが作成されているか</li>
+          <li>セキュリティソフトが通信を遮断していないか</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>Firewall checks</h2>
+        <ul>
+          <li>Firewall rules are created</li>
+          <li>Security software is not blocking the port</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>それでも難しい場合</h2>
+        <p class="muted">
+          24時間稼働が必要なら、VPSという選択肢があります。
+          <a href="/docs/24-7-hosting" data-event="docs_24_7_hosting_click">比較を見る（PR）</a>
+        </p>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>Still stuck?</h2>
+        <p class="muted">
+          If you need always-on hosting, VPS can help.
+          <a href="/docs/24-7-hosting" data-event="docs_24_7_hosting_click">See options (PR)</a>
+        </p>
+      </section>
+
+      <footer>BlockPilot</footer>
+    </div>
+
+    <script>
+      const buttons = document.querySelectorAll("[data-lang]");
+      const blocks = document.querySelectorAll("[data-lang-block]");
+      const storageKey = "mcsm-docs-lang";
+
+      const applyLang = (lang) => {
+        blocks.forEach((block) => {
+          const blockLang = block.getAttribute("data-lang-block");
+          const display = block.getAttribute("data-lang-display") || "block";
+          block.style.display = blockLang === lang ? display : "none";
+        });
+        buttons.forEach((button) => {
+          button.classList.toggle("active", button.getAttribute("data-lang") === lang);
+        });
+        try {
+          localStorage.setItem(storageKey, lang);
+        } catch (error) {
+          // ignore
+        }
+      };
+
+      const trackEvent = ({ event_name, link_url, link_text, source }) => {
+        const win = window;
+        if (typeof win.gtag === "function") {
+          win.gtag("event", event_name, {
+            event_category: source || "cta",
+            event_label: link_text || link_url || "",
+            link_url: link_url,
+          });
+          return;
+        }
+        if (Array.isArray(win.dataLayer)) {
+          win.dataLayer.push({
+            event: event_name,
+            link_url: link_url,
+            link_text: link_text,
+            source: source || "cta",
+          });
+        }
+      };
+
+      const handleTrackedClick = (event) => {
+        const target = event.target;
+        if (!target || !target.closest) {
+          return;
+        }
+        const link = target.closest("a");
+        if (!link) {
+          return;
+        }
+        const eventName = link.getAttribute("data-event");
+        const href = link.getAttribute("href") || "";
+        const text = link.textContent ? link.textContent.trim() : "";
+        if (eventName) {
+          trackEvent({
+            event_name: eventName,
+            link_url: href,
+            link_text: text,
+            source: "cta",
+          });
+        }
+        const rel = (link.getAttribute("rel") || "").toLowerCase();
+        if (rel.includes("sponsored") && eventName !== "outbound_affiliate_click") {
+          trackEvent({
+            event_name: "outbound_affiliate_click",
+            link_url: href,
+            link_text: text,
+            source: "affiliate",
+          });
+        }
+      };
+
+      const saved = (() => {
+        try {
+          return localStorage.getItem(storageKey);
+        } catch (error) {
+          return null;
+        }
+      })();
+
+      const browserLang = navigator.language && navigator.language.toLowerCase().startsWith("ja") ? "ja" : "en";
+      const initialLang = saved || browserLang;
+      applyLang(initialLang);
+
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => applyLang(button.getAttribute("data-lang")));
+      });
+
+      document.addEventListener("click", handleTrackedClick, { passive: true });
+    </script>
+  </body>
+</html>
+
