@@ -1,0 +1,88 @@
+﻿<Window x:Class="McServerManager.Views.NewServerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="新規サーバー作成"
+        Width="760"
+        Height="660"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Style="{StaticResource Card}" Padding="0">
+            <TabControl Margin="12">
+                <TabItem Header="基本設定">
+                    <StackPanel Margin="22">
+                        <TextBlock Text="サーバー名"/>
+                        <TextBox Text="{Binding Name}" Height="30"/>
+
+                        <TextBlock Text="保存先フォルダ" Margin="0,12,0,0"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox Text="{Binding DirectoryPath}" Width="520" Height="30"/>
+                            <Button Content="参照" Command="{Binding BrowseDirectoryCommand}" Margin="8,0,0,0"/>
+                        </StackPanel>
+
+                        <TextBlock Text="サーバー種別" Margin="0,12,0,0"/>
+                        <ComboBox ItemsSource="{Binding ServerTypes}" SelectedItem="{Binding SelectedServerType}" DisplayMemberPath="Label" Width="320"/>
+
+                        <TextBlock Text="Minecraft バージョン" Margin="0,12,0,0"/>
+                        <StackPanel Orientation="Horizontal">
+                            <ComboBox ItemsSource="{Binding Versions}" SelectedItem="{Binding SelectedVersion}" DisplayMemberPath="Id" Width="320"/>
+                            <Button Content="更新" Command="{Binding RefreshVersionsCommand}" Margin="8,0,0,0"/>
+                        </StackPanel>
+
+                        <TextBlock Text="MOTD" Margin="0,12,0,0"/>
+                        <TextBox Text="{Binding Motd}" Height="30"/>
+                    </StackPanel>
+                </TabItem>
+
+                <TabItem Header="リソース">
+                    <StackPanel Margin="22">
+                        <TextBlock Text="メモリ割り当て (Xms / Xmx MB)"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox Text="{Binding MemoryXms}" Width="120" Height="30"/>
+                            <TextBlock Text=" / " VerticalAlignment="Center" Margin="6,0"/>
+                            <TextBox Text="{Binding MemoryXmx}" Width="120" Height="30"/>
+                        </StackPanel>
+
+                        <TextBlock Text="Java パス" Margin="0,12,0,0"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox Text="{Binding JavaPath}" Width="520" Height="30"/>
+                            <Button Content="参照" Command="{Binding BrowseJavaCommand}" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </TabItem>
+
+                <TabItem Header="ネットワーク">
+                    <StackPanel Margin="22">
+                        <TextBlock Text="ポート"/>
+                        <TextBox Text="{Binding Port}" Width="120" Height="30"/>
+                        <TextBlock Text="最大人数" Margin="0,12,0,0"/>
+                        <TextBox Text="{Binding MaxPlayers}" Width="120" Height="30"/>
+                        <CheckBox Content="オンラインモード" IsChecked="{Binding OnlineMode}" Margin="0,12,0,0"/>
+                    </StackPanel>
+                </TabItem>
+
+                <TabItem Header="EULA">
+                    <StackPanel Margin="22">
+                        <TextBlock TextWrapping="Wrap">
+                            Minecraft サーバーの EULA に同意する必要があります。
+                        </TextBlock>
+                        <CheckBox Content="EULA に同意する" IsChecked="{Binding EulaAccepted}" Margin="0,12,0,0"/>
+                    </StackPanel>
+                </TabItem>
+            </TabControl>
+        </Border>
+
+        <StackPanel Grid.Row="1" Margin="0,20,0,0">
+            <TextBlock Text="{Binding StatusMessage}" Foreground="#D06666"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,6,0,0">
+                <Button Content="キャンセル" Command="{Binding CancelCommand}" Width="110"/>
+                <Button Content="作成" Command="{Binding CreateCommand}" Style="{StaticResource PrimaryButton}" Width="110" Margin="8,0,0,0"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

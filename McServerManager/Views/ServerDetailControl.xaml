@@ -1,0 +1,427 @@
+﻿<UserControl x:Class="McServerManager.Views.ServerDetailControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel>
+                    <TextBlock Text="{Binding Name}" FontSize="20" FontWeight="SemiBold"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <Border Background="{DynamicResource BrushAccentSoft}"
+                                BorderBrush="{DynamicResource BrushAccent}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="8,2"
+                                Margin="0,0,8,0">
+                            <TextBlock Text="{Binding StatusText}" Foreground="{DynamicResource BrushAccent}" FontSize="12"/>
+                        </Border>
+                        <Border Background="{DynamicResource BrushSurface}"
+                                BorderBrush="{DynamicResource BrushBorder}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="8,2"
+                                Margin="0,0,8,0">
+                            <TextBlock Text="{Binding ServerType, StringFormat=種別 {0}}" FontSize="12"/>
+                        </Border>
+                        <Border Background="{DynamicResource BrushSurface}"
+                                BorderBrush="{DynamicResource BrushBorder}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="8,2"
+                                Margin="0,0,8,0">
+                            <TextBlock Text="{Binding Port, StringFormat=ポート {0}}" FontSize="12"/>
+                        </Border>
+                        <Border Background="{DynamicResource BrushSurface}"
+                                BorderBrush="{DynamicResource BrushBorder}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="8,2">
+                            <TextBlock Text="{Binding Version, StringFormat=バージョン {0}}" FontSize="12"/>
+                        </Border>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                        <Border Background="{DynamicResource BrushSurface}"
+                                BorderBrush="{DynamicResource BrushBorder}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="8,2"
+                                Margin="0,0,8,0">
+                            <TextBlock Text="{Binding CpuUsagePercent, StringFormat=CPU {0:F0}%}" FontSize="12"/>
+                        </Border>
+                        <Border Background="{DynamicResource BrushSurface}"
+                                BorderBrush="{DynamicResource BrushBorder}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="8,2"
+                                Margin="0,0,8,0">
+                            <TextBlock Text="{Binding MemoryUsageMb, StringFormat=RAM {0:F0}MB}" FontSize="12"/>
+                        </Border>
+                        <Border Background="{DynamicResource BrushSurface}"
+                                BorderBrush="{DynamicResource BrushBorder}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="8,2">
+                            <TextBlock Text="{Binding PlayerCountText, StringFormat=プレイヤー {0}}" FontSize="12"/>
+                        </Border>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                        <TextBlock Text="最終起動" Style="{StaticResource MutedText}" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding LastStartedAtText}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="保存先" Style="{StaticResource MutedText}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding ServerDirectory}"
+                                   TextTrimming="CharacterEllipsis"
+                                   VerticalAlignment="Center"
+                                   Margin="6,0,0,0"/>
+                        <Button Grid.Column="2" Content="開く" Command="{Binding OpenServerDirectoryCommand}" Margin="8,0,0,0" Width="80"/>
+                    </Grid>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="StartServerButton" Content="起動" Command="{Binding StartCommand}" Style="{StaticResource PrimaryButton}" Width="90" Margin="0,0,8,0"/>
+                    <Button Content="停止" Command="{Binding StopCommand}" Width="90" Margin="0,0,8,0"/>
+                    <Button Content="再起動" Command="{Binding RestartCommand}" Width="90"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <TabControl x:Name="ServerTabs" Grid.Row="1">
+            <TabItem Header="コンソール">
+                <Grid Margin="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Style="{StaticResource SurfacePanel}">
+                        <ListBox ItemsSource="{Binding Logs}"
+                                 FontFamily="Cascadia Mono"
+                                 FontSize="12"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 VirtualizingStackPanel.IsVirtualizing="True"/>
+                    </Border>
+
+                    <Grid Grid.Row="1" Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Text="{Binding CommandText, UpdateSourceTrigger=PropertyChanged}" Height="32"/>
+                        <Button Grid.Column="1" Content="送信" Command="{Binding SendCommandCommand}" Margin="8,0,0,0" Width="90"/>
+                        <Button Grid.Column="2" Content="ログ出力" Command="{Binding ExportLogsCommand}" Margin="8,0,0,0"/>
+                        <Button Grid.Column="3" Content="ログフォルダ" Command="{Binding OpenLogsDirectoryCommand}" Margin="8,0,0,0"/>
+                        <Button Grid.Column="4" Content="クラッシュレポート" Command="{Binding OpenCrashReportsCommand}" Margin="8,0,0,0"/>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="SettingsTab" Header="設定">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="12">
+                        <Border Style="{StaticResource SurfacePanel}">
+                            <StackPanel>
+                                <TextBlock Text="サーバー設定" FontWeight="SemiBold" FontSize="14"/>
+                                <TextBlock Text="稼働中の変更は保存できますが反映は再起動後です。" Style="{StaticResource MutedText}" Margin="0,4,0,0"/>
+                                <TextBlock Text="再起動が必要" Foreground="#D06666" FontWeight="SemiBold" Margin="0,8,0,0"
+                                           Visibility="{Binding RestartRequired, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"/>
+
+                                <Grid DataContext="{Binding Settings}" Margin="0,12,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="170"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="サーバーポート"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ServerPort}" Width="120"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="最大人数" Margin="0,8,0,0"/>
+                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding MaxPlayers}" Width="120" Margin="0,8,0,0"/>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="MOTD" Margin="0,8,0,0"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Motd}" Width="420" Margin="0,8,0,0"/>
+
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="オンラインモード" Margin="0,8,0,0"/>
+                                    <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding OnlineMode}" Margin="0,8,0,0"/>
+
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="難易度" Margin="0,8,0,0"/>
+                                    <ComboBox Grid.Row="4" Grid.Column="1" SelectedValue="{Binding Difficulty}" SelectedValuePath="Content" Width="160" Margin="0,8,0,0">
+                                        <ComboBoxItem Content="peaceful"/>
+                                        <ComboBoxItem Content="easy"/>
+                                        <ComboBoxItem Content="normal"/>
+                                        <ComboBoxItem Content="hard"/>
+                                    </ComboBox>
+
+                                    <TextBlock Grid.Row="5" Grid.Column="0" Text="ゲームモード" Margin="0,8,0,0"/>
+                                    <ComboBox Grid.Row="5" Grid.Column="1" SelectedValue="{Binding GameMode}" SelectedValuePath="Content" Width="160" Margin="0,8,0,0">
+                                        <ComboBoxItem Content="survival"/>
+                                        <ComboBoxItem Content="creative"/>
+                                        <ComboBoxItem Content="adventure"/>
+                                        <ComboBoxItem Content="spectator"/>
+                                    </ComboBox>
+
+                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="PvP" Margin="0,8,0,0"/>
+                                    <CheckBox Grid.Row="6" Grid.Column="1" IsChecked="{Binding Pvp}" Margin="0,8,0,0"/>
+
+                                    <TextBlock Grid.Row="7" Grid.Column="0" Text="描画距離" Margin="0,8,0,0"/>
+                                    <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding ViewDistance}" Width="120" Margin="0,8,0,0"/>
+
+                                    <TextBlock Grid.Row="8" Grid.Column="0" Text="スポーン保護" Margin="0,8,0,0"/>
+                                    <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding SpawnProtection}" Width="120" Margin="0,8,0,0"/>
+
+                                    <TextBlock Grid.Row="9" Grid.Column="0" Text="ワールド名" Margin="0,8,0,0"/>
+                                    <TextBox Grid.Row="9" Grid.Column="1" Text="{Binding LevelName}" Width="220" Margin="0,8,0,0"/>
+
+                                    <TextBlock Grid.Row="10" Grid.Column="0" Text="シード" Margin="0,8,0,0"/>
+                                    <TextBox Grid.Row="10" Grid.Column="1" Text="{Binding Seed}" Width="220" Margin="0,8,0,0"/>
+
+                                    <TextBlock Grid.Row="11" Grid.Column="0" Text="Java パス" Margin="0,8,0,0"/>
+                                    <StackPanel Grid.Row="11" Grid.Column="1" Orientation="Horizontal" Margin="0,8,0,0">
+                                        <TextBox x:Name="JavaPathTextBox" Text="{Binding DataContext.JavaPath, RelativeSource={RelativeSource AncestorType=UserControl}}" Width="360"/>
+                                        <Button Content="参照" Command="{Binding DataContext.BrowseJavaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="8,0,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
+                            <StackPanel>
+                                <TextBlock Text="クラッシュ復帰" FontWeight="SemiBold" FontSize="14"/>
+                                <CheckBox Content="クラッシュ時に自動再起動" IsChecked="{Binding AutoRestartOnCrash}" Margin="0,8,0,0"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                    <TextBlock Text="再起動までの秒数" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBox Text="{Binding AutoRestartDelaySeconds}" Width="80"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="OP 管理" FontWeight="SemiBold" FontSize="14"/>
+                                    <ListBox ItemsSource="{Binding Ops}" SelectedItem="{Binding SelectedOp}" Margin="0,8,0,0" Height="160">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="{Binding Level, StringFormat=Level {0}}" Style="{StaticResource MutedText}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                        <TextBox Text="{Binding NewOpName}" Width="180" Height="28"/>
+                                        <Button Content="追加" Command="{Binding AddOpCommand}" Margin="8,0,0,0"/>
+                                        <Button Content="削除" Command="{Binding RemoveOpCommand}" Margin="8,0,0,0"/>
+                                    </StackPanel>
+                                    <Button Content="再読込" Command="{Binding ReloadPermissionsCommand}" Margin="0,8,0,0" Width="100"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Margin="16,0,0,0">
+                                    <TextBlock Text="ホワイトリスト" FontWeight="SemiBold" FontSize="14"/>
+                                    <ListBox ItemsSource="{Binding Whitelist}" SelectedItem="{Binding SelectedWhitelist}" Margin="0,8,0,0" Height="160">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                        <TextBox Text="{Binding NewWhitelistName}" Width="180" Height="28"/>
+                                        <Button Content="追加" Command="{Binding AddWhitelistCommand}" Margin="8,0,0,0"/>
+                                        <Button Content="削除" Command="{Binding RemoveWhitelistCommand}" Margin="8,0,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+                            <Button Content="設定を保存" Command="{Binding SaveSettingsCommand}" Style="{StaticResource PrimaryButton}" Width="140"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="ワールド">
+                <Grid Margin="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Style="{StaticResource SurfacePanel}" Grid.Column="0" Margin="0,0,12,0">
+                        <StackPanel>
+                            <TextBlock Text="ワールド一覧" FontWeight="SemiBold" FontSize="14"/>
+                            <ListBox ItemsSource="{Binding Worlds}" SelectedItem="{Binding SelectedWorld}" Margin="0,8,0,8" Height="220"/>
+                            <Button Content="切り替え" Command="{Binding SwitchWorldCommand}" Margin="0,0,0,6"/>
+                            <Button Content="削除" Command="{Binding DeleteWorldCommand}"/>
+
+                            <TextBlock Text="新規ワールド" Margin="0,12,0,4"/>
+                            <TextBox Text="{Binding NewWorldName}" Height="28"/>
+                            <Button Content="作成" Command="{Binding CreateWorldCommand}" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource SurfacePanel}" Grid.Column="1">
+                        <StackPanel>
+                            <TextBlock Text="バックアップ" FontWeight="SemiBold" FontSize="14"/>
+                            <ListBox ItemsSource="{Binding Backups}" SelectedItem="{Binding SelectedBackup}" Height="220" Margin="0,8,0,0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding FileName}" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding Comment}" Style="{StaticResource MutedText}"/>
+                                            <TextBlock Text="{Binding CreatedAt}" Style="{StaticResource MutedText}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <TextBox Text="{Binding BackupComment}" Width="260" Height="28"/>
+                                <Button Content="バックアップ" Command="{Binding BackupWorldCommand}" Margin="8,0,0,0"/>
+                            </StackPanel>
+                            <CheckBox Content="復元前に現状をバックアップする" IsChecked="{Binding BackupCurrentBeforeRestore}" Margin="0,8,0,0"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <Button Content="復元" Command="{Binding RestoreWorldCommand}"/>
+                                <Button Content="一覧更新" Command="{Binding RefreshBackupsCommand}" Margin="8,0,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="バージョン">
+                <StackPanel Margin="12">
+                    <Border Style="{StaticResource SurfacePanel}">
+                        <StackPanel>
+                            <TextBlock Text="バージョン管理" FontWeight="SemiBold" FontSize="14"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <Button Content="一覧更新" Command="{Binding LoadVersionsCommand}" Width="120"/>
+                                <TextBlock Text="現在:" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Version}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <ComboBox ItemsSource="{Binding AvailableVersions}" SelectedItem="{Binding SelectedVersion}"
+                                      DisplayMemberPath="Id" Width="260" Margin="0,12,0,0"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <Button Content="変更" Command="{Binding ChangeVersionCommand}" Width="100"/>
+                                <Button Content="再ダウンロード" Command="{Binding RedownloadJarCommand}" Margin="8,0,0,0"/>
+                            </StackPanel>
+                            <TextBlock Text="変更前にバックアップを作成します。" Style="{StaticResource MutedText}" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </TabItem>
+
+            <TabItem x:Name="NetworkTab" Header="ネットワーク">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="12">
+                        <Border x:Name="FirewallSection" Style="{StaticResource SurfacePanel}">
+                            <StackPanel>
+                                <TextBlock Text="Firewall 受信ルール" FontWeight="SemiBold" FontSize="14"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                    <Button Content="作成" Command="{Binding CreateFirewallRuleCommand}" Width="90"/>
+                                    <Button Content="削除" Command="{Binding DeleteFirewallRuleCommand}" Margin="8,0,0,0" Width="90"/>
+                                    <Button Content="再作成" Command="{Binding RecreateFirewallRuleCommand}" Margin="8,0,0,0" Width="90"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
+                            <StackPanel>
+                                <TextBlock Text="待受チェック" FontWeight="SemiBold" FontSize="14"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                    <Button Content="チェック" Command="{Binding CheckPortCommand}" Width="90"/>
+                                    <TextBlock Text="{Binding LocalPortStatus}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
+                            <StackPanel>
+                                <TextBlock Text="アドレス" FontWeight="SemiBold" FontSize="14"/>
+                                <TextBlock Text="LAN IP" Style="{StaticResource MutedText}" Margin="0,8,0,4"/>
+                                <ItemsControl ItemsSource="{Binding LanIpAddresses}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <TextBlock Text="グローバル IP" Style="{StaticResource MutedText}" Margin="0,12,0,4"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="取得" Command="{Binding RefreshPublicIpCommand}" Width="90"/>
+                                    <TextBlock Text="{Binding PublicIp}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding PublicIpStatus}" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource MutedText}"/>
+                                </StackPanel>
+
+                                <TextBlock Text="共有アドレス" Style="{StaticResource MutedText}" Margin="0,12,0,4"/>
+                                <TextBlock x:Name="ShareAddressText">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0}:{1}">
+                                            <Binding Path="PublicIp"/>
+                                            <Binding Path="Port"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
+                            <StackPanel>
+                                <TextBlock Text="外部公開チェックリスト" FontWeight="SemiBold" FontSize="14"/>
+                                <ItemsControl ItemsSource="{Binding ExternalChecklist}" Margin="0,8,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="-  {Binding}"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>

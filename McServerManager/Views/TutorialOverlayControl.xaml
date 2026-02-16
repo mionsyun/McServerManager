@@ -1,0 +1,54 @@
+<UserControl x:Class="McServerManager.Views.TutorialOverlayControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid x:Name="OverlayRoot"
+          Visibility="{Binding IsActive, Converter={StaticResource BooleanToVisibilityConverter}}"
+          Background="Transparent">
+        <Path Fill="{DynamicResource BrushOverlayDim}">
+            <Path.Data>
+                <MultiBinding Converter="{StaticResource TutorialDimGeometryConverter}">
+                    <Binding ElementName="OverlayRoot" Path="ActualWidth"/>
+                    <Binding ElementName="OverlayRoot" Path="ActualHeight"/>
+                    <Binding Path="HighlightRect"/>
+                    <Binding Path="HighlightCornerRadius"/>
+                </MultiBinding>
+            </Path.Data>
+        </Path>
+
+        <Canvas>
+            <Border Canvas.Left="{Binding HighlightRect.X}"
+                    Canvas.Top="{Binding HighlightRect.Y}"
+                    Width="{Binding HighlightRect.Width}"
+                    Height="{Binding HighlightRect.Height}"
+                    BorderBrush="{DynamicResource BrushAccent}"
+                    BorderThickness="2"
+                    CornerRadius="{Binding HighlightCornerRadius}"
+                    Background="#00FFFFFF"
+                    Visibility="{Binding HasHighlight, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+            <Border Canvas.Left="{Binding CardPosition.X}"
+                    Canvas.Top="{Binding CardPosition.Y}"
+                    Width="{Binding CardWidth}"
+                    Background="{DynamicResource BrushCard}"
+                    BorderBrush="{DynamicResource BrushBorder}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Padding="16"
+                    Effect="{StaticResource CardShadow}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding ProgressText}" Margin="10,2,0,0" Style="{StaticResource MutedText}"/>
+                    </StackPanel>
+                    <TextBlock Text="{Binding Body}" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+                        <Button Content="戻る" Command="{Binding BackCommand}" IsEnabled="{Binding CanGoBack}" Margin="0,0,6,0"/>
+                        <Button Content="スキップ" Command="{Binding SkipCommand}" Margin="0,0,6,0"/>
+                        <Button Content="終了" Command="{Binding FinishCommand}" Margin="0,0,6,0"/>
+                        <Button Content="{Binding NextButtonText}" Command="{Binding NextCommand}" Style="{StaticResource PrimaryButton}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Canvas>
+    </Grid>
+</UserControl>

@@ -1,0 +1,30 @@
+﻿<Window x:Class="McServerManager.Views.FirstRunWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="はじめに"
+        Width="520"
+        Height="360"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{DynamicResource BrushBg}"
+        Foreground="{DynamicResource BrushText}">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Style="{StaticResource Card}">
+            <StackPanel>
+                <TextBlock Text="Minecraft サーバーマネージャー" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <TextBlock Text="クイックスタート" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                <TextBlock Text="- Java が見つからない場合は「設定」タブで java.exe を指定してください。" TextWrapping="Wrap"/>
+                <TextBlock Text="- サーバーを作成して起動すると初回ワールドが生成されます。" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                <TextBlock Text="- 公開する場合は「ネットワーク」タブで Firewall 設定と疎通チェックを行ってください。" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                <TextBlock Text="- ワールドのバックアップは「ワールド」タブから行えます。" TextWrapping="Wrap" Margin="0,6,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <Button Grid.Row="1" Content="はじめる" Style="{StaticResource PrimaryButton}" Width="140" HorizontalAlignment="Right" Margin="0,12,0,0" Click="OnClose"/>
+    </Grid>
+</Window>
