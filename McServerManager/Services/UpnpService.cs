@@ -14,7 +14,7 @@ public sealed class UpnpService
         var device = await GetDeviceAsync().ConfigureAwait(false);
         if (device is null)
         {
-            return (false, "自動ポート開放に対応するルーターが見つかりません。");
+            return (false, BuildDeviceNotFoundMessage(port));
         }
 
         try
@@ -25,7 +25,7 @@ public sealed class UpnpService
         }
         catch (Exception ex)
         {
-            return (false, ex.Message);
+            return (false, BuildOpenPortFailureMessage(port, ex));
         }
     }
 
@@ -66,5 +66,55 @@ public sealed class UpnpService
         {
             return null;
         }
+    }
+
+    private static string BuildDeviceNotFoundMessage(int port)
+    {
+        var lines = new List<string>
+        {
+            "UPnP対応ルーターが見つかりませんでした。",
+            "共有回線（J:COMなど）やCGNAT環境では、ポート開放そのものができない場合があります。",
+            $"手動でルーターの TCP {port} を開放するか、固定IPオプション / VPN中継（Tailscale, playit.gg など）を検討してください。"
+        };
+
+        return string.Join(Environment.NewLine, lines);
+    }
+
+    private static string BuildOpenPortFailureMessage(int port, Exception ex)
+    {
+        var detail = string.IsNullOrWhiteSpace(ex.Message)
+            ? ex.GetType().Name
+            : ex.Message;
+
+        var lines = new List<string>
+        {
+            $"UPnPで TCP {port} の開放に失敗しました。",
+            $"詳細: {detail}"
+        };
+
+        if (IsLikelySharedLineFailure(detail))
+        {
+            lines.Add("回線事業者側で外部公開が制限されている可能性があります（共有回線/CGNAT）。");
+        }
+
+        lines.Add("ルーターのUPnP有効化・二重ルーター構成（ONU+Wi-Fiルーター）の確認を行ってください。");
+        lines.Add("改善しない場合は、固定IPオプションまたはVPN中継（Tailscale, playit.gg など）の利用を推奨します。");
+
+        return string.Join(Environment.NewLine, lines);
+    }
+
+    private static bool IsLikelySharedLineFailure(string detail)
+    {
+        if (string.IsNullOrWhiteSpace(detail))
+        {
+            return false;
+        }
+
+        return detail.Contains("718", StringComparison.OrdinalIgnoreCase)
+               || detail.Contains("NotAuthorized", StringComparison.OrdinalIgnoreCase)
+               || detail.Contains("NoSuchEntryInArray", StringComparison.OrdinalIgnoreCase)
+               || detail.Contains("ActionFailed", StringComparison.OrdinalIgnoreCase)
+               || detail.Contains("アクセス", StringComparison.OrdinalIgnoreCase)
+               || detail.Contains("拒否", StringComparison.OrdinalIgnoreCase);
     }
 }

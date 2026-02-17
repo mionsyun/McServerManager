@@ -26,6 +26,8 @@ public sealed class NewServerViewModel : ObservableObject
     private MinecraftVersionInfo? _selectedVersion;
     private ServerTypeOption? _selectedServerType;
     private string _statusMessage = string.Empty;
+    private bool _isBusy;
+    private string _progressMessage = string.Empty;
 
     public NewServerViewModel(AppServices services, IEnumerable<string> existingNames)
     {
@@ -35,10 +37,10 @@ public sealed class NewServerViewModel : ObservableObject
         ServerTypes = new ObservableCollection<ServerTypeOption>();
         DirectoryPath = _services.Paths.ServersPath;
 
-        BrowseDirectoryCommand = new RelayCommand(_ => BrowseDirectory());
-        BrowseJavaCommand = new RelayCommand(_ => BrowseJava());
+        BrowseDirectoryCommand = new RelayCommand(_ => BrowseDirectory(), _ => !IsBusy);
+        BrowseJavaCommand = new RelayCommand(_ => BrowseJava(), _ => !IsBusy);
         CreateCommand = new AsyncRelayCommand(CreateAsync);
-        CancelCommand = new RelayCommand(_ => RequestClose?.Invoke(false));
+        CancelCommand = new RelayCommand(_ => RequestClose?.Invoke(false), _ => !IsBusy);
         RefreshVersionsCommand = new AsyncRelayCommand(LoadVersionsAsync);
 
         InitializeDefaults();
@@ -128,6 +130,26 @@ public sealed class NewServerViewModel : ObservableObject
         private set => SetProperty(ref _statusMessage, value);
     }
 
+    public bool IsBusy
+    {
+        get => _isBusy;
+        private set
+        {
+            if (SetProperty(ref _isBusy, value))
+            {
+                BrowseDirectoryCommand.RaiseCanExecuteChanged();
+                BrowseJavaCommand.RaiseCanExecuteChanged();
+                CancelCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public string ProgressMessage
+    {
+        get => _progressMessage;
+        private set => SetProperty(ref _progressMessage, value);
+    }
+
     public RelayCommand BrowseDirectoryCommand { get; }
     public RelayCommand BrowseJavaCommand { get; }
     public AsyncRelayCommand CreateCommand { get; }
@@ -136,6 +158,9 @@ public sealed class NewServerViewModel : ObservableObject
 
     public async Task LoadVersionsAsync()
     {
+        IsBusy = true;
+        ProgressMessage = "バージョン一覧を取得中...";
+
         try
         {
             var versions = await _services.Versions.GetVersionsAsync();
@@ -153,6 +178,11 @@ public sealed class NewServerViewModel : ObservableObject
         {
             StatusMessage = $"バージョン取得失敗: {ex.Message}";
         }
+        finally
+        {
+            ProgressMessage = string.Empty;
+            IsBusy = false;
+        }
     }
 
     private async Task CreateAsync()
@@ -166,6 +196,9 @@ public sealed class NewServerViewModel : ObservableObject
 
         try
         {
+            IsBusy = true;
+            ProgressMessage = "サーバー作成を開始しています...";
+
             var options = new NewServerOptions
             {
                 Name = Name.Trim(),
@@ -182,13 +215,19 @@ public sealed class NewServerViewModel : ObservableObject
                 Motd = Motd
             };
 
-            var config = await _services.Provisioning.CreateAsync(options);
+            var progress = new Progress<string>(message => ProgressMessage = message);
+            var config = await _services.Provisioning.CreateAsync(options, progress);
             ServerCreated?.Invoke(config);
             RequestClose?.Invoke(true);
         }
         catch (Exception ex)
         {
             StatusMessage = $"作成に失敗しました: {ex.Message}";
+        }
+        finally
+        {
+            ProgressMessage = string.Empty;
+            IsBusy = false;
         }
     }
 

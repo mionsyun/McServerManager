@@ -39,7 +39,7 @@ public partial class ServerDetailControl : System.Windows.Controls.UserControl
 
         if (e.Data.GetData(System.Windows.DataFormats.FileDrop) is string[] paths && paths.Length > 0)
         {
-            vm.ImportAddons(paths);
+            _ = vm.ImportAddonsAsync(paths);
         }
 
         e.Handled = true;

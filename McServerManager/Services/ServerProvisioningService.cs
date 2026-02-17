@@ -21,7 +21,7 @@ public sealed class ServerProvisioningService
         _jarService = jarService;
     }
 
-    public async Task<ServerConfig> CreateAsync(NewServerOptions options)
+    public async Task<ServerConfig> CreateAsync(NewServerOptions options, IProgress<string>? progress = null)
     {
         if (!options.EulaAccepted)
         {
@@ -34,14 +34,17 @@ public sealed class ServerProvisioningService
             : options.DirectoryPath;
         var serverDirectory = Path.Combine(baseDirectory, serverId);
 
+        progress?.Report("作成先フォルダを準備しています...");
+
         Directory.CreateDirectory(baseDirectory);
         Directory.CreateDirectory(serverDirectory);
         Directory.CreateDirectory(Path.Combine(serverDirectory, "logs"));
         Directory.CreateDirectory(Path.Combine(serverDirectory, "backups"));
 
         var jarPath = Path.Combine(serverDirectory, "server.jar");
-        await _jarService.DownloadAsync(options.Type, options.Version, jarPath, options.JavaPath).ConfigureAwait(false);
+        await _jarService.DownloadAsync(options.Type, options.Version, jarPath, options.JavaPath, progress).ConfigureAwait(false);
 
+        progress?.Report("設定ファイルを書き込み中...");
         File.WriteAllText(Path.Combine(serverDirectory, "eula.txt"), "eula=true");
 
         var config = new ServerConfig
@@ -89,6 +92,8 @@ public sealed class ServerProvisioningService
 
         _propertiesService.Save(serverDirectory, props);
         _configService.SaveToDirectory(config, serverDirectory);
+
+        progress?.Report("サーバー作成が完了しました。");
 
         return config;
     }

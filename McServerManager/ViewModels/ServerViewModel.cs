@@ -29,8 +29,6 @@ public sealed class ServerViewModel : ObservableObject
     private string _publicIp = "-";
     private string _publicIpStatus = string.Empty;
     private string _newWorldName = string.Empty;
-    private string _backupComment = string.Empty;
-    private bool _backupCurrentBeforeRestore = true;
     private MinecraftVersionInfo? _selectedVersion;
     private string _newOpName = string.Empty;
     private string _newWhitelistName = string.Empty;
@@ -46,6 +44,12 @@ public sealed class ServerViewModel : ObservableObject
     private bool _upnpOpened;
     private AddonEntry? _selectedAddon;
     private string _addonStatus = string.Empty;
+    private string _addonImportReview = "未実行";
+    private string _addonSearchQuery = string.Empty;
+    private string _addonCatalogStatus = "未検索";
+    private AddonSearchResult? _selectedAddonSearchResult;
+    private bool _isAddonBusy;
+    private string _addonProgressMessage = string.Empty;
     private LaunchModeOption? _selectedLaunchMode;
     private StartupPresetOption? _selectedStartupPreset;
     private string _javaExtraArguments = string.Empty;
@@ -66,13 +70,13 @@ public sealed class ServerViewModel : ObservableObject
 
         Logs = _runtime.Logs;
         Worlds = new ObservableCollection<string>();
-        Backups = new ObservableCollection<BackupMetadata>();
         AvailableVersions = new ObservableCollection<MinecraftVersionInfo>();
         LanIpAddresses = new ObservableCollection<string>(_services.Network.GetLanIpAddresses());
         ExternalChecklist = new ObservableCollection<string>(_services.Network.GetExternalChecklist());
         Ops = new ObservableCollection<OpEntry>();
         Whitelist = new ObservableCollection<WhitelistEntry>();
         Addons = new ObservableCollection<AddonEntry>();
+        AddonSearchResults = new ObservableCollection<AddonSearchResult>();
         LaunchModes = new ObservableCollection<LaunchModeOption>();
         StartupPresets = new ObservableCollection<StartupPresetOption>();
 
@@ -94,9 +98,6 @@ public sealed class ServerViewModel : ObservableObject
         SwitchWorldCommand = new RelayCommand(_ => SwitchWorld(), _ => !string.IsNullOrWhiteSpace(SelectedWorld) && !IsSelectedWorldCurrent);
         DeleteWorldCommand = new RelayCommand(_ => DeleteWorld(), _ => !string.IsNullOrWhiteSpace(SelectedWorld));
         CreateWorldCommand = new RelayCommand(_ => CreateWorld(), _ => !string.IsNullOrWhiteSpace(NewWorldName));
-        BackupWorldCommand = new RelayCommand(_ => BackupWorld(), _ => !string.IsNullOrWhiteSpace(SelectedWorld));
-        RestoreWorldCommand = new RelayCommand(_ => RestoreWorld(), _ => SelectedBackup is not null);
-        RefreshBackupsCommand = new RelayCommand(_ => LoadBackups());
         RefreshWorldsCommand = new RelayCommand(_ => LoadWorlds());
         OpenSelectedWorldDirectoryCommand = new RelayCommand(_ => OpenSelectedWorldDirectory(), _ => !string.IsNullOrWhiteSpace(SelectedWorld));
         OpenServerDirectoryCommand = new RelayCommand(_ => OpenServerDirectory());
@@ -115,18 +116,23 @@ public sealed class ServerViewModel : ObservableObject
         AddWhitelistCommand = new RelayCommand(_ => AddWhitelist(), _ => !string.IsNullOrWhiteSpace(NewWhitelistName));
         RemoveWhitelistCommand = new RelayCommand(_ => RemoveWhitelist(), _ => SelectedWhitelist is not null);
         ReloadPermissionsCommand = new RelayCommand(_ => LoadPermissions());
-        AddAddonsCommand = new RelayCommand(_ => BrowseAndAddAddons(), _ => SupportsAddonManagement);
-        RefreshAddonsCommand = new RelayCommand(_ => LoadAddons(), _ => SupportsAddonManagement);
-        OpenAddonsDirectoryCommand = new RelayCommand(_ => OpenAddonsDirectory(), _ => SupportsAddonManagement);
-        EnableAddonCommand = new RelayCommand(_ => EnableAddon(), _ => SelectedAddon is not null && !SelectedAddon.IsEnabled);
-        DisableAddonCommand = new RelayCommand(_ => DisableAddon(), _ => SelectedAddon is not null && SelectedAddon.IsEnabled);
-        DeleteAddonCommand = new RelayCommand(_ => DeleteAddon(), _ => SelectedAddon is not null);
+        AddAddonsCommand = new RelayCommand(_ => BrowseAndAddAddons(), _ => SupportsAddonManagement && !IsAddonBusy);
+        RefreshAddonsCommand = new RelayCommand(_ => LoadAddons(), _ => SupportsAddonManagement && !IsAddonBusy);
+        OpenAddonsDirectoryCommand = new RelayCommand(_ => OpenAddonsDirectory(), _ => SupportsAddonManagement && !IsAddonBusy);
+        EnableAddonCommand = new RelayCommand(_ => EnableAddon(), _ => SelectedAddon is not null && !SelectedAddon.IsEnabled && !IsAddonBusy);
+        DisableAddonCommand = new RelayCommand(_ => DisableAddon(), _ => SelectedAddon is not null && SelectedAddon.IsEnabled && !IsAddonBusy);
+        DeleteAddonCommand = new RelayCommand(_ => DeleteAddon(), _ => SelectedAddon is not null && !IsAddonBusy);
+        SearchAddonCatalogCommand = new AsyncRelayCommand(
+            SearchAddonCatalogAsync,
+            () => SupportsAddonManagement && !string.IsNullOrWhiteSpace(AddonSearchQuery));
+        OpenAddonCatalogPageCommand = new RelayCommand(
+            _ => OpenSelectedAddonCatalogPage(),
+            _ => SelectedAddonSearchResult is not null && !string.IsNullOrWhiteSpace(SelectedAddonSearchResult.ProjectUrl));
         ApplyStartupPresetCommand = new RelayCommand(_ => ApplyStartupPreset(), _ => SelectedStartupPreset is not null);
         RunHealthCheckCommand = new RelayCommand(_ => RunHealthCheck(showEvenIfCompleted: true));
 
         LoadSettings();
         LoadWorlds();
-        LoadBackups();
         LoadPermissions();
         LoadAddons();
         _ = LoadVersionsAsync();
@@ -146,13 +152,13 @@ public sealed class ServerViewModel : ObservableObject
     public string ServerDirectory => _config.DirectoryPath;
     public ObservableCollection<string> Logs { get; }
     public ObservableCollection<string> Worlds { get; }
-    public ObservableCollection<BackupMetadata> Backups { get; }
     public ObservableCollection<MinecraftVersionInfo> AvailableVersions { get; }
     public ObservableCollection<string> LanIpAddresses { get; }
     public ObservableCollection<string> ExternalChecklist { get; }
     public ObservableCollection<OpEntry> Ops { get; }
     public ObservableCollection<WhitelistEntry> Whitelist { get; }
     public ObservableCollection<AddonEntry> Addons { get; }
+    public ObservableCollection<AddonSearchResult> AddonSearchResults { get; }
     public ObservableCollection<LaunchModeOption> LaunchModes { get; }
     public ObservableCollection<StartupPresetOption> StartupPresets { get; }
 
@@ -243,7 +249,6 @@ public sealed class ServerViewModel : ObservableObject
             {
                 SwitchWorldCommand.RaiseCanExecuteChanged();
                 DeleteWorldCommand.RaiseCanExecuteChanged();
-                BackupWorldCommand.RaiseCanExecuteChanged();
                 OpenSelectedWorldDirectoryCommand.RaiseCanExecuteChanged();
                 OnPropertyChanged(nameof(IsSelectedWorldCurrent));
                 OnPropertyChanged(nameof(WorldSwitchHint));
@@ -309,6 +314,85 @@ public sealed class ServerViewModel : ObservableObject
     {
         get => _addonStatus;
         private set => SetProperty(ref _addonStatus, value);
+    }
+
+    public string AddonSearchQuery
+    {
+        get => _addonSearchQuery;
+        set
+        {
+            if (SetProperty(ref _addonSearchQuery, value))
+            {
+                SearchAddonCatalogCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public string AddonCatalogStatus
+    {
+        get => _addonCatalogStatus;
+        private set => SetProperty(ref _addonCatalogStatus, value);
+    }
+
+    public AddonSearchResult? SelectedAddonSearchResult
+    {
+        get => _selectedAddonSearchResult;
+        set
+        {
+            if (SetProperty(ref _selectedAddonSearchResult, value))
+            {
+                OpenAddonCatalogPageCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public bool IsAddonBusy
+    {
+        get => _isAddonBusy;
+        private set
+        {
+            if (SetProperty(ref _isAddonBusy, value))
+            {
+                RaiseAddonCommandsCanExecuteChanged();
+            }
+        }
+    }
+
+    public string AddonProgressMessage
+    {
+        get => _addonProgressMessage;
+        private set => SetProperty(ref _addonProgressMessage, value);
+    }
+
+    public string AddonImportReview
+    {
+        get => _addonImportReview;
+        private set => SetProperty(ref _addonImportReview, value);
+    }
+
+    public string AddonGuideText
+    {
+        get
+        {
+            if (string.Equals(ServerType, "Fabric", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Fabric: Fabric対応MOD(.jar)を追加してください。依存MOD（例: fabric-api）が必要な場合があります。";
+            }
+
+            if (string.Equals(ServerType, "Forge", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Forge: Forge対応MOD(.jar)を追加してください。Fabric系は通常動作しません。";
+            }
+
+            if (string.Equals(ServerType, "Paper", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(ServerType, "Purpur", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(ServerType, "Spigot", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Plugin: plugin.yml を含むプラグインを推奨します。MOD系jarは動作しない可能性があります。";
+            }
+
+            return "この種別はMOD/プラグイン管理対象外です。";
+        }
     }
 
     public LaunchModeOption? SelectedLaunchMode
@@ -425,31 +509,6 @@ public sealed class ServerViewModel : ObservableObject
                 CreateWorldCommand.RaiseCanExecuteChanged();
             }
         }
-    }
-
-    private BackupMetadata? _selectedBackup;
-    public BackupMetadata? SelectedBackup
-    {
-        get => _selectedBackup;
-        set
-        {
-            if (SetProperty(ref _selectedBackup, value))
-            {
-                RestoreWorldCommand.RaiseCanExecuteChanged();
-            }
-        }
-    }
-
-    public string BackupComment
-    {
-        get => _backupComment;
-        set => SetProperty(ref _backupComment, value);
-    }
-
-    public bool BackupCurrentBeforeRestore
-    {
-        get => _backupCurrentBeforeRestore;
-        set => SetProperty(ref _backupCurrentBeforeRestore, value);
     }
 
     public MinecraftVersionInfo? SelectedVersion
@@ -575,9 +634,6 @@ public sealed class ServerViewModel : ObservableObject
     public RelayCommand SwitchWorldCommand { get; }
     public RelayCommand DeleteWorldCommand { get; }
     public RelayCommand CreateWorldCommand { get; }
-    public RelayCommand BackupWorldCommand { get; }
-    public RelayCommand RestoreWorldCommand { get; }
-    public RelayCommand RefreshBackupsCommand { get; }
     public RelayCommand RefreshWorldsCommand { get; }
     public RelayCommand OpenSelectedWorldDirectoryCommand { get; }
     public RelayCommand OpenServerDirectoryCommand { get; }
@@ -602,6 +658,8 @@ public sealed class ServerViewModel : ObservableObject
     public RelayCommand EnableAddonCommand { get; }
     public RelayCommand DisableAddonCommand { get; }
     public RelayCommand DeleteAddonCommand { get; }
+    public AsyncRelayCommand SearchAddonCatalogCommand { get; }
+    public RelayCommand OpenAddonCatalogPageCommand { get; }
     public RelayCommand ApplyStartupPresetCommand { get; }
     public RelayCommand RunHealthCheckCommand { get; }
 
@@ -950,6 +1008,27 @@ public sealed class ServerViewModel : ObservableObject
         }
     }
 
+    private void OpenUrl(string url)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return;
+            }
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            WpfMessageBox.Show($"ブラウザを開けませんでした: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
     private void CreateWorld()
     {
         try
@@ -1019,75 +1098,6 @@ public sealed class ServerViewModel : ObservableObject
         }
     }
 
-    private void LoadBackups()
-    {
-        Backups.Clear();
-        var backupDir = Path.Combine(ServerDirectory, "backups");
-        foreach (var backup in _services.Worlds.GetBackups(backupDir))
-        {
-            Backups.Add(backup);
-        }
-    }
-
-    private void BackupWorld()
-    {
-        if (string.IsNullOrWhiteSpace(SelectedWorld))
-        {
-            return;
-        }
-
-        try
-        {
-            var backupsDir = Path.Combine(ServerDirectory, "backups");
-            _services.Worlds.BackupWorld(ServerDirectory, SelectedWorld, backupsDir, BackupComment);
-            BackupComment = string.Empty;
-            LoadBackups();
-        }
-        catch (Exception ex)
-        {
-            WpfMessageBox.Show($"バックアップに失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
-
-    private void RestoreWorld()
-    {
-        if (SelectedBackup is null)
-        {
-            return;
-        }
-
-        if (Status != ServerStatus.Stopped)
-        {
-            WpfMessageBox.Show("停止中のみ復元できます。", "確認", MessageBoxButton.OK, MessageBoxImage.Information);
-            return;
-        }
-
-        var targetWorld = SelectedWorld ?? _config.WorldName;
-        if (string.IsNullOrWhiteSpace(targetWorld))
-        {
-            WpfMessageBox.Show("復元先のワールドを選択してください。", "確認", MessageBoxButton.OK, MessageBoxImage.Information);
-            return;
-        }
-
-        try
-        {
-            if (BackupCurrentBeforeRestore && !string.IsNullOrWhiteSpace(_config.WorldName))
-            {
-                var backupsDir = Path.Combine(ServerDirectory, "backups");
-                _services.Worlds.BackupWorld(ServerDirectory, _config.WorldName, backupsDir, "restore");
-            }
-
-            var backupsDirectory = Path.Combine(ServerDirectory, "backups");
-            _services.Worlds.RestoreBackup(ServerDirectory, backupsDirectory, SelectedBackup, targetWorld);
-            LoadWorlds();
-            OnPropertyChanged(nameof(WorldSwitchHint));
-        }
-        catch (Exception ex)
-        {
-            WpfMessageBox.Show($"復元に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
-
     private async Task LoadVersionsAsync()
     {
         try
@@ -1131,12 +1141,6 @@ public sealed class ServerViewModel : ObservableObject
 
         try
         {
-            if (!string.IsNullOrWhiteSpace(_config.WorldName))
-            {
-                var backupsDir = Path.Combine(ServerDirectory, "backups");
-                _services.Worlds.BackupWorld(ServerDirectory, _config.WorldName, backupsDir, "version-change");
-            }
-
             var jarPath = Path.Combine(ServerDirectory, "server.jar");
             await _services.Jars.DownloadAsync(_config.Type, SelectedVersion.Id, jarPath, _config.JavaPath);
             _config.Version = SelectedVersion.Id;
@@ -1257,11 +1261,16 @@ public sealed class ServerViewModel : ObservableObject
         if (!SupportsAddonManagement)
         {
             AddonStatus = "このサーバー種別はMOD/プラグイン管理の対象外です。";
+            AddonImportReview = "対象外";
+            AddonCatalogStatus = "対象外";
+            AddonSearchResults.Clear();
+            SelectedAddonSearchResult = null;
             RaiseAddonCommandsCanExecuteChanged();
             OnPropertyChanged(nameof(SupportsAddonManagement));
             OnPropertyChanged(nameof(AddonCategoryName));
             OnPropertyChanged(nameof(AddonActiveDirectory));
             OnPropertyChanged(nameof(AddonDisabledDirectory));
+            OnPropertyChanged(nameof(AddonGuideText));
             return;
         }
 
@@ -1281,6 +1290,11 @@ public sealed class ServerViewModel : ObservableObject
             {
                 AddonStatus += $" / 警告 {warnings.Count} 件";
             }
+
+            if (string.Equals(AddonImportReview, "未実行", StringComparison.OrdinalIgnoreCase))
+            {
+                AddonImportReview = "追加前チェックを実行してください。";
+            }
         }
         catch (Exception ex)
         {
@@ -1293,6 +1307,7 @@ public sealed class ServerViewModel : ObservableObject
         OnPropertyChanged(nameof(AddonCategoryName));
         OnPropertyChanged(nameof(AddonActiveDirectory));
         OnPropertyChanged(nameof(AddonDisabledDirectory));
+        OnPropertyChanged(nameof(AddonGuideText));
     }
 
     private void BrowseAndAddAddons()
@@ -1311,20 +1326,60 @@ public sealed class ServerViewModel : ObservableObject
 
         if (dialog.ShowDialog() == true)
         {
-            ImportAddons(dialog.FileNames);
+            _ = ImportAddonsAsync(dialog.FileNames);
         }
     }
 
-    public void ImportAddons(IEnumerable<string> sourcePaths)
+    public async Task ImportAddonsAsync(IEnumerable<string> sourcePaths)
     {
-        if (!SupportsAddonManagement)
+        if (!SupportsAddonManagement || IsAddonBusy)
         {
             return;
         }
 
         try
         {
-            var count = _services.Addons.AddFiles(ServerDirectory, ServerType, sourcePaths);
+            IsAddonBusy = true;
+            AddonProgressMessage = "追加前チェックを実行しています...";
+            await Task.Yield();
+
+            var assessment = _services.Addons.AssessImport(ServerType, sourcePaths, Addons);
+            AddonImportReview = assessment.Summary;
+
+            if (assessment.CandidateCount == 0)
+            {
+                AddonStatus = "追加できるjarファイルが見つかりませんでした。";
+                return;
+            }
+
+            if (assessment.RequiresConfirmation)
+            {
+                var detailLines = assessment.Warnings
+                    .Take(12)
+                    .Select((warning, index) => $"{index + 1}. {warning}")
+                    .ToList();
+
+                if (assessment.Warnings.Count > detailLines.Count)
+                {
+                    detailLines.Add($"...他 {assessment.Warnings.Count - detailLines.Count} 件");
+                }
+
+                var details = string.Join(Environment.NewLine, detailLines);
+                var result = WpfMessageBox.Show(
+                    $"追加前チェックで注意点が見つかりました。続行しますか？{Environment.NewLine}{Environment.NewLine}{details}",
+                    "追加前チェック",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (result != MessageBoxResult.Yes)
+                {
+                    AddonStatus = "追加をキャンセルしました。";
+                    return;
+                }
+            }
+
+            AddonProgressMessage = "ファイルを追加しています...";
+            var count = await Task.Run(() => _services.Addons.AddFiles(ServerDirectory, ServerType, sourcePaths));
             if (count > 0)
             {
                 AddonStatus = $"{count} 件を追加しました。";
@@ -1334,12 +1389,18 @@ public sealed class ServerViewModel : ObservableObject
                 AddonStatus = "追加できるjarファイルが見つかりませんでした。";
             }
 
+            AddonProgressMessage = "一覧を更新しています...";
             LoadAddons();
             ShowAddonCompatibilityWarnings();
         }
         catch (Exception ex)
         {
             WpfMessageBox.Show($"追加に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            AddonProgressMessage = string.Empty;
+            IsAddonBusy = false;
         }
     }
 
@@ -1428,6 +1489,57 @@ public sealed class ServerViewModel : ObservableObject
         OpenDirectory(AddonActiveDirectory, $"{AddonCategoryName}フォルダが見つかりません。");
     }
 
+    private async Task SearchAddonCatalogAsync()
+    {
+        if (!SupportsAddonManagement)
+        {
+            return;
+        }
+
+        var query = AddonSearchQuery?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            AddonCatalogStatus = "検索キーワードを入力してください。";
+            return;
+        }
+
+        try
+        {
+            AddonCatalogStatus = "検索中...";
+            var results = await _services.AddonCatalog.SearchAsync(query, ServerType, Version, limit: 20).ConfigureAwait(false);
+
+            WpfApplication.Current.Dispatcher.Invoke(() =>
+            {
+                AddonSearchResults.Clear();
+                foreach (var result in results)
+                {
+                    AddonSearchResults.Add(result);
+                }
+
+                SelectedAddonSearchResult = AddonSearchResults.FirstOrDefault();
+            });
+
+            AddonCatalogStatus = results.Count == 0
+                ? "該当する候補が見つかりませんでした。"
+                : $"{results.Count} 件見つかりました。";
+        }
+        catch (Exception ex)
+        {
+            AddonCatalogStatus = "検索に失敗しました。";
+            WpfMessageBox.Show($"Modrinth検索に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void OpenSelectedAddonCatalogPage()
+    {
+        if (SelectedAddonSearchResult is null)
+        {
+            return;
+        }
+
+        OpenUrl(SelectedAddonSearchResult.ProjectUrl);
+    }
+
     private void RaiseAddonCommandsCanExecuteChanged()
     {
         AddAddonsCommand.RaiseCanExecuteChanged();
@@ -1436,6 +1548,8 @@ public sealed class ServerViewModel : ObservableObject
         EnableAddonCommand.RaiseCanExecuteChanged();
         DisableAddonCommand.RaiseCanExecuteChanged();
         DeleteAddonCommand.RaiseCanExecuteChanged();
+        SearchAddonCatalogCommand.RaiseCanExecuteChanged();
+        OpenAddonCatalogPageCommand.RaiseCanExecuteChanged();
     }
 
     private void AddOp()
@@ -1593,7 +1707,7 @@ public sealed class ServerViewModel : ObservableObject
         var (ok, error) = await _services.Upnp.TryOpenPortAsync(_config.Port, $"McServerManager_{_config.Name}");
         if (!ok)
         {
-            WpfMessageBox.Show($"ポート開放に失敗しました: {error}", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+            WpfMessageBox.Show(error ?? "ポート開放に失敗しました。", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 

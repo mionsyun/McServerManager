@@ -78,6 +78,11 @@
         </Border>
 
         <StackPanel Grid.Row="1" Margin="0,20,0,0">
+            <ProgressBar Height="6"
+                         IsIndeterminate="True"
+                         Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <TextBlock Text="{Binding ProgressMessage}" Style="{StaticResource MutedText}" Margin="0,6,0,0"
+                       Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <TextBlock Text="{Binding StatusMessage}" Foreground="#D06666"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,6,0,0">
                 <Button Content="キャンセル" Command="{Binding CancelCommand}" Width="110"/>

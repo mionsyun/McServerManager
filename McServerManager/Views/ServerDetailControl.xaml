@@ -323,12 +323,7 @@
 
             <TabItem Header="ワールド">
                 <Grid Margin="12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="300"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <Border Style="{StaticResource SurfacePanel}" Grid.Column="0" Margin="0,0,12,0">
+                    <Border Style="{StaticResource SurfacePanel}">
                         <StackPanel>
                             <TextBlock Text="ワールド一覧" FontWeight="SemiBold" FontSize="14"/>
                             <TextBlock Text="現在のワールド" Style="{StaticResource MutedText}" Margin="0,8,0,4"/>
@@ -361,34 +356,6 @@
                             <Button Content="作成" Command="{Binding CreateWorldCommand}" Margin="0,6,0,0"/>
                         </StackPanel>
                     </Border>
-
-                    <Border Style="{StaticResource SurfacePanel}" Grid.Column="1">
-                        <StackPanel>
-                            <TextBlock Text="バックアップ" FontWeight="SemiBold" FontSize="14"/>
-                            <ListBox ItemsSource="{Binding Backups}" SelectedItem="{Binding SelectedBackup}" Height="220" Margin="0,8,0,0">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding FileName}" FontWeight="SemiBold"/>
-                                            <TextBlock Text="{Binding Comment}" Style="{StaticResource MutedText}"/>
-                                            <TextBlock Text="{Binding CreatedAt}" Style="{StaticResource MutedText}"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-
-                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                <TextBox Text="{Binding BackupComment}" Width="260" Height="28"/>
-                                <Button Content="バックアップ" Command="{Binding BackupWorldCommand}" Margin="8,0,0,0"/>
-                            </StackPanel>
-                            <CheckBox Content="復元前に現状をバックアップする" IsChecked="{Binding BackupCurrentBeforeRestore}" Margin="0,8,0,0"/>
-
-                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                <Button Content="復元" Command="{Binding RestoreWorldCommand}"/>
-                                <Button Content="一覧更新" Command="{Binding RefreshBackupsCommand}" Margin="8,0,0,0"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
                 </Grid>
             </TabItem>
 
@@ -404,9 +371,19 @@
                         <StackPanel>
                             <TextBlock Text="管理対象" FontWeight="SemiBold" FontSize="14"/>
                             <TextBlock Text="{Binding AddonStatus}" Style="{StaticResource MutedText}" Margin="0,4,0,0"/>
+                            <TextBlock Text="{Binding AddonImportReview, StringFormat=追加前チェック: {0}}" Style="{StaticResource MutedText}" Margin="0,4,0,0"/>
+                            <ProgressBar Height="6"
+                                         Margin="0,8,0,0"
+                                         IsIndeterminate="True"
+                                         Visibility="{Binding IsAddonBusy, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            <TextBlock Text="{Binding AddonProgressMessage}"
+                                       Style="{StaticResource MutedText}"
+                                       Margin="0,6,0,0"
+                                       Visibility="{Binding IsAddonBusy, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                             <TextBlock Text="{Binding AddonCategoryName, StringFormat=種別: {0}}" Style="{StaticResource MutedText}" Margin="0,6,0,0"/>
                             <TextBlock Text="{Binding AddonActiveDirectory, StringFormat=有効: {0}}" Style="{StaticResource MutedText}" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
                             <TextBlock Text="{Binding AddonDisabledDirectory, StringFormat=無効: {0}}" Style="{StaticResource MutedText}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding AddonGuideText}" Style="{StaticResource MutedText}" Margin="0,8,0,0" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
 
@@ -414,10 +391,33 @@
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <WrapPanel>
+                            <StackPanel Margin="0,0,0,8">
+                                <TextBlock Text="Modrinth 検索" FontWeight="SemiBold" FontSize="14"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                    <TextBox Text="{Binding AddonSearchQuery, UpdateSourceTrigger=PropertyChanged}" Width="280" Height="28"/>
+                                    <Button Content="検索" Command="{Binding SearchAddonCatalogCommand}" Margin="8,0,0,0"/>
+                                    <Button Content="ページを開く" Command="{Binding OpenAddonCatalogPageCommand}" Margin="8,0,0,0"/>
+                                </StackPanel>
+                                <TextBlock Text="{Binding AddonCatalogStatus}" Style="{StaticResource MutedText}" Margin="0,6,0,0"/>
+
+                                <ListBox ItemsSource="{Binding AddonSearchResults}" SelectedItem="{Binding SelectedAddonSearchResult}" Height="150" Margin="0,8,0,0">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Margin="0,2,0,2">
+                                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding DownloadCount, StringFormat=Downloads: {0:N0}}" Style="{StaticResource MutedText}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+
+                            <WrapPanel Grid.Row="1">
                                 <Button Content="追加" Command="{Binding AddAddonsCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8"/>
                                 <Button Content="有効化" Command="{Binding EnableAddonCommand}" Margin="0,0,8,8"/>
                                 <Button Content="無効化" Command="{Binding DisableAddonCommand}" Margin="0,0,8,8"/>
@@ -426,7 +426,7 @@
                                 <Button Content="一覧更新" Command="{Binding RefreshAddonsCommand}" Margin="0,0,0,8"/>
                             </WrapPanel>
 
-                            <ListBox Grid.Row="1" ItemsSource="{Binding Addons}" SelectedItem="{Binding SelectedAddon}" Margin="0,8,0,0">
+                            <ListBox Grid.Row="2" ItemsSource="{Binding Addons}" SelectedItem="{Binding SelectedAddon}" Margin="0,8,0,0">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <Grid Margin="0,2,0,2">
