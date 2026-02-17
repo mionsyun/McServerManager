@@ -18,9 +18,6 @@
         { rel: "icon", type: "image/png", href: "/icon.png" }
       ]
     }
-  },
-  nitro: {
-    preset: "static"
   }
 });
 

@@ -332,7 +332,7 @@ public sealed class ServerViewModel : ObservableObject
         {
             if (SetProperty(ref _selectedStartupPreset, value))
             {
-                ApplyStartupPresetCommand.RaiseCanExecuteChanged();
+                ApplyStartupPresetCommand?.RaiseCanExecuteChanged();
             }
         }
     }
@@ -630,11 +630,14 @@ public sealed class ServerViewModel : ObservableObject
         StartupPresets.Add(new StartupPresetOption("MemorySaver", "Memory Saver", 1024, 2048, "-XX:+UseG1GC"));
         StartupPresets.Add(new StartupPresetOption("Throughput", "Throughput", 4096, 8192, "-XX:+UseG1GC -XX:MaxGCPauseMillis=100"));
 
-        SelectedLaunchMode = LaunchModes.FirstOrDefault(item => string.Equals(item.Id, _config.LaunchModeOverride, StringComparison.OrdinalIgnoreCase))
+        _selectedLaunchMode = LaunchModes.FirstOrDefault(item => string.Equals(item.Id, _config.LaunchModeOverride, StringComparison.OrdinalIgnoreCase))
             ?? LaunchModes.FirstOrDefault(item => string.Equals(item.Id, "Auto", StringComparison.OrdinalIgnoreCase));
+        OnPropertyChanged(nameof(SelectedLaunchMode));
+        OnPropertyChanged(nameof(LaunchModeDescription));
 
-        SelectedStartupPreset = StartupPresets.FirstOrDefault(item => string.Equals(item.Id, _config.StartupPresetId, StringComparison.OrdinalIgnoreCase))
+        _selectedStartupPreset = StartupPresets.FirstOrDefault(item => string.Equals(item.Id, _config.StartupPresetId, StringComparison.OrdinalIgnoreCase))
             ?? StartupPresets.FirstOrDefault(item => string.Equals(item.Id, "Balanced", StringComparison.OrdinalIgnoreCase));
+        OnPropertyChanged(nameof(SelectedStartupPreset));
     }
 
     private void ApplyStartupPreset()
