@@ -2,7 +2,6 @@
 using System.Windows;
 using System.Text;
 using WpfApplication = System.Windows.Application;
-using WpfMessageBox = System.Windows.MessageBox;
 using McServerManager.Models;
 using McServerManager.Services;
 using McServerManager.Utilities;
@@ -172,11 +171,11 @@ public sealed class MainViewModel : ObservableObject
 
         if (target.Status != ServerStatus.Stopped)
         {
-            WpfMessageBox.Show("停止中のサーバーのみ削除できます。", "確認", MessageBoxButton.OK, MessageBoxImage.Information);
+            _services.Dialog.Show("停止中のサーバーのみ削除できます。", "確認", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
-        if (WpfMessageBox.Show("選択したサーバーを削除します。よろしいですか？", "確認", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
+        if (_services.Dialog.Show("選択したサーバーを削除します。よろしいですか？", "確認", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
         {
             return;
         }
@@ -190,7 +189,7 @@ public sealed class MainViewModel : ObservableObject
             }
             catch (IOException ex)
             {
-                WpfMessageBox.Show(
+                _services.Dialog.Show(
                     $"削除に失敗しました。別のプロセスがファイルを使用中の可能性があります。\n{ex.Message}",
                     "エラー",
                     MessageBoxButton.OK,
@@ -199,7 +198,7 @@ public sealed class MainViewModel : ObservableObject
             }
             catch (UnauthorizedAccessException ex)
             {
-                WpfMessageBox.Show(
+                _services.Dialog.Show(
                     $"削除に失敗しました。アクセス権限を確認してください。\n{ex.Message}",
                     "エラー",
                     MessageBoxButton.OK,
@@ -224,7 +223,7 @@ public sealed class MainViewModel : ObservableObject
 
         if (target.Status != ServerStatus.Stopped)
         {
-            WpfMessageBox.Show("停止中のサーバーのみ複製できます。", "確認", MessageBoxButton.OK, MessageBoxImage.Information);
+            _services.Dialog.Show("停止中のサーバーのみ複製できます。", "確認", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
@@ -242,7 +241,7 @@ public sealed class MainViewModel : ObservableObject
         var config = _services.Configs.LoadAll(new[] { targetDir }).FirstOrDefault();
         if (config is null)
         {
-            WpfMessageBox.Show("複製に失敗しました。", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show("複製に失敗しました。", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
@@ -317,6 +316,6 @@ public sealed class MainViewModel : ObservableObject
             .AppendLine(logsText)
             .ToString();
 
-        WpfMessageBox.Show(message, "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+        _services.Dialog.Show(message, "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
     }
 }

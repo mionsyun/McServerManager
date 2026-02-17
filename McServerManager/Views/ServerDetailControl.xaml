@@ -508,10 +508,10 @@
 
                         <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
                             <StackPanel>
-                                <TextBlock Text="待受チェック" FontWeight="SemiBold" FontSize="14"/>
+                                <TextBlock Text="UPnP ポート操作" FontWeight="SemiBold" FontSize="14"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                    <Button Content="チェック" Command="{Binding CheckPortCommand}" Width="90"/>
-                                    <TextBlock Text="{Binding LocalPortStatus}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                    <Button Content="開放" Command="{Binding OpenPortCommand}" Width="110"/>
+                                    <Button Content="閉鎖" Command="{Binding ClosePortCommand}" Margin="8,0,0,0" Width="110"/>
                                 </StackPanel>
                             </StackPanel>
                         </Border>

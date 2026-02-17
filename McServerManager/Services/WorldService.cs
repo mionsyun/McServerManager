@@ -11,7 +11,7 @@ public sealed class WorldService
 
         var excluded = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            "logs", "backups", "libraries", "versions", "cache"
+            "logs", "libraries", "versions", "cache"
         };
 
         var worlds = new List<string>();

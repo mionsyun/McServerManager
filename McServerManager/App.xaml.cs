@@ -28,6 +28,7 @@ public partial class App : System.Windows.Application
             var firewallService = new FirewallService();
             var networkService = new NetworkService();
             var upnpService = new UpnpService();
+            var dialogService = new DialogService();
             var themeService = new ThemeService();
             var javaService = new JavaService();
             var addonManagementService = new AddonManagementService();
@@ -52,6 +53,7 @@ public partial class App : System.Windows.Application
                 firewallService,
                 networkService,
                 upnpService,
+                dialogService,
                 themeService,
                 javaService,
                 addonManagementService,

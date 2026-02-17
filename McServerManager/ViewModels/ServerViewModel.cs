@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -6,7 +6,6 @@ using System.Windows;
 using System.Windows.Threading;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using WpfApplication = System.Windows.Application;
-using WpfMessageBox = System.Windows.MessageBox;
 using McServerManager.Models;
 using McServerManager.Services;
 using McServerManager.Utilities;
@@ -25,7 +24,6 @@ public sealed class ServerViewModel : ObservableObject
     private string _commandText = string.Empty;
     private bool _restartRequired;
     private string _javaPath = string.Empty;
-    private string _localPortStatus = "未チェック";
     private string _publicIp = "-";
     private string _publicIpStatus = string.Empty;
     private string _newWorldName = string.Empty;
@@ -109,7 +107,8 @@ public sealed class ServerViewModel : ObservableObject
         CreateFirewallRuleCommand = new RelayCommand(_ => CreateFirewallRule());
         DeleteFirewallRuleCommand = new RelayCommand(_ => DeleteFirewallRule());
         RecreateFirewallRuleCommand = new RelayCommand(_ => RecreateFirewallRule());
-        CheckPortCommand = new AsyncRelayCommand(CheckPortAsync);
+        OpenPortCommand = new AsyncRelayCommand(OpenPortAsync);
+        ClosePortCommand = new AsyncRelayCommand(ClosePortAsync);
         RefreshPublicIpCommand = new AsyncRelayCommand(RefreshPublicIpAsync);
         AddOpCommand = new RelayCommand(_ => AddOp(), _ => !string.IsNullOrWhiteSpace(NewOpName));
         RemoveOpCommand = new RelayCommand(_ => RemoveOp(), _ => SelectedOp is not null);
@@ -219,12 +218,6 @@ public sealed class ServerViewModel : ObservableObject
                 _services.Configs.Save(_config);
             }
         }
-    }
-
-    public string LocalPortStatus
-    {
-        get => _localPortStatus;
-        private set => SetProperty(ref _localPortStatus, value);
     }
 
     public string PublicIp
@@ -645,7 +638,8 @@ public sealed class ServerViewModel : ObservableObject
     public RelayCommand CreateFirewallRuleCommand { get; }
     public RelayCommand DeleteFirewallRuleCommand { get; }
     public RelayCommand RecreateFirewallRuleCommand { get; }
-    public AsyncRelayCommand CheckPortCommand { get; }
+    public AsyncRelayCommand OpenPortCommand { get; }
+    public AsyncRelayCommand ClosePortCommand { get; }
     public AsyncRelayCommand RefreshPublicIpCommand { get; }
     public RelayCommand AddOpCommand { get; }
     public RelayCommand RemoveOpCommand { get; }
@@ -710,7 +704,7 @@ public sealed class ServerViewModel : ObservableObject
         JavaExtraArguments = SelectedStartupPreset.JavaExtraArguments;
         _config.StartupPresetId = SelectedStartupPreset.Id;
         _services.Configs.Save(_config);
-        WpfMessageBox.Show($"起動プリセット「{SelectedStartupPreset.Label}」を適用しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+        _services.Dialog.Show($"起動プリセット「{SelectedStartupPreset.Label}」を適用しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private async Task StartAsync()
@@ -726,7 +720,7 @@ public sealed class ServerViewModel : ObservableObject
 
         if (!Directory.Exists(ServerDirectory))
         {
-            WpfMessageBox.Show("サーバーディレクトリが見つかりません。", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show("サーバーディレクトリが見つかりません。", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
@@ -746,7 +740,7 @@ public sealed class ServerViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"起動に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"起動に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -799,7 +793,7 @@ public sealed class ServerViewModel : ObservableObject
         {
             if (showEvenIfCompleted)
             {
-                WpfMessageBox.Show("ヘルスチェックで問題は見つかりませんでした。", "ヘルスチェック", MessageBoxButton.OK, MessageBoxImage.Information);
+                _services.Dialog.Show("ヘルスチェックで問題は見つかりませんでした。", "ヘルスチェック", MessageBoxButton.OK, MessageBoxImage.Information);
             }
 
             return;
@@ -807,7 +801,7 @@ public sealed class ServerViewModel : ObservableObject
 
         var message = string.Join(Environment.NewLine + Environment.NewLine, issues.Concat(fixes));
         var image = issues.Count > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information;
-        WpfMessageBox.Show(message, "初回ヘルスチェック", MessageBoxButton.OK, image);
+        _services.Dialog.Show(message, "初回ヘルスチェック", MessageBoxButton.OK, image);
     }
 
     private void WarnIfJavaVersionMismatch()
@@ -833,7 +827,7 @@ public sealed class ServerViewModel : ObservableObject
         }
 
         var versionText = string.IsNullOrWhiteSpace(rawVersion) ? actualMajor.ToString() : rawVersion;
-        WpfMessageBox.Show(
+        _services.Dialog.Show(
             $"Minecraft {Version} は Java {requiredMajor} 以上が推奨です。現在の Java: {versionText}\n必要に応じて「設定」タブで java.exe を切り替えてください。",
             "Java バージョン警告",
             MessageBoxButton.OK,
@@ -848,7 +842,7 @@ public sealed class ServerViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"停止に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"停止に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
@@ -864,7 +858,7 @@ public sealed class ServerViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"再起動に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"再起動に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -889,11 +883,11 @@ public sealed class ServerViewModel : ObservableObject
             var fileName = $"console-{DateTime.Now:yyyyMMdd-HHmmss}.txt";
             var path = Path.Combine(logsDir, fileName);
             File.WriteAllLines(path, Logs, Encoding.UTF8);
-            WpfMessageBox.Show($"ログを保存しました: {path}", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+            _services.Dialog.Show($"ログを保存しました: {path}", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"ログ出力に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"ログ出力に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -923,7 +917,7 @@ public sealed class ServerViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"設定保存に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"設定保存に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -992,7 +986,7 @@ public sealed class ServerViewModel : ObservableObject
         {
             if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
             {
-                WpfMessageBox.Show(missingMessage, "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                _services.Dialog.Show(missingMessage, "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -1004,7 +998,7 @@ public sealed class ServerViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"フォルダを開けませんでした: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"フォルダを開けませんでした: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -1025,7 +1019,7 @@ public sealed class ServerViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"ブラウザを開けませんでした: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"ブラウザを開けませんでした: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -1039,7 +1033,7 @@ public sealed class ServerViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"ワールド作成に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"ワールド作成に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -1072,11 +1066,11 @@ public sealed class ServerViewModel : ObservableObject
 
         if (Status != ServerStatus.Stopped)
         {
-            WpfMessageBox.Show("停止中のみ削除できます。", "確認", MessageBoxButton.OK, MessageBoxImage.Information);
+            _services.Dialog.Show("停止中のみ削除できます。", "確認", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
-        if (WpfMessageBox.Show($"ワールド {SelectedWorld} を削除します。", "確認", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
+        if (_services.Dialog.Show($"ワールド {SelectedWorld} を削除します。", "確認", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
         {
             return;
         }
@@ -1094,7 +1088,7 @@ public sealed class ServerViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"削除に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"削除に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -1117,7 +1111,7 @@ public sealed class ServerViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"バージョン取得に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"バージョン取得に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -1130,11 +1124,11 @@ public sealed class ServerViewModel : ObservableObject
 
         if (Status != ServerStatus.Stopped)
         {
-            WpfMessageBox.Show("停止中のみ変更できます。", "確認", MessageBoxButton.OK, MessageBoxImage.Information);
+            _services.Dialog.Show("停止中のみ変更できます。", "確認", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
-        if (WpfMessageBox.Show($"バージョンを {SelectedVersion.Id} に変更します。", "確認", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+        if (_services.Dialog.Show($"バージョンを {SelectedVersion.Id} に変更します。", "確認", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
         {
             return;
         }
@@ -1149,7 +1143,7 @@ public sealed class ServerViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"バージョン変更に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"バージョン変更に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -1157,7 +1151,7 @@ public sealed class ServerViewModel : ObservableObject
     {
         if (Status != ServerStatus.Stopped)
         {
-            WpfMessageBox.Show("停止中のみ再ダウンロードできます。", "確認", MessageBoxButton.OK, MessageBoxImage.Information);
+            _services.Dialog.Show("停止中のみ再ダウンロードできます。", "確認", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
@@ -1168,7 +1162,7 @@ public sealed class ServerViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"再ダウンロードに失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"再ダウンロードに失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -1183,11 +1177,11 @@ public sealed class ServerViewModel : ObservableObject
 
             _services.Firewall.CreateRules(_config.Port, _config.Firewall);
             _services.Configs.Save(_config);
-            WpfMessageBox.Show("Firewall ルールを作成しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+            _services.Dialog.Show("Firewall ルールを作成しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"Firewall ルール作成に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"Firewall ルール作成に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -1196,11 +1190,11 @@ public sealed class ServerViewModel : ObservableObject
         try
         {
             _services.Firewall.DeleteRules(_config.Firewall);
-            WpfMessageBox.Show("Firewall ルールを削除しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+            _services.Dialog.Show("Firewall ルールを削除しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"Firewall ルール削除に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"Firewall ルール削除に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -1215,19 +1209,32 @@ public sealed class ServerViewModel : ObservableObject
 
             _services.Firewall.RecreateRules(_config.Port, _config.Firewall);
             _services.Configs.Save(_config);
-            WpfMessageBox.Show("Firewall ルールを再作成しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+            _services.Dialog.Show("Firewall ルールを再作成しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"Firewall ルール再作成に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"Firewall ルール再作成に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
-    private async Task CheckPortAsync()
+    private async Task OpenPortAsync()
     {
-        LocalPortStatus = "確認中...";
-        var isOpen = await _services.Network.IsLocalPortOpenAsync(_config.Port);
-        LocalPortStatus = isOpen ? "待受中" : "未待受";
+        var (ok, error) = await _services.Upnp.TryOpenPortAsync(_config.Port, $"McServerManager_{_config.Name}");
+        if (!ok)
+        {
+            _services.Dialog.Show(error ?? "ポート開放に失敗しました。", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        _upnpOpened = true;
+        _services.Dialog.Show($"TCP {_config.Port} のポート開放を実行しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
+    private async Task ClosePortAsync()
+    {
+        await _services.Upnp.TryClosePortAsync(_config.Port);
+        _upnpOpened = false;
+        _services.Dialog.Show($"TCP {_config.Port} のポート閉鎖を実行しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private async Task RefreshPublicIpAsync()
@@ -1299,7 +1306,7 @@ public sealed class ServerViewModel : ObservableObject
         catch (Exception ex)
         {
             AddonStatus = "一覧取得に失敗しました。";
-            WpfMessageBox.Show($"一覧取得に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"一覧取得に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         RaiseAddonCommandsCanExecuteChanged();
@@ -1365,7 +1372,7 @@ public sealed class ServerViewModel : ObservableObject
                 }
 
                 var details = string.Join(Environment.NewLine, detailLines);
-                var result = WpfMessageBox.Show(
+                var result = _services.Dialog.Show(
                     $"追加前チェックで注意点が見つかりました。続行しますか？{Environment.NewLine}{Environment.NewLine}{details}",
                     "追加前チェック",
                     MessageBoxButton.YesNo,
@@ -1395,7 +1402,7 @@ public sealed class ServerViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"追加に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"追加に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
@@ -1413,7 +1420,7 @@ public sealed class ServerViewModel : ObservableObject
         }
 
         var lines = string.Join(Environment.NewLine, warnings.Select((warning, index) => $"{index + 1}. {warning}"));
-        WpfMessageBox.Show(
+        _services.Dialog.Show(
             $"追加した {AddonCategoryName} に互換性の注意点があります。{Environment.NewLine}{Environment.NewLine}{lines}",
             "互換性チェック",
             MessageBoxButton.OK,
@@ -1434,7 +1441,7 @@ public sealed class ServerViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"無効化に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"無効化に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -1452,7 +1459,7 @@ public sealed class ServerViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"有効化に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"有効化に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -1463,7 +1470,7 @@ public sealed class ServerViewModel : ObservableObject
             return;
         }
 
-        if (WpfMessageBox.Show($"{SelectedAddon.FileName} を削除します。", "確認", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
+        if (_services.Dialog.Show($"{SelectedAddon.FileName} を削除します。", "確認", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
         {
             return;
         }
@@ -1475,7 +1482,7 @@ public sealed class ServerViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            WpfMessageBox.Show($"削除に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"削除に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -1526,7 +1533,7 @@ public sealed class ServerViewModel : ObservableObject
         catch (Exception ex)
         {
             AddonCatalogStatus = "検索に失敗しました。";
-            WpfMessageBox.Show($"Modrinth検索に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"Modrinth検索に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -1669,7 +1676,7 @@ public sealed class ServerViewModel : ObservableObject
         }
 
         var names = string.Join(", ", processes.Select(p => $"{p.ProcessName}({p.Id})"));
-        var result = WpfMessageBox.Show(
+        var result = _services.Dialog.Show(
             $"ポート {_config.Port} を使用しているプロセスがあります: {names}\n終了させて続行しますか？",
             "ポート使用中",
             MessageBoxButton.YesNo,
@@ -1682,7 +1689,7 @@ public sealed class ServerViewModel : ObservableObject
 
         if (!_services.Network.TryKillProcessesUsingPort(_config.Port, out var error))
         {
-            WpfMessageBox.Show($"プロセス終了に失敗しました: {error}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"プロセス終了に失敗しました: {error}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
             return false;
         }
 
@@ -1693,7 +1700,7 @@ public sealed class ServerViewModel : ObservableObject
     {
         if (_appSettings.PromptUpnp)
         {
-            var result = WpfMessageBox.Show("ルーターの自動ポート開放を試しますか？", "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var result = _services.Dialog.Show("ルーターの自動ポート開放を試しますか？", "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result != MessageBoxResult.Yes)
             {
                 return;
@@ -1707,7 +1714,7 @@ public sealed class ServerViewModel : ObservableObject
         var (ok, error) = await _services.Upnp.TryOpenPortAsync(_config.Port, $"McServerManager_{_config.Name}");
         if (!ok)
         {
-            WpfMessageBox.Show(error ?? "ポート開放に失敗しました。", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+            _services.Dialog.Show(error ?? "ポート開放に失敗しました。", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 

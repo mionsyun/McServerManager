@@ -16,6 +16,7 @@ public sealed class AppServices
         FirewallService firewall,
         NetworkService network,
         UpnpService upnp,
+        IDialogService dialog,
         ThemeService theme,
         JavaService java,
         AddonManagementService addons,
@@ -34,6 +35,7 @@ public sealed class AppServices
         Firewall = firewall;
         Network = network;
         Upnp = upnp;
+        Dialog = dialog;
         Theme = theme;
         Java = java;
         Addons = addons;
@@ -53,6 +55,7 @@ public sealed class AppServices
     public FirewallService Firewall { get; }
     public NetworkService Network { get; }
     public UpnpService Upnp { get; }
+    public IDialogService Dialog { get; }
     public ThemeService Theme { get; }
     public JavaService Java { get; }
     public AddonManagementService Addons { get; }

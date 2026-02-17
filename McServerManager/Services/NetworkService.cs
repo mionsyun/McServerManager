@@ -8,21 +8,6 @@ namespace McServerManager.Services;
 
 public sealed class NetworkService
 {
-    public async Task<bool> IsLocalPortOpenAsync(int port)
-    {
-        try
-        {
-            using var client = new TcpClient();
-            var connectTask = client.ConnectAsync(IPAddress.Loopback, port);
-            var completed = await Task.WhenAny(connectTask, Task.Delay(1000)).ConfigureAwait(false);
-            return completed == connectTask && client.Connected;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
     public IReadOnlyList<string> GetLanIpAddresses()
     {
         var list = new List<string>();
@@ -53,7 +38,7 @@ public sealed class NetworkService
         {
             "ルーターでポート開放（転送）を設定する。",
             "グローバル IP とポート番号をフレンドに共有する。",
-            "サーバーが起動中で待受中か確認する。",
+            "サーバーが起動中であることを確認する。",
             "Windows Firewall の受信許可を確認する。"
         };
     }

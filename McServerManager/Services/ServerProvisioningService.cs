@@ -39,7 +39,6 @@ public sealed class ServerProvisioningService
         Directory.CreateDirectory(baseDirectory);
         Directory.CreateDirectory(serverDirectory);
         Directory.CreateDirectory(Path.Combine(serverDirectory, "logs"));
-        Directory.CreateDirectory(Path.Combine(serverDirectory, "backups"));
 
         var jarPath = Path.Combine(serverDirectory, "server.jar");
         await _jarService.DownloadAsync(options.Type, options.Version, jarPath, options.JavaPath, progress).ConfigureAwait(false);
