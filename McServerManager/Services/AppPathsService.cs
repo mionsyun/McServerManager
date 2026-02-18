@@ -7,9 +7,8 @@ public sealed class AppPathsService
     public AppPathsService()
     {
         var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        var legacyRootPath = Path.Combine(appDataPath, "McServerManager");
-        RootPath = Path.Combine(appDataPath, "BlockPilot");
-        MigrateLegacyData(legacyRootPath, RootPath);
+        RootPath = Path.Combine(appDataPath, "MaiPilot");
+        MigrateLegacyData(RootPath, Path.Combine(appDataPath, "BlockPilot"), Path.Combine(appDataPath, "McServerManager"));
         ServersPath = Path.Combine(RootPath, "servers");
         CachePath = Path.Combine(RootPath, "cache");
         EnsureDirectories();
@@ -38,24 +37,34 @@ public sealed class AppPathsService
         Directory.CreateDirectory(CachePath);
     }
 
-    private static void MigrateLegacyData(string legacyRootPath, string currentRootPath)
+    private static void MigrateLegacyData(string currentRootPath, params string[] legacyRootPaths)
     {
-        if (!Directory.Exists(legacyRootPath) || Directory.Exists(currentRootPath))
+        if (Directory.Exists(currentRootPath))
         {
             return;
         }
 
-        try
+        foreach (var legacyRootPath in legacyRootPaths)
         {
-            Directory.Move(legacyRootPath, currentRootPath);
-        }
-        catch (IOException)
-        {
-            CopyDirectory(legacyRootPath, currentRootPath);
-        }
-        catch (UnauthorizedAccessException)
-        {
-            CopyDirectory(legacyRootPath, currentRootPath);
+            if (!Directory.Exists(legacyRootPath))
+            {
+                continue;
+            }
+
+            try
+            {
+                Directory.Move(legacyRootPath, currentRootPath);
+            }
+            catch (IOException)
+            {
+                CopyDirectory(legacyRootPath, currentRootPath);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                CopyDirectory(legacyRootPath, currentRootPath);
+            }
+
+            return;
         }
     }
 

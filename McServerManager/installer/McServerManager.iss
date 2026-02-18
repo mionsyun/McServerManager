@@ -3,13 +3,13 @@
 
 [Setup]
 AppId={{D5F6E1C5-2A2D-4E9A-8B0E-9C0C9E6E5A2C}}
-AppName=MC Server Manager
+AppName=MaiPilot
 AppVersion={#AppVersion}
-AppPublisher=MC Server Manager
-DefaultDirName={commonpf}\MC Server Manager
-DefaultGroupName=MC Server Manager
+AppPublisher=MaiPilot
+DefaultDirName={commonpf}\MaiPilot
+DefaultGroupName=MaiPilot
 OutputDir=dist
-OutputBaseFilename=BlockPilotSetup
+OutputBaseFilename=MaiPilotSetup
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -24,11 +24,11 @@ RestartApplications=no
 Source: "..\\bin\\Release\\net8.0-windows\\win-x64\\publish\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\MC Server Manager"; Filename: "{app}\McServerManager.exe"; IconFilename: "{app}\icon.ico"; WorkingDir: "{app}"
-Name: "{commondesktop}\MC Server Manager"; Filename: "{app}\McServerManager.exe"; IconFilename: "{app}\icon.ico"; WorkingDir: "{app}"; Tasks: desktopicon
+Name: "{group}\MaiPilot"; Filename: "{app}\McServerManager.exe"; IconFilename: "{app}\icon.ico"; WorkingDir: "{app}"
+Name: "{commondesktop}\MaiPilot"; Filename: "{app}\McServerManager.exe"; IconFilename: "{app}\icon.ico"; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a desktop icon"; GroupDescription: "Additional tasks";
 
 [Run]
-Filename: "{app}\McServerManager.exe"; Description: "Launch MC Server Manager"; WorkingDir: "{app}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\McServerManager.exe"; Description: "Launch MaiPilot"; WorkingDir: "{app}"; Flags: nowait postinstall skipifsilent

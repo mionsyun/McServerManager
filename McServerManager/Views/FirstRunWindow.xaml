@@ -1,4 +1,4 @@
-﻿<Window x:Class="McServerManager.Views.FirstRunWindow"
+<Window x:Class="McServerManager.Views.FirstRunWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="はじめに"
@@ -16,7 +16,7 @@
 
         <Border Style="{StaticResource Card}">
             <StackPanel>
-                <TextBlock Text="Minecraft サーバーマネージャー" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <TextBlock Text="MaiPilot" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,8"/>
                 <TextBlock Text="クイックスタート" FontWeight="SemiBold" Margin="0,0,0,6"/>
                 <TextBlock Text="- Java が見つからない場合は「設定」タブで java.exe を指定してください。" TextWrapping="Wrap"/>
                 <TextBlock Text="- サーバーを作成して起動すると初回ワールドが生成されます。" TextWrapping="Wrap" Margin="0,6,0,0"/>

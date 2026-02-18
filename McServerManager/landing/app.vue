@@ -1,7 +1,7 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
-const downloadUrl = "/downloads/BlockPilotSetup.exe";
+const downloadUrl = "/downloads/MaiPilotSetup.exe";
 const docsUrl = "/docs";
 const docsLanUrl = "/docs/lan";
 const docsHostingUrl = "/docs/24-7-hosting";
@@ -29,10 +29,10 @@ const faqLinks: Record<string, string> = {
 
 const translations = {
   en: {
-    metaTitle: "BlockPilot | Gamer-first Minecraft server control",
+    metaTitle: "MaiPilot | Gamer-first Minecraft server control",
     metaDescription:
       "A Windows GUI to create, run, and recover Minecraft servers with clear setup, local-only data, and transparent network checks.",
-    siteName: "BlockPilot",
+    siteName: "MaiPilot",
     nav: {
       features: "Features",
       help: "Guided Setup",
@@ -47,7 +47,7 @@ const translations = {
     eyebrow: "Guided hosting for first-time and returning players",
     heroTitle: "Launch with confidence, even on day one.",
     heroSub:
-      "BlockPilot puts setup, checks, and recovery in one place so you can focus on your world.",
+      "MaiPilot puts setup, checks, and recovery in one place so you can focus on your world.",
     heroNotes: [
       "A GUI to create, run, and recover Minecraft servers on Windows.",
       "Data stays on your PC. Only minimal required network calls. Admin actions are clearly shown.",
@@ -205,7 +205,7 @@ const translations = {
       },
       {
         title: "External access is not working.",
-        body: "Follow the checklist for ports and routers.",
+        body: "Follow the checklist for ports and routers. On shared networks (dorm/school/apartment internet), upstream restrictions may block port forwarding.",
         linkId: "port",
         linkLabel: "Open port-forwarding guide",
       },
@@ -239,10 +239,10 @@ const translations = {
     footerDisclosure: "This page includes affiliate links (PR).",
   },
   ja: {
-    metaTitle: "BlockPilot | ゲーマー向けマイクラサーバー管理",
+    metaTitle: "MaiPilot | ゲーマー向けマイクラサーバー管理",
     metaDescription:
       "WindowsでMinecraftサーバーを作成・起動・復旧するGUI。データはローカル保存、通信は最小限、権限は明示します。",
-    siteName: "BlockPilot",
+    siteName: "MaiPilot",
     nav: {
       features: "特長",
       help: "ガイド付きセットアップ",
@@ -415,7 +415,7 @@ const translations = {
       },
       {
         title: "外部公開ができません",
-        body: "ポート開放チェックリストを確認してください。",
+        body: "ポート開放チェックリストを確認してください。共有回線（寮・学校・マンション一括回線など）は上位側の制限で失敗する場合があります。",
         linkId: "port",
         linkLabel: "ポート開放ガイドを見る",
       },
@@ -581,7 +581,7 @@ useHead(() => ({
   meta: [
     { name: "description", content: t.value.metaDescription },
     { name: "keywords", content: "Minecraft server manager, Minecraft server GUI, Minecraft server Windows, マイクラ サーバー 管理, マイクラ サーバー 立て方" },
-    { name: "author", content: "BlockPilot" },
+    { name: "author", content: "MaiPilot" },
     { name: "robots", content: "index,follow" },
     { name: "theme-color", content: "#0b0f17" },
     { name: "format-detection", content: "telephone=no" },
@@ -630,8 +630,8 @@ useHead(() => ({
   <div class="page">
     <header class="nav">
       <div class="brand">
-        <img src="/icon.png" alt="BlockPilot" class="brand-icon" />
-        <span class="brand-name">BlockPilot</span>
+        <img src="/icon.png" alt="MaiPilot" class="brand-icon" />
+        <span class="brand-name">MaiPilot</span>
       </div>
       <nav class="nav-links">
         <a href="#features">{{ t.nav.features }}</a>
@@ -869,8 +869,8 @@ useHead(() => ({
 
     <footer class="footer">
       <div class="footer-left">
-        <img src="/icon.png" alt="BlockPilot" class="brand-icon small" />
-        <span>BlockPilot</span>
+        <img src="/icon.png" alt="MaiPilot" class="brand-icon small" />
+        <span>MaiPilot</span>
       </div>
       <div class="footer-links">
         <a :href="docsUrl">{{ t.footerDocs }}</a>
@@ -882,4 +882,3 @@ useHead(() => ({
     </footer>
   </div>
 </template>
-

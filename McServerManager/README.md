@@ -1,4 +1,4 @@
-﻿# McServerManager
+# McServerManager
 
 Minecraft サーバーを Windows 上で管理するための WPF デスクトップアプリです。サーバーの作成、起動/停止、設定編集、ワールド管理、バックアップ、バージョン切替、ネットワーク/Firewall 設定までを GUI で完結させます。
 
@@ -88,7 +88,7 @@ Minecraft サーバーを Windows 上で管理するための WPF デスクト�
 - Spigot: BuildTools.jar をダウンロードしてビルド
 
 ## データ保存先
-- ルート: `%APPDATA%\BlockPilot`
+- ルート: `%APPDATA%\MaiPilot`
 - `appsettings.json`: アプリ設定
 - `servers/<serverId>/config.json`: サーバー構成
 - `servers/<serverId>/server.properties`: Minecraft 設定

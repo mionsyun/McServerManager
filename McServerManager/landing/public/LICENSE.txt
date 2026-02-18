@@ -1,7 +1,7 @@
-BlockPilot Project License
+MaiPilot Project License
 ===============================
 
-Copyright (c) 2025 BlockPilot Project
+Copyright (c) 2025 MaiPilot Project
 
 Permission to use this software is granted for personal, non-commercial
 purposes only.

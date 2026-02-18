@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://lp.maipilot.jp/</loc>
+    <loc>https://www.maipilot.jp/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <lastmod>2026-02-17</lastmod>
   </url>
   <url>
-    <loc>https://lp.maipilot.jp/docs/</loc>
+    <loc>https://www.maipilot.jp/docs/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <lastmod>2026-02-17</lastmod>
   </url>
   <url>
-    <loc>https://lp.maipilot.jp/docs/24-7-hosting/</loc>
+    <loc>https://www.maipilot.jp/docs/24-7-hosting/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <lastmod>2026-02-17</lastmod>
   </url>
   <url>
-    <loc>https://lp.maipilot.jp/docs/port-forwarding/</loc>
+    <loc>https://www.maipilot.jp/docs/port-forwarding/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <lastmod>2026-02-17</lastmod>
   </url>
   <url>
-    <loc>https://lp.maipilot.jp/docs/privacy-and-network/</loc>
+    <loc>https://www.maipilot.jp/docs/privacy-and-network/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <lastmod>2026-02-17</lastmod>
   </url>
   <url>
-    <loc>https://lp.maipilot.jp/docs/lan/</loc>
+    <loc>https://www.maipilot.jp/docs/lan/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
     <lastmod>2026-02-17</lastmod>
   </url>
   <url>
-    <loc>https://lp.maipilot.jp/docs/troubleshooting/</loc>
+    <loc>https://www.maipilot.jp/docs/troubleshooting/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <lastmod>2026-02-17</lastmod>

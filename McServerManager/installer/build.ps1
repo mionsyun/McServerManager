@@ -8,7 +8,7 @@ $root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $projectPath = Join-Path $root "McServerManager.csproj"
 $issPath = Join-Path $root "installer\McServerManager.iss"
 $publishExe = Join-Path $root "bin\$Configuration\net8.0-windows\$Runtime\publish\McServerManager.exe"
-$setupExe = Join-Path $root "installer\dist\BlockPilotSetup.exe"
+$setupExe = Join-Path $root "installer\dist\MaiPilotSetup.exe"
 
 $isccCandidates = @(
     $env:ISCC_PATH,
@@ -45,7 +45,7 @@ if ($canSign) {
     Write-Host "Signing app binary before packaging..."
     & $signTool sign /fd SHA256 /f $pfxPath /p $pfxPassword /tr $timestampUrl /td SHA256 $publishExe
     if ($LASTEXITCODE -ne 0) {
-        throw "Signing McServerManager.exe failed."
+        throw "Signing MaiPilot executable failed."
     }
 } else {
     Write-Host "Skipping signing (SIGNTOOL_PATH or CODESIGN_PFX not set)."

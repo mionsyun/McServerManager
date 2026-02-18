@@ -74,7 +74,7 @@ public partial class App : System.Windows.Application
             LogException("OnStartup", ex);
             System.Windows.MessageBox.Show(
                 $"Startup failed. Log: {GetLogPath()}",
-                "MC Server Manager",
+                "MaiPilot",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
             Shutdown(-1);
@@ -128,7 +128,7 @@ public partial class App : System.Windows.Application
                 LogException("Dispatcher", args.Exception);
                 System.Windows.MessageBox.Show(
                     $"Unexpected error. Log: {GetLogPath()}",
-                    "MC Server Manager",
+                    "MaiPilot",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 args.Handled = true;
@@ -174,6 +174,6 @@ public partial class App : System.Windows.Application
 
     private static string GetLogPath()
     {
-        return Path.Combine(Path.GetTempPath(), "McServerManager-startup.log");
+        return Path.Combine(Path.GetTempPath(), "MaiPilot-startup.log");
     }
 }

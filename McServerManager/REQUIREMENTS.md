@@ -89,7 +89,7 @@
 - サーバーデータは端末内に保存され、クラウドへ自動送信しない。
 
 ## 7. データ保存仕様
-- ルート: `%APPDATA%\BlockPilot`
+- ルート: `%APPDATA%\MaiPilot`
 - `appsettings.json`: アプリ設定
 - `servers/<serverId>/config.json`: サーバー構成
 - `servers/<serverId>/server.properties`: Minecraft 設定

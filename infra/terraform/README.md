@@ -28,7 +28,7 @@ terraform apply -auto-approve
 `terraform.tfvars` で以下を設定してください。
 
 ```hcl
-custom_domain_name            = "lp.maipilot.jp"
+custom_domain_name            = "www.maipilot.jp"
 custom_domain_validation_type = "cname-delegation"
 ```
 

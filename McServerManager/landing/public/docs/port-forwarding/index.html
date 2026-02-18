@@ -1,9 +1,9 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>BlockPilot | ポート開放チェックリスト</title>
+    <title>MaiPilot | ポート開放チェックリスト</title>
     <style>
       :root {
         color-scheme: dark;
@@ -123,7 +123,7 @@
       <header>
         <div class="nav">
           <div class="brand">
-            <span>BlockPilot</span>
+            <span>MaiPilot</span>
             <span class="tag">Port Forwarding</span>
           </div>
           <div>
@@ -167,6 +167,7 @@
           <li>ルーター側でUPnPが無効</li>
           <li>二重ルーターでUPnPが届かない</li>
           <li>IPv6/CGNAT環境で外部公開できない</li>
+          <li>共有回線（寮・学校・マンション一括回線など）で、上位側にポート開放権限がない</li>
         </ul>
       </section>
 
@@ -176,6 +177,7 @@
           <li>UPnP is disabled on the router</li>
           <li>Double router setup blocks UPnP</li>
           <li>IPv6/CGNAT prevents inbound access</li>
+          <li>Shared networks (dorm/school/apartment internet) do not allow port forwarding at the upstream gateway</li>
         </ul>
       </section>
 
@@ -229,7 +231,7 @@
         </p>
       </section>
 
-      <footer>BlockPilot</footer>
+      <footer>MaiPilot</footer>
     </div>
 
     <script>
@@ -324,4 +326,3 @@
     </script>
   </body>
 </html>
-

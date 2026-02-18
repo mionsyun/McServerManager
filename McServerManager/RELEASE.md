@@ -21,6 +21,6 @@ Release Checklist
    - `icon.ico` is present in the publish output.
 
 5) Smoke test
-   - Install the new `installer\\dist\\BlockPilotSetup.exe`
+   - Install the new `installer\\dist\\MaiPilotSetup.exe`
    - Launch from Start Menu and taskbar.
    - Start/stop a sample server.
