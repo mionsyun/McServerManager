@@ -63,6 +63,24 @@ pnpm-debug.log*
 McServerManager/installer/dist/
 McServerManager/McServerManager/
 
+## Terraform / IaC local artifacts
+**/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+*.tfplan
+tfplan
+*.tfvars
+!.tfvars.example
+
+## Local tools bootstrap
+tools/
+
 ## OS / editor temp files
 Thumbs.db
 .DS_Store

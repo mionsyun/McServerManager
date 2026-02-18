@@ -1,0 +1,16 @@
+prefix              = "mcsm"
+environment         = "prod"
+location            = "Japan East"
+resource_group_name = ""
+static_web_app_name = ""
+
+static_web_app_sku_tier = "Free"
+static_web_app_sku_size = "Free"
+
+# Optional: set custom domain (e.g. lp.example.com). Leave empty to disable.
+custom_domain_name            = ""
+custom_domain_validation_type = "cname-delegation"
+
+tags = {
+  owner = "your-name"
+}
