@@ -7,8 +7,9 @@
   },
   "scripts": {
     "dev": "nuxt dev",
-    "build": "nuxt build",
-    "generate": "nuxt generate",
+    "build": "npm run prepare:docs-aliases && nuxt build",
+    "prepare:docs-aliases": "node ./scripts/create-doc-aliases.mjs",
+    "generate": "npm run prepare:docs-aliases && nuxt generate",
     "preview": "nuxt preview"
   },
   "dependencies": {

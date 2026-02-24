@@ -49,6 +49,8 @@ _ReSharper*/
 **/.nitro/
 **/dist/
 **/.cache/
+McServerManager/landing/public/LPdocs/
+McServerManager/landing/public/lpdocs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
