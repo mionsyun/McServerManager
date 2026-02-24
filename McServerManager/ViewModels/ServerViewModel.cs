@@ -27,6 +27,11 @@ public sealed class ServerViewModel : ObservableObject
     private string _publicIp = "-";
     private string _publicIpStatus = string.Empty;
     private string _newWorldName = string.Empty;
+    private string _mapArchivePath = string.Empty;
+    private string _mapImportWorldName = string.Empty;
+    private bool _replaceWorldOnMapImport;
+    private string _mapImportStatus = "配布マップ未選択";
+    private ArchiveWorldCandidate? _selectedMapArchiveCandidate;
     private MinecraftVersionInfo? _selectedVersion;
     private string _newOpName = string.Empty;
     private string _newWhitelistName = string.Empty;
@@ -68,6 +73,7 @@ public sealed class ServerViewModel : ObservableObject
 
         Logs = _runtime.Logs;
         Worlds = new ObservableCollection<string>();
+        MapArchiveCandidates = new ObservableCollection<ArchiveWorldCandidate>();
         AvailableVersions = new ObservableCollection<MinecraftVersionInfo>();
         LanIpAddresses = new ObservableCollection<string>(_services.Network.GetLanIpAddresses());
         ExternalChecklist = new ObservableCollection<string>(_services.Network.GetExternalChecklist());
@@ -98,6 +104,8 @@ public sealed class ServerViewModel : ObservableObject
         CreateWorldCommand = new RelayCommand(_ => CreateWorld(), _ => !string.IsNullOrWhiteSpace(NewWorldName));
         RefreshWorldsCommand = new RelayCommand(_ => LoadWorlds());
         OpenSelectedWorldDirectoryCommand = new RelayCommand(_ => OpenSelectedWorldDirectory(), _ => !string.IsNullOrWhiteSpace(SelectedWorld));
+        BrowseMapArchiveCommand = new RelayCommand(_ => BrowseMapArchive());
+        ImportMapArchiveCommand = new AsyncRelayCommand(ImportMapArchiveAsync, CanImportMapArchive);
         OpenServerDirectoryCommand = new RelayCommand(_ => OpenServerDirectory());
         OpenLogsDirectoryCommand = new RelayCommand(_ => OpenLogsDirectory());
         OpenCrashReportsCommand = new RelayCommand(_ => OpenCrashReports());
@@ -151,6 +159,7 @@ public sealed class ServerViewModel : ObservableObject
     public string ServerDirectory => _config.DirectoryPath;
     public ObservableCollection<string> Logs { get; }
     public ObservableCollection<string> Worlds { get; }
+    public ObservableCollection<ArchiveWorldCandidate> MapArchiveCandidates { get; }
     public ObservableCollection<MinecraftVersionInfo> AvailableVersions { get; }
     public ObservableCollection<string> LanIpAddresses { get; }
     public ObservableCollection<string> ExternalChecklist { get; }
@@ -180,6 +189,7 @@ public sealed class ServerViewModel : ObservableObject
                 StopCommand.RaiseCanExecuteChanged();
                 RestartCommand.RaiseCanExecuteChanged();
                 SendCommandCommand.RaiseCanExecuteChanged();
+                ImportMapArchiveCommand.RaiseCanExecuteChanged();
             }
         }
     }
@@ -504,6 +514,73 @@ public sealed class ServerViewModel : ObservableObject
         }
     }
 
+    public string MapArchivePath
+    {
+        get => _mapArchivePath;
+        private set
+        {
+            if (SetProperty(ref _mapArchivePath, value))
+            {
+                ImportMapArchiveCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public ArchiveWorldCandidate? SelectedMapArchiveCandidate
+    {
+        get => _selectedMapArchiveCandidate;
+        set
+        {
+            if (SetProperty(ref _selectedMapArchiveCandidate, value))
+            {
+                OnPropertyChanged(nameof(MapArchiveSourceHint));
+                ImportMapArchiveCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public string MapArchiveSourceHint
+    {
+        get
+        {
+            if (MapArchiveCandidates.Count == 0)
+            {
+                return "ZIPを選択すると導入候補を表示します。";
+            }
+
+            if (MapArchiveCandidates.Count == 1)
+            {
+                return "候補は1件です。";
+            }
+
+            return $"候補が {MapArchiveCandidates.Count} 件あります。導入元フォルダを選択してください。";
+        }
+    }
+
+    public string MapImportWorldName
+    {
+        get => _mapImportWorldName;
+        set
+        {
+            if (SetProperty(ref _mapImportWorldName, value))
+            {
+                ImportMapArchiveCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public bool ReplaceWorldOnMapImport
+    {
+        get => _replaceWorldOnMapImport;
+        set => SetProperty(ref _replaceWorldOnMapImport, value);
+    }
+
+    public string MapImportStatus
+    {
+        get => _mapImportStatus;
+        private set => SetProperty(ref _mapImportStatus, value);
+    }
+
     public MinecraftVersionInfo? SelectedVersion
     {
         get => _selectedVersion;
@@ -629,6 +706,8 @@ public sealed class ServerViewModel : ObservableObject
     public RelayCommand CreateWorldCommand { get; }
     public RelayCommand RefreshWorldsCommand { get; }
     public RelayCommand OpenSelectedWorldDirectoryCommand { get; }
+    public RelayCommand BrowseMapArchiveCommand { get; }
+    public AsyncRelayCommand ImportMapArchiveCommand { get; }
     public RelayCommand OpenServerDirectoryCommand { get; }
     public RelayCommand OpenLogsDirectoryCommand { get; }
     public RelayCommand OpenCrashReportsCommand { get; }
@@ -943,6 +1022,11 @@ public sealed class ServerViewModel : ObservableObject
             Worlds.Add(world);
         }
 
+        if (string.IsNullOrWhiteSpace(MapImportWorldName))
+        {
+            MapImportWorldName = _config.WorldName;
+        }
+
         SelectedWorld = Worlds.FirstOrDefault(w => string.Equals(w, _config.WorldName, StringComparison.OrdinalIgnoreCase))
             ?? Worlds.FirstOrDefault();
         OnPropertyChanged(nameof(CurrentWorldName));
@@ -950,6 +1034,7 @@ public sealed class ServerViewModel : ObservableObject
         OnPropertyChanged(nameof(WorldSwitchHint));
         SwitchWorldCommand.RaiseCanExecuteChanged();
         OpenSelectedWorldDirectoryCommand.RaiseCanExecuteChanged();
+        ImportMapArchiveCommand.RaiseCanExecuteChanged();
     }
 
     private void OpenSelectedWorldDirectory()
@@ -1090,6 +1175,201 @@ public sealed class ServerViewModel : ObservableObject
         {
             _services.Dialog.Show($"削除に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+
+    private bool CanImportMapArchive()
+    {
+        return Status == ServerStatus.Stopped
+               && !string.IsNullOrWhiteSpace(MapArchivePath)
+               && File.Exists(MapArchivePath)
+               && !string.IsNullOrWhiteSpace(MapImportWorldName)
+               && SelectedMapArchiveCandidate is not null;
+    }
+
+    private void BrowseMapArchive()
+    {
+        var dialog = new OpenFileDialog
+        {
+            Filter = "ZIP ファイル|*.zip",
+            CheckFileExists = true,
+            Multiselect = false
+        };
+
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        MapArchivePath = dialog.FileName;
+        if (!LoadMapArchiveCandidates(dialog.FileName))
+        {
+            return;
+        }
+    }
+
+    private async Task ImportMapArchiveAsync()
+    {
+        if (Status != ServerStatus.Stopped)
+        {
+            _services.Dialog.Show("停止中のみ配布マップを導入できます。", "確認", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var archivePath = MapArchivePath?.Trim() ?? string.Empty;
+        var worldName = MapImportWorldName?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(archivePath) || string.IsNullOrWhiteSpace(worldName))
+        {
+            MapImportStatus = "ZIP と導入先ワールド名を指定してください。";
+            return;
+        }
+
+        if (!File.Exists(archivePath))
+        {
+            MapImportStatus = "ZIP ファイルが見つかりません。";
+            return;
+        }
+
+        var selectedCandidate = SelectedMapArchiveCandidate;
+        if (selectedCandidate is null)
+        {
+            MapImportStatus = "導入元フォルダを選択してください。";
+            return;
+        }
+
+        var targetDirectory = Path.Combine(ServerDirectory, worldName);
+        if (Directory.Exists(targetDirectory) && !ReplaceWorldOnMapImport)
+        {
+            MapImportStatus = "同名ワールドが存在します。上書き設定を有効にしてください。";
+            _services.Dialog.Show(
+                $"ワールド {worldName} は既に存在します。上書きして導入する場合はチェックを有効にしてください。",
+                "確認",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+            return;
+        }
+
+        if (Directory.Exists(targetDirectory) && ReplaceWorldOnMapImport)
+        {
+            var confirm = _services.Dialog.Show(
+                $"ワールド {worldName} は既に存在します。上書きして導入しますか？",
+                "確認",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+            if (confirm != MessageBoxResult.Yes)
+            {
+                MapImportStatus = "導入をキャンセルしました。";
+                return;
+            }
+        }
+
+        try
+        {
+            MapImportStatus = "配布マップを導入しています...";
+            var importedSource = await Task.Run(
+                () => _services.Worlds.ImportWorldArchive(
+                    ServerDirectory,
+                    archivePath,
+                    worldName,
+                    ReplaceWorldOnMapImport,
+                    selectedCandidate.RelativePath));
+
+            LoadWorlds();
+            SelectedWorld = worldName;
+            SwitchWorld();
+
+            MapImportStatus = $"導入完了: {worldName}";
+            _services.Dialog.Show(
+                $"配布マップ ({importedSource}) を {worldName} として導入しました。次回起動時にこのワールドが適用されます。",
+                "完了",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MapImportStatus = "導入に失敗しました。";
+            _services.Dialog.Show($"配布マップ導入に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private bool LoadMapArchiveCandidates(string archivePath)
+    {
+        try
+        {
+            MapArchiveCandidates.Clear();
+            SelectedMapArchiveCandidate = null;
+
+            foreach (var candidate in _services.Worlds.GetArchiveWorldCandidates(archivePath))
+            {
+                MapArchiveCandidates.Add(candidate);
+            }
+
+            SelectedMapArchiveCandidate = MapArchiveCandidates.FirstOrDefault();
+            OnPropertyChanged(nameof(MapArchiveSourceHint));
+
+            if (MapArchiveCandidates.Count == 0)
+            {
+                MapImportStatus = "ZIP内にワールドデータが見つかりません。";
+                _services.Dialog.Show(
+                    "ZIP内に導入可能なワールドが見つかりませんでした。level.dat または region を含むワールドを選択してください。",
+                    "確認",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(MapImportWorldName))
+            {
+                MapImportWorldName = SuggestWorldNameFromCandidate(SelectedMapArchiveCandidate, archivePath);
+            }
+
+            MapImportStatus = MapArchiveCandidates.Count == 1
+                ? "導入元フォルダを自動選択しました。"
+                : $"導入元候補が {MapArchiveCandidates.Count} 件見つかりました。正しいフォルダを選択してください。";
+            return true;
+        }
+        catch (Exception ex)
+        {
+            MapArchiveCandidates.Clear();
+            SelectedMapArchiveCandidate = null;
+            OnPropertyChanged(nameof(MapArchiveSourceHint));
+            MapImportStatus = "ZIPの解析に失敗しました。";
+            _services.Dialog.Show($"配布マップZIPの解析に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            return false;
+        }
+    }
+
+    private static string SuggestWorldNameFromCandidate(ArchiveWorldCandidate? candidate, string archivePath)
+    {
+        if (candidate is not null && !string.IsNullOrWhiteSpace(candidate.RelativePath))
+        {
+            var name = candidate.RelativePath
+                .Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries)
+                .LastOrDefault();
+            var sanitized = SanitizeWorldName(name ?? string.Empty);
+            if (!string.IsNullOrWhiteSpace(sanitized))
+            {
+                return sanitized;
+            }
+        }
+
+        return SuggestWorldNameFromArchive(archivePath);
+    }
+
+    private static string SuggestWorldNameFromArchive(string archivePath)
+    {
+        var raw = Path.GetFileNameWithoutExtension(archivePath);
+        return SanitizeWorldName(raw);
+    }
+
+    private static string SanitizeWorldName(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return "world";
+        }
+
+        var cleaned = new string(raw.Where(ch => !Path.GetInvalidFileNameChars().Contains(ch)).ToArray()).Trim();
+        return string.IsNullOrWhiteSpace(cleaned) ? "world" : cleaned;
     }
 
     private async Task LoadVersionsAsync()

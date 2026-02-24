@@ -15,7 +15,8 @@ public sealed class ServerConfigService
 
     public IReadOnlyList<ServerConfig> LoadAll(IEnumerable<string>? additionalDirectories = null)
     {
-        var list = new List<ServerConfig>();
+        var byServerId = new Dictionary<string, (ServerConfig Config, DateTime ConfigUpdatedAtUtc)>(StringComparer.OrdinalIgnoreCase);
+        var seenConfigPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var searchRoots = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             _pathsService.ServersPath
@@ -43,6 +44,12 @@ public sealed class ServerConfigService
             {
                 try
                 {
+                    var fullConfigPath = Path.GetFullPath(configPath);
+                    if (!seenConfigPaths.Add(fullConfigPath))
+                    {
+                        continue;
+                    }
+
                     var json = File.ReadAllText(configPath);
                     var config = JsonSerializer.Deserialize<ServerConfig>(json);
                     if (config is null || string.IsNullOrWhiteSpace(config.ServerId))
@@ -53,7 +60,15 @@ public sealed class ServerConfigService
                     {
                         config.DirectoryPath = Path.GetDirectoryName(configPath) ?? string.Empty;
                     }
-                    list.Add(config);
+
+                    var updatedAtUtc = File.GetLastWriteTimeUtc(configPath);
+                    if (byServerId.TryGetValue(config.ServerId, out var existing)
+                        && existing.ConfigUpdatedAtUtc >= updatedAtUtc)
+                    {
+                        continue;
+                    }
+
+                    byServerId[config.ServerId] = (config, updatedAtUtc);
                 }
                 catch
                 {
@@ -62,7 +77,9 @@ public sealed class ServerConfigService
             }
         }
 
-        return list;
+        return byServerId.Values
+            .Select(item => item.Config)
+            .ToList();
     }
 
     public ServerConfig? Load(string serverId)

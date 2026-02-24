@@ -323,38 +323,150 @@
 
             <TabItem Header="ワールド">
                 <Grid Margin="12">
-                    <Border Style="{StaticResource SurfacePanel}">
-                        <StackPanel>
-                            <TextBlock Text="ワールド一覧" FontWeight="SemiBold" FontSize="14"/>
-                            <TextBlock Text="現在のワールド" Style="{StaticResource MutedText}" Margin="0,8,0,4"/>
-                            <Border Background="{DynamicResource BrushCard}"
-                                    BorderBrush="{DynamicResource BrushBorder}"
-                                    BorderThickness="1"
-                                    CornerRadius="8"
-                                    Padding="10,6">
-                                <TextBlock Text="{Binding CurrentWorldName}" FontWeight="SemiBold"/>
-                            </Border>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="360"/>
+                    </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="切り替え先" Style="{StaticResource MutedText}" Margin="0,10,0,4"/>
-                            <ComboBox ItemsSource="{Binding Worlds}"
-                                      SelectedItem="{Binding SelectedWorld}"
-                                      MinWidth="220"/>
-                            <TextBlock Text="{Binding WorldSwitchHint}" Style="{StaticResource MutedText}" Margin="0,6,0,0"/>
+                    <Border Grid.Column="0" Style="{StaticResource SurfacePanel}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                            <WrapPanel Margin="0,10,0,0">
-                                <Button Content="このワールドに切り替え" Command="{Binding SwitchWorldCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8"/>
+                            <TextBlock Text="運用中ワールド" FontWeight="SemiBold" FontSize="14"/>
+
+                            <Grid Grid.Row="1" Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="現在:" Style="{StaticResource MutedText}" VerticalAlignment="Center"/>
+                                <Border Grid.Column="1"
+                                        Background="{DynamicResource BrushCard}"
+                                        BorderBrush="{DynamicResource BrushBorder}"
+                                        BorderThickness="1"
+                                        CornerRadius="8"
+                                        Padding="10,6"
+                                        Margin="8,0,0,0">
+                                    <TextBlock Text="{Binding CurrentWorldName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                </Border>
+                            </Grid>
+
+                            <Grid Grid.Row="2" Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <ComboBox ItemsSource="{Binding Worlds}"
+                                          SelectedItem="{Binding SelectedWorld}"
+                                          Margin="0,0,8,0"/>
+                                <Button Grid.Column="1"
+                                        Content="切り替え"
+                                        Command="{Binding SwitchWorldCommand}"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Width="100"/>
+                            </Grid>
+
+                            <TextBlock Grid.Row="3" Text="{Binding WorldSwitchHint}" Style="{StaticResource MutedText}" Margin="0,6,0,0" TextWrapping="Wrap"/>
+
+                            <WrapPanel Grid.Row="4" Margin="0,10,0,0">
                                 <Button Content="フォルダを開く" Command="{Binding OpenSelectedWorldDirectoryCommand}" Margin="0,0,8,8"/>
-                                <Button Content="一覧更新" Command="{Binding RefreshWorldsCommand}" Margin="0,0,0,8"/>
+                                <Button Content="一覧更新" Command="{Binding RefreshWorldsCommand}" Margin="0,0,8,8"/>
+                                <Button Content="選択中を削除" Command="{Binding DeleteWorldCommand}" Margin="0,0,0,8"/>
                             </WrapPanel>
 
-                            <ListBox ItemsSource="{Binding Worlds}" SelectedItem="{Binding SelectedWorld}" Margin="0,2,0,8" Height="160"/>
+                            <ListBox Grid.Row="5"
+                                     ItemsSource="{Binding Worlds}"
+                                     SelectedItem="{Binding SelectedWorld}"
+                                     Margin="0,4,0,0"/>
 
-                            <Button Content="削除" Command="{Binding DeleteWorldCommand}" Width="120"/>
+                            <Grid Grid.Row="6" Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding NewWorldName}" Height="28" VerticalContentAlignment="Center"/>
+                                <Button Grid.Column="1" Content="新規作成" Command="{Binding CreateWorldCommand}" Margin="8,0,0,0" Width="100"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
 
-                            <TextBlock Text="新規ワールド" Margin="0,12,0,4"/>
-                            <TextBox Text="{Binding NewWorldName}" Height="28"/>
-                            <Button Content="作成" Command="{Binding CreateWorldCommand}" Margin="0,6,0,0"/>
-                        </StackPanel>
+                    <Border Grid.Column="2" Style="{StaticResource SurfacePanel}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="配布マップ導入 (.zip)" FontWeight="SemiBold" FontSize="14"/>
+                            <TextBlock Grid.Row="1"
+                                       Text="ZIPを選択し、導入先ワールド名を指定して取り込みます。"
+                                       Style="{StaticResource MutedText}"
+                                       Margin="0,4,0,0"
+                                       TextWrapping="Wrap"/>
+
+                            <TextBlock Grid.Row="2" Text="ZIPファイル" Margin="0,10,0,4"/>
+                            <Grid Grid.Row="3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding MapArchivePath, Mode=OneWay}" IsReadOnly="True" Height="28" VerticalContentAlignment="Center"/>
+                                <Button Grid.Column="1" Content="選択" Command="{Binding BrowseMapArchiveCommand}" Margin="8,0,0,0" Width="100"/>
+                            </Grid>
+
+                            <TextBlock Grid.Row="4" Text="導入元フォルダ" Margin="0,10,0,4"/>
+                            <ComboBox Grid.Row="5"
+                                      ItemsSource="{Binding MapArchiveCandidates}"
+                                      SelectedItem="{Binding SelectedMapArchiveCandidate}"
+                                      DisplayMemberPath="DisplayName"/>
+                            <TextBlock Grid.Row="6"
+                                       Text="{Binding MapArchiveSourceHint}"
+                                       Style="{StaticResource MutedText}"
+                                       Margin="0,6,0,0"
+                                       TextWrapping="Wrap"/>
+
+                            <TextBlock Grid.Row="7" Text="導入先ワールド名" Margin="0,10,0,4"/>
+                            <TextBox Grid.Row="8" Text="{Binding MapImportWorldName}" Height="28"/>
+
+                            <StackPanel Grid.Row="9" Margin="0,10,0,0">
+                                <CheckBox Content="同名ワールドは上書きして導入"
+                                          IsChecked="{Binding ReplaceWorldOnMapImport}"/>
+
+                                <Button Content="配布マップを導入"
+                                        Command="{Binding ImportMapArchiveCommand}"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Width="170"
+                                        Margin="0,10,0,0"/>
+
+                                <Border Background="{DynamicResource BrushCard}"
+                                        BorderBrush="{DynamicResource BrushBorder}"
+                                        BorderThickness="1"
+                                        CornerRadius="8"
+                                        Padding="10,8"
+                                        Margin="0,10,0,0">
+                                    <TextBlock Text="{Binding MapImportStatus}"
+                                               Style="{StaticResource MutedText}"
+                                               TextWrapping="Wrap"/>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
                     </Border>
                 </Grid>
             </TabItem>
