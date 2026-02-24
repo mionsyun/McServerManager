@@ -1,0 +1,162 @@
+name: Build And Upload Installer
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - "McServerManager/**/*.cs"
+      - "McServerManager/**/*.xaml"
+      - "McServerManager/**/*.csproj"
+      - "McServerManager/**/*.sln"
+      - "McServerManager/installer/**"
+      - "McServerManager/Resources/**"
+      - "McServerManager/icon.ico"
+      - "McServerManager/icon.png"
+      - "McServerManager/icon-square.png"
+      - "McServerManager/LICENSE.txt"
+      - "McServerManager/THIRD_PARTY_NOTICES.txt"
+      - ".github/workflows/deploy-installer-to-storage.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-installer-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build_installer:
+    runs-on: windows-latest
+    outputs:
+      app_version: ${{ steps.version.outputs.app_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --no-progress -y
+
+      - name: Build installer
+        shell: pwsh
+        run: .\McServerManager\installer\build.ps1 -Configuration Release -Runtime win-x64
+
+      - name: Resolve app version
+        id: version
+        shell: pwsh
+        run: |
+          [xml]$project = Get-Content "McServerManager/McServerManager.csproj"
+          $version = ($project.Project.PropertyGroup | Where-Object { $_.Version } | Select-Object -First 1).Version
+          if ([string]::IsNullOrWhiteSpace($version)) {
+            throw "Version not found in McServerManager.csproj"
+          }
+          "app_version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer
+          path: McServerManager/installer/dist/MaiPilotSetup.exe
+          if-no-files-found: error
+          retention-days: 14
+
+  upload_to_storage:
+    needs: build_installer
+    runs-on: ubuntu-latest
+    env:
+      AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+      AZURE_STORAGE_CONTAINER: ${{ vars.AZURE_STORAGE_CONTAINER }}
+      AZURE_STORAGE_BLOB_PREFIX: ${{ vars.AZURE_STORAGE_BLOB_PREFIX }}
+    steps:
+      - name: Download installer artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: installer
+          path: .
+
+      - name: Validate Azure settings
+        shell: bash
+        run: |
+          if [ -z "$AZURE_STORAGE_CONNECTION_STRING" ]; then
+            echo "AZURE_STORAGE_CONNECTION_STRING is not set."
+            exit 1
+          fi
+          if [ -z "$AZURE_STORAGE_CONTAINER" ]; then
+            echo "AZURE_STORAGE_CONTAINER is not set."
+            exit 1
+          fi
+
+      - name: Upload installer to Blob Storage
+        id: upload
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION="${{ needs.build_installer.outputs.app_version }}"
+          FILE_PATH="MaiPilotSetup.exe"
+          PREFIX="${AZURE_STORAGE_BLOB_PREFIX:-downloads}"
+          PREFIX="${PREFIX#/}"
+          PREFIX="${PREFIX%/}"
+
+          if [ -n "$PREFIX" ]; then
+            LATEST_BLOB="${PREFIX}/MaiPilotSetup.exe"
+            VERSIONED_BLOB="${PREFIX}/MaiPilotSetup-${VERSION}.exe"
+          else
+            LATEST_BLOB="MaiPilotSetup.exe"
+            VERSIONED_BLOB="MaiPilotSetup-${VERSION}.exe"
+          fi
+
+          az storage container create \
+            --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
+            --name "$AZURE_STORAGE_CONTAINER" \
+            --fail-on-exist false \
+            1>/dev/null
+
+          az storage blob upload \
+            --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
+            --container-name "$AZURE_STORAGE_CONTAINER" \
+            --name "$LATEST_BLOB" \
+            --file "$FILE_PATH" \
+            --content-type "application/vnd.microsoft.portable-executable" \
+            --overwrite true \
+            1>/dev/null
+
+          az storage blob upload \
+            --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
+            --container-name "$AZURE_STORAGE_CONTAINER" \
+            --name "$VERSIONED_BLOB" \
+            --file "$FILE_PATH" \
+            --content-type "application/vnd.microsoft.portable-executable" \
+            --overwrite true \
+            1>/dev/null
+
+          LATEST_URL=$(az storage blob url \
+            --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
+            --container-name "$AZURE_STORAGE_CONTAINER" \
+            --name "$LATEST_BLOB" \
+            -o tsv)
+
+          VERSIONED_URL=$(az storage blob url \
+            --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
+            --container-name "$AZURE_STORAGE_CONTAINER" \
+            --name "$VERSIONED_BLOB" \
+            -o tsv)
+
+          {
+            echo "latest_url=$LATEST_URL"
+            echo "versioned_url=$VERSIONED_URL"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Job summary
+        shell: bash
+        run: |
+          {
+            echo "## Installer uploaded"
+            echo "- Version: \`${{ needs.build_installer.outputs.app_version }}\`"
+            echo "- Latest: ${{ steps.upload.outputs.latest_url }}"
+            echo "- Versioned: ${{ steps.upload.outputs.versioned_url }}"
+          } >> "$GITHUB_STEP_SUMMARY"

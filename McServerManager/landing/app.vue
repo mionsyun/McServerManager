@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
-const downloadUrl = "/downloads/MaiPilotSetup.exe";
+const defaultDownloadPath = "/downloads/MaiPilotSetup.exe";
 const docsUrl = "/docs";
 const docsLanUrl = "/docs/lan";
 const docsHostingUrl = "/docs/24-7-hosting";
@@ -9,12 +9,6 @@ const docsPortUrl = "/docs/port-forwarding";
 const docsTroubleUrl = "/docs/troubleshooting";
 const docsPrivacyUrl = "/docs/privacy-and-network";
 const version = "1.0.0";
-
-const downloadOptionLinks: Record<string, string> = {
-  local: downloadUrl,
-  lan: docsLanUrl,
-  hosting: docsHostingUrl,
-};
 
 const downloadOptionEvents: Record<string, string> = {
   local: "download_click",
@@ -462,6 +456,16 @@ const siteUrl = computed(() => {
   }
   return raw.endsWith("/") ? raw.slice(0, -1) : raw;
 });
+const downloadUrl = computed(() => {
+  const raw = runtimeConfig.public.downloadUrl as string | undefined;
+  return raw && raw.trim().length > 0 ? raw : defaultDownloadPath;
+});
+
+const downloadOptionLinks = computed<Record<string, string>>(() => ({
+  local: downloadUrl.value,
+  lan: docsLanUrl,
+  hosting: docsHostingUrl,
+}));
 
 type TrackPayload = {
   event_name: string;

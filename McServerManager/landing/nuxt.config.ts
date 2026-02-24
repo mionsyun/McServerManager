@@ -4,7 +4,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || "https://www.maipilot.jp"
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || "https://www.maipilot.jp",
+      downloadUrl: process.env.NUXT_PUBLIC_DOWNLOAD_URL || "/downloads/MaiPilotSetup.exe"
     }
   },
 
