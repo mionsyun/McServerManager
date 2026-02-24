@@ -113,7 +113,8 @@ jobs:
           az storage container create \
             --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
             --name "$AZURE_STORAGE_CONTAINER" \
-            --fail-on-exist false \
+            --only-show-errors \
+            -o none \
             1>/dev/null
 
           az storage blob upload \
