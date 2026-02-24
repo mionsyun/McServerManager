@@ -69,8 +69,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-      AZURE_STORAGE_CONTAINER: ${{ vars.AZURE_STORAGE_CONTAINER }}
-      AZURE_STORAGE_BLOB_PREFIX: ${{ vars.AZURE_STORAGE_BLOB_PREFIX }}
     steps:
       - name: Download installer artifact
         uses: actions/download-artifact@v4
@@ -85,10 +83,6 @@ jobs:
             echo "AZURE_STORAGE_CONNECTION_STRING is not set."
             exit 1
           fi
-          if [ -z "$AZURE_STORAGE_CONTAINER" ]; then
-            echo "AZURE_STORAGE_CONTAINER is not set."
-            exit 1
-          fi
 
       - name: Upload installer to Blob Storage
         id: upload
@@ -98,7 +92,8 @@ jobs:
 
           VERSION="${{ needs.build_installer.outputs.app_version }}"
           FILE_PATH="MaiPilotSetup.exe"
-          PREFIX="${AZURE_STORAGE_BLOB_PREFIX:-downloads}"
+          CONTAINER="public"
+          PREFIX="downloads"
           PREFIX="${PREFIX#/}"
           PREFIX="${PREFIX%/}"
 
@@ -112,14 +107,23 @@ jobs:
 
           az storage container create \
             --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
-            --name "$AZURE_STORAGE_CONTAINER" \
+            --name "$CONTAINER" \
+            --public-access blob \
+            --only-show-errors \
+            -o none \
+            1>/dev/null
+
+          az storage container set-permission \
+            --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
+            --name "$CONTAINER" \
+            --public-access blob \
             --only-show-errors \
             -o none \
             1>/dev/null
 
           az storage blob upload \
             --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
-            --container-name "$AZURE_STORAGE_CONTAINER" \
+            --container-name "$CONTAINER" \
             --name "$LATEST_BLOB" \
             --file "$FILE_PATH" \
             --content-type "application/vnd.microsoft.portable-executable" \
@@ -128,7 +132,7 @@ jobs:
 
           az storage blob upload \
             --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
-            --container-name "$AZURE_STORAGE_CONTAINER" \
+            --container-name "$CONTAINER" \
             --name "$VERSIONED_BLOB" \
             --file "$FILE_PATH" \
             --content-type "application/vnd.microsoft.portable-executable" \
@@ -137,16 +141,17 @@ jobs:
 
           LATEST_URL=$(az storage blob url \
             --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
-            --container-name "$AZURE_STORAGE_CONTAINER" \
+            --container-name "$CONTAINER" \
             --name "$LATEST_BLOB" \
             -o tsv)
 
           VERSIONED_URL=$(az storage blob url \
             --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
-            --container-name "$AZURE_STORAGE_CONTAINER" \
+            --container-name "$CONTAINER" \
             --name "$VERSIONED_BLOB" \
             -o tsv)
 
+          echo "container=$CONTAINER" >> "$GITHUB_OUTPUT"
           {
             echo "latest_url=$LATEST_URL"
             echo "versioned_url=$VERSIONED_URL"
@@ -158,6 +163,7 @@ jobs:
           {
             echo "## Installer uploaded"
             echo "- Version: \`${{ needs.build_installer.outputs.app_version }}\`"
+            echo "- Container: \`${{ steps.upload.outputs.container }}\`"
             echo "- Latest: ${{ steps.upload.outputs.latest_url }}"
             echo "- Versioned: ${{ steps.upload.outputs.versioned_url }}"
           } >> "$GITHUB_STEP_SUMMARY"

@@ -19,6 +19,12 @@ SetupIconFile=..\icon.ico
 PrivilegesRequired=admin
 CloseApplications=yes
 RestartApplications=no
+ShowLanguageDialog=yes
+LanguageDetectionMethod=none
+
+[Languages]
+Name: "japanese"; MessagesFile: "compiler:Languages\Japanese.isl"
+Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
 Source: "..\\bin\\Release\\net8.0-windows\\win-x64\\publish\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -28,7 +34,7 @@ Name: "{group}\MaiPilot"; Filename: "{app}\McServerManager.exe"; IconFilename: "
 Name: "{commondesktop}\MaiPilot"; Filename: "{app}\McServerManager.exe"; IconFilename: "{app}\icon.ico"; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Tasks]
-Name: "desktopicon"; Description: "Create a desktop icon"; GroupDescription: "Additional tasks";
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 
 [Run]
-Filename: "{app}\McServerManager.exe"; Description: "Launch MaiPilot"; WorkingDir: "{app}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\McServerManager.exe"; Description: "{cm:LaunchProgram,MaiPilot}"; WorkingDir: "{app}"; Flags: nowait postinstall skipifsilent
