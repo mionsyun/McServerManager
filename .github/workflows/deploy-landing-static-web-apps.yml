@@ -49,7 +49,7 @@ jobs:
       - name: Generate static site
         working-directory: McServerManager/landing
         env:
-          NUXT_PUBLIC_DOWNLOAD_URL: ${{ vars.NUXT_PUBLIC_DOWNLOAD_URL }}
+          NUXT_PUBLIC_DOWNLOAD_URL: ${{ vars.NUXT_PUBLIC_DOWNLOAD_URL || 'https://stmailpilotje.blob.core.windows.net/public/downloads/MaiPilotSetup.exe' }}
         run: npm run generate
 
       - name: Deploy to Azure Static Web Apps

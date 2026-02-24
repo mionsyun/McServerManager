@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
-const defaultDownloadPath = "/downloads/MaiPilotSetup.exe";
+const defaultDownloadPath = "https://stmailpilotje.blob.core.windows.net/public/downloads/MaiPilotSetup.exe";
 const docsUrl = "/docs";
 const docsLanUrl = "/docs/lan";
 const docsHostingUrl = "/docs/24-7-hosting";
