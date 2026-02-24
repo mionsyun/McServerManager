@@ -42,4 +42,28 @@
     <priority>0.7</priority>
     <lastmod>2026-02-17</lastmod>
   </url>
+  <url>
+    <loc>https://www.maipilot.jp/docs/growth/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-02-19</lastmod>
+  </url>
+  <url>
+    <loc>https://www.maipilot.jp/docs/growth/windows-minecraft-server-2026/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-02-19</lastmod>
+  </url>
+  <url>
+    <loc>https://www.maipilot.jp/docs/growth/port-open-checklist/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-02-19</lastmod>
+  </url>
+  <url>
+    <loc>https://www.maipilot.jp/docs/growth/paper-plugin-quickstart/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-02-19</lastmod>
+  </url>
 </urlset>

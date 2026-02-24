@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ポート開放できない時のチェックリスト | MaiPilot</title>
+    <meta name="description" content="Minecraftサーバーのポート開放で詰まる原因を切り分けるチェックリスト。ルーター・Firewall・回線制限まで確認。" />
+    <style>
+      :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
+      *{box-sizing:border-box;}
+      body{margin:0;padding:32px 16px;font-family:"Noto Sans JP","Segoe UI",sans-serif;color:var(--text);background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%);} 
+      .wrap{max-width:980px;margin:0 auto;display:grid;gap:16px;} 
+      .card{background:var(--panel);border:1px solid rgba(126,157,201,.25);border-radius:16px;padding:22px;} 
+      .hero{background:linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)), var(--panel);} 
+      .muted{color:var(--muted);} 
+      .notice{background:rgba(255,209,102,.12);color:#ffd166;border-radius:10px;padding:10px 14px;font-weight:700;font-size:13px;margin-top:12px;} 
+      .cta{border:1px solid rgba(102,255,136,.45);background:rgba(102,255,136,.08);} 
+      a{color:var(--accent2);text-decoration:none;} 
+      h1,h2,h3{margin:0 0 10px;} ul,ol{margin:8px 0 0 18px;color:var(--muted);} 
+      .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;}
+      .mini{background:var(--panel2);border:1px solid rgba(126,157,201,.25);border-radius:12px;padding:12px;}
+      .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+      .chip{font-size:12px;padding:5px 10px;border:1px solid rgba(126,157,201,.35);border-radius:999px;color:var(--muted);} 
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="card hero">
+        <a href="/docs/growth/">← ガイド一覧へ</a>
+        <h1>ポート開放できない時のチェックリスト</h1>
+        <p class="muted">「友だちが入れない」を最短で切り分けるための順番を固定化しています。</p>
+        <div class="chips">
+          <span class="chip">想定読了: 5分</span>
+          <span class="chip">対象: 接続不可トラブル</span>
+          <span class="chip">目的: 原因切り分け</span>
+        </div>
+        <div class="notice">※この記事には広告・PRリンクを含みます。</div>
+      </section>
+
+      <section class="card">
+        <h2>詰まりポイント早見表</h2>
+        <div class="grid">
+          <div class="mini"><h3>ローカルNG</h3><p class="muted">サーバー起動/ポート競合を先に確認。</p></div>
+          <div class="mini"><h3>LANのみOK</h3><p class="muted">ルーター転送先IPとFirewallを確認。</p></div>
+          <div class="mini"><h3>外部のみNG</h3><p class="muted">CGNAT/共有回線の制約を疑う。</p></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>先に結論</h2>
+        <ul>
+          <li>まずローカル接続できるかを確認する。</li>
+          <li>次にLAN接続、最後に外部接続の順で確認する。</li>
+          <li>外部だけ失敗する場合は回線仕様（CGNAT/共有回線）を疑う。</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>チェック手順</h2>
+        <ol>
+          <li>サーバープロセスがポートをListenしているか確認。</li>
+          <li>Windows Firewallの受信ルールを確認。</li>
+          <li>ルーターの転送先IPが現在のPCと一致しているか確認。</li>
+          <li>二重ルーター構成かどうか確認。</li>
+          <li>CGNAT/共有回線で外部開放不可ではないか確認。</li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h2>詰まりやすい原因トップ3</h2>
+        <ul>
+          <li>PC再起動でLAN IPが変わり、転送先がズレる。</li>
+          <li>セキュリティソフト側で追加ブロックされる。</li>
+          <li>ISP仕様で外部からの着信がそもそも不可。</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>代替手段（PR）</h2>
+        <p class="muted">自宅回線での公開が難しい場合の選択肢です。提携URLに差し替えて運用できます。</p>
+        <ul>
+          <li><a href="https://YOUR-AFFILIATE-LINK-3.example" rel="sponsored nofollow noopener" target="_blank" data-source="growth_port_open" data-label="vps_no_port_forward">ポート開放不要のVPS運用（PR）</a></li>
+          <li><a href="/docs/24-7-hosting" data-event="docs_24_7_hosting_click" data-source="growth_port_open" data-label="hosting_comparison">24時間運用の比較を見る（PR）</a></li>
+        </ul>
+      </section>
+
+      <section class="card cta">
+        <h2>このツールならここまで自動です</h2>
+        <ul>
+          <li>ネットワーク確認機能をタブで一元化</li>
+          <li>公開IP確認、UPnP、Firewall操作の入口を統合</li>
+          <li>つまずき時にログと復旧手順へすぐ移動</li>
+        </ul>
+        <p><a href="/?from=growth_port_open_checklist" data-event="growth_download_click" data-source="growth_port_open" data-label="download">MaiPilotをダウンロード</a> / <a href="/docs/port-forwarding" data-event="growth_docs_click" data-source="growth_port_open" data-label="port_guide">既存のポート開放ガイド</a></p>
+      </section>
+
+      <section class="card">
+        <h2>次に読む</h2>
+        <p class="muted">サーバー自体の作成手順を確認するならこちら。</p>
+        <a href="/docs/growth/windows-minecraft-server-2026/" data-event="growth_article_click" data-source="growth_port_open" data-label="next_windows_2026">Windowsでマイクラサーバーを立てる（2026年版） →</a>
+      </section>
+    </main>
+    <script>
+      const trackEvent = ({ event_name, link_url, link_text, source }) => {
+        const win = window;
+        if (typeof win.gtag === "function") {
+          win.gtag("event", event_name, {
+            event_category: source || "cta",
+            event_label: link_text || link_url || "",
+            link_url: link_url,
+          });
+          return;
+        }
+        if (Array.isArray(win.dataLayer)) {
+          win.dataLayer.push({
+            event: event_name,
+            link_url: link_url,
+            link_text: link_text,
+            source: source || "cta",
+          });
+        }
+      };
+
+      const handleTrackedClick = (event) => {
+        const target = event.target;
+        if (!target || !target.closest) {
+          return;
+        }
+        const link = target.closest("a");
+        if (!link) {
+          return;
+        }
+        const eventName = link.getAttribute("data-event");
+        const href = link.getAttribute("href") || "";
+        const label = link.getAttribute("data-label");
+        const text = label || (link.textContent ? link.textContent.trim() : "");
+        const source = link.getAttribute("data-source") || "cta";
+
+        if (eventName) {
+          trackEvent({
+            event_name: eventName,
+            link_url: href,
+            link_text: text,
+            source,
+          });
+        }
+
+        const rel = (link.getAttribute("rel") || "").toLowerCase();
+        if (rel.includes("sponsored") && eventName !== "outbound_affiliate_click") {
+          trackEvent({
+            event_name: "outbound_affiliate_click",
+            link_url: href,
+            link_text: text,
+            source: "affiliate",
+          });
+        }
+      };
+
+      document.addEventListener("click", handleTrackedClick, { passive: true });
+    </script>
+  </body>
+</html>

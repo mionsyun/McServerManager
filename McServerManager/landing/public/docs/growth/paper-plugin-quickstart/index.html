@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Paperサーバーにプラグインを入れる最短手順 | MaiPilot</title>
+    <meta name="description" content="Paperサーバーでプラグインを安全に導入する最短手順。バージョン不一致や起動失敗の回避策付き。" />
+    <style>
+      :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
+      *{box-sizing:border-box;} 
+      body{margin:0;padding:32px 16px;font-family:"Noto Sans JP","Segoe UI",sans-serif;color:var(--text);background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%);} 
+      .wrap{max-width:980px;margin:0 auto;display:grid;gap:16px;} 
+      .card{background:var(--panel);border:1px solid rgba(126,157,201,.25);border-radius:16px;padding:22px;} 
+      .hero{background:linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)), var(--panel);} 
+      .muted{color:var(--muted);} 
+      .notice{background:rgba(255,209,102,.12);color:#ffd166;border-radius:10px;padding:10px 14px;font-weight:700;font-size:13px;margin-top:12px;} 
+      .cta{border:1px solid rgba(102,255,136,.45);background:rgba(102,255,136,.08);} 
+      a{color:var(--accent2);text-decoration:none;} 
+      h1,h2,h3{margin:0 0 10px;} ul,ol{margin:8px 0 0 18px;color:var(--muted);} 
+      .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;}
+      .mini{background:var(--panel2);border:1px solid rgba(126,157,201,.25);border-radius:12px;padding:12px;}
+      .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+      .chip{font-size:12px;padding:5px 10px;border:1px solid rgba(126,157,201,.35);border-radius:999px;color:var(--muted);} 
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="card hero">
+        <a href="/docs/growth/">← ガイド一覧へ</a>
+        <h1>Paperサーバーにプラグインを入れる最短手順</h1>
+        <p class="muted">「入れたら落ちた」を防ぐための、短い手順ガイドです。</p>
+        <div class="chips">
+          <span class="chip">想定読了: 5分</span>
+          <span class="chip">対象: Paper運用者</span>
+          <span class="chip">目的: 安全導入</span>
+        </div>
+        <div class="notice">※この記事には広告・PRリンクを含みます。</div>
+      </section>
+
+      <section class="card">
+        <h2>導入前チェック</h2>
+        <div class="grid">
+          <div class="mini"><h3>停止状態にする</h3><p class="muted">ファイル破損と競合を防ぐ。</p></div>
+          <div class="mini"><h3>互換性確認</h3><p class="muted">MC/Paper/Javaの3点一致を確認。</p></div>
+          <div class="mini"><h3>バックアップ</h3><p class="muted">導入前の退避で即ロールバック可能に。</p></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>先に結論</h2>
+        <ul>
+          <li>導入前にサーバー停止とバックアップを必ず行う。</li>
+          <li>プラグインは1つずつ追加して起動確認する。</li>
+          <li>対応Minecraft/Paperバージョンを事前確認する。</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>最短手順</h2>
+        <ol>
+          <li>サーバー停止。</li>
+          <li>`plugins` フォルダへ対象JARを配置。</li>
+          <li>サーバー起動し、`plugins` コマンドやログでロード確認。</li>
+          <li>設定ファイルが生成されたら必要箇所のみ編集。</li>
+          <li>問題なければ次のプラグインを追加。</li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h2>うまくいかない時</h2>
+        <ul>
+          <li>`UnsupportedClassVersionError` はJava不一致の可能性。</li>
+          <li>`NoSuchMethodError` はAPI/バージョン不一致の可能性。</li>
+          <li>起動不能時は新規追加したJARを一旦外して再起動。</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>おすすめ環境（PR）</h2>
+        <ul>
+          <li><a href="https://YOUR-AFFILIATE-LINK-4.example" rel="sponsored nofollow noopener" target="_blank" data-source="growth_paper_plugin" data-label="plugin_vps">プラグイン運用向け高クロックVPS（PR）</a></li>
+          <li><a href="https://YOUR-AFFILIATE-LINK-5.example" rel="sponsored nofollow noopener" target="_blank" data-source="growth_paper_plugin" data-label="backup_storage">自動バックアップ対応ストレージ（PR）</a></li>
+        </ul>
+      </section>
+
+      <section class="card cta">
+        <h2>このツールならここまで自動です</h2>
+        <ul>
+          <li>サーバー停止/起動操作をUIで一元化</li>
+          <li>ログ確認とクラッシュ対応手順へワンクリックで移動</li>
+          <li>バックアップ実行を標準機能で提供</li>
+        </ul>
+        <p><a href="/?from=growth_paper_plugin_quickstart" data-event="growth_download_click" data-source="growth_paper_plugin" data-label="download">MaiPilotをダウンロード</a> / <a href="/docs/troubleshooting" data-event="growth_docs_click" data-source="growth_paper_plugin" data-label="troubleshooting">トラブルシュート</a></p>
+      </section>
+
+      <section class="card">
+        <h2>次に読む</h2>
+        <p class="muted">公開時の接続トラブル対策はこちら。</p>
+        <a href="/docs/growth/port-open-checklist/" data-event="growth_article_click" data-source="growth_paper_plugin" data-label="next_port_open">ポート開放できない時のチェックリスト →</a>
+      </section>
+    </main>
+    <script>
+      const trackEvent = ({ event_name, link_url, link_text, source }) => {
+        const win = window;
+        if (typeof win.gtag === "function") {
+          win.gtag("event", event_name, {
+            event_category: source || "cta",
+            event_label: link_text || link_url || "",
+            link_url: link_url,
+          });
+          return;
+        }
+        if (Array.isArray(win.dataLayer)) {
+          win.dataLayer.push({
+            event: event_name,
+            link_url: link_url,
+            link_text: link_text,
+            source: source || "cta",
+          });
+        }
+      };
+
+      const handleTrackedClick = (event) => {
+        const target = event.target;
+        if (!target || !target.closest) {
+          return;
+        }
+        const link = target.closest("a");
+        if (!link) {
+          return;
+        }
+        const eventName = link.getAttribute("data-event");
+        const href = link.getAttribute("href") || "";
+        const label = link.getAttribute("data-label");
+        const text = label || (link.textContent ? link.textContent.trim() : "");
+        const source = link.getAttribute("data-source") || "cta";
+
+        if (eventName) {
+          trackEvent({
+            event_name: eventName,
+            link_url: href,
+            link_text: text,
+            source,
+          });
+        }
+
+        const rel = (link.getAttribute("rel") || "").toLowerCase();
+        if (rel.includes("sponsored") && eventName !== "outbound_affiliate_click") {
+          trackEvent({
+            event_name: "outbound_affiliate_click",
+            link_url: href,
+            link_text: text,
+            source: "affiliate",
+          });
+        }
+      };
+
+      document.addEventListener("click", handleTrackedClick, { passive: true });
+    </script>
+  </body>
+</html>

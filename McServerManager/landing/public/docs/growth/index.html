@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MaiPilot | お役立ちガイド</title>
+    <meta name="description" content="Minecraftサーバーでよくあるトラブルを短い手順で解決するガイド集。" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg:#0b0f17;
+        --panel:#121a2a;
+        --panel2:#162038;
+        --text:#e6eefb;
+        --muted:#9fb0c8;
+        --accent:#66ff88;
+        --accent2:#33a8ff;
+      }
+      * { box-sizing:border-box; }
+      body {
+        margin:0;
+        padding:32px 16px;
+        font-family:"Noto Sans JP","Segoe UI",sans-serif;
+        color:var(--text);
+        background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%);
+      }
+      .wrap { max-width:1040px; margin:0 auto; display:grid; gap:16px; }
+      .card {
+        background:var(--panel);
+        border:1px solid rgba(126,157,201,.25);
+        border-radius:16px;
+        padding:22px;
+      }
+      .hero {
+        background:
+          linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)),
+          var(--panel);
+      }
+      .muted { color:var(--muted); }
+      .notice {
+        background:rgba(255,209,102,.12);
+        color:#ffd166;
+        border-radius:10px;
+        padding:10px 14px;
+        font-weight:700;
+        font-size:13px;
+        margin-top:12px;
+      }
+      a { color:var(--accent2); text-decoration:none; }
+      h1,h2,h3 { margin:0 0 10px; }
+      ul { margin:8px 0 0 18px; color:var(--muted); }
+      .top { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+      .badge {
+        background:rgba(102,255,136,.15);
+        color:var(--accent);
+        border-radius:999px;
+        padding:6px 12px;
+        font-size:12px;
+        font-weight:700;
+      }
+      .grid {
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+        gap:12px;
+      }
+      .item {
+        background:var(--panel2);
+        border:1px solid rgba(126,157,201,.25);
+        border-radius:14px;
+        padding:14px;
+        display:grid;
+        gap:8px;
+      }
+      .kpis {
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+        gap:10px;
+      }
+      .kpi {
+        border:1px solid rgba(126,157,201,.25);
+        border-radius:12px;
+        padding:12px;
+        background:rgba(22,32,56,.45);
+      }
+      .kpi strong { display:block; font-size:20px; color:var(--accent); }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="card hero">
+        <div class="top">
+          <strong>MaiPilot</strong>
+          <span class="badge">Guides</span>
+        </div>
+        <h1>Minecraftサーバー お役立ちガイド</h1>
+        <p class="muted">よくあるトラブルを、短い手順で解決できるガイド集です。</p>
+        <div class="notice">※本ハブおよびリンク先記事には広告・PRリンクを含みます。</div>
+      </section>
+
+      <section class="card">
+        <h2>記事一覧</h2>
+        <div class="grid">
+          <article class="item">
+            <h3>Windowsでマイクラサーバーを立てる（2026年版）</h3>
+            <p class="muted">初回構築を短手順で解説。</p>
+            <a href="/docs/growth/windows-minecraft-server-2026/" data-event="growth_article_click" data-source="growth_hub" data-label="windows-minecraft-server-2026">記事を読む →</a>
+          </article>
+          <article class="item">
+            <h3>ポート開放できない時のチェックリスト</h3>
+            <p class="muted">接続不可を順番に切り分ける。</p>
+            <a href="/docs/growth/port-open-checklist/" data-event="growth_article_click" data-source="growth_hub" data-label="port-open-checklist">記事を読む →</a>
+          </article>
+          <article class="item">
+            <h3>Paperサーバーにプラグインを入れる最短手順</h3>
+            <p class="muted">導入失敗を防ぐ順番を固定化。</p>
+            <a href="/docs/growth/paper-plugin-quickstart/" data-event="growth_article_click" data-source="growth_hub" data-label="paper-plugin-quickstart">記事を読む →</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>はじめての方へ</h2>
+        <div class="kpis">
+          <div class="kpi"><strong>1. まず1本読む</strong><span class="muted">今の困りごとに近い記事から始める。</span></div>
+          <div class="kpi"><strong>2. 手順どおり進める</strong><span class="muted">上から順に進め、必要なら次の記事へ。</span></div>
+        </div>
+      </section>
+    </main>
+    <script>
+      const trackEvent = ({ event_name, link_url, link_text, source }) => {
+        const win = window;
+        if (typeof win.gtag === "function") {
+          win.gtag("event", event_name, {
+            event_category: source || "cta",
+            event_label: link_text || link_url || "",
+            link_url: link_url,
+          });
+          return;
+        }
+        if (Array.isArray(win.dataLayer)) {
+          win.dataLayer.push({
+            event: event_name,
+            link_url: link_url,
+            link_text: link_text,
+            source: source || "cta",
+          });
+        }
+      };
+
+      const handleTrackedClick = (event) => {
+        const target = event.target;
+        if (!target || !target.closest) {
+          return;
+        }
+        const link = target.closest("a");
+        if (!link) {
+          return;
+        }
+        const eventName = link.getAttribute("data-event");
+        const href = link.getAttribute("href") || "";
+        const label = link.getAttribute("data-label");
+        const text = label || (link.textContent ? link.textContent.trim() : "");
+        const source = link.getAttribute("data-source") || "cta";
+
+        if (eventName) {
+          trackEvent({
+            event_name: eventName,
+            link_url: href,
+            link_text: text,
+            source,
+          });
+        }
+
+        const rel = (link.getAttribute("rel") || "").toLowerCase();
+        if (rel.includes("sponsored") && eventName !== "outbound_affiliate_click") {
+          trackEvent({
+            event_name: "outbound_affiliate_click",
+            link_url: href,
+            link_text: text,
+            source: "affiliate",
+          });
+        }
+      };
+
+      document.addEventListener("click", handleTrackedClick, { passive: true });
+    </script>
+  </body>
+</html>
