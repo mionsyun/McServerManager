@@ -195,6 +195,38 @@ const translations = {
     ],
     downloadPrimary: "Download for Windows",
     downloadSecondary: "Setup notes",
+    prSectionTitle: "Sponsored options (PR)",
+    prSectionSub: "You can place both banner ads and regular links.",
+    prItems: [
+      {
+        kind: "banner",
+        title: "ConoHa VPS (PR)",
+        description: "GMO Internet ConoHa VPS. Good for always-on public server hosting.",
+        cta: "Open ConoHa VPS (PR)",
+        href: "https://px.a8.net/svt/ejp?a8mat=4AXJKD+2YKMU2+50+4YQJIQ",
+        imageSrc: "https://www28.a8.net/svt/bgt?aid=260225869179&wid=002&eno=01&mid=s00000000018030129000&mc=1",
+        imageAlt: "ConoHa VPS sponsored banner",
+        eventName: "pr_conoha_click",
+      },
+      {
+        kind: "link",
+        title: "Shin VPS (PR)",
+        description: "High-spec VPS with strong memory cost performance.",
+        cta: "Open Shin VPS (PR)",
+        href: "https://px.a8.net/svt/ejp?a8mat=4AXJKD+2WSC0Q+5GDG+NTRMQ",
+        eventName: "pr_shinvps_click",
+      },
+      {
+        kind: "banner",
+        title: "Shin VPS Banner (PR)",
+        description: "300x250 sponsored banner from A8 material.",
+        cta: "Open Shin VPS offer (PR)",
+        href: "https://px.a8.net/svt/ejp?a8mat=4AXJKD+2WSC0Q+5GDG+NVP2P",
+        imageSrc: "https://www29.a8.net/svt/bgt?aid=260225869176&wid=002&eno=01&mid=s00000025450004011000&mc=1",
+        imageAlt: "Shin VPS sponsored banner",
+        eventName: "pr_shinvps_click",
+      },
+    ],
     faqTitle: "FAQ",
     faqSub: "Quick answers for a smooth start.",
     faq: [
@@ -411,6 +443,38 @@ const translations = {
     ],
     downloadPrimary: "Windows 用を入手",
     downloadSecondary: "セットアップノート",
+    prSectionTitle: "スポンサーリンク（PR）",
+    prSectionSub: "バナー広告と通常リンクの両方を掲載できます。",
+    prItems: [
+      {
+        kind: "banner",
+        title: "ConoHa VPS（PR）",
+        description: "GMOインターネットのVPS。24時間運用や外部公開向け。",
+        cta: "ConoHa VPSを見る（PR）",
+        href: "https://px.a8.net/svt/ejp?a8mat=4AXJKD+2YKMU2+50+4YQJIQ",
+        imageSrc: "https://www28.a8.net/svt/bgt?aid=260225869179&wid=002&eno=01&mid=s00000000018030129000&mc=1",
+        imageAlt: "ConoHa VPS スポンサードバナー",
+        eventName: "pr_conoha_click",
+      },
+      {
+        kind: "link",
+        title: "シンVPS（PR）",
+        description: "メモリ単価重視で選びたい人向けのVPS。",
+        cta: "シンVPSを見る（PR）",
+        href: "https://px.a8.net/svt/ejp?a8mat=4AXJKD+2WSC0Q+5GDG+NTRMQ",
+        eventName: "pr_shinvps_click",
+      },
+      {
+        kind: "banner",
+        title: "シンVPSバナー（PR）",
+        description: "A8提供の300x250バナー素材です。",
+        cta: "シンVPSの詳細を見る（PR）",
+        href: "https://px.a8.net/svt/ejp?a8mat=4AXJKD+2WSC0Q+5GDG+NVP2P",
+        imageSrc: "https://www29.a8.net/svt/bgt?aid=260225869176&wid=002&eno=01&mid=s00000025450004011000&mc=1",
+        imageAlt: "シンVPS スポンサードバナー",
+        eventName: "pr_shinvps_click",
+      },
+    ],
     faqTitle: "よくある質問",
     faqSub: "スムーズに始めるためのヒント。",
     faq: [
@@ -468,6 +532,18 @@ type Locale = keyof typeof translations;
 const currentLang = ref<Locale>("en");
 const t = computed(() => translations[currentLang.value]);
 const runtimeConfig = useRuntimeConfig();
+
+type PrItem = {
+  kind: "banner" | "link";
+  title: string;
+  description?: string;
+  cta: string;
+  href: string;
+  imageSrc?: string;
+  imageAlt?: string;
+  eventName?: string;
+};
+
 const siteUrl = computed(() => {
   const raw = runtimeConfig.public.siteUrl as string | undefined;
   if (!raw) {
@@ -479,12 +555,70 @@ const downloadUrl = computed(() => {
   const raw = runtimeConfig.public.downloadUrl as string | undefined;
   return raw && raw.trim().length > 0 ? raw : defaultDownloadPath;
 });
+const gaMeasurementId = computed(() => {
+  const raw = runtimeConfig.public.gaMeasurementId as string | undefined;
+  return raw?.trim() ?? "";
+});
+const gaInitScript = computed(() => {
+  if (!gaMeasurementId.value) {
+    return "";
+  }
+  return [
+    "window.dataLayer = window.dataLayer || [];",
+    "function gtag(){dataLayer.push(arguments);}",
+    "gtag('js', new Date());",
+    `gtag('config', ${JSON.stringify(gaMeasurementId.value)});`,
+  ].join("\n");
+});
 
 const downloadOptionLinks = computed<Record<string, string>>(() => ({
   local: downloadUrl.value,
   lan: docsLanUrl,
   hosting: docsHostingUrl,
 }));
+const defaultPrItems = computed<PrItem[]>(() => t.value.prItems as unknown as PrItem[]);
+const normalizePrItem = (value: unknown): PrItem | null => {
+  if (typeof value !== "object" || value === null) {
+    return null;
+  }
+  const obj = value as Record<string, unknown>;
+  const href = typeof obj.href === "string" ? obj.href.trim() : "";
+  const title = typeof obj.title === "string" ? obj.title.trim() : "";
+  const cta = typeof obj.cta === "string" ? obj.cta.trim() : "";
+  if (!href || !title || !cta) {
+    return null;
+  }
+  const kind = obj.kind === "banner" ? "banner" : "link";
+  return {
+    kind,
+    title,
+    cta,
+    href,
+    description: typeof obj.description === "string" ? obj.description.trim() : undefined,
+    imageSrc: typeof obj.imageSrc === "string" ? obj.imageSrc.trim() : undefined,
+    imageAlt: typeof obj.imageAlt === "string" ? obj.imageAlt.trim() : undefined,
+    eventName: typeof obj.eventName === "string" ? obj.eventName.trim() : undefined,
+  };
+};
+const prItems = computed<PrItem[]>(() => {
+  const raw = runtimeConfig.public.prItemsJson as string | undefined;
+  if (!raw || raw.trim().length === 0) {
+    return defaultPrItems.value;
+  }
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return defaultPrItems.value;
+    }
+    const normalized = parsed
+      .map((item) => normalizePrItem(item))
+      .filter((item): item is PrItem => item !== null);
+    return normalized.length > 0 ? normalized : defaultPrItems.value;
+  } catch {
+    return defaultPrItems.value;
+  }
+});
+const isExternalUrl = (href: string) => /^https?:\/\//i.test(href);
 
 type TrackPayload = {
   event_name: string;
@@ -650,6 +784,18 @@ useHead(() => ({
   ],
   link: siteUrl.value ? [{ rel: "canonical", href: `${siteUrl.value}/` }] : [],
   script: [
+    ...(gaMeasurementId.value
+      ? [
+          {
+            src: `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaMeasurementId.value)}`,
+            async: true,
+          },
+          {
+            key: "ga4-init",
+            children: gaInitScript.value,
+          },
+        ]
+      : []),
     {
       type: "application/ld+json",
       key: "ld-json",
@@ -903,6 +1049,36 @@ useHead(() => ({
               </a>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section class="section reveal">
+        <div class="section-head">
+          <h2>{{ t.prSectionTitle }}</h2>
+          <p>{{ t.prSectionSub }}</p>
+        </div>
+        <div class="grid pr-grid">
+          <article v-for="item in prItems" :key="`${item.kind}-${item.href}-${item.title}`" class="panel pr-card">
+            <a
+              :href="item.href"
+              class="pr-link-card"
+              data-affiliate="true"
+              :data-event="item.eventName || 'outbound_affiliate_click'"
+              :target="isExternalUrl(item.href) ? '_blank' : null"
+              :rel="isExternalUrl(item.href) ? 'sponsored nofollow noopener noreferrer' : 'sponsored nofollow'"
+            >
+              <img
+                v-if="item.kind === 'banner' && item.imageSrc"
+                :src="item.imageSrc"
+                :alt="item.imageAlt || item.title"
+                class="pr-banner-image"
+                loading="lazy"
+              />
+              <h3>{{ item.title }}</h3>
+              <p v-if="item.description">{{ item.description }}</p>
+              <span class="pr-cta">{{ item.cta }}</span>
+            </a>
+          </article>
         </div>
       </section>
 

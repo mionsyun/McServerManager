@@ -7,7 +7,9 @@ export default defineNuxtConfig({
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || "https://www.maipilot.jp",
       downloadUrl:
         process.env.NUXT_PUBLIC_DOWNLOAD_URL ||
-        "https://stmailpilotje.blob.core.windows.net/public/downloads/MaiPilotSetup.exe"
+        "https://stmailpilotje.blob.core.windows.net/public/downloads/MaiPilotSetup.exe",
+      gaMeasurementId: process.env.NUXT_PUBLIC_GA_MEASUREMENT_ID || "",
+      prItemsJson: process.env.NUXT_PUBLIC_PR_ITEMS_JSON || ""
     }
   },
 
