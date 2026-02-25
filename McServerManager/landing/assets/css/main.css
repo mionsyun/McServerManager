@@ -686,9 +686,12 @@ a {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: var(--panel-strong);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    /*
+     * NOTE: background / backdrop-filter は ::before に移動。
+     * .nav 自体に backdrop-filter があると containing block が生成され、
+     * 子要素の position:fixed がビューポート基準でなく .nav 基準になり
+     * ドロワーとオーバーレイが壊れるため。
+     */
     border-bottom: 1px solid var(--stroke);
     display: flex;
     justify-content: space-between;
@@ -697,6 +700,17 @@ a {
     margin: 0 -16px;
     padding-left: calc(16px + env(safe-area-inset-left, 0px));
     padding-right: calc(16px + env(safe-area-inset-right, 0px));
+  }
+
+  .nav::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--panel-strong);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    z-index: -1;
+    pointer-events: none;
   }
 
   .hamburger {
