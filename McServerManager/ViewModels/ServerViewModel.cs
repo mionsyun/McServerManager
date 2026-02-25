@@ -520,7 +520,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     public string MapArchivePath
     {
         get => _mapArchivePath;
-        private set
+        set
         {
             if (SetProperty(ref _mapArchivePath, value))
             {
