@@ -7,9 +7,15 @@ namespace McServerManager.Services;
 public sealed class AddonCatalogService
 {
     private const string SearchApi = "https://api.modrinth.com/v2/search";
-    private readonly HttpClient _httpClient = new();
+    private readonly HttpClient _httpClient;
 
-    public async Task<IReadOnlyList<AddonSearchResult>> SearchAsync(string query, string serverType, string minecraftVersion, int limit = 15)
+    public AddonCatalogService()
+    {
+        _httpClient = new HttpClient();
+        _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("McServerManager/1.0 (shunki@github)");
+    }
+
+    public async Task<IReadOnlyList<AddonSearchResult>> SearchAsync(string query, string serverType, string minecraftVersion, int limit = 20)
     {
         if (string.IsNullOrWhiteSpace(query))
         {
@@ -17,8 +23,12 @@ public sealed class AddonCatalogService
         }
 
         var encodedQuery = Uri.EscapeDataString(query.Trim());
-        var cappedLimit = Math.Clamp(limit, 1, 30);
-        var requestUrl = $"{SearchApi}?query={encodedQuery}&limit={cappedLimit}&index=relevance";
+        var cappedLimit = Math.Clamp(limit, 1, 100);
+
+        // Modrinth facets: サーバー側でフィルタリングして精度を上げる
+        var facets = BuildFacets(serverType, minecraftVersion);
+        var facetsParam = string.IsNullOrEmpty(facets) ? string.Empty : $"&facets={Uri.EscapeDataString(facets)}";
+        var requestUrl = $"{SearchApi}?query={encodedQuery}&limit={cappedLimit}&index=relevance{facetsParam}";
 
         using var response = await _httpClient.GetAsync(requestUrl).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
@@ -31,24 +41,10 @@ public sealed class AddonCatalogService
             return Array.Empty<AddonSearchResult>();
         }
 
-        var expectedProjectType = ResolveProjectType(serverType);
         var results = new List<AddonSearchResult>();
 
         foreach (var hit in hits.EnumerateArray())
         {
-            var projectType = hit.TryGetProperty("project_type", out var projectTypeElement)
-                ? projectTypeElement.GetString() ?? string.Empty
-                : string.Empty;
-            if (!string.Equals(projectType, expectedProjectType, StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            if (!IsCompatibleVersion(hit, minecraftVersion))
-            {
-                continue;
-            }
-
             var slug = hit.TryGetProperty("slug", out var slugElement) ? slugElement.GetString() ?? string.Empty : string.Empty;
             var projectId = hit.TryGetProperty("project_id", out var idElement) ? idElement.GetString() ?? string.Empty : string.Empty;
             var title = hit.TryGetProperty("title", out var titleElement) ? titleElement.GetString() ?? slug : slug;
@@ -58,6 +54,12 @@ public sealed class AddonCatalogService
             var downloads = hit.TryGetProperty("downloads", out var downloadsElement)
                 ? downloadsElement.GetInt32()
                 : 0;
+            var iconUrl = hit.TryGetProperty("icon_url", out var iconElement)
+                ? iconElement.GetString() ?? string.Empty
+                : string.Empty;
+            var projectType = hit.TryGetProperty("project_type", out var ptElement)
+                ? ptElement.GetString() ?? string.Empty
+                : string.Empty;
 
             if (string.IsNullOrWhiteSpace(slug))
             {
@@ -81,6 +83,40 @@ public sealed class AddonCatalogService
             .ToList();
     }
 
+    private static string BuildFacets(string serverType, string minecraftVersion)
+    {
+        // Modrinth facets 形式: [["key:value"],["key:value"]] (AND条件)
+        // 同一配列内は OR 条件: [["categories:forge","categories:neoforge"]]
+        var groups = new List<string>();
+
+        // project_type フィルター
+        var projectType = ResolveProjectType(serverType);
+        if (!string.IsNullOrEmpty(projectType))
+        {
+            groups.Add($"[\"project_type:{projectType}\"]");
+        }
+
+        // loader/categories フィルター
+        var loaderFacet = ResolveLoaderFacet(serverType);
+        if (!string.IsNullOrEmpty(loaderFacet))
+        {
+            groups.Add(loaderFacet);
+        }
+
+        // バージョンフィルター
+        if (!string.IsNullOrWhiteSpace(minecraftVersion))
+        {
+            groups.Add($"[\"versions:{minecraftVersion}\"]");
+        }
+
+        if (groups.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        return $"[{string.Join(",", groups)}]";
+    }
+
     private static string ResolveProjectType(string serverType)
     {
         if (string.Equals(serverType, "Forge", StringComparison.OrdinalIgnoreCase)
@@ -89,30 +125,26 @@ public sealed class AddonCatalogService
             return "mod";
         }
 
-        return "plugin";
+        if (string.Equals(serverType, "Paper", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(serverType, "Spigot", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(serverType, "Purpur", StringComparison.OrdinalIgnoreCase))
+        {
+            return "plugin";
+        }
+
+        return string.Empty;
     }
 
-    private static bool IsCompatibleVersion(JsonElement hit, string minecraftVersion)
+    private static string ResolveLoaderFacet(string serverType)
     {
-        if (string.IsNullOrWhiteSpace(minecraftVersion))
+        return serverType.ToLowerInvariant() switch
         {
-            return true;
-        }
-
-        if (!hit.TryGetProperty("versions", out var versionsElement) || versionsElement.ValueKind != JsonValueKind.Array)
-        {
-            return true;
-        }
-
-        foreach (var versionElement in versionsElement.EnumerateArray())
-        {
-            var value = versionElement.GetString();
-            if (string.Equals(value, minecraftVersion, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-        }
-
-        return false;
+            "forge" => "[\"categories:forge\",\"categories:neoforge\"]",
+            "fabric" => "[\"categories:fabric\"]",
+            "paper" => "[\"categories:paper\",\"categories:bukkit\"]",
+            "spigot" => "[\"categories:spigot\",\"categories:bukkit\"]",
+            "purpur" => "[\"categories:purpur\",\"categories:paper\",\"categories:bukkit\"]",
+            _ => string.Empty
+        };
     }
 }

@@ -23,6 +23,7 @@
   <ItemGroup>
     <Resource Include="icon.png" />
     <Resource Include="icon-square.png" />
+    <Resource Include="Fonts\PressStart2P-Regular.ttf" />
   </ItemGroup>
 
   <ItemGroup>

@@ -16,15 +16,15 @@
 
         <Border Style="{StaticResource Card}">
             <StackPanel>
-                <TextBlock Text="MaiPilot" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                <TextBlock Text="クイックスタート" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                <TextBlock Text="- Java が見つからない場合は「設定」タブで java.exe を指定してください。" TextWrapping="Wrap"/>
-                <TextBlock Text="- サーバーを作成して起動すると初回ワールドが生成されます。" TextWrapping="Wrap" Margin="0,6,0,0"/>
-                <TextBlock Text="- 公開する場合は「ネットワーク」タブで Firewall 設定と疎通チェックを行ってください。" TextWrapping="Wrap" Margin="0,6,0,0"/>
-                <TextBlock Text="- ワールドのバックアップは「ワールド」タブから行えます。" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                <TextBlock Text="🎮 MaiPilot" FontSize="20" FontWeight="Bold" Margin="0,0,0,10"/>
+                <TextBlock Text="クイックスタート" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,8"/>
+                <TextBlock Text="• Java が見つからない場合は「設定」タブで java.exe を指定してください。" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                <TextBlock Text="• サーバーを作成して起動すると初回ワールドが生成されます。" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                <TextBlock Text="• 公開する場合は「ネットワーク」タブで Firewall 設定と疎通チェックを行ってください。" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                <TextBlock Text="• ワールドのバックアップは「ワールド」タブから行えます。" TextWrapping="Wrap"/>
             </StackPanel>
         </Border>
 
-        <Button Grid.Row="1" Content="はじめる" Style="{StaticResource PrimaryButton}" Width="140" HorizontalAlignment="Right" Margin="0,12,0,0" Click="OnClose"/>
+        <Button Grid.Row="1" Content="はじめる →" Style="{StaticResource PrimaryButton}" Width="150" HorizontalAlignment="Right" Margin="0,12,0,0" Click="OnClose"/>
     </Grid>
 </Window>

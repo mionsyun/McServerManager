@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch, nextTick } from "vue";
 
 const mobileMenuOpen = ref(false);
 const closeMobileMenu = () => { mobileMenuOpen.value = false; };
+
+let revealObserver: IntersectionObserver | null = null;
 
 const defaultDownloadPath = "https://stmailpilotje.blob.core.windows.net/public/downloads/MaiPilotSetup.exe";
 const docsUrl = "/docs";
@@ -578,6 +580,25 @@ onMounted(() => {
     return;
   }
   document.addEventListener("click", handleTrackedClick, { passive: true });
+
+  /* ── Scroll-triggered reveal ── */
+  revealObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          revealObserver?.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.12 }
+  );
+  nextTick(() => {
+    document.querySelectorAll(".reveal").forEach((el) => {
+      revealObserver?.observe(el);
+    });
+  });
+
   const saved = localStorage.getItem("mcsm-lang") as Locale | null;
   if (saved && translations[saved]) {
     currentLang.value = saved;
@@ -594,6 +615,8 @@ onBeforeUnmount(() => {
     return;
   }
   document.removeEventListener("click", handleTrackedClick);
+  revealObserver?.disconnect();
+  revealObserver = null;
 });
 
 useHead(() => ({

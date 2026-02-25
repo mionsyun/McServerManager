@@ -181,12 +181,22 @@ public sealed class MainViewModel : ObservableObject
             return;
         }
 
+        var runtimeReleased = _services.Runtime.TryRelease(target.ServerId);
+        if (!runtimeReleased)
+        {
+            _services.Dialog.Show(
+                "サーバーランタイムの解放に失敗しました。アプリ再起動で解消する場合があります。",
+                "警告",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
+
         var directory = target.ServerDirectory;
         if (!string.IsNullOrWhiteSpace(directory) && Directory.Exists(directory))
         {
             try
             {
-                Directory.Delete(directory, true);
+                ForceDeleteDirectory(directory);
             }
             catch (IOException ex)
             {
@@ -208,22 +218,37 @@ public sealed class MainViewModel : ObservableObject
             }
         }
 
-        var runtimeReleased = _services.Runtime.TryRelease(target.ServerId);
-        if (!runtimeReleased)
-        {
-            _services.Dialog.Show(
-                "サーバーランタイムの解放に失敗しました。アプリ再起動で解消する場合があります。",
-                "警告",
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning);
-        }
-
         DisposeServerViewModel(target);
         Servers.Remove(target);
         if (SelectedServer == target)
         {
             SelectedServer = Servers.FirstOrDefault();
         }
+    }
+
+    /// <summary>
+    /// 読み取り専用属性をすべて解除してからディレクトリを再帰削除する。
+    /// Git (BuildTools) が作成する .idx / .pack ファイルなどは
+    /// ReadOnly 属性が付いているため、通常の Directory.Delete では失敗する。
+    /// </summary>
+    private static void ForceDeleteDirectory(string path)
+    {
+        var di = new DirectoryInfo(path);
+        foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
+        {
+            if (fi.Attributes.HasFlag(FileAttributes.ReadOnly))
+            {
+                fi.Attributes = FileAttributes.Normal;
+            }
+        }
+        foreach (var sub in di.EnumerateDirectories("*", SearchOption.AllDirectories))
+        {
+            if (sub.Attributes.HasFlag(FileAttributes.ReadOnly))
+            {
+                sub.Attributes = FileAttributes.Normal;
+            }
+        }
+        di.Delete(true);
     }
 
     private void DuplicateServer(ServerViewModel? target)

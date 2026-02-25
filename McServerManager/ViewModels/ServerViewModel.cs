@@ -4,22 +4,25 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Threading;
-using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
-using WpfApplication = System.Windows.Application;
 using McServerManager.Models;
 using McServerManager.Services;
 using McServerManager.Utilities;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using WpfApplication = System.Windows.Application;
 
 namespace McServerManager.ViewModels;
 
 public sealed class ServerViewModel : ObservableObject, IDisposable
 {
-    private static readonly Regex PlayerCountRegex = new(@"There are (\d+) of a max of (\d+) players online", RegexOptions.Compiled);
+    private static readonly Regex PlayerCountRegex = new(
+        @"There are (\d+) of a max of (\d+) players online",
+        RegexOptions.Compiled
+    );
     private readonly AppServices _services;
     private readonly ServerRuntime _runtime;
     private readonly AppSettings _appSettings;
     private readonly DispatcherTimer _statsTimer;
-    private ServerConfig _config;
+    private readonly ServerConfig _config;
     private ServerSettingsViewModel _settings;
     private string _commandText = string.Empty;
     private bool _restartRequired;
@@ -73,17 +76,19 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         _settings.PropertyChanged += (_, _) => UpdateRestartRequired();
 
         Logs = _runtime.Logs;
-        Worlds = new ObservableCollection<string>();
-        MapArchiveCandidates = new ObservableCollection<ArchiveWorldCandidate>();
-        AvailableVersions = new ObservableCollection<MinecraftVersionInfo>();
+        Worlds = [];
+        MapArchiveCandidates = [];
+        AvailableVersions = [];
         LanIpAddresses = new ObservableCollection<string>(_services.Network.GetLanIpAddresses());
-        ExternalChecklist = new ObservableCollection<string>(_services.Network.GetExternalChecklist());
-        Ops = new ObservableCollection<OpEntry>();
-        Whitelist = new ObservableCollection<WhitelistEntry>();
-        Addons = new ObservableCollection<AddonEntry>();
-        AddonSearchResults = new ObservableCollection<AddonSearchResult>();
-        LaunchModes = new ObservableCollection<LaunchModeOption>();
-        StartupPresets = new ObservableCollection<StartupPresetOption>();
+        ExternalChecklist = new ObservableCollection<string>(
+            _services.Network.GetExternalChecklist()
+        );
+        Ops = [];
+        Whitelist = [];
+        Addons = [];
+        AddonSearchResults = [];
+        LaunchModes = [];
+        StartupPresets = [];
 
         AutoRestartOnCrash = _config.AutoRestartOnCrash;
         AutoRestartDelaySeconds = _config.AutoRestartDelaySeconds;
@@ -96,23 +101,41 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         StartCommand = new AsyncRelayCommand(StartAsync, () => Status == ServerStatus.Stopped);
         StopCommand = new AsyncRelayCommand(StopAsync, () => Status != ServerStatus.Stopped);
         RestartCommand = new AsyncRelayCommand(RestartAsync, () => Status == ServerStatus.Running);
-        SendCommandCommand = new RelayCommand(_ => SendCommand(), _ => Status == ServerStatus.Running);
+        SendCommandCommand = new RelayCommand(
+            _ => SendCommand(),
+            _ => Status == ServerStatus.Running
+        );
         ExportLogsCommand = new RelayCommand(_ => ExportLogs());
         SaveSettingsCommand = new RelayCommand(_ => SaveSettings());
         BrowseJavaCommand = new RelayCommand(_ => BrowseJava());
         DetectJavaCommand = new RelayCommand(_ => DetectJava());
-        SwitchWorldCommand = new RelayCommand(_ => SwitchWorld(), _ => !string.IsNullOrWhiteSpace(SelectedWorld) && !IsSelectedWorldCurrent);
-        DeleteWorldCommand = new RelayCommand(_ => DeleteWorld(), _ => !string.IsNullOrWhiteSpace(SelectedWorld));
-        CreateWorldCommand = new RelayCommand(_ => CreateWorld(), _ => !string.IsNullOrWhiteSpace(NewWorldName));
+        SwitchWorldCommand = new RelayCommand(
+            _ => SwitchWorld(),
+            _ => !string.IsNullOrWhiteSpace(SelectedWorld) && !IsSelectedWorldCurrent
+        );
+        DeleteWorldCommand = new RelayCommand(
+            _ => DeleteWorld(),
+            _ => !string.IsNullOrWhiteSpace(SelectedWorld)
+        );
+        CreateWorldCommand = new RelayCommand(
+            _ => CreateWorld(),
+            _ => !string.IsNullOrWhiteSpace(NewWorldName)
+        );
         RefreshWorldsCommand = new RelayCommand(_ => LoadWorlds());
-        OpenSelectedWorldDirectoryCommand = new RelayCommand(_ => OpenSelectedWorldDirectory(), _ => !string.IsNullOrWhiteSpace(SelectedWorld));
+        OpenSelectedWorldDirectoryCommand = new RelayCommand(
+            _ => OpenSelectedWorldDirectory(),
+            _ => !string.IsNullOrWhiteSpace(SelectedWorld)
+        );
         BrowseMapArchiveCommand = new RelayCommand(_ => BrowseMapArchive());
         ImportMapArchiveCommand = new AsyncRelayCommand(ImportMapArchiveAsync, CanImportMapArchive);
         OpenServerDirectoryCommand = new RelayCommand(_ => OpenServerDirectory());
         OpenLogsDirectoryCommand = new RelayCommand(_ => OpenLogsDirectory());
         OpenCrashReportsCommand = new RelayCommand(_ => OpenCrashReports());
         LoadVersionsCommand = new AsyncRelayCommand(LoadVersionsAsync);
-        ChangeVersionCommand = new AsyncRelayCommand(ChangeVersionAsync, () => SelectedVersion is not null);
+        ChangeVersionCommand = new AsyncRelayCommand(
+            ChangeVersionAsync,
+            () => SelectedVersion is not null
+        );
         RedownloadJarCommand = new AsyncRelayCommand(RedownloadJarAsync);
         CreateFirewallRuleCommand = new RelayCommand(_ => CreateFirewallRule());
         DeleteFirewallRuleCommand = new RelayCommand(_ => DeleteFirewallRule());
@@ -123,22 +146,53 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         CopyShareAddressCommand = new RelayCommand(_ => CopyShareAddress());
         AddOpCommand = new RelayCommand(_ => AddOp(), _ => !string.IsNullOrWhiteSpace(NewOpName));
         RemoveOpCommand = new RelayCommand(_ => RemoveOp(), _ => SelectedOp is not null);
-        AddWhitelistCommand = new RelayCommand(_ => AddWhitelist(), _ => !string.IsNullOrWhiteSpace(NewWhitelistName));
-        RemoveWhitelistCommand = new RelayCommand(_ => RemoveWhitelist(), _ => SelectedWhitelist is not null);
+        AddWhitelistCommand = new RelayCommand(
+            _ => AddWhitelist(),
+            _ => !string.IsNullOrWhiteSpace(NewWhitelistName)
+        );
+        RemoveWhitelistCommand = new RelayCommand(
+            _ => RemoveWhitelist(),
+            _ => SelectedWhitelist is not null
+        );
         ReloadPermissionsCommand = new RelayCommand(_ => LoadPermissions());
-        AddAddonsCommand = new RelayCommand(_ => BrowseAndAddAddons(), _ => SupportsAddonManagement && !IsAddonBusy);
-        RefreshAddonsCommand = new RelayCommand(_ => LoadAddons(), _ => SupportsAddonManagement && !IsAddonBusy);
-        OpenAddonsDirectoryCommand = new RelayCommand(_ => OpenAddonsDirectory(), _ => SupportsAddonManagement && !IsAddonBusy);
-        EnableAddonCommand = new RelayCommand(_ => EnableAddon(), _ => SelectedAddon is not null && !SelectedAddon.IsEnabled && !IsAddonBusy);
-        DisableAddonCommand = new RelayCommand(_ => DisableAddon(), _ => SelectedAddon is not null && SelectedAddon.IsEnabled && !IsAddonBusy);
-        DeleteAddonCommand = new RelayCommand(_ => DeleteAddon(), _ => SelectedAddon is not null && !IsAddonBusy);
+        AddAddonsCommand = new RelayCommand(
+            _ => BrowseAndAddAddons(),
+            _ => SupportsAddonManagement && !IsAddonBusy
+        );
+        RefreshAddonsCommand = new RelayCommand(
+            _ => LoadAddons(),
+            _ => SupportsAddonManagement && !IsAddonBusy
+        );
+        OpenAddonsDirectoryCommand = new RelayCommand(
+            _ => OpenAddonsDirectory(),
+            _ => SupportsAddonManagement && !IsAddonBusy
+        );
+        EnableAddonCommand = new RelayCommand(
+            _ => EnableAddon(),
+            _ => SelectedAddon is not null && !SelectedAddon.IsEnabled && !IsAddonBusy
+        );
+        DisableAddonCommand = new RelayCommand(
+            _ => DisableAddon(),
+            _ => SelectedAddon is not null && SelectedAddon.IsEnabled && !IsAddonBusy
+        );
+        DeleteAddonCommand = new RelayCommand(
+            _ => DeleteAddon(),
+            _ => SelectedAddon is not null && !IsAddonBusy
+        );
         SearchAddonCatalogCommand = new AsyncRelayCommand(
             SearchAddonCatalogAsync,
-            () => SupportsAddonManagement && !string.IsNullOrWhiteSpace(AddonSearchQuery));
+            () => SupportsAddonManagement && !string.IsNullOrWhiteSpace(AddonSearchQuery)
+        );
         OpenAddonCatalogPageCommand = new RelayCommand(
             _ => OpenSelectedAddonCatalogPage(),
-            _ => SelectedAddonSearchResult is not null && !string.IsNullOrWhiteSpace(SelectedAddonSearchResult.ProjectUrl));
-        ApplyStartupPresetCommand = new RelayCommand(_ => ApplyStartupPreset(), _ => SelectedStartupPreset is not null);
+            _ =>
+                SelectedAddonSearchResult is not null
+                && !string.IsNullOrWhiteSpace(SelectedAddonSearchResult.ProjectUrl)
+        );
+        ApplyStartupPresetCommand = new RelayCommand(
+            _ => ApplyStartupPreset(),
+            _ => SelectedStartupPreset is not null
+        );
         RunHealthCheckCommand = new RelayCommand(_ => RunHealthCheck(showEvenIfCompleted: true));
 
         LoadSettings();
@@ -147,7 +201,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         LoadAddons();
         _ = LoadVersionsAsync();
 
-        _statsTimer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, (_, _) => UpdateStats(), WpfApplication.Current.Dispatcher);
+        _statsTimer = new DispatcherTimer(
+            TimeSpan.FromSeconds(1),
+            DispatcherPriority.Background,
+            (_, _) => UpdateStats(),
+            WpfApplication.Current.Dispatcher
+        );
         _statsTimer.Start();
 
         Status = _runtime.Status;
@@ -197,16 +256,17 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         }
     }
 
-    public string StatusText => Status switch
-    {
-        ServerStatus.Starting => "起動中",
-        ServerStatus.Running => "稼働中",
-        ServerStatus.Stopping => "停止中",
-        _ => "停止"
-    };
+    public string StatusText =>
+        Status switch
+        {
+            ServerStatus.Starting => "起動中",
+            ServerStatus.Running => "稼働中",
+            ServerStatus.Stopping => "停止中",
+            _ => "停止",
+        };
 
-    public string LastStartedAtText
-        => _config.LastStartedAt?.ToLocalTime().ToString("yyyy/MM/dd HH:mm") ?? "-";
+    public string LastStartedAtText =>
+        _config.LastStartedAt?.ToLocalTime().ToString("yyyy/MM/dd HH:mm") ?? "-";
 
     public string CommandText
     {
@@ -262,11 +322,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         }
     }
 
-    public string CurrentWorldName => string.IsNullOrWhiteSpace(_config.WorldName) ? "-" : _config.WorldName;
+    public string CurrentWorldName =>
+        string.IsNullOrWhiteSpace(_config.WorldName) ? "-" : _config.WorldName;
 
-    public bool IsSelectedWorldCurrent
-        => !string.IsNullOrWhiteSpace(SelectedWorld)
-           && string.Equals(SelectedWorld, _config.WorldName, StringComparison.OrdinalIgnoreCase);
+    public bool IsSelectedWorldCurrent =>
+        !string.IsNullOrWhiteSpace(SelectedWorld)
+        && string.Equals(SelectedWorld, _config.WorldName, StringComparison.OrdinalIgnoreCase);
 
     public string WorldSwitchHint
     {
@@ -390,9 +451,11 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 return "Forge: Forge対応MOD(.jar)を追加してください。Fabric系は通常動作しません。";
             }
 
-            if (string.Equals(ServerType, "Paper", StringComparison.OrdinalIgnoreCase)
+            if (
+                string.Equals(ServerType, "Paper", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(ServerType, "Purpur", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(ServerType, "Spigot", StringComparison.OrdinalIgnoreCase))
+                || string.Equals(ServerType, "Spigot", StringComparison.OrdinalIgnoreCase)
+            )
             {
                 return "Plugin: plugin.yml を含むプラグインを推奨します。MOD系jarは動作しない可能性があります。";
             }
@@ -762,17 +825,49 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         LaunchModes.Add(new LaunchModeOption("ForceForgeWinArgs", "Forge win_args.txt 固定"));
 
         StartupPresets.Clear();
-        StartupPresets.Add(new StartupPresetOption("Balanced", "Balanced（推奨）", 2048, 4096, "-XX:+UseG1GC -XX:+ParallelRefProcEnabled"));
-        StartupPresets.Add(new StartupPresetOption("MemorySaver", "Memory Saver", 1024, 2048, "-XX:+UseG1GC"));
-        StartupPresets.Add(new StartupPresetOption("Throughput", "Throughput", 4096, 8192, "-XX:+UseG1GC -XX:MaxGCPauseMillis=100"));
+        StartupPresets.Add(
+            new StartupPresetOption(
+                "Balanced",
+                "Balanced（推奨）",
+                2048,
+                4096,
+                "-XX:+UseG1GC -XX:+ParallelRefProcEnabled"
+            )
+        );
+        StartupPresets.Add(
+            new StartupPresetOption("MemorySaver", "Memory Saver", 1024, 2048, "-XX:+UseG1GC")
+        );
+        StartupPresets.Add(
+            new StartupPresetOption(
+                "Throughput",
+                "Throughput",
+                4096,
+                8192,
+                "-XX:+UseG1GC -XX:MaxGCPauseMillis=100"
+            )
+        );
 
-        _selectedLaunchMode = LaunchModes.FirstOrDefault(item => string.Equals(item.Id, _config.LaunchModeOverride, StringComparison.OrdinalIgnoreCase))
-            ?? LaunchModes.FirstOrDefault(item => string.Equals(item.Id, "Auto", StringComparison.OrdinalIgnoreCase));
+        _selectedLaunchMode =
+            LaunchModes.FirstOrDefault(item =>
+                string.Equals(
+                    item.Id,
+                    _config.LaunchModeOverride,
+                    StringComparison.OrdinalIgnoreCase
+                )
+            )
+            ?? LaunchModes.FirstOrDefault(item =>
+                string.Equals(item.Id, "Auto", StringComparison.OrdinalIgnoreCase)
+            );
         OnPropertyChanged(nameof(SelectedLaunchMode));
         OnPropertyChanged(nameof(LaunchModeDescription));
 
-        _selectedStartupPreset = StartupPresets.FirstOrDefault(item => string.Equals(item.Id, _config.StartupPresetId, StringComparison.OrdinalIgnoreCase))
-            ?? StartupPresets.FirstOrDefault(item => string.Equals(item.Id, "Balanced", StringComparison.OrdinalIgnoreCase));
+        _selectedStartupPreset =
+            StartupPresets.FirstOrDefault(item =>
+                string.Equals(item.Id, _config.StartupPresetId, StringComparison.OrdinalIgnoreCase)
+            )
+            ?? StartupPresets.FirstOrDefault(item =>
+                string.Equals(item.Id, "Balanced", StringComparison.OrdinalIgnoreCase)
+            );
         OnPropertyChanged(nameof(SelectedStartupPreset));
     }
 
@@ -788,7 +883,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         JavaExtraArguments = SelectedStartupPreset.JavaExtraArguments;
         _config.StartupPresetId = SelectedStartupPreset.Id;
         _services.Configs.Save(_config);
-        _services.Dialog.Show($"起動プリセット「{SelectedStartupPreset.Label}」を適用しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+        _services.Dialog.Show(
+            $"起動プリセット「{SelectedStartupPreset.Label}」を適用しました。",
+            "完了",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information
+        );
     }
 
     private async Task StartAsync()
@@ -804,7 +904,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
         if (!Directory.Exists(ServerDirectory))
         {
-            _services.Dialog.Show("サーバーディレクトリが見つかりません。", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                "サーバーディレクトリが見つかりません。",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
             return;
         }
 
@@ -827,7 +932,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"起動に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"起動に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
@@ -865,11 +975,16 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         {
             var runBat = Path.Combine(ServerDirectory, "run.bat");
             var hasRunBat = File.Exists(runBat);
-            var hasWinArgs = Directory.Exists(ServerDirectory)
-                && Directory.EnumerateFiles(ServerDirectory, "win_args.txt", SearchOption.AllDirectories).Any();
+            var hasWinArgs =
+                Directory.Exists(ServerDirectory)
+                && Directory
+                    .EnumerateFiles(ServerDirectory, "win_args.txt", SearchOption.AllDirectories)
+                    .Any();
             if (!hasRunBat && !hasWinArgs)
             {
-                issues.Add("Forge の起動補助ファイル (run.bat / win_args.txt) が見つかりません。\nバージョン再ダウンロードまたは Forge の再インストールを推奨します。");
+                issues.Add(
+                    "Forge の起動補助ファイル (run.bat / win_args.txt) が見つかりません。\nバージョン再ダウンロードまたは Forge の再インストールを推奨します。"
+                );
             }
         }
 
@@ -880,7 +995,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         {
             if (showEvenIfCompleted)
             {
-                _services.Dialog.Show("ヘルスチェックで問題は見つかりませんでした。", "ヘルスチェック", MessageBoxButton.OK, MessageBoxImage.Information);
+                _services.Dialog.Show(
+                    "ヘルスチェックで問題は見つかりませんでした。",
+                    "ヘルスチェック",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
+                );
             }
 
             return;
@@ -903,7 +1023,9 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             ? _services.Java.FindJavaExecutable() ?? "java"
             : JavaPath;
 
-        if (!_services.Java.TryGetJavaMajorVersion(javaExe, out var actualMajor, out var rawVersion))
+        if (
+            !_services.Java.TryGetJavaMajorVersion(javaExe, out var actualMajor, out var rawVersion)
+        )
         {
             return;
         }
@@ -913,12 +1035,15 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             return;
         }
 
-        var versionText = string.IsNullOrWhiteSpace(rawVersion) ? actualMajor.ToString() : rawVersion;
+        var versionText = string.IsNullOrWhiteSpace(rawVersion)
+            ? actualMajor.ToString()
+            : rawVersion;
         _services.Dialog.Show(
             $"Minecraft {Version} は Java {requiredMajor} 以上が推奨です。現在の Java: {versionText}\n必要に応じて「設定」タブで java.exe を切り替えてください。",
             "Java バージョン警告",
             MessageBoxButton.OK,
-            MessageBoxImage.Warning);
+            MessageBoxImage.Warning
+        );
     }
 
     private async Task StopAsync()
@@ -929,7 +1054,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"停止に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"停止に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
         finally
         {
@@ -945,7 +1075,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"再起動に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"再起動に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
@@ -970,11 +1105,21 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             var fileName = $"console-{DateTime.Now:yyyyMMdd-HHmmss}.txt";
             var path = Path.Combine(logsDir, fileName);
             File.WriteAllLines(path, Logs, Encoding.UTF8);
-            _services.Dialog.Show($"ログを保存しました: {path}", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+            _services.Dialog.Show(
+                $"ログを保存しました: {path}",
+                "完了",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"ログ出力に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"ログ出力に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
@@ -1004,17 +1149,18 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"設定保存に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"設定保存に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
     private void BrowseJava()
     {
-        var dialog = new OpenFileDialog
-        {
-            Filter = "java.exe|java.exe",
-            FileName = "java.exe"
-        };
+        var dialog = new OpenFileDialog { Filter = "java.exe|java.exe", FileName = "java.exe" };
 
         if (dialog.ShowDialog() == true)
         {
@@ -1035,7 +1181,8 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 "Javaが見つかりませんでした。\n\nhttps://adoptium.net から Eclipse Temurin (LTS) をインストールしてください。\nインストール時に「PATH に追加」にチェックを入れてから再度お試しください。",
                 "Java 自動検出",
                 MessageBoxButton.OK,
-                MessageBoxImage.Information);
+                MessageBoxImage.Information
+            );
         }
     }
 
@@ -1052,8 +1199,10 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             MapImportWorldName = _config.WorldName;
         }
 
-        SelectedWorld = Worlds.FirstOrDefault(w => string.Equals(w, _config.WorldName, StringComparison.OrdinalIgnoreCase))
-            ?? Worlds.FirstOrDefault();
+        SelectedWorld =
+            Worlds.FirstOrDefault(w =>
+                string.Equals(w, _config.WorldName, StringComparison.OrdinalIgnoreCase)
+            ) ?? Worlds.FirstOrDefault();
         OnPropertyChanged(nameof(CurrentWorldName));
         OnPropertyChanged(nameof(IsSelectedWorldCurrent));
         OnPropertyChanged(nameof(WorldSwitchHint));
@@ -1096,19 +1245,25 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         {
             if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
             {
-                _services.Dialog.Show(missingMessage, "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                _services.Dialog.Show(
+                    missingMessage,
+                    "エラー",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
                 return;
             }
 
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = path,
-                UseShellExecute = true
-            });
+            Process.Start(new ProcessStartInfo { FileName = path, UseShellExecute = true });
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"フォルダを開けませんでした: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"フォルダを開けませんでした: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
@@ -1121,15 +1276,16 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 return;
             }
 
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = url,
-                UseShellExecute = true
-            });
+            Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"ブラウザを開けませんでした: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"ブラウザを開けませんでした: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
@@ -1143,7 +1299,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"ワールド作成に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"ワールド作成に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
@@ -1176,11 +1337,23 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
         if (Status != ServerStatus.Stopped)
         {
-            _services.Dialog.Show("停止中のみ削除できます。", "確認", MessageBoxButton.OK, MessageBoxImage.Information);
+            _services.Dialog.Show(
+                "停止中のみ削除できます。",
+                "確認",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
             return;
         }
 
-        if (_services.Dialog.Show($"ワールド {SelectedWorld} を削除します。", "確認", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
+        if (
+            _services.Dialog.Show(
+                $"ワールド {SelectedWorld} を削除します。",
+                "確認",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning
+            ) != MessageBoxResult.Yes
+        )
         {
             return;
         }
@@ -1198,17 +1371,22 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"削除に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"削除に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
     private bool CanImportMapArchive()
     {
         return Status == ServerStatus.Stopped
-               && !string.IsNullOrWhiteSpace(MapArchivePath)
-               && File.Exists(MapArchivePath)
-               && !string.IsNullOrWhiteSpace(MapImportWorldName)
-               && SelectedMapArchiveCandidate is not null;
+            && !string.IsNullOrWhiteSpace(MapArchivePath)
+            && File.Exists(MapArchivePath)
+            && !string.IsNullOrWhiteSpace(MapImportWorldName)
+            && SelectedMapArchiveCandidate is not null;
     }
 
     private void BrowseMapArchive()
@@ -1217,7 +1395,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         {
             Filter = "ZIP ファイル|*.zip",
             CheckFileExists = true,
-            Multiselect = false
+            Multiselect = false,
         };
 
         if (dialog.ShowDialog() != true)
@@ -1236,7 +1414,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     {
         if (Status != ServerStatus.Stopped)
         {
-            _services.Dialog.Show("停止中のみ配布マップを導入できます。", "確認", MessageBoxButton.OK, MessageBoxImage.Information);
+            _services.Dialog.Show(
+                "停止中のみ配布マップを導入できます。",
+                "確認",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
             return;
         }
 
@@ -1269,7 +1452,8 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 $"ワールド {worldName} は既に存在します。上書きして導入する場合はチェックを有効にしてください。",
                 "確認",
                 MessageBoxButton.OK,
-                MessageBoxImage.Information);
+                MessageBoxImage.Information
+            );
             return;
         }
 
@@ -1279,7 +1463,8 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 $"ワールド {worldName} は既に存在します。上書きして導入しますか？",
                 "確認",
                 MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
+                MessageBoxImage.Warning
+            );
             if (confirm != MessageBoxResult.Yes)
             {
                 MapImportStatus = "導入をキャンセルしました。";
@@ -1290,13 +1475,15 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         try
         {
             MapImportStatus = "配布マップを導入しています...";
-            var importedSource = await Task.Run(
-                () => _services.Worlds.ImportWorldArchive(
+            var importedSource = await Task.Run(() =>
+                _services.Worlds.ImportWorldArchive(
                     ServerDirectory,
                     archivePath,
                     worldName,
                     ReplaceWorldOnMapImport,
-                    selectedCandidate.RelativePath));
+                    selectedCandidate.RelativePath
+                )
+            );
 
             LoadWorlds();
             SelectedWorld = worldName;
@@ -1307,12 +1494,18 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 $"配布マップ ({importedSource}) を {worldName} として導入しました。次回起動時にこのワールドが適用されます。",
                 "完了",
                 MessageBoxButton.OK,
-                MessageBoxImage.Information);
+                MessageBoxImage.Information
+            );
         }
         catch (Exception ex)
         {
             MapImportStatus = "導入に失敗しました。";
-            _services.Dialog.Show($"配布マップ導入に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"配布マップ導入に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
@@ -1338,18 +1531,23 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                     "ZIP内に導入可能なワールドが見つかりませんでした。level.dat または region を含むワールドを選択してください。",
                     "確認",
                     MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                    MessageBoxImage.Warning
+                );
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(MapImportWorldName))
             {
-                MapImportWorldName = SuggestWorldNameFromCandidate(SelectedMapArchiveCandidate, archivePath);
+                MapImportWorldName = SuggestWorldNameFromCandidate(
+                    SelectedMapArchiveCandidate,
+                    archivePath
+                );
             }
 
-            MapImportStatus = MapArchiveCandidates.Count == 1
-                ? "導入元フォルダを自動選択しました。"
-                : $"導入元候補が {MapArchiveCandidates.Count} 件見つかりました。正しいフォルダを選択してください。";
+            MapImportStatus =
+                MapArchiveCandidates.Count == 1
+                    ? "導入元フォルダを自動選択しました。"
+                    : $"導入元候補が {MapArchiveCandidates.Count} 件見つかりました。正しいフォルダを選択してください。";
             return true;
         }
         catch (Exception ex)
@@ -1358,17 +1556,25 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             SelectedMapArchiveCandidate = null;
             OnPropertyChanged(nameof(MapArchiveSourceHint));
             MapImportStatus = "ZIPの解析に失敗しました。";
-            _services.Dialog.Show($"配布マップZIPの解析に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"配布マップZIPの解析に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
             return false;
         }
     }
 
-    private static string SuggestWorldNameFromCandidate(ArchiveWorldCandidate? candidate, string archivePath)
+    private static string SuggestWorldNameFromCandidate(
+        ArchiveWorldCandidate? candidate,
+        string archivePath
+    )
     {
         if (candidate is not null && !string.IsNullOrWhiteSpace(candidate.RelativePath))
         {
-            var name = candidate.RelativePath
-                .Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries)
+            var name = candidate
+                .RelativePath.Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries)
                 .LastOrDefault();
             var sanitized = SanitizeWorldName(name ?? string.Empty);
             if (!string.IsNullOrWhiteSpace(sanitized))
@@ -1393,7 +1599,9 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             return "world";
         }
 
-        var cleaned = new string(raw.Where(ch => !Path.GetInvalidFileNameChars().Contains(ch)).ToArray()).Trim();
+        var cleaned = new string([
+            .. raw.Where(ch => !Path.GetInvalidFileNameChars().Contains(ch)),
+        ]).Trim();
         return string.IsNullOrWhiteSpace(cleaned) ? "world" : cleaned;
     }
 
@@ -1409,14 +1617,22 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 {
                     AvailableVersions.Add(version);
                 }
-                SelectedVersion = AvailableVersions.FirstOrDefault(v => string.Equals(v.Id, _config.Version, StringComparison.OrdinalIgnoreCase))
+                SelectedVersion =
+                    AvailableVersions.FirstOrDefault(v =>
+                        string.Equals(v.Id, _config.Version, StringComparison.OrdinalIgnoreCase)
+                    )
                     ?? AvailableVersions.FirstOrDefault(v => v.Type == "release")
                     ?? AvailableVersions.FirstOrDefault();
             });
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"バージョン取得に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"バージョン取得に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
@@ -1429,11 +1645,23 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
         if (Status != ServerStatus.Stopped)
         {
-            _services.Dialog.Show("停止中のみ変更できます。", "確認", MessageBoxButton.OK, MessageBoxImage.Information);
+            _services.Dialog.Show(
+                "停止中のみ変更できます。",
+                "確認",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
             return;
         }
 
-        if (_services.Dialog.Show($"バージョンを {SelectedVersion.Id} に変更します。", "確認", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+        if (
+            _services.Dialog.Show(
+                $"バージョンを {SelectedVersion.Id} に変更します。",
+                "確認",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question
+            ) != MessageBoxResult.Yes
+        )
         {
             return;
         }
@@ -1441,14 +1669,24 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         try
         {
             var jarPath = Path.Combine(ServerDirectory, "server.jar");
-            await _services.Jars.DownloadAsync(_config.Type, SelectedVersion.Id, jarPath, _config.JavaPath);
+            await _services.Jars.DownloadAsync(
+                _config.Type,
+                SelectedVersion.Id,
+                jarPath,
+                _config.JavaPath
+            );
             _config.Version = SelectedVersion.Id;
             _services.Configs.Save(_config);
             OnPropertyChanged(nameof(Version));
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"バージョン変更に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"バージョン変更に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
@@ -1456,18 +1694,33 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     {
         if (Status != ServerStatus.Stopped)
         {
-            _services.Dialog.Show("停止中のみ再ダウンロードできます。", "確認", MessageBoxButton.OK, MessageBoxImage.Information);
+            _services.Dialog.Show(
+                "停止中のみ再ダウンロードできます。",
+                "確認",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
             return;
         }
 
         try
         {
             var jarPath = Path.Combine(ServerDirectory, "server.jar");
-            await _services.Jars.DownloadAsync(_config.Type, _config.Version, jarPath, _config.JavaPath);
+            await _services.Jars.DownloadAsync(
+                _config.Type,
+                _config.Version,
+                jarPath,
+                _config.JavaPath
+            );
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"再ダウンロードに失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"再ダウンロードに失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
@@ -1482,11 +1735,21 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
             _services.Firewall.CreateRules(_config.Port, _config.Firewall);
             _services.Configs.Save(_config);
-            _services.Dialog.Show("Firewall ルールを作成しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+            _services.Dialog.Show(
+                "Firewall ルールを作成しました。",
+                "完了",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"Firewall ルール作成に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"Firewall ルール作成に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
@@ -1495,11 +1758,21 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         try
         {
             _services.Firewall.DeleteRules(_config.Firewall);
-            _services.Dialog.Show("Firewall ルールを削除しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+            _services.Dialog.Show(
+                "Firewall ルールを削除しました。",
+                "完了",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"Firewall ルール削除に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"Firewall ルール削除に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
@@ -1514,32 +1787,60 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
             _services.Firewall.RecreateRules(_config.Port, _config.Firewall);
             _services.Configs.Save(_config);
-            _services.Dialog.Show("Firewall ルールを再作成しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+            _services.Dialog.Show(
+                "Firewall ルールを再作成しました。",
+                "完了",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"Firewall ルール再作成に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"Firewall ルール再作成に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
     private async Task OpenPortAsync()
     {
-        var (ok, error) = await _services.Upnp.TryOpenPortAsync(_config.Port, $"McServerManager_{_config.Name}");
+        var (ok, error) = await _services.Upnp.TryOpenPortAsync(
+            _config.Port,
+            $"McServerManager_{_config.Name}"
+        );
         if (!ok)
         {
-            _services.Dialog.Show(error ?? "ポート開放に失敗しました。", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+            _services.Dialog.Show(
+                error ?? "ポート開放に失敗しました。",
+                "警告",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning
+            );
             return;
         }
 
         _upnpOpened = true;
-        _services.Dialog.Show($"TCP {_config.Port} のポート開放を実行しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+        _services.Dialog.Show(
+            $"TCP {_config.Port} のポート開放を実行しました。",
+            "完了",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information
+        );
     }
 
     private async Task ClosePortAsync()
     {
         await _services.Upnp.TryClosePortAsync(_config.Port);
         _upnpOpened = false;
-        _services.Dialog.Show($"TCP {_config.Port} のポート閉鎖を実行しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+        _services.Dialog.Show(
+            $"TCP {_config.Port} のポート閉鎖を実行しました。",
+            "完了",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information
+        );
     }
 
     private async Task RefreshPublicIpAsync()
@@ -1552,7 +1853,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
     private void CopyShareAddress()
     {
-        var address = $"{PublicIp}:{Port}";
+        var address = PublicIp;
         try
         {
             System.Windows.Clipboard.SetText(address);
@@ -1606,9 +1907,10 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 Addons.Add(addon);
             }
 
-            AddonStatus = Addons.Count == 0
-                ? $"{AddonCategoryName}ファイルがまだありません。"
-                : $"{AddonCategoryName} {Addons.Count} 件";
+            AddonStatus =
+                Addons.Count == 0
+                    ? $"{AddonCategoryName}ファイルがまだありません。"
+                    : $"{AddonCategoryName} {Addons.Count} 件";
 
             var warnings = _services.Addons.AnalyzeCompatibilityWarnings(ServerType, Addons);
             if (warnings.Count > 0)
@@ -1624,7 +1926,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         catch (Exception ex)
         {
             AddonStatus = "一覧取得に失敗しました。";
-            _services.Dialog.Show($"一覧取得に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"一覧取得に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
 
         RaiseAddonCommandsCanExecuteChanged();
@@ -1646,7 +1953,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         {
             Filter = "jarファイル|*.jar",
             Multiselect = true,
-            CheckFileExists = true
+            CheckFileExists = true,
         };
 
         if (dialog.ShowDialog() == true)
@@ -1679,8 +1986,8 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
             if (assessment.RequiresConfirmation)
             {
-                var detailLines = assessment.Warnings
-                    .Take(12)
+                var detailLines = assessment
+                    .Warnings.Take(12)
                     .Select((warning, index) => $"{index + 1}. {warning}")
                     .ToList();
 
@@ -1694,7 +2001,8 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                     $"追加前チェックで注意点が見つかりました。続行しますか？{Environment.NewLine}{Environment.NewLine}{details}",
                     "追加前チェック",
                     MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning);
+                    MessageBoxImage.Warning
+                );
 
                 if (result != MessageBoxResult.Yes)
                 {
@@ -1704,7 +2012,9 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             }
 
             AddonProgressMessage = "ファイルを追加しています...";
-            var count = await Task.Run(() => _services.Addons.AddFiles(ServerDirectory, ServerType, sourcePaths));
+            var count = await Task.Run(() =>
+                _services.Addons.AddFiles(ServerDirectory, ServerType, sourcePaths)
+            );
             if (count > 0)
             {
                 AddonStatus = $"{count} 件を追加しました。";
@@ -1720,7 +2030,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"追加に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"追加に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
         finally
         {
@@ -1737,12 +2052,16 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             return;
         }
 
-        var lines = string.Join(Environment.NewLine, warnings.Select((warning, index) => $"{index + 1}. {warning}"));
+        var lines = string.Join(
+            Environment.NewLine,
+            warnings.Select((warning, index) => $"{index + 1}. {warning}")
+        );
         _services.Dialog.Show(
             $"追加した {AddonCategoryName} に互換性の注意点があります。{Environment.NewLine}{Environment.NewLine}{lines}",
             "互換性チェック",
             MessageBoxButton.OK,
-            MessageBoxImage.Warning);
+            MessageBoxImage.Warning
+        );
     }
 
     private void DisableAddon()
@@ -1759,7 +2078,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"無効化に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"無効化に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
@@ -1777,7 +2101,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"有効化に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"有効化に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
@@ -1788,7 +2117,14 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             return;
         }
 
-        if (_services.Dialog.Show($"{SelectedAddon.FileName} を削除します。", "確認", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
+        if (
+            _services.Dialog.Show(
+                $"{SelectedAddon.FileName} を削除します。",
+                "確認",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning
+            ) != MessageBoxResult.Yes
+        )
         {
             return;
         }
@@ -1800,7 +2136,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show($"削除に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"削除に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
@@ -1831,7 +2172,9 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         try
         {
             AddonCatalogStatus = "検索中...";
-            var results = await _services.AddonCatalog.SearchAsync(query, ServerType, Version, limit: 20).ConfigureAwait(false);
+            var results = await _services
+                .AddonCatalog.SearchAsync(query, ServerType, Version, limit: 20)
+                .ConfigureAwait(false);
 
             WpfApplication.Current.Dispatcher.Invoke(() =>
             {
@@ -1844,14 +2187,20 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 SelectedAddonSearchResult = AddonSearchResults.FirstOrDefault();
             });
 
-            AddonCatalogStatus = results.Count == 0
-                ? "該当する候補が見つかりませんでした。"
-                : $"{results.Count} 件見つかりました。";
+            AddonCatalogStatus =
+                results.Count == 0
+                    ? "該当する候補が見つかりませんでした。"
+                    : $"{results.Count} 件見つかりました。";
         }
         catch (Exception ex)
         {
             AddonCatalogStatus = "検索に失敗しました。";
-            _services.Dialog.Show($"Modrinth検索に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"Modrinth検索に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
@@ -1949,15 +2298,19 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
         try
         {
+            process.Refresh();
             var now = DateTime.UtcNow;
             var totalCpu = process.TotalProcessorTime;
             if (_lastCpuCheck != DateTime.MinValue)
             {
                 var deltaCpu = totalCpu - _lastCpuTime;
                 var deltaTime = now - _lastCpuCheck;
-                var cpuPercent = deltaTime.TotalMilliseconds > 0
-                    ? deltaCpu.TotalMilliseconds / (deltaTime.TotalMilliseconds * Environment.ProcessorCount) * 100
-                    : 0;
+                var cpuPercent =
+                    deltaTime.TotalMilliseconds > 0
+                        ? deltaCpu.TotalMilliseconds
+                            / (deltaTime.TotalMilliseconds * Environment.ProcessorCount)
+                            * 100
+                        : 0;
                 CpuUsagePercent = Math.Clamp(cpuPercent, 0, 100);
             }
 
@@ -1998,7 +2351,8 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             $"ポート {_config.Port} を使用しているプロセスがあります: {names}\n終了させて続行しますか？",
             "ポート使用中",
             MessageBoxButton.YesNo,
-            MessageBoxImage.Warning);
+            MessageBoxImage.Warning
+        );
 
         if (result != MessageBoxResult.Yes)
         {
@@ -2007,7 +2361,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
         if (!_services.Network.TryKillProcessesUsingPort(_config.Port, out var error))
         {
-            _services.Dialog.Show($"プロセス終了に失敗しました: {error}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show(
+                $"プロセス終了に失敗しました: {error}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
             return false;
         }
 
@@ -2018,7 +2377,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     {
         if (_appSettings.PromptUpnp)
         {
-            var result = _services.Dialog.Show("ルーターの自動ポート開放を試しますか？", "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var result = _services.Dialog.Show(
+                "ルーターの自動ポート開放を試しますか？",
+                "確認",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question
+            );
             if (result != MessageBoxResult.Yes)
             {
                 return;
@@ -2029,10 +2393,18 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             return;
         }
 
-        var (ok, error) = await _services.Upnp.TryOpenPortAsync(_config.Port, $"McServerManager_{_config.Name}");
+        var (ok, error) = await _services.Upnp.TryOpenPortAsync(
+            _config.Port,
+            $"McServerManager_{_config.Name}"
+        );
         if (!ok)
         {
-            _services.Dialog.Show(error ?? "ポート開放に失敗しました。", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+            _services.Dialog.Show(
+                error ?? "ポート開放に失敗しました。",
+                "警告",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning
+            );
             return;
         }
 

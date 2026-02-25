@@ -31,4 +31,6 @@
     <SolidColorBrush x:Key="BrushSuccessSoft" Color="#E8F5E9"/>
     <SolidColorBrush x:Key="BrushWarningSoft" Color="#FFF3E0"/>
     <SolidColorBrush x:Key="BrushErrorSoft" Color="#FFEBEE"/>
+    <SolidColorBrush x:Key="BrushTerminalBg" Color="#F5F7FA"/>
+    <SolidColorBrush x:Key="BrushTerminalFg" Color="#1A2433"/>
 </ResourceDictionary>

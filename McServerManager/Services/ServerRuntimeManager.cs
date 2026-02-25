@@ -64,7 +64,14 @@ public sealed class ServerRuntimeManager
 
         var javaPath = string.IsNullOrWhiteSpace(config.JavaPath) ? "java" : config.JavaPath;
         var jarPath = Path.Combine(serverDirectory, "server.jar");
-        if (!File.Exists(jarPath))
+
+        // Forge 1.17+ は run.bat / win_args.txt で起動するため server.jar が不要な場合がある
+        var isForge = string.Equals(config.Type, "Forge", StringComparison.OrdinalIgnoreCase);
+        var hasForgeAltLaunch = isForge && (
+            File.Exists(Path.Combine(serverDirectory, "run.bat")) ||
+            !string.IsNullOrWhiteSpace(FindForgeWinArgsFile(serverDirectory)));
+
+        if (!File.Exists(jarPath) && !hasForgeAltLaunch)
         {
             throw new FileNotFoundException("server.jar が見つかりません。", jarPath);
         }
