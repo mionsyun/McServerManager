@@ -631,6 +631,11 @@ a {
   color: var(--text);
 }
 
+.steps li > strong,
+.steps li > .step-body {
+  grid-column: 2;
+}
+
 .preview {
   min-height: 220px;
   background: var(--bg);

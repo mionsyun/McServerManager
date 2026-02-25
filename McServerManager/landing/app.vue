@@ -581,20 +581,27 @@ onMounted(() => {
   }
   document.addEventListener("click", handleTrackedClick, { passive: true });
 
-  /* ── Scroll-triggered reveal ── */
-  revealObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("visible");
-          revealObserver?.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.12 }
-  );
+  // Fallback for environments without IntersectionObserver.
   nextTick(() => {
-    document.querySelectorAll(".reveal").forEach((el) => {
+    const revealTargets = Array.from(document.querySelectorAll<HTMLElement>(".reveal"));
+    if (!("IntersectionObserver" in window)) {
+      revealTargets.forEach((el) => {
+        el.classList.add("visible");
+      });
+      return;
+    }
+    revealObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            revealObserver?.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    revealTargets.forEach((el) => {
       revealObserver?.observe(el);
     });
   });
@@ -820,7 +827,7 @@ useHead(() => ({
           <ol class="steps">
             <li v-for="step in t.steps" :key="step.title">
               <strong>{{ step.title }}</strong>
-              {{ step.body }}
+              <span class="step-body">{{ step.body }}</span>
             </li>
           </ol>
         </div>
