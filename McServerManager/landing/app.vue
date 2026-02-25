@@ -197,6 +197,7 @@ const translations = {
     downloadSecondary: "Setup notes",
     prSectionTitle: "Sponsored options (PR)",
     prSectionSub: "You can place both banner ads and regular links.",
+    prTextLinkLabel: "Text Link (PR)",
     prItems: [
       {
         kind: "banner",
@@ -445,6 +446,7 @@ const translations = {
     downloadSecondary: "セットアップノート",
     prSectionTitle: "スポンサーリンク（PR）",
     prSectionSub: "バナー広告と通常リンクの両方を掲載できます。",
+    prTextLinkLabel: "テキストリンク（PR）",
     prItems: [
       {
         kind: "banner",
@@ -1058,7 +1060,12 @@ useHead(() => ({
           <p>{{ t.prSectionSub }}</p>
         </div>
         <div class="grid pr-grid">
-          <article v-for="item in prItems" :key="`${item.kind}-${item.href}-${item.title}`" class="panel pr-card">
+          <article
+            v-for="item in prItems"
+            :key="`${item.kind}-${item.href}-${item.title}`"
+            class="panel pr-card"
+            :class="item.kind === 'banner' ? 'is-banner' : 'is-link'"
+          >
             <a
               :href="item.href"
               class="pr-link-card"
@@ -1074,6 +1081,9 @@ useHead(() => ({
                 class="pr-banner-image"
                 loading="lazy"
               />
+              <div v-else class="pr-link-media" aria-hidden="true">
+                <span>{{ t.prTextLinkLabel }}</span>
+              </div>
               <h3>{{ item.title }}</h3>
               <p v-if="item.description">{{ item.description }}</p>
               <span class="pr-cta">{{ item.cta }}</span>

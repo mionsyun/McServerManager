@@ -510,7 +510,7 @@ a {
 .section-head {
   display: grid;
   gap: 12px;
-  max-width: 680px;
+  max-width: 760px;
 }
 
 .section h2 {
@@ -586,6 +586,11 @@ a {
 
 .panel h3 {
   margin-top: 0;
+  overflow-wrap: anywhere;
+}
+
+.panel p {
+  overflow-wrap: anywhere;
 }
 
 .split {
@@ -775,7 +780,7 @@ a {
 }
 
 .pr-grid {
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
 .pr-card {
@@ -786,8 +791,8 @@ a {
 .pr-link-card {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  min-height: 100%;
+  gap: 12px;
+  height: 100%;
   padding: 18px;
   color: inherit;
 }
@@ -798,18 +803,66 @@ a {
 
 .pr-banner-image {
   width: 100%;
-  height: 140px;
+  height: clamp(120px, 18vw, 168px);
   object-fit: cover;
   border-radius: 12px;
   border: 1px solid var(--stroke);
   background: rgba(255, 255, 255, 0.03);
 }
 
+.pr-link-media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: clamp(120px, 18vw, 168px);
+  border-radius: 12px;
+  border: 1px dashed rgba(51, 168, 255, 0.45);
+  background: linear-gradient(135deg, rgba(51, 168, 255, 0.1), rgba(102, 255, 136, 0.1));
+}
+
+.pr-link-media span {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: var(--accent-2);
+}
+
+.pr-link-card h3 {
+  margin: 0;
+}
+
+.pr-link-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
 .pr-cta {
-  margin-top: auto;
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-weight: 700;
   color: var(--accent-2);
   transition: color 0.2s ease;
+}
+
+.pr-cta::after {
+  content: "→";
+  transition: transform 0.2s ease;
+}
+
+.pr-link-card:hover .pr-cta::after {
+  transform: translateX(3px);
+}
+
+.faq .panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.faq .panel p {
+  flex: 1;
 }
 
 .footer {
@@ -1139,7 +1192,8 @@ a {
   .faq,
   .security,
   .compat-grid,
-  .download-options {
+  .download-options,
+  .pr-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1252,6 +1306,11 @@ a {
 
   .download-options-block {
     margin-top: 20px;
+  }
+
+  .pr-link-card {
+    padding: 16px;
+    gap: 10px;
   }
 
   /* ─── Support / Security CTA ─── */

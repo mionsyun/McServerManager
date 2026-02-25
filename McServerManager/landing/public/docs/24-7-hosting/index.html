@@ -139,6 +139,29 @@
       a {
         color: var(--accent-2);
       }
+      .affiliate-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 14px;
+        margin-top: 12px;
+      }
+      .affiliate-card {
+        display: grid;
+        gap: 10px;
+        background: var(--panel-2);
+        border: 1px solid rgba(126, 157, 201, 0.28);
+        border-radius: 12px;
+        padding: 12px;
+      }
+      .affiliate-card img {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        border: 1px solid rgba(126, 157, 201, 0.35);
+      }
+      .affiliate-title {
+        font-weight: 700;
+      }
       footer {
         text-align: center;
         color: var(--muted);
@@ -292,21 +315,97 @@
       <section class="card" data-lang-block="ja">
         <h2>候補（PR）</h2>
         <p class="muted">選定基準: 料金 / 解約のしやすさ / 日本語 / 管理画面 / 安定性</p>
-        <ul>
-          <li><a href="https://example.com/provider-a" rel="sponsored" data-event="outbound_affiliate_click">Provider A (PR)</a></li>
-          <li><a href="https://example.com/provider-b" rel="sponsored" data-event="outbound_affiliate_click">Provider B (PR)</a></li>
-          <li><a href="https://example.com/provider-c" rel="sponsored" data-event="outbound_affiliate_click">Provider C (PR)</a></li>
-        </ul>
+        <div class="affiliate-grid">
+          <article class="affiliate-card">
+            <a
+              href="https://px.a8.net/svt/ejp?a8mat=4AXJKD+2YKMU2+50+4YQJIQ"
+              rel="sponsored nofollow noopener noreferrer"
+              target="_blank"
+              data-event="pr_conoha_click"
+            >
+              <img
+                src="https://www28.a8.net/svt/bgt?aid=260225869179&wid=002&eno=01&mid=s00000000018030129000&mc=1"
+                alt="ConoHa VPS バナー（PR）"
+              />
+            </a>
+            <div class="affiliate-title">ConoHa VPS（PR）</div>
+            <a
+              href="https://px.a8.net/svt/ejp?a8mat=4AXJKD+2YKMU2+50+4YQJIQ"
+              rel="sponsored nofollow noopener noreferrer"
+              target="_blank"
+              data-event="pr_conoha_click"
+            >ConoHa VPSを見る（PR）</a>
+          </article>
+
+          <article class="affiliate-card">
+            <a
+              href="https://px.a8.net/svt/ejp?a8mat=4AXJKD+2WSC0Q+5GDG+NVP2P"
+              rel="sponsored nofollow noopener noreferrer"
+              target="_blank"
+              data-event="pr_shinvps_click"
+            >
+              <img
+                src="https://www29.a8.net/svt/bgt?aid=260225869176&wid=002&eno=01&mid=s00000025450004011000&mc=1"
+                alt="シンVPS バナー（PR）"
+              />
+            </a>
+            <div class="affiliate-title">シンVPS（PR）</div>
+            <a
+              href="https://px.a8.net/svt/ejp?a8mat=4AXJKD+2WSC0Q+5GDG+NTRMQ"
+              rel="sponsored nofollow noopener noreferrer"
+              target="_blank"
+              data-event="pr_shinvps_click"
+            >シンVPSを見る（PR）</a>
+          </article>
+        </div>
       </section>
 
       <section class="card" data-lang-block="en">
         <h2>Options (PR)</h2>
         <p class="muted">Selection criteria: price, cancellation, language, control panel, stability</p>
-        <ul>
-          <li><a href="https://example.com/provider-a" rel="sponsored" data-event="outbound_affiliate_click">Provider A (PR)</a></li>
-          <li><a href="https://example.com/provider-b" rel="sponsored" data-event="outbound_affiliate_click">Provider B (PR)</a></li>
-          <li><a href="https://example.com/provider-c" rel="sponsored" data-event="outbound_affiliate_click">Provider C (PR)</a></li>
-        </ul>
+        <div class="affiliate-grid">
+          <article class="affiliate-card">
+            <a
+              href="https://px.a8.net/svt/ejp?a8mat=4AXJKD+2YKMU2+50+4YQJIQ"
+              rel="sponsored nofollow noopener noreferrer"
+              target="_blank"
+              data-event="pr_conoha_click"
+            >
+              <img
+                src="https://www28.a8.net/svt/bgt?aid=260225869179&wid=002&eno=01&mid=s00000000018030129000&mc=1"
+                alt="ConoHa VPS banner (PR)"
+              />
+            </a>
+            <div class="affiliate-title">ConoHa VPS (PR)</div>
+            <a
+              href="https://px.a8.net/svt/ejp?a8mat=4AXJKD+2YKMU2+50+4YQJIQ"
+              rel="sponsored nofollow noopener noreferrer"
+              target="_blank"
+              data-event="pr_conoha_click"
+            >Open ConoHa VPS (PR)</a>
+          </article>
+
+          <article class="affiliate-card">
+            <a
+              href="https://px.a8.net/svt/ejp?a8mat=4AXJKD+2WSC0Q+5GDG+NVP2P"
+              rel="sponsored nofollow noopener noreferrer"
+              target="_blank"
+              data-event="pr_shinvps_click"
+            >
+              <img
+                src="https://www29.a8.net/svt/bgt?aid=260225869176&wid=002&eno=01&mid=s00000025450004011000&mc=1"
+                alt="Shin VPS banner (PR)"
+              />
+            </a>
+            <div class="affiliate-title">Shin VPS (PR)</div>
+            <a
+              href="https://px.a8.net/svt/ejp?a8mat=4AXJKD+2WSC0Q+5GDG+NTRMQ"
+              rel="sponsored nofollow noopener noreferrer"
+              target="_blank"
+              data-event="pr_shinvps_click"
+            >Open Shin VPS (PR)</a>
+          </article>
+        </div>
       </section>
 
       <section class="card" data-lang-block="ja">
