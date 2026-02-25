@@ -9,20 +9,49 @@ namespace McServerManager.Services;
 public sealed class ServerRuntimeManager
 {
     private readonly Dictionary<string, ServerRuntime> _runtimes = new();
+    private readonly object _runtimesLock = new();
 
     public event Action<ServerConfig, int?>? ServerCrashed;
 
     public ServerRuntime GetOrCreate(ServerConfig config)
     {
-        if (_runtimes.TryGetValue(config.ServerId, out var runtime))
+        lock (_runtimesLock)
         {
-            runtime.UpdateConfig(config);
+            if (_runtimes.TryGetValue(config.ServerId, out var runtime))
+            {
+                runtime.UpdateConfig(config);
+                return runtime;
+            }
+
+            runtime = new ServerRuntime(config);
+            _runtimes[config.ServerId] = runtime;
             return runtime;
         }
+    }
 
-        runtime = new ServerRuntime(config);
-        _runtimes[config.ServerId] = runtime;
-        return runtime;
+    public bool TryRelease(string serverId)
+    {
+        if (string.IsNullOrWhiteSpace(serverId))
+        {
+            return false;
+        }
+
+        lock (_runtimesLock)
+        {
+            if (!_runtimes.TryGetValue(serverId, out var runtime))
+            {
+                return false;
+            }
+
+            var process = runtime.Process;
+            if (runtime.Status != ServerStatus.Stopped || (process is not null && !process.HasExited))
+            {
+                return false;
+            }
+
+            _runtimes.Remove(serverId);
+            return true;
+        }
     }
 
     public async Task StartAsync(ServerConfig config, string serverDirectory)

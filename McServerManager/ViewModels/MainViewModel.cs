@@ -119,6 +119,7 @@ public sealed class MainViewModel : ObservableObject
 
     private void LoadServers()
     {
+        DisposeServerViewModels(Servers);
         Servers.Clear();
         var configs = _services.Configs.LoadAll(_settings.ServerDirectories);
         foreach (var config in configs.OrderBy(c => c.Name))
@@ -207,6 +208,17 @@ public sealed class MainViewModel : ObservableObject
             }
         }
 
+        var runtimeReleased = _services.Runtime.TryRelease(target.ServerId);
+        if (!runtimeReleased)
+        {
+            _services.Dialog.Show(
+                "サーバーランタイムの解放に失敗しました。アプリ再起動で解消する場合があります。",
+                "警告",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
+
+        DisposeServerViewModel(target);
         Servers.Remove(target);
         if (SelectedServer == target)
         {
@@ -292,6 +304,31 @@ public sealed class MainViewModel : ObservableObject
         {
             var targetDir = Path.Combine(destination, Path.GetFileName(dir));
             CopyDirectory(dir, targetDir);
+        }
+    }
+
+    private static void DisposeServerViewModels(IEnumerable<ServerViewModel> servers)
+    {
+        foreach (var server in servers.ToList())
+        {
+            DisposeServerViewModel(server);
+        }
+    }
+
+    private static void DisposeServerViewModel(ServerViewModel? server)
+    {
+        if (server is null)
+        {
+            return;
+        }
+
+        try
+        {
+            server.Dispose();
+        }
+        catch
+        {
+            // Best effort cleanup.
         }
     }
 

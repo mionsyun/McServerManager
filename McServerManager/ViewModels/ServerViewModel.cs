@@ -12,7 +12,7 @@ using McServerManager.Utilities;
 
 namespace McServerManager.ViewModels;
 
-public sealed class ServerViewModel : ObservableObject
+public sealed class ServerViewModel : ObservableObject, IDisposable
 {
     private static readonly Regex PlayerCountRegex = new(@"There are (\d+) of a max of (\d+) players online", RegexOptions.Compiled);
     private readonly AppServices _services;
@@ -58,6 +58,7 @@ public sealed class ServerViewModel : ObservableObject
     private string _javaExtraArguments = string.Empty;
     private int _memoryXmsMb;
     private int _memoryXmxMb;
+    private bool _isDisposed;
 
     public ServerViewModel(AppServices services, ServerConfig config)
     {
@@ -816,10 +817,13 @@ public sealed class ServerViewModel : ObservableObject
 
         try
         {
-            _config.LastStartedAt = DateTime.UtcNow;
-            _services.Configs.Save(_config);
-            OnPropertyChanged(nameof(LastStartedAtText));
             await _services.Runtime.StartAsync(_config, ServerDirectory);
+            if (_runtime.Status != ServerStatus.Stopped)
+            {
+                _config.LastStartedAt = DateTime.UtcNow;
+                _services.Configs.Save(_config);
+                OnPropertyChanged(nameof(LastStartedAtText));
+            }
         }
         catch (Exception ex)
         {
@@ -1027,7 +1031,7 @@ public sealed class ServerViewModel : ObservableObject
         }
         else
         {
-            MessageBox.Show(
+            _services.Dialog.Show(
                 "Javaが見つかりませんでした。\n\nhttps://adoptium.net から Eclipse Temurin (LTS) をインストールしてください。\nインストール時に「PATH に追加」にチェックを入れてから再度お試しください。",
                 "Java 自動検出",
                 MessageBoxButton.OK,
@@ -1551,7 +1555,7 @@ public sealed class ServerViewModel : ObservableObject
         var address = $"{PublicIp}:{Port}";
         try
         {
-            Clipboard.SetText(address);
+            System.Windows.Clipboard.SetText(address);
         }
         catch
         {
@@ -2044,5 +2048,19 @@ public sealed class ServerViewModel : ObservableObject
 
         await _services.Upnp.TryClosePortAsync(_config.Port);
         _upnpOpened = false;
+    }
+
+    public void Dispose()
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        _isDisposed = true;
+        _runtime.StatusChanged -= OnStatusChanged;
+        _runtime.LogReceived -= OnLogReceived;
+        _statsTimer.Stop();
+        GC.SuppressFinalize(this);
     }
 }

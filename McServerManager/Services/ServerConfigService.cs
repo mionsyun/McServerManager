@@ -40,7 +40,7 @@ public sealed class ServerConfigService
                 continue;
             }
 
-            foreach (var configPath in Directory.EnumerateFiles(root, "config.json", SearchOption.AllDirectories))
+            foreach (var configPath in EnumerateConfigPaths(root))
             {
                 try
                 {
@@ -128,5 +128,33 @@ public sealed class ServerConfigService
         Directory.CreateDirectory(Path.GetDirectoryName(path) ?? _pathsService.ServersPath);
         var json = JsonSerializer.Serialize(config, _options);
         File.WriteAllText(path, json);
+    }
+
+    private static IEnumerable<string> EnumerateConfigPaths(string root)
+    {
+        var rootConfig = Path.Combine(root, "config.json");
+        if (File.Exists(rootConfig))
+        {
+            yield return rootConfig;
+        }
+
+        IEnumerable<string> childDirectories;
+        try
+        {
+            childDirectories = Directory.EnumerateDirectories(root);
+        }
+        catch
+        {
+            yield break;
+        }
+
+        foreach (var directory in childDirectories)
+        {
+            var candidate = Path.Combine(directory, "config.json");
+            if (File.Exists(candidate))
+            {
+                yield return candidate;
+            }
+        }
     }
 }
