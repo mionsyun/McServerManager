@@ -99,6 +99,7 @@ public sealed class ServerViewModel : ObservableObject
         ExportLogsCommand = new RelayCommand(_ => ExportLogs());
         SaveSettingsCommand = new RelayCommand(_ => SaveSettings());
         BrowseJavaCommand = new RelayCommand(_ => BrowseJava());
+        DetectJavaCommand = new RelayCommand(_ => DetectJava());
         SwitchWorldCommand = new RelayCommand(_ => SwitchWorld(), _ => !string.IsNullOrWhiteSpace(SelectedWorld) && !IsSelectedWorldCurrent);
         DeleteWorldCommand = new RelayCommand(_ => DeleteWorld(), _ => !string.IsNullOrWhiteSpace(SelectedWorld));
         CreateWorldCommand = new RelayCommand(_ => CreateWorld(), _ => !string.IsNullOrWhiteSpace(NewWorldName));
@@ -118,6 +119,7 @@ public sealed class ServerViewModel : ObservableObject
         OpenPortCommand = new AsyncRelayCommand(OpenPortAsync);
         ClosePortCommand = new AsyncRelayCommand(ClosePortAsync);
         RefreshPublicIpCommand = new AsyncRelayCommand(RefreshPublicIpAsync);
+        CopyShareAddressCommand = new RelayCommand(_ => CopyShareAddress());
         AddOpCommand = new RelayCommand(_ => AddOp(), _ => !string.IsNullOrWhiteSpace(NewOpName));
         RemoveOpCommand = new RelayCommand(_ => RemoveOp(), _ => SelectedOp is not null);
         AddWhitelistCommand = new RelayCommand(_ => AddWhitelist(), _ => !string.IsNullOrWhiteSpace(NewWhitelistName));
@@ -701,6 +703,7 @@ public sealed class ServerViewModel : ObservableObject
     public RelayCommand ExportLogsCommand { get; }
     public RelayCommand SaveSettingsCommand { get; }
     public RelayCommand BrowseJavaCommand { get; }
+    public RelayCommand DetectJavaCommand { get; }
     public RelayCommand SwitchWorldCommand { get; }
     public RelayCommand DeleteWorldCommand { get; }
     public RelayCommand CreateWorldCommand { get; }
@@ -720,6 +723,7 @@ public sealed class ServerViewModel : ObservableObject
     public AsyncRelayCommand OpenPortCommand { get; }
     public AsyncRelayCommand ClosePortCommand { get; }
     public AsyncRelayCommand RefreshPublicIpCommand { get; }
+    public RelayCommand CopyShareAddressCommand { get; }
     public RelayCommand AddOpCommand { get; }
     public RelayCommand RemoveOpCommand { get; }
     public RelayCommand AddWhitelistCommand { get; }
@@ -1011,6 +1015,23 @@ public sealed class ServerViewModel : ObservableObject
         if (dialog.ShowDialog() == true)
         {
             JavaPath = dialog.FileName;
+        }
+    }
+
+    private void DetectJava()
+    {
+        var detected = _services.Java.FindJavaExecutable();
+        if (!string.IsNullOrWhiteSpace(detected))
+        {
+            JavaPath = detected;
+        }
+        else
+        {
+            MessageBox.Show(
+                "Javaが見つかりませんでした。\n\nhttps://adoptium.net から Eclipse Temurin (LTS) をインストールしてください。\nインストール時に「PATH に追加」にチェックを入れてから再度お試しください。",
+                "Java 自動検出",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
         }
     }
 
@@ -1523,6 +1544,19 @@ public sealed class ServerViewModel : ObservableObject
         var ip = await _services.Network.GetPublicIpAsync();
         PublicIp = string.IsNullOrWhiteSpace(ip) ? "-" : ip;
         PublicIpStatus = string.IsNullOrWhiteSpace(ip) ? "取得失敗" : string.Empty;
+    }
+
+    private void CopyShareAddress()
+    {
+        var address = $"{PublicIp}:{Port}";
+        try
+        {
+            Clipboard.SetText(address);
+        }
+        catch
+        {
+            // Clipboard may fail in rare cases
+        }
     }
 
     private void LoadPermissions()

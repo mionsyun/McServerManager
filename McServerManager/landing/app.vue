@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+
+const mobileMenuOpen = ref(false);
+const closeMobileMenu = () => { mobileMenuOpen.value = false; };
 
 const defaultDownloadPath = "https://stmailpilotje.blob.core.windows.net/public/downloads/MaiPilotSetup.exe";
 const docsUrl = "/docs";
@@ -8,6 +11,7 @@ const docsHostingUrl = "/docs/24-7-hosting";
 const docsPortUrl = "/docs/port-forwarding";
 const docsTroubleUrl = "/docs/troubleshooting";
 const docsPrivacyUrl = "/docs/privacy-and-network";
+const docsJavaUrl = "/docs/java-setup/";
 const version = "1.0.0";
 
 const downloadOptionEvents: Record<string, string> = {
@@ -19,6 +23,7 @@ const faqLinks: Record<string, string> = {
   hosting: docsHostingUrl,
   port: docsPortUrl,
   trouble: docsTroubleUrl,
+  java: docsJavaUrl,
 };
 
 const translations = {
@@ -208,6 +213,12 @@ const translations = {
         body: "Open logs/crash reports from the Console tab or follow the guide.",
         linkId: "trouble",
         linkLabel: "Open troubleshooting",
+      },
+      {
+        title: "How do I install Java?",
+        body: "Download Eclipse Temurin (LTS) from adoptium.net and run the installer. MaiPilot auto-detects your Java path.",
+        linkId: "java",
+        linkLabel: "Open Java setup guide",
       },
       {
         title: "Does it work with mods?",
@@ -418,6 +429,12 @@ const translations = {
         body: "コンソールからログ/クラッシュレポートを開くか、ガイドを参照してください。",
         linkId: "trouble",
         linkLabel: "トラブルシュートを見る",
+      },
+      {
+        title: "Javaの入れ方がわかりません",
+        body: "adoptium.net から Eclipse Temurin (LTS) をインストールするだけ。MaiPilotが自動検出します。",
+        linkId: "java",
+        linkLabel: "Java導入ガイドを見る",
       },
       {
         title: "MOD は使えますか？",
@@ -637,13 +654,22 @@ useHead(() => ({
         <img src="/icon.png" alt="MaiPilot" class="brand-icon" />
         <span class="brand-name">MaiPilot</span>
       </div>
-      <nav class="nav-links">
-        <a href="#features">{{ t.nav.features }}</a>
-        <a href="#help">{{ t.nav.help }}</a>
-        <a href="#how">{{ t.nav.how }}</a>
-        <a href="#compat">{{ t.nav.compat }}</a>
-        <a href="#security">{{ t.nav.security }}</a>
-        <a href="#download" class="nav-cta">{{ t.nav.download }}</a>
+      <button
+        class="hamburger"
+        type="button"
+        :class="{ open: mobileMenuOpen }"
+        aria-label="Menu"
+        @click="mobileMenuOpen = !mobileMenuOpen"
+      >
+        <span /><span /><span />
+      </button>
+      <nav class="nav-links" :class="{ 'mobile-open': mobileMenuOpen }">
+        <a href="#features" @click="closeMobileMenu">{{ t.nav.features }}</a>
+        <a href="#help" @click="closeMobileMenu">{{ t.nav.help }}</a>
+        <a href="#how" @click="closeMobileMenu">{{ t.nav.how }}</a>
+        <a href="#compat" @click="closeMobileMenu">{{ t.nav.compat }}</a>
+        <a href="#security" @click="closeMobileMenu">{{ t.nav.security }}</a>
+        <a href="#download" class="nav-cta" @click="closeMobileMenu">{{ t.nav.download }}</a>
         <div class="lang-toggle" aria-label="Language toggle">
           <span class="lang-label">{{ t.langLabel }}</span>
           <button
@@ -664,6 +690,7 @@ useHead(() => ({
           </button>
         </div>
       </nav>
+      <div class="mobile-overlay" :class="{ visible: mobileMenuOpen }" @click="closeMobileMenu" />
     </header>
 
     <main>
@@ -872,16 +899,18 @@ useHead(() => ({
     </main>
 
     <footer class="footer">
-      <div class="footer-left">
-        <img src="/icon.png" alt="MaiPilot" class="brand-icon small" />
-        <span>MaiPilot</span>
+      <div class="footer-top">
+        <div class="footer-left">
+          <img src="/icon.png" alt="MaiPilot" class="brand-icon small" />
+          <span>MaiPilot</span>
+        </div>
+        <div class="footer-right">{{ t.footerRight }}</div>
       </div>
       <div class="footer-links">
         <a :href="docsUrl">{{ t.footerDocs }}</a>
         <a href="/THIRD_PARTY_NOTICES.txt">{{ t.footerNotices }}</a>
         <a href="/LICENSE.txt">{{ t.footerLicense }}</a>
       </div>
-      <div class="footer-right">{{ t.footerRight }}</div>
       <div class="footer-disclosure">{{ t.footerDisclosure }}</div>
     </footer>
   </div>

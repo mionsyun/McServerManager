@@ -24,4 +24,11 @@
     <SolidColorBrush x:Key="BrushPressed" Color="#D0DBEB"/>
     <SolidColorBrush x:Key="BrushBorderHover" Color="#7E92B0"/>
     <SolidColorBrush x:Key="BrushOverlayDim" Color="#A0000000"/>
+    <SolidColorBrush x:Key="BrushAccentHover" Color="#1E5A9E"/>
+    <SolidColorBrush x:Key="BrushSuccess" Color="#2E7D32"/>
+    <SolidColorBrush x:Key="BrushWarning" Color="#E65100"/>
+    <SolidColorBrush x:Key="BrushError" Color="#C62828"/>
+    <SolidColorBrush x:Key="BrushSuccessSoft" Color="#E8F5E9"/>
+    <SolidColorBrush x:Key="BrushWarningSoft" Color="#FFF3E0"/>
+    <SolidColorBrush x:Key="BrushErrorSoft" Color="#FFEBEE"/>
 </ResourceDictionary>

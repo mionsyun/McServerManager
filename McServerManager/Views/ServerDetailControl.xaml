@@ -124,7 +124,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Text="{Binding CommandText, UpdateSourceTrigger=PropertyChanged}" Height="32"/>
+                        <TextBox Grid.Column="0" Text="{Binding CommandText, UpdateSourceTrigger=PropertyChanged}" Height="32">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Enter" Command="{Binding SendCommandCommand}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
                         <Button Grid.Column="1" Content="送信" Command="{Binding SendCommandCommand}" Margin="8,0,0,0" Width="90"/>
                     </Grid>
                     <WrapPanel Grid.Row="2" Margin="0,8,0,0">
@@ -142,7 +146,7 @@
                             <StackPanel>
                                 <TextBlock Text="サーバー設定" FontWeight="SemiBold" FontSize="14"/>
                                 <TextBlock Text="稼働中の変更は保存できますが反映は再起動後です。" Style="{StaticResource MutedText}" Margin="0,4,0,0"/>
-                                <TextBlock Text="再起動が必要" Foreground="#D06666" FontWeight="SemiBold" Margin="0,8,0,0"
+                                <TextBlock Text="⚠ 再起動が必要" Foreground="{DynamicResource BrushError}" FontWeight="SemiBold" Margin="0,8,0,0"
                                            Visibility="{Binding RestartRequired, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"/>
 
                                 <Grid DataContext="{Binding Settings}" Margin="0,12,0,0">
@@ -209,9 +213,23 @@
                                     <TextBox Grid.Row="10" Grid.Column="1" Text="{Binding Seed}" Width="220" Margin="0,8,0,0"/>
 
                                     <TextBlock Grid.Row="11" Grid.Column="0" Text="Java パス" Margin="0,8,0,0"/>
-                                    <StackPanel Grid.Row="11" Grid.Column="1" Orientation="Horizontal" Margin="0,8,0,0">
-                                        <TextBox x:Name="JavaPathTextBox" Text="{Binding DataContext.JavaPath, RelativeSource={RelativeSource AncestorType=UserControl}}" Width="360"/>
-                                        <Button Content="参照" Command="{Binding DataContext.BrowseJavaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="8,0,0,0"/>
+                                    <StackPanel Grid.Row="11" Grid.Column="1" Margin="0,8,0,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox x:Name="JavaPathTextBox" Text="{Binding DataContext.JavaPath, RelativeSource={RelativeSource AncestorType=UserControl}}" Width="360"/>
+                                            <Button Content="参照" Command="{Binding DataContext.BrowseJavaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="8,0,0,0"/>
+                                            <Button Content="自動検出" Command="{Binding DataContext.DetectJavaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="8,0,0,0"/>
+                                        </StackPanel>
+                                        <Border Background="{DynamicResource BrushAccentSoft}"
+                                                CornerRadius="6"
+                                                Padding="10,6"
+                                                Margin="0,6,0,0">
+                                            <TextBlock TextWrapping="Wrap" FontSize="11.5" Foreground="{DynamicResource BrushTextMuted}">
+                                                <Run Text="💡 Javaが未導入の場合は"/><LineBreak/>
+                                                <Run Text="  1. https://adoptium.net から Temurin (LTS) をダウンロード"/><LineBreak/>
+                                                <Run Text="  2. インストーラーで「PATH に追加」にチェック"/><LineBreak/>
+                                                <Run Text="  3. 「自動検出」ボタンで自動設定されます"/>
+                                            </TextBlock>
+                                        </Border>
                                     </StackPanel>
                                 </Grid>
                             </StackPanel>
@@ -510,7 +528,11 @@
                             <StackPanel Margin="0,0,0,8">
                                 <TextBlock Text="Modrinth 検索" FontWeight="SemiBold" FontSize="14"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                                    <TextBox Text="{Binding AddonSearchQuery, UpdateSourceTrigger=PropertyChanged}" Width="280" Height="28"/>
+                                    <TextBox Text="{Binding AddonSearchQuery, UpdateSourceTrigger=PropertyChanged}" Width="280" Height="28">
+                                        <TextBox.InputBindings>
+                                            <KeyBinding Key="Enter" Command="{Binding SearchAddonCatalogCommand}"/>
+                                        </TextBox.InputBindings>
+                                    </TextBox>
                                     <Button Content="検索" Command="{Binding SearchAddonCatalogCommand}" Margin="8,0,0,0"/>
                                     <Button Content="ページを開く" Command="{Binding OpenAddonCatalogPageCommand}" Margin="8,0,0,0"/>
                                 </StackPanel>
@@ -648,14 +670,23 @@
                                 </StackPanel>
 
                                 <TextBlock Text="共有アドレス" Style="{StaticResource MutedText}" Margin="0,12,0,4"/>
-                                <TextBlock x:Name="ShareAddressText">
-                                    <TextBlock.Text>
-                                        <MultiBinding StringFormat="{}{0}:{1}">
-                                            <Binding Path="PublicIp"/>
-                                            <Binding Path="Port"/>
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="{DynamicResource BrushCard}"
+                                            BorderBrush="{DynamicResource BrushBorder}"
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                            Padding="10,6">
+                                        <TextBlock x:Name="ShareAddressText" FontWeight="SemiBold" FontSize="14">
+                                            <TextBlock.Text>
+                                                <MultiBinding StringFormat="{}{0}:{1}">
+                                                    <Binding Path="PublicIp"/>
+                                                    <Binding Path="Port"/>
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </Border>
+                                    <Button Content="コピー" Command="{Binding CopyShareAddressCommand}" Margin="8,0,0,0" Width="80"/>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
 
