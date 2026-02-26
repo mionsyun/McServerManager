@@ -165,55 +165,99 @@
       <section class="card" data-lang-block="ja">
         <h2>まず見る場所</h2>
         <ul>
-          <li>コンソールタブのログ</li>
-          <li>ログフォルダ（logs）</li>
-          <li>クラッシュレポート（crash-reports）</li>
+          <li>コンソールタブのログ（リアルタイムでエラーを確認）</li>
+          <li>ログフォルダ（logs）— “ログフォルダを開く” ボタンで直接アクセス</li>
+          <li>クラッシュレポート（crash-reports）— 同じくワンクリックで開けます</li>
         </ul>
       </section>
 
       <section class="card" data-lang-block="en">
         <h2>Where to look first</h2>
         <ul>
-          <li>Console tab logs</li>
-          <li>Logs folder (logs)</li>
-          <li>Crash reports (crash-reports)</li>
+          <li>Console tab logs (check errors in real time)</li>
+          <li>Logs folder (logs) — open directly from the "Open logs folder" button</li>
+          <li>Crash reports (crash-reports) — also one-click accessible</li>
         </ul>
       </section>
 
       <section class="card" data-lang-block="ja">
         <h2>よくある原因</h2>
         <ul>
-          <li>Java バージョンが不足</li>
-          <li>ポート競合</li>
-          <li>MOD/プラグインの相性</li>
+          <li><strong>Java バージョン不足</strong> — 起動前に自動チェックされますが、警告を無視すると起動失敗します。</li>
+          <li><strong>ポート競合</strong> — 25565 が別プロセスで使用中の場合、バインドに失敗します。</li>
+          <li><strong>MOD/プラグインの相性</strong> — バージョン不一致や相互競合でクラッシュすることがあります。</li>
+          <li><strong>メモリ不足</strong> — MOD 大量導入時は割り当てメモリを増やしてください。</li>
+          <li><strong>ワールド破損</strong> — 強制終了後などに発生。バックアップから復元できます。</li>
         </ul>
       </section>
 
       <section class="card" data-lang-block="en">
         <h2>Common causes</h2>
         <ul>
-          <li>Java version mismatch</li>
-          <li>Port conflicts</li>
-          <li>Mod/plugin compatibility</li>
+          <li><strong>Java version mismatch</strong> — Auto-checked before start, but ignoring the warning causes startup failure.</li>
+          <li><strong>Port conflicts</strong> — Another process using 25565 will block binding.</li>
+          <li><strong>Mod/plugin compatibility</strong> — Version mismatches or conflicts can cause crashes.</li>
+          <li><strong>Not enough memory</strong> — Increase allocated memory when running many mods.</li>
+          <li><strong>World corruption</strong> — May happen after a forced shutdown. Restore from a backup.</li>
         </ul>
       </section>
 
       <section class="card" data-lang-block="ja">
         <h2>復旧の流れ</h2>
         <ol>
-          <li>最新ログを確認。</li>
+          <li>最新ログを確認— コンソールタブまたは logs フォルダでエラー行を探す。</li>
           <li>Java/ポート設定を見直す。</li>
-          <li>必要ならバックアップから復元。</li>
+          <li>MOD/プラグインが原因なら、直近追加したものを外して再起動。</li>
+          <li>必要ならバックアップから復元（バックアップタブからワンクリック）。</li>
         </ol>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>自動再起動 / クラッシュ復旧</h2>
+        <ul>
+          <li>MaiPilot はクラッシュを検知すると自動でサーバーを再起動します。</li>
+          <li>繰り返しクラッシュする場合は自動再起動を停止し、ログで根本原因を確認してください。</li>
+          <li>リアルタイムモニタリング（CPU・TPS・プレイヤー数）でパフォーマンス低下を事前に察知できます。</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>MOD/プラグインのトラブル</h2>
+        <ul>
+          <li><code>UnsupportedClassVersionError</code> → Java バージョンが低すぎます。</li>
+          <li><code>NoSuchMethodError</code> → MOD/プラグインの対応バージョンを確認。</li>
+          <li>起動不能 → 新規追加した JAR を外して再起動。</li>
+          <li>不安定な MOD は Modrinth 検索でアップデート版を探してみてください。</li>
+        </ul>
       </section>
 
       <section class="card" data-lang-block="en">
         <h2>Recovery flow</h2>
         <ol>
-          <li>Check the latest logs.</li>
+          <li>Check the latest logs — look for error lines in the Console tab or logs folder.</li>
           <li>Review Java and port settings.</li>
-          <li>Restore from backup if needed.</li>
+          <li>If a mod/plugin is the cause, remove the most recently added JAR and restart.</li>
+          <li>Restore from backup if needed (one click from the Backups tab).</li>
         </ol>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>Auto-restart / crash recovery</h2>
+        <ul>
+          <li>MaiPilot automatically restarts the server when a crash is detected.</li>
+          <li>If crashes repeat, disable auto-restart and check logs for the root cause.</li>
+          <li>Real-time monitoring (CPU, TPS, players) helps detect performance issues early.</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>MOD/plugin troubleshooting</h2>
+        <ul>
+          <li><code>UnsupportedClassVersionError</code> → Java version too low.</li>
+          <li><code>NoSuchMethodError</code> → Check the mod/plugin's supported version.</li>
+          <li>Cannot start → Remove the newly added JAR and restart.</li>
+          <li>For unstable mods, try searching for an updated version via Modrinth integration.</li>
+        </ul>
       </section>
 
       <footer>MaiPilot</footer>

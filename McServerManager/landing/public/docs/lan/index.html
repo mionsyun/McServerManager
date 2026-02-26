@@ -166,25 +166,68 @@
         <h2>手順</h2>
         <ol>
           <li>サーバーを起動します。</li>
-          <li>「ネットワーク」タブでLAN IPを確認。</li>
+          <li>「ネットワーク」タブで LAN IP（例: 192.168.x.x）を確認。</li>
           <li>友だちに「LAN IP:ポート」を共有。</li>
+          <li>友だちは Minecraft の「マルチプレイ」→「ダイレクト接続」で入力して接続。</li>
         </ol>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>うまくいかないとき</h2>
+        <ul>
+          <li><strong>接続できない</strong> — 全員が同じ Wi-Fi / ルーターに接続しているか確認。</li>
+          <li><strong>IP が見つからない</strong> — ネットワークタブで「ローカル IP」を確認。192.168.x.x または 10.x.x.x 形式のもの。</li>
+          <li><strong>Firewall ブロック</strong> — Windows Firewall が受信をブロックしている場合があります。MaiPilot の Firewall ルール取得機能で確認。</li>
+          <li><strong>ポートが違う</strong> — server.properties のポート番号と接続先のポートが一致しているか確認。</li>
+          <li><strong>Minecraft のバージョンが違う</strong> — サーバーとクライアントのバージョンを揃えてください。</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>外部からの接続（インターネット経由）</h2>
+        <p class="muted">LAN 外の友だちと遊ぶにはポート開放が必要です。</p>
+        <ul>
+          <li><a href="/docs/port-forwarding">ポート開放チェックリスト</a></li>
+          <li><a href="/docs/24-7-hosting" data-event="docs_24_7_hosting_click">24時間運用VPS比較（PR）</a></li>
+        </ul>
       </section>
 
       <section class="card" data-lang-block="en">
         <h2>Steps</h2>
         <ol>
           <li>Start the server.</li>
-          <li>Check the LAN IP in the Network tab.</li>
-          <li>Share “LAN IP:Port” with friends.</li>
+          <li>Check the LAN IP (e.g. 192.168.x.x) in the Network tab.</li>
+          <li>Share "LAN IP:Port" with friends.</li>
+          <li>Friends enter it via Minecraft Multiplayer → Direct Connection.</li>
         </ol>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>Troubleshooting</h2>
+        <ul>
+          <li><strong>Can't connect</strong> — Verify all players are on the same Wi-Fi / router.</li>
+          <li><strong>Can't find IP</strong> — Check "Local IP" in the Network tab (192.168.x.x or 10.x.x.x).</li>
+          <li><strong>Firewall block</strong> — Windows Firewall may block inbound connections. Use MaiPilot's firewall rule tool to check.</li>
+          <li><strong>Wrong port</strong> — Make sure the server.properties port matches the connection port.</li>
+          <li><strong>Version mismatch</strong> — Server and client Minecraft versions must match.</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>Playing over the internet</h2>
+        <p class="muted">To play with friends outside your LAN, you need port forwarding.</p>
+        <ul>
+          <li><a href="/docs/port-forwarding">Port forwarding checklist</a></li>
+          <li><a href="/docs/24-7-hosting" data-event="docs_24_7_hosting_click">24/7 VPS hosting comparison (PR)</a></li>
+        </ul>
       </section>
 
       <section class="card" data-lang-block="ja">
         <h2>よくあるポイント</h2>
         <ul>
-          <li>同じWi-Fiに接続している必要があります。</li>
-          <li>ポート番号はサーバー設定と一致させます。</li>
+          <li>同じ Wi-Fi に接続している必要があります。</li>
+          <li>ポート番号はサーバー設定と一致させます（デフォルト: 25565）。</li>
+          <li>サーバー PC がスリープすると接続が切れます。電源設定を確認してください。</li>
         </ul>
       </section>
 
@@ -192,7 +235,8 @@
         <h2>Common notes</h2>
         <ul>
           <li>All players must be on the same Wi-Fi.</li>
-          <li>Make sure the port matches the server settings.</li>
+          <li>Make sure the port matches the server settings (default: 25565).</li>
+          <li>If the server PC sleeps, the connection drops. Check power settings.</li>
         </ul>
       </section>
 
