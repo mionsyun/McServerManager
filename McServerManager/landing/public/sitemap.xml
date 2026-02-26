@@ -4,72 +4,72 @@
     <loc>https://www.maipilot.jp/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <lastmod>2026-02-17</lastmod>
+    <lastmod>2026-02-26</lastmod>
   </url>
   <url>
     <loc>https://www.maipilot.jp/docs/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2026-02-17</lastmod>
+    <lastmod>2026-02-26</lastmod>
   </url>
   <url>
     <loc>https://www.maipilot.jp/docs/24-7-hosting/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2026-02-17</lastmod>
-  </url>
-  <url>
-    <loc>https://www.maipilot.jp/docs/port-forwarding/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <lastmod>2026-02-17</lastmod>
-  </url>
-  <url>
-    <loc>https://www.maipilot.jp/docs/privacy-and-network/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-    <lastmod>2026-02-17</lastmod>
-  </url>
-  <url>
-    <loc>https://www.maipilot.jp/docs/lan/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-    <lastmod>2026-02-17</lastmod>
-  </url>
-  <url>
-    <loc>https://www.maipilot.jp/docs/troubleshooting/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <lastmod>2026-02-17</lastmod>
+    <lastmod>2026-02-26</lastmod>
   </url>
   <url>
     <loc>https://www.maipilot.jp/docs/growth/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2026-02-19</lastmod>
-  </url>
-  <url>
-    <loc>https://www.maipilot.jp/docs/growth/windows-minecraft-server-2026/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <lastmod>2026-02-19</lastmod>
-  </url>
-  <url>
-    <loc>https://www.maipilot.jp/docs/growth/port-open-checklist/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <lastmod>2026-02-19</lastmod>
+    <lastmod>2026-02-26</lastmod>
   </url>
   <url>
     <loc>https://www.maipilot.jp/docs/growth/paper-plugin-quickstart/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2026-02-19</lastmod>
+    <lastmod>2026-02-26</lastmod>
+  </url>
+  <url>
+    <loc>https://www.maipilot.jp/docs/growth/port-open-checklist/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-02-26</lastmod>
+  </url>
+  <url>
+    <loc>https://www.maipilot.jp/docs/growth/windows-minecraft-server-2026/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-02-26</lastmod>
   </url>
   <url>
     <loc>https://www.maipilot.jp/docs/java-setup/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2026-02-19</lastmod>
+    <lastmod>2026-02-26</lastmod>
+  </url>
+  <url>
+    <loc>https://www.maipilot.jp/docs/lan/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-02-26</lastmod>
+  </url>
+  <url>
+    <loc>https://www.maipilot.jp/docs/port-forwarding/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-02-26</lastmod>
+  </url>
+  <url>
+    <loc>https://www.maipilot.jp/docs/privacy-and-network/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-02-26</lastmod>
+  </url>
+  <url>
+    <loc>https://www.maipilot.jp/docs/troubleshooting/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-02-26</lastmod>
   </url>
 </urlset>
