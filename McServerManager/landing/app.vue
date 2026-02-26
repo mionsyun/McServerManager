@@ -30,9 +30,9 @@ const faqLinks: Record<string, string> = {
 
 const translations = {
   en: {
-    metaTitle: "MaiPilot | Gamer-first Minecraft server control",
+    metaTitle: "MaiPilot | All-in-one Minecraft server manager for Windows",
     metaDescription:
-      "A Windows GUI to create, run, and recover Minecraft servers with clear setup, local-only data, and transparent network checks.",
+      "A Windows GUI for Vanilla, Paper, Forge, Fabric, Spigot & Purpur servers. Manage mods, backups, permissions, and network — all from one interface.",
     siteName: "MaiPilot",
     nav: {
       features: "Features",
@@ -45,13 +45,13 @@ const translations = {
     langLabel: "Language",
     langJa: "日本語",
     langEn: "English",
-    eyebrow: "Guided hosting for first-time and returning players",
-    heroTitle: "Launch with confidence, even on day one.",
+    eyebrow: "All-in-one Minecraft server management for Windows",
+    heroTitle: "Every server type. One interface.",
     heroSub:
-      "MaiPilot puts setup, checks, and recovery in one place so you can focus on your world.",
+      "Vanilla, Paper, Forge, Fabric, Spigot, Purpur — set up, mod, back up, and monitor from a single window.",
     heroNotes: [
-      "A GUI to create, run, and recover Minecraft servers on Windows.",
-      "Data stays on your PC. Only minimal required network calls. Admin actions are clearly shown.",
+      "Create, run, and manage six server types on Windows with a full-featured GUI.",
+      "Data stays on your PC. Minimal network calls. Admin actions are clearly shown.",
     ],
     heroAffiliateLabel: "Need always-on hosting?",
     heroAffiliateCta: "See hosting options (PR)",
@@ -69,38 +69,55 @@ const translations = {
     cardMemory: "Memory",
     cardStart: "Start",
     cardBackup: "Backup",
+    cardMods: "Mods",
     cardFirewall: "Firewall",
-    featuresTitle: "Fast start. Clear control.",
-    featuresSub: "The safety-critical parts are shown first.",
+    featuresTitle: "Everything you need, already built in.",
+    featuresSub: "Six server types, mod management, backups, and more — out of the box.",
     features: [
       {
-        title: "Crash recovery path",
-        body: "Open logs and crash reports with one click when things go wrong.",
+        title: "Six server types",
+        body: "Vanilla, Paper, Purpur, Fabric, Forge, and Spigot. Pick one and go.",
+      },
+      {
+        title: "MOD & Plugin manager",
+        body: "Add, enable, disable mods/plugins. Search Modrinth directly in the app.",
+      },
+      {
+        title: "Backup, restore & worlds",
+        body: "ZIP backups, one-click restore, world switching, and map archive import.",
+      },
+      {
+        title: "Settings GUI",
+        body: "Edit server.properties, manage OPs and whitelist — no file editing needed.",
+      },
+      {
+        title: "Network all-in-one",
+        body: "Firewall rules, UPnP, public IP, port check, and a guided checklist.",
+      },
+      {
+        title: "Crash recovery & auto-restart",
+        body: "One-click access to logs and crash reports. Optional auto-restart when unattended.",
+      },
+      {
+        title: "Live monitoring",
+        body: "CPU, RAM, and player count updated every second in real time.",
       },
       {
         title: "Safe apply flow",
-        body: "Changes are saved, but applied after restart to prevent mistakes.",
-      },
-      {
-        title: "Backup & restore built-in",
-        body: "World backups and restores are standard, not add-ons.",
-      },
-      {
-        title: "Network guidance",
-        body: "Checklist, IP lookup, firewall, and UPnP help in one tab.",
+        body: "Settings are saved instantly but applied after restart to prevent accidents.",
       },
     ],
     featuresAffiliateLabel: "Always-on hosting is an option if your PC cannot stay on.",
     featuresAffiliateCta: "Compare hosting options (PR)",
-    stepsTitle: "3 steps, no noise",
+    stepsTitle: "3 steps to your first server",
     steps: [
       {
         title: "Create a server profile (EULA required).",
-        body: "Name, location, server type, and version.",
+        body: "Choose name, location, type (Vanilla/Paper/Forge…), and version.",
       },
       {
-        title: "Set only what matters.",
-        body: "Memory, port, and Java path with clear explanations.",
+        title: "Configure with a GUI.",
+        body: "Memory, port, Java path, and server.properties — all with clear labels.",
       },
       {
         title: "Start with checks.",
@@ -127,7 +144,7 @@ const translations = {
       },
       {
         title: "Crash recovery",
-        body: "One-click access to logs and crash reports with tips to fix fast.",
+        body: "One-click access to logs and crash reports. Enable auto-restart for unattended recovery.",
       },
     ],
     helpCta: "Open setup notes",
@@ -177,7 +194,7 @@ const translations = {
       {
         id: "local",
         title: "Run locally on this PC",
-        body: "Use the desktop app with local worlds and fast backups.",
+        body: "Full server management with local worlds, mods, and fast backups.",
         cta: "Download",
       },
       {
@@ -235,6 +252,14 @@ const translations = {
     faqSub: "Quick answers for a smooth start.",
     faq: [
       {
+        title: "Which server types are supported?",
+        body: "Vanilla, Paper, Purpur, Fabric, Forge, and Spigot. Choose when creating a server.",
+      },
+      {
+        title: "Does it work with mods and plugins?",
+        body: "Yes. Select a modded server type (Forge, Fabric, Paper, etc.) and use the MOD/Plugin tab to add, manage, or search Modrinth.",
+      },
+      {
         title: "I cannot keep my PC on 24/7.",
         body: "If you need always-on hosting, see the options.",
         linkId: "hosting",
@@ -248,7 +273,7 @@ const translations = {
       },
       {
         title: "It crashed and I do not know where logs are.",
-        body: "Open logs/crash reports from the Console tab or follow the guide.",
+        body: "Open logs/crash reports from the Console tab. You can also enable auto-restart for unattended recovery.",
         linkId: "trouble",
         linkLabel: "Open troubleshooting",
       },
@@ -257,10 +282,6 @@ const translations = {
         body: "Download Eclipse Temurin (LTS) from adoptium.net and run the installer. MaiPilot auto-detects your Java path.",
         linkId: "java",
         linkLabel: "Open Java setup guide",
-      },
-      {
-        title: "Does it work with mods?",
-        body: "Vanilla is the main focus. Modded servers may need extra steps.",
       },
       {
         title: "Where are server files stored?",
@@ -284,9 +305,9 @@ const translations = {
     footerDisclosure: "This page includes affiliate links (PR).",
   },
   ja: {
-    metaTitle: "MaiPilot | ゲーマー向けマイクラサーバー管理",
+    metaTitle: "MaiPilot | Windows向けマイクラサーバー統合管理",
     metaDescription:
-      "WindowsでMinecraftサーバーを作成・起動・復旧するGUI。データはローカル保存、通信は最小限、権限は明示します。",
+      "Vanilla・Paper・Forge・Fabric・Spigot・Purpurに対応。MOD管理・バックアップ・監視を一画面で。Windows用GUI。",
     siteName: "MaiPilot",
     nav: {
       features: "特長",
@@ -299,12 +320,12 @@ const translations = {
     langLabel: "言語",
     langJa: "日本語",
     langEn: "English",
-    eyebrow: "ゲーマー向け Minecraft サーバー管理",
-    heroTitle: "サクッと建てて、安定稼働。",
+    eyebrow: "Windows向け Minecraft サーバー統合管理",
+    heroTitle: "6種のサーバーを、ひとつの画面で。",
     heroSub:
-      "Java・ポート・クラッシュのチェックまで、一画面でスマートに。",
+      "Vanilla・Paper・Forge・Fabric・Spigot・Purpur — セットアップからMOD管理・監視まで。",
     heroNotes: [
-      "WindowsでMinecraftサーバーを、迷わず作って・動かして・戻せるGUI",
+      "6種のサーバーを作成・運用・管理できるWindows用フルGUI",
       "データはPC内。必要最小限の通信のみ。権限が必要な操作は明示します",
     ],
     heroAffiliateLabel: "24時間運用の選択肢もあります",
@@ -323,25 +344,42 @@ const translations = {
     cardMemory: "メモリ",
     cardStart: "開始",
     cardBackup: "バックアップ",
+    cardMods: "MOD",
     cardFirewall: "ファイアウォール",
-    featuresTitle: "起動が速い。操作が速い。",
-    featuresSub: "安心に効く体験を先に見せます。",
+    featuresTitle: "必要な機能、すべて標準搭載。",
+    featuresSub: "6種のサーバー対応、MOD管理、バックアップ — はじめから揃っています。",
     features: [
       {
-        title: "復旧導線が明確",
-        body: "クラッシュ時はログ/クラッシュレポートへワンクリック。",
+        title: "6種のサーバー対応",
+        body: "Vanilla・Paper・Purpur・Fabric・Forge・Spigotから選んですぐ開始。",
+      },
+      {
+        title: "MOD/プラグイン管理",
+        body: "追加・有効化・無効化をGUIで。Modrinth検索も内蔵。",
+      },
+      {
+        title: "バックアップ/復元/ワールド管理",
+        body: "ZIPバックアップ・ワンクリック復元・ワールド切替・配布マップ導入。",
+      },
+      {
+        title: "設定GUI",
+        body: "server.propertiesの編集、OP/ホワイトリスト管理をGUIで完結。",
+      },
+      {
+        title: "ネットワーク一括管理",
+        body: "Firewall・UPnP・公開IP・ポートチェック・チェックリストを一画面に。",
+      },
+      {
+        title: "クラッシュ復旧/自動再起動",
+        body: "ログ/クラッシュレポートへワンクリック。自動再起動も設定可能。",
+      },
+      {
+        title: "リアルタイム監視",
+        body: "CPU・RAM・プレイヤー数を毎秒リアルタイム更新。",
       },
       {
         title: "安全な反映フロー",
         body: "変更は保存できるが反映は再起動後。事故を防ぎます。",
-      },
-      {
-        title: "バックアップ/復元が標準",
-        body: "ワールドのバックアップ/復元を標準で搭載。",
-      },
-      {
-        title: "ネットワーク支援",
-        body: "公開チェック/IP表示/Firewall/UPnPのガイド。",
       },
     ],
     featuresAffiliateLabel: "PCをつけっぱなしにできない場合は、VPSという選択肢もあります。",
@@ -350,15 +388,15 @@ const translations = {
     steps: [
       {
         title: "サーバープロファイル作成（EULA同意必須）",
-        body: "名前/保存先/種別/バージョンを指定。",
+        body: "名前・保存先・種別（Vanilla/Paper/Forge…）・バージョンを指定。",
       },
       {
-        title: "必要な設定だけ",
-        body: "メモリ/ポート/Javaパスを説明しながら設定。",
+        title: "GUIで設定",
+        body: "メモリ・ポート・Javaパス・server.propertiesを分かりやすく設定。",
       },
       {
         title: "起動前チェック",
-        body: "Java互換/公開チェックで不安を減らす。",
+        body: "Java互換・公開チェックで不安を減らす。",
       },
     ],
     previewTitle: "ライブログ",
@@ -381,7 +419,7 @@ const translations = {
       },
       {
         title: "クラッシュ復旧",
-        body: "ログ/クラッシュレポートへ即アクセスできます。",
+        body: "ログ/クラッシュレポートへ即アクセス。自動再起動も設定可能です。",
       },
     ],
     helpCta: "セットアップノートを見る",
@@ -431,7 +469,7 @@ const translations = {
       {
         id: "local",
         title: "このPCでローカル運用",
-        body: "ローカルの世界をそのまま管理したい人向け。",
+        body: "6種のサーバーをまるごと管理。MOD・バックアップ・監視まで。",
         cta: "ダウンロード",
       },
       {
@@ -489,6 +527,14 @@ const translations = {
     faqSub: "スムーズに始めるためのヒント。",
     faq: [
       {
+        title: "対応サーバー種別は？",
+        body: "Vanilla・Paper・Purpur・Fabric・Forge・Spigotの6種です。作成時に選べます。",
+      },
+      {
+        title: "MOD/プラグインは使えますか？",
+        body: "はい。Forge・Fabric・Paper等を選んで、MOD/プラグインタブで追加・管理できます。Modrinth検索も内蔵しています。",
+      },
+      {
         title: "PCをつけっぱなしにできません",
         body: "常時稼働が必要な場合はVPSの選択肢があります。",
         linkId: "hosting",
@@ -502,7 +548,7 @@ const translations = {
       },
       {
         title: "クラッシュした/ログが分からない",
-        body: "コンソールからログ/クラッシュレポートを開くか、ガイドを参照してください。",
+        body: "コンソールからログ/クラッシュレポートを開けます。自動再起動を有効にすると無人復旧も可能です。",
         linkId: "trouble",
         linkLabel: "トラブルシュートを見る",
       },
@@ -511,10 +557,6 @@ const translations = {
         body: "adoptium.net から Eclipse Temurin (LTS) をインストールするだけ。MaiPilotが自動検出します。",
         linkId: "java",
         linkLabel: "Java導入ガイドを見る",
-      },
-      {
-        title: "MOD は使えますか？",
-        body: "基本はバニラ向けです。MOD は追加の手順が必要な場合があります。",
       },
       {
         title: "サーバーファイルはどこ？",
@@ -942,6 +984,7 @@ useHead(() => ({
             <div class="hero-cta">
               <button class="btn tiny" type="button">{{ t.cardStart }}</button>
               <button class="btn tiny ghost" type="button">{{ t.cardBackup }}</button>
+              <button class="btn tiny ghost" type="button">{{ t.cardMods }}</button>
               <button class="btn tiny ghost" type="button">{{ t.cardFirewall }}</button>
             </div>
           </div>
