@@ -201,15 +201,14 @@ jobs:
             SHA256=$(sha256sum "$EXE_PATH" | awk '{print $1}')
             PUBLISHED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-            cat > "$TARGET_MANIFEST" <<EOF
-{
-  "version": "$VERSION",
-  "installerUrl": "$VERSIONED_URL",
-  "sha256": "$SHA256",
-  "publishedAt": "$PUBLISHED_AT",
-  "releaseNotesUrl": "$RELEASE_NOTES_URL"
-}
-EOF
+            printf '%s\n' \
+              '{' \
+              "  \"version\": \"$VERSION\"," \
+              "  \"installerUrl\": \"$VERSIONED_URL\"," \
+              "  \"sha256\": \"$SHA256\"," \
+              "  \"publishedAt\": \"$PUBLISHED_AT\"," \
+              "  \"releaseNotesUrl\": \"$RELEASE_NOTES_URL\"" \
+              '}' > "$TARGET_MANIFEST"
           fi
 
           git config user.name "github-actions[bot]"
