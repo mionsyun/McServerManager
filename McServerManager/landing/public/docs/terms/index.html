@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MaiPilot | 利用規約</title>
+    <meta name="description" content="MaiPilot公式サイトおよびソフトウェアの利用規約。免責事項・禁止事項・配布に関する規定を記載しています。" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0f17;
+        --panel: #121a2a;
+        --panel-2: #162038;
+        --text: #e6eefb;
+        --muted: #9fb0c8;
+        --accent: #66ff88;
+        --accent-2: #33a8ff;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Noto Sans JP", "Segoe UI", sans-serif;
+        background: radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%);
+        color: var(--text);
+        padding: 32px 16px;
+      }
+      .wrap {
+        max-width: 960px;
+        margin: 0 auto;
+        display: grid;
+        gap: 20px;
+      }
+      header {
+        display: grid;
+        gap: 10px;
+      }
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+      }
+      .back-link {
+        color: var(--accent-2);
+        text-decoration: none;
+        font-weight: 700;
+      }
+      .tag {
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(102, 255, 136, 0.15);
+        color: var(--accent);
+        font-weight: 700;
+        font-size: 12px;
+      }
+      .lang-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .lang-label {
+        font-size: 12px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .lang-btn {
+        border: 1px solid rgba(126, 157, 201, 0.35);
+        background: transparent;
+        color: var(--muted);
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .lang-btn.active {
+        color: #03110a;
+        background: linear-gradient(135deg, var(--accent), #1bd760);
+        border-color: transparent;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(24px, 3.2vw, 34px);
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid rgba(126, 157, 201, 0.25);
+        border-radius: 16px;
+        padding: 20px;
+      }
+      h2 {
+        margin: 0 0 10px;
+        font-size: 20px;
+      }
+      h3 {
+        margin: 16px 0 6px;
+        font-size: 16px;
+      }
+      ul,
+      ol {
+        margin: 8px 0 0 18px;
+        color: var(--muted);
+      }
+      p {
+        margin: 8px 0;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      a {
+        color: var(--accent-2);
+      }
+      footer {
+        text-align: center;
+        color: var(--muted);
+        font-size: 12px;
+      }
+    </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MM106D2B2Z');
+    </script>
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://www.maipilot.jp/docs/terms/" />
+    <meta property="og:title" content="MaiPilot | 利用規約" />
+    <meta property="og:description" content="MaiPilot公式サイトおよびソフトウェアの利用規約。免責事項・禁止事項・配布に関する規定を記載しています。" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://www.maipilot.jp/docs/terms/" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="MaiPilot | 利用規約" />
+    <meta name="twitter:description" content="MaiPilot公式サイトおよびソフトウェアの利用規約。免責事項・禁止事項・配布に関する規定を記載しています。" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="nav">
+          <div class="brand">
+            <span>MaiPilot</span>
+            <span class="tag">Terms</span>
+          </div>
+          <div>
+            <a class="back-link" href="/docs">← Docs</a>
+            <span class="muted"> / </span>
+            <a class="back-link" href="/">Home</a>
+          </div>
+        </div>
+        <h1>
+          <span data-lang-block="ja" data-lang-display="inline">利用規約</span>
+          <span data-lang-block="en" data-lang-display="inline">Terms of Use</span>
+        </h1>
+        <div class="lang-toggle" role="group" aria-label="Language toggle">
+          <span class="lang-label">Language</span>
+          <button class="lang-btn" type="button" data-lang="ja">日本語</button>
+          <button class="lang-btn" type="button" data-lang="en">English</button>
+        </div>
+      </header>
+
+      <!-- ===== 日本語 ===== -->
+
+      <section class="card" data-lang-block="ja">
+        <h2>はじめに</h2>
+        <p class="muted">
+          本利用規約（以下「本規約」）は、MaiPilot 公式サイト（https://www.maipilot.jp、以下「本サイト」）および
+          MaiPilot ソフトウェア（以下「本ソフトウェア」）の利用条件を定めるものです。
+          本サイトの利用または本ソフトウェアのダウンロードをもって、本規約に同意したものとみなします。
+        </p>
+        <p class="muted">制定日: 2026年2月26日</p>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>1. ソフトウェアの利用</h2>
+        <ul>
+          <li>本ソフトウェアは、個人的・非商用目的に限り無料で利用できます。</li>
+          <li>ライセンスの詳細は <a href="/LICENSE.txt">LICENSE.txt</a> をご確認ください。</li>
+          <li>本ソフトウェアは Windows 10/11 向けに提供されます。他の環境での動作は保証しません。</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>2. 禁止事項</h2>
+        <ul>
+          <li>本ソフトウェアの再配布（公式サイト以外からの配布を含む）</li>
+          <li>本ソフトウェアの改変・リバースエンジニアリング・逆コンパイル</li>
+          <li>本ソフトウェアまたは本サイトを利用した違法行為</li>
+          <li>本サイトのコンテンツの無断転載・複製</li>
+          <li>本サイトへの不正アクセス・攻撃行為</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>3. 免責事項</h2>
+        <ul>
+          <li>本ソフトウェアは「現状のまま（AS IS）」で提供されます。動作の完全性・正確性・安全性を保証するものではありません。</li>
+          <li>本ソフトウェアの使用により生じたデータの損失・破損、サーバー障害、その他一切の損害について、運営者は責任を負いません。</li>
+          <li>本ソフトウェアはファイアウォール設定やポート開放など、システムの設定変更を伴う操作を含みます。操作の結果については利用者の責任となります。</li>
+          <li>本サイトに掲載されている情報は正確性を期していますが、内容を保証するものではありません。</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>4. 配布とアップデート</h2>
+        <ul>
+          <li>本ソフトウェアの正規の配布元は本サイト（https://www.maipilot.jp）のみです。</li>
+          <li>本サイト以外から入手したファイルについて、運営者は一切の責任を負いません。</li>
+          <li>アップデートは手動で最新のインストーラーを取得・実行する方式です。自動更新機能はありません。</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>5. 外部リンクおよびアフィリエイト</h2>
+        <p class="muted">
+          本サイトには外部サイトへのリンクやアフィリエイトリンク（PR）が含まれる場合があります。
+          外部サイトの内容・サービスについて、運営者は責任を負いません。
+          アフィリエイトについての詳細は <a href="/docs/privacy-policy/">プライバシーポリシー</a> をご確認ください。
+        </p>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>6. 知的財産権</h2>
+        <p class="muted">
+          本サイトおよび本ソフトウェアに関する著作権その他の知的財産権は、運営者または正当な権利者に帰属します。
+          「Minecraft」は Mojang Studios / Microsoft Corporation の商標です。本プロジェクトは Mojang / Microsoft とは無関係です。
+        </p>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>7. 規約の変更</h2>
+        <p class="muted">
+          本規約は必要に応じて改定されることがあります。重要な変更がある場合は本ページ上部に告知します。
+          変更後も本サイトおよび本ソフトウェアを利用した場合、変更後の規約に同意したものとみなします。
+        </p>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>8. 準拠法</h2>
+        <p class="muted">
+          本規約は日本法に準拠し、日本国の裁判所を第一審の専属的合意管轄裁判所とします。
+        </p>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>9. お問い合わせ</h2>
+        <p class="muted">
+          本規約に関するお問い合わせは下記までご連絡ください。<br />
+          <a href="mailto:support@maipilot.jp">support@maipilot.jp</a>
+        </p>
+      </section>
+
+      <!-- ===== English ===== -->
+
+      <section class="card" data-lang-block="en">
+        <h2>Introduction</h2>
+        <p class="muted">
+          These Terms of Use ("Terms") govern your use of the MaiPilot website (https://www.maipilot.jp, "the Site")
+          and MaiPilot software ("the Software"). By using the Site or downloading the Software, you agree to these Terms.
+        </p>
+        <p class="muted">Effective date: February 26, 2026</p>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>1. Software Usage</h2>
+        <ul>
+          <li>The Software is free for personal, non-commercial use only.</li>
+          <li>See <a href="/LICENSE.txt">LICENSE.txt</a> for full license details.</li>
+          <li>The Software is provided for Windows 10/11. Operation on other platforms is not guaranteed.</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>2. Prohibited Actions</h2>
+        <ul>
+          <li>Redistributing the Software (including hosting downloads outside the official site)</li>
+          <li>Modifying, reverse engineering, or decompiling the Software</li>
+          <li>Using the Software or the Site for illegal activities</li>
+          <li>Reproducing or republishing Site content without permission</li>
+          <li>Unauthorized access to or attacks against the Site</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>3. Disclaimer</h2>
+        <ul>
+          <li>The Software is provided "AS IS" without warranties of any kind regarding completeness, accuracy, or safety.</li>
+          <li>The operator is not liable for any data loss, corruption, server failures, or other damages arising from use of the Software.</li>
+          <li>The Software includes operations that modify system settings (firewall rules, port forwarding). Users are responsible for the results of these operations.</li>
+          <li>Information on the Site is intended to be accurate but is not guaranteed.</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>4. Distribution and Updates</h2>
+        <ul>
+          <li>The only official distribution source for the Software is the Site (https://www.maipilot.jp).</li>
+          <li>The operator is not responsible for files obtained from any other source.</li>
+          <li>Updates are manual — download and run the latest installer. There is no auto-update feature.</li>
+        </ul>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>5. External Links and Affiliates</h2>
+        <p class="muted">
+          The Site may contain links to external sites and affiliate links (PR).
+          The operator is not responsible for the content or services of external sites.
+          For details on affiliate disclosures, see the <a href="/docs/privacy-policy/">Privacy Policy</a>.
+        </p>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>6. Intellectual Property</h2>
+        <p class="muted">
+          Copyright and other intellectual property rights for the Site and Software belong to the operator or their rightful owners.
+          "Minecraft" is a trademark of Mojang Studios / Microsoft Corporation. This project is not affiliated with Mojang or Microsoft.
+        </p>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>7. Changes to These Terms</h2>
+        <p class="muted">
+          These Terms may be revised as needed. Significant changes will be announced at the top of this page.
+          Continued use of the Site or Software after changes constitutes acceptance of the revised Terms.
+        </p>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>8. Governing Law</h2>
+        <p class="muted">
+          These Terms are governed by the laws of Japan. Any disputes shall be subject to the exclusive jurisdiction of the courts of Japan.
+        </p>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>9. Contact</h2>
+        <p class="muted">
+          For questions about these Terms, contact us at
+          <a href="mailto:support@maipilot.jp">support@maipilot.jp</a>.
+        </p>
+      </section>
+
+      <footer>MaiPilot</footer>
+    </div>
+
+    <script>
+      const buttons = document.querySelectorAll("[data-lang]");
+      const blocks = document.querySelectorAll("[data-lang-block]");
+      const storageKey = "mcsm-docs-lang";
+
+      const applyLang = (lang) => {
+        blocks.forEach((block) => {
+          const blockLang = block.getAttribute("data-lang-block");
+          const display = block.getAttribute("data-lang-display") || "block";
+          block.style.display = blockLang === lang ? display : "none";
+        });
+        buttons.forEach((button) => {
+          button.classList.toggle("active", button.getAttribute("data-lang") === lang);
+        });
+        try {
+          localStorage.setItem(storageKey, lang);
+        } catch (error) {
+          // ignore
+        }
+      };
+
+      const saved = (() => {
+        try {
+          return localStorage.getItem(storageKey);
+        } catch (error) {
+          return null;
+        }
+      })();
+
+      const browserLang = navigator.language && navigator.language.toLowerCase().startsWith("ja") ? "ja" : "en";
+      const initialLang = saved || browserLang;
+      applyLang(initialLang);
+
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => applyLang(button.getAttribute("data-lang")));
+      });
+    </script>
+  </body>
+</html>

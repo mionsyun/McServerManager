@@ -67,6 +67,18 @@
     <lastmod>2026-02-26</lastmod>
   </url>
   <url>
+    <loc>https://www.maipilot.jp/docs/privacy-policy/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <lastmod>2026-02-26</lastmod>
+  </url>
+  <url>
+    <loc>https://www.maipilot.jp/docs/terms/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <lastmod>2026-02-26</lastmod>
+  </url>
+  <url>
     <loc>https://www.maipilot.jp/docs/troubleshooting/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

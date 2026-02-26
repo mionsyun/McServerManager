@@ -30,6 +30,10 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     private string _publicIp = "-";
     private string _publicIpStatus = string.Empty;
     private string _newWorldName = string.Empty;
+    private string _restoreBackupWorldName = string.Empty;
+    private bool _createBackupBeforeRestore = true;
+    private string _worldBackupStatus = "バックアップ未作成";
+    private WorldBackupEntry? _selectedWorldBackup;
     private string _mapArchivePath = string.Empty;
     private string _mapImportWorldName = string.Empty;
     private bool _replaceWorldOnMapImport;
@@ -77,6 +81,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
         Logs = _runtime.Logs;
         Worlds = [];
+        WorldBackups = [];
         MapArchiveCandidates = [];
         AvailableVersions = [];
         LanIpAddresses = new ObservableCollection<string>(_services.Network.GetLanIpAddresses());
@@ -121,6 +126,17 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             _ => CreateWorld(),
             _ => !string.IsNullOrWhiteSpace(NewWorldName)
         );
+        CreateWorldBackupCommand = new AsyncRelayCommand(
+            CreateWorldBackupAsync,
+            CanCreateWorldBackup
+        );
+        RefreshWorldBackupsCommand = new RelayCommand(_ => LoadWorldBackups());
+        OpenBackupsDirectoryCommand = new RelayCommand(_ => OpenBackupsDirectory());
+        RestoreWorldBackupCommand = new AsyncRelayCommand(
+            RestoreWorldBackupAsync,
+            CanRestoreWorldBackup
+        );
+        DeleteWorldBackupCommand = new RelayCommand(DeleteWorldBackup, CanDeleteWorldBackup);
         RefreshWorldsCommand = new RelayCommand(_ => LoadWorlds());
         OpenSelectedWorldDirectoryCommand = new RelayCommand(
             _ => OpenSelectedWorldDirectory(),
@@ -197,6 +213,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
         LoadSettings();
         LoadWorlds();
+        LoadWorldBackups();
         LoadPermissions();
         LoadAddons();
         _ = LoadVersionsAsync();
@@ -221,6 +238,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     public string ServerDirectory => _config.DirectoryPath;
     public ObservableCollection<string> Logs { get; }
     public ObservableCollection<string> Worlds { get; }
+    public ObservableCollection<WorldBackupEntry> WorldBackups { get; }
     public ObservableCollection<ArchiveWorldCandidate> MapArchiveCandidates { get; }
     public ObservableCollection<MinecraftVersionInfo> AvailableVersions { get; }
     public ObservableCollection<string> LanIpAddresses { get; }
@@ -251,6 +269,8 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 StopCommand.RaiseCanExecuteChanged();
                 RestartCommand.RaiseCanExecuteChanged();
                 SendCommandCommand.RaiseCanExecuteChanged();
+                CreateWorldBackupCommand.RaiseCanExecuteChanged();
+                RestoreWorldBackupCommand.RaiseCanExecuteChanged();
                 ImportMapArchiveCommand.RaiseCanExecuteChanged();
             }
         }
@@ -316,8 +336,14 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 SwitchWorldCommand.RaiseCanExecuteChanged();
                 DeleteWorldCommand.RaiseCanExecuteChanged();
                 OpenSelectedWorldDirectoryCommand.RaiseCanExecuteChanged();
+                CreateWorldBackupCommand.RaiseCanExecuteChanged();
                 OnPropertyChanged(nameof(IsSelectedWorldCurrent));
                 OnPropertyChanged(nameof(WorldSwitchHint));
+
+                if (string.IsNullOrWhiteSpace(RestoreBackupWorldName) && !string.IsNullOrWhiteSpace(value))
+                {
+                    RestoreBackupWorldName = value;
+                }
             }
         }
     }
@@ -580,6 +606,43 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         }
     }
 
+    public string RestoreBackupWorldName
+    {
+        get => _restoreBackupWorldName;
+        set
+        {
+            if (SetProperty(ref _restoreBackupWorldName, value))
+            {
+                RestoreWorldBackupCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public bool CreateBackupBeforeRestore
+    {
+        get => _createBackupBeforeRestore;
+        set => SetProperty(ref _createBackupBeforeRestore, value);
+    }
+
+    public string WorldBackupStatus
+    {
+        get => _worldBackupStatus;
+        private set => SetProperty(ref _worldBackupStatus, value);
+    }
+
+    public WorldBackupEntry? SelectedWorldBackup
+    {
+        get => _selectedWorldBackup;
+        set
+        {
+            if (SetProperty(ref _selectedWorldBackup, value))
+            {
+                RestoreWorldBackupCommand.RaiseCanExecuteChanged();
+                DeleteWorldBackupCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
     public string MapArchivePath
     {
         get => _mapArchivePath;
@@ -771,6 +834,11 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     public RelayCommand SwitchWorldCommand { get; }
     public RelayCommand DeleteWorldCommand { get; }
     public RelayCommand CreateWorldCommand { get; }
+    public AsyncRelayCommand CreateWorldBackupCommand { get; }
+    public RelayCommand RefreshWorldBackupsCommand { get; }
+    public RelayCommand OpenBackupsDirectoryCommand { get; }
+    public AsyncRelayCommand RestoreWorldBackupCommand { get; }
+    public RelayCommand DeleteWorldBackupCommand { get; }
     public RelayCommand RefreshWorldsCommand { get; }
     public RelayCommand OpenSelectedWorldDirectoryCommand { get; }
     public RelayCommand BrowseMapArchiveCommand { get; }
@@ -1199,6 +1267,11 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             MapImportWorldName = _config.WorldName;
         }
 
+        if (string.IsNullOrWhiteSpace(RestoreBackupWorldName))
+        {
+            RestoreBackupWorldName = _config.WorldName;
+        }
+
         SelectedWorld =
             Worlds.FirstOrDefault(w =>
                 string.Equals(w, _config.WorldName, StringComparison.OrdinalIgnoreCase)
@@ -1208,6 +1281,8 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(WorldSwitchHint));
         SwitchWorldCommand.RaiseCanExecuteChanged();
         OpenSelectedWorldDirectoryCommand.RaiseCanExecuteChanged();
+        CreateWorldBackupCommand.RaiseCanExecuteChanged();
+        RestoreWorldBackupCommand.RaiseCanExecuteChanged();
         ImportMapArchiveCommand.RaiseCanExecuteChanged();
     }
 
@@ -1378,6 +1453,221 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 MessageBoxImage.Error
             );
         }
+    }
+
+    private void LoadWorldBackups()
+    {
+        var previousSelectedPath = SelectedWorldBackup?.FullPath;
+        WorldBackups.Clear();
+        foreach (var backup in _services.Worlds.GetWorldBackups(ServerDirectory))
+        {
+            WorldBackups.Add(backup);
+        }
+
+        if (!string.IsNullOrWhiteSpace(previousSelectedPath))
+        {
+            SelectedWorldBackup = WorldBackups.FirstOrDefault(entry =>
+                string.Equals(entry.FullPath, previousSelectedPath, StringComparison.OrdinalIgnoreCase)
+            );
+        }
+
+        SelectedWorldBackup ??= WorldBackups.FirstOrDefault();
+        if (WorldBackups.Count == 0)
+        {
+            WorldBackupStatus = "バックアップはまだありません。";
+        }
+        else if (string.IsNullOrWhiteSpace(WorldBackupStatus) || WorldBackupStatus == "バックアップ未作成")
+        {
+            WorldBackupStatus = $"バックアップ {WorldBackups.Count} 件";
+        }
+
+        RestoreWorldBackupCommand.RaiseCanExecuteChanged();
+        DeleteWorldBackupCommand.RaiseCanExecuteChanged();
+    }
+
+    private bool CanCreateWorldBackup()
+    {
+        return Status == ServerStatus.Stopped && !string.IsNullOrWhiteSpace(SelectedWorld);
+    }
+
+    private async Task CreateWorldBackupAsync()
+    {
+        if (Status != ServerStatus.Stopped)
+        {
+            _services.Dialog.Show(
+                "停止中のみバックアップできます。",
+                "確認",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
+            return;
+        }
+
+        var worldName = SelectedWorld?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(worldName))
+        {
+            _services.Dialog.Show(
+                "バックアップ対象のワールドを選択してください。",
+                "確認",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
+            return;
+        }
+
+        try
+        {
+            WorldBackupStatus = "バックアップを作成しています...";
+            var created = await Task.Run(() =>
+                _services.Worlds.CreateWorldBackup(ServerDirectory, worldName)
+            );
+
+            LoadWorldBackups();
+            SelectedWorldBackup = WorldBackups.FirstOrDefault(entry =>
+                string.Equals(entry.FullPath, created.FullPath, StringComparison.OrdinalIgnoreCase)
+            );
+            WorldBackupStatus = $"バックアップ作成完了: {created.FileName}";
+        }
+        catch (Exception ex)
+        {
+            WorldBackupStatus = "バックアップ作成に失敗しました。";
+            _services.Dialog.Show(
+                $"バックアップ作成に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+        }
+    }
+
+    private bool CanRestoreWorldBackup()
+    {
+        return Status == ServerStatus.Stopped
+            && SelectedWorldBackup is not null
+            && !string.IsNullOrWhiteSpace(RestoreBackupWorldName);
+    }
+
+    private async Task RestoreWorldBackupAsync()
+    {
+        if (Status != ServerStatus.Stopped)
+        {
+            _services.Dialog.Show(
+                "停止中のみ復元できます。",
+                "確認",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
+            return;
+        }
+
+        var backup = SelectedWorldBackup;
+        var targetWorldName = RestoreBackupWorldName?.Trim() ?? string.Empty;
+        if (backup is null || string.IsNullOrWhiteSpace(targetWorldName))
+        {
+            WorldBackupStatus = "復元先ワールド名とバックアップを指定してください。";
+            return;
+        }
+
+        var targetDirectory = Path.Combine(ServerDirectory, targetWorldName);
+        if (Directory.Exists(targetDirectory))
+        {
+            var result = _services.Dialog.Show(
+                $"ワールド {targetWorldName} をバックアップ {backup.FileName} で上書き復元します。続行しますか？",
+                "確認",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning
+            );
+            if (result != MessageBoxResult.Yes)
+            {
+                WorldBackupStatus = "復元をキャンセルしました。";
+                return;
+            }
+        }
+
+        try
+        {
+            WorldBackupStatus = "バックアップを復元しています...";
+            var sourceWorld = await Task.Run(() =>
+                _services.Worlds.RestoreWorldBackup(
+                    ServerDirectory,
+                    backup.FullPath,
+                    targetWorldName,
+                    overwriteExisting: true,
+                    createBackupBeforeRestore: CreateBackupBeforeRestore
+                )
+            );
+
+            LoadWorlds();
+            LoadWorldBackups();
+            SelectedWorld = targetWorldName;
+            SwitchWorld();
+            WorldBackupStatus = $"復元完了: {backup.FileName} -> {targetWorldName}";
+            _services.Dialog.Show(
+                $"バックアップ ({backup.FileName}) を {targetWorldName} に復元しました。導入元: {sourceWorld}",
+                "完了",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
+        }
+        catch (Exception ex)
+        {
+            WorldBackupStatus = "復元に失敗しました。";
+            _services.Dialog.Show(
+                $"バックアップ復元に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+        }
+    }
+
+    private bool CanDeleteWorldBackup()
+    {
+        return SelectedWorldBackup is not null;
+    }
+
+    private void DeleteWorldBackup()
+    {
+        var backup = SelectedWorldBackup;
+        if (backup is null)
+        {
+            return;
+        }
+
+        if (
+            _services.Dialog.Show(
+                $"バックアップ {backup.FileName} を削除します。",
+                "確認",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning
+            ) != MessageBoxResult.Yes
+        )
+        {
+            return;
+        }
+
+        try
+        {
+            _services.Worlds.DeleteWorldBackup(backup.FullPath);
+            LoadWorldBackups();
+            WorldBackupStatus = $"バックアップを削除しました: {backup.FileName}";
+        }
+        catch (Exception ex)
+        {
+            _services.Dialog.Show(
+                $"バックアップ削除に失敗しました: {ex.Message}",
+                "エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+        }
+    }
+
+    private void OpenBackupsDirectory()
+    {
+        var backupsDirectory = _services.Worlds.GetBackupsDirectory(ServerDirectory);
+        Directory.CreateDirectory(backupsDirectory);
+        OpenDirectory(backupsDirectory, "バックアップフォルダが見つかりません。");
     }
 
     private bool CanImportMapArchive()

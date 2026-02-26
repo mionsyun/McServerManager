@@ -278,6 +278,8 @@ const translations = {
     footerDocs: "Docs",
     footerNotices: "Third-party notices",
     footerLicense: "License",
+    footerPrivacy: "Privacy Policy",
+    footerTerms: "Terms of Use",
     footerRight: "Built for local worlds.",
     footerDisclosure: "This page includes affiliate links (PR).",
   },
@@ -530,6 +532,8 @@ const translations = {
     footerDocs: "ドキュメント",
     footerNotices: "サードパーティ通知",
     footerLicense: "ライセンス",
+    footerPrivacy: "プライバシーポリシー",
+    footerTerms: "利用規約",
     footerRight: "ローカル世界のために。",
     footerDisclosure: "本ページにはアフィリエイトリンク（PR）が含まれます。",
   },
@@ -1145,6 +1149,8 @@ useHead(() => ({
       </div>
       <div class="footer-links">
         <a :href="docsUrl">{{ t.footerDocs }}</a>
+        <a href="/docs/privacy-policy/">{{ t.footerPrivacy }}</a>
+        <a href="/docs/terms/">{{ t.footerTerms }}</a>
         <a href="/THIRD_PARTY_NOTICES.txt">{{ t.footerNotices }}</a>
         <a href="/LICENSE.txt">{{ t.footerLicense }}</a>
       </div>

@@ -435,29 +435,82 @@
                     </Border>
 
                     <Border Grid.Column="2" Style="{StaticResource SurfacePanel}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-
-                            <TextBlock Text="🗺️ 配布マップ導入 (.zip)" FontWeight="SemiBold" FontSize="14"/>
-                            <TextBlock Grid.Row="1"
-                                       Text="ZIPを選択し、導入先ワールド名を指定して取り込みます。"
+                        <StackPanel>
+                            <TextBlock Text="💾 ワールドバックアップ" FontWeight="SemiBold" FontSize="14"/>
+                            <TextBlock Text="停止中にローカルワールドのバックアップ作成・復元ができます。"
                                        Style="{StaticResource MutedText}"
                                        Margin="0,4,0,0"
                                        TextWrapping="Wrap"/>
 
-                            <TextBlock Grid.Row="2" Text="ZIPファイル" Margin="0,10,0,4"/>
-                            <Grid Grid.Row="3">
+                            <WrapPanel Margin="0,10,0,0">
+                                <Button Content="バックアップ作成"
+                                        Command="{Binding CreateWorldBackupCommand}"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Margin="0,0,8,8"/>
+                                <Button Content="一覧更新"
+                                        Command="{Binding RefreshWorldBackupsCommand}"
+                                        Margin="0,0,8,8"/>
+                                <Button Content="フォルダを開く"
+                                        Command="{Binding OpenBackupsDirectoryCommand}"
+                                        Margin="0,0,0,8"/>
+                            </WrapPanel>
+
+                            <TextBlock Text="復元先ワールド名" Margin="0,4,0,4"/>
+                            <TextBox Text="{Binding RestoreBackupWorldName}"/>
+
+                            <CheckBox Content="復元前に現在ワールドを自動バックアップ"
+                                      IsChecked="{Binding CreateBackupBeforeRestore}"
+                                      Margin="0,8,0,0"/>
+
+                            <WrapPanel Margin="0,10,0,0">
+                                <Button Content="選択バックアップを復元"
+                                        Command="{Binding RestoreWorldBackupCommand}"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Margin="0,0,8,8"/>
+                                <Button Content="選択バックアップ削除"
+                                        Command="{Binding DeleteWorldBackupCommand}"
+                                        Margin="0,0,0,8"/>
+                            </WrapPanel>
+
+                            <ListBox ItemsSource="{Binding WorldBackups}"
+                                     SelectedItem="{Binding SelectedWorldBackup}"
+                                     Margin="0,4,0,0"
+                                     MaxHeight="170">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,2,0,2">
+                                            <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                            <WrapPanel Margin="0,2,0,0">
+                                                <TextBlock Text="{Binding WorldName, StringFormat=ワールド: {0}}" Style="{StaticResource MutedText}" Margin="0,0,10,0"/>
+                                                <TextBlock Text="{Binding CreatedAtText}" Style="{StaticResource MutedText}" Margin="0,0,10,0"/>
+                                                <TextBlock Text="{Binding SizeText}" Style="{StaticResource MutedText}"/>
+                                            </WrapPanel>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <Border Background="{DynamicResource BrushCard}"
+                                    BorderBrush="{DynamicResource BrushBorder}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Padding="10,8"
+                                    Margin="0,10,0,0">
+                                <TextBlock Text="{Binding WorldBackupStatus}"
+                                           Style="{StaticResource MutedText}"
+                                           TextWrapping="Wrap"/>
+                            </Border>
+
+                            <Separator Margin="0,14,0,14"/>
+
+                            <TextBlock Text="🗺️ 配布マップ導入 (.zip)" FontWeight="SemiBold" FontSize="14"/>
+                            <TextBlock Text="ZIPを選択し、導入先ワールド名を指定して取り込みます。"
+                                       Style="{StaticResource MutedText}"
+                                       Margin="0,4,0,0"
+                                       TextWrapping="Wrap"/>
+
+                            <TextBlock Text="ZIPファイル" Margin="0,10,0,4"/>
+                            <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
@@ -466,21 +519,19 @@
                                 <Button Grid.Column="1" Content="選択" Command="{Binding BrowseMapArchiveCommand}" Margin="8,0,0,0" Width="100"/>
                             </Grid>
 
-                            <TextBlock Grid.Row="4" Text="導入元フォルダ" Margin="0,10,0,4"/>
-                            <ComboBox Grid.Row="5"
-                                      ItemsSource="{Binding MapArchiveCandidates}"
+                            <TextBlock Text="導入元フォルダ" Margin="0,10,0,4"/>
+                            <ComboBox ItemsSource="{Binding MapArchiveCandidates}"
                                       SelectedItem="{Binding SelectedMapArchiveCandidate}"
                                       DisplayMemberPath="DisplayName"/>
-                            <TextBlock Grid.Row="6"
-                                       Text="{Binding MapArchiveSourceHint}"
+                            <TextBlock Text="{Binding MapArchiveSourceHint}"
                                        Style="{StaticResource MutedText}"
                                        Margin="0,6,0,0"
                                        TextWrapping="Wrap"/>
 
-                            <TextBlock Grid.Row="7" Text="導入先ワールド名" Margin="0,10,0,4"/>
-                            <TextBox Grid.Row="8" Text="{Binding MapImportWorldName}"/>
+                            <TextBlock Text="導入先ワールド名" Margin="0,10,0,4"/>
+                            <TextBox Text="{Binding MapImportWorldName}"/>
 
-                            <StackPanel Grid.Row="9" Margin="0,10,0,0">
+                            <StackPanel Margin="0,10,0,0">
                                 <CheckBox Content="同名ワールドは上書きして導入"
                                           IsChecked="{Binding ReplaceWorldOnMapImport}"/>
 
@@ -501,7 +552,7 @@
                                                TextWrapping="Wrap"/>
                                 </Border>
                             </StackPanel>
-                        </Grid>
+                        </StackPanel>
                     </Border>
                 </Grid>
                 </ScrollViewer>
