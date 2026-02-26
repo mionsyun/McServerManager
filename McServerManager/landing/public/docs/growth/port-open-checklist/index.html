@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ポート開放できない時のチェックリスト | MaiPilot</title>
-    <meta name="description" content="Minecraftサーバーのポート開放で詰まる原因を切り分けるチェックリスト。ルーター・Firewall・回線制限まで確認。" />
+    <title>マイクラポート開放できない時のチェックリスト | MaiPilot</title>
+    <meta name="description" content="マイクラサーバーのポート開放で接続できない時の対処手順。25565、ルーター、Firewall、CGNATまで順番に確認。" />
     <style>
       :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
       *{box-sizing:border-box;}
@@ -33,20 +33,20 @@
     </script>
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="https://www.maipilot.jp/docs/growth/port-open-checklist/" />
-    <meta property="og:title" content="ポート開放できない時のチェックリスト | MaiPilot" />
-    <meta property="og:description" content="Minecraftサーバーのポート開放で詰まる原因を切り分けるチェックリスト。ルーター・Firewall・回線制限まで確認。" />
+    <meta property="og:title" content="マイクラポート開放できない時のチェックリスト | MaiPilot" />
+    <meta property="og:description" content="マイクラサーバーのポート開放で接続できない時の対処手順。25565、ルーター、Firewall、CGNATまで順番に確認。" />
     <meta property="og:type" content="article" />
     <meta property="og:url" content="https://www.maipilot.jp/docs/growth/port-open-checklist/" />
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="ポート開放できない時のチェックリスト | MaiPilot" />
-    <meta name="twitter:description" content="Minecraftサーバーのポート開放で詰まる原因を切り分けるチェックリスト。ルーター・Firewall・回線制限まで確認。" />
+    <meta name="twitter:title" content="マイクラポート開放できない時のチェックリスト | MaiPilot" />
+    <meta name="twitter:description" content="マイクラサーバーのポート開放で接続できない時の対処手順。25565、ルーター、Firewall、CGNATまで順番に確認。" />
   </head>
   <body>
     <main class="wrap">
       <section class="card hero">
         <a href="/docs/growth/">← ガイド一覧へ</a>
-        <h1>ポート開放できない時のチェックリスト</h1>
-        <p class="muted">「友だちが入れない」を最短で切り分けるための順番を固定化しています。</p>
+        <h1>マイクラポート開放できない時のチェックリスト</h1>
+        <p class="muted">「友だちが入れない」を最短で切り分けるために、マイクラサーバーのポート開放手順を順番化しています。</p>
         <div class="chips">
           <span class="chip">想定読了: 5分</span>
           <span class="chip">対象: 接続不可トラブル</span>
@@ -76,12 +76,22 @@
       <section class="card">
         <h2>チェック手順</h2>
         <ol>
-          <li>サーバープロセスがポートをListenしているか確認。</li>
+          <li>サーバープロセスが25565ポートをListenしているか確認。</li>
           <li>Windows Firewallの受信ルールを確認。</li>
           <li>ルーターの転送先IPが現在のPCと一致しているか確認。</li>
           <li>二重ルーター構成かどうか確認。</li>
           <li>CGNAT/共有回線で外部開放不可ではないか確認。</li>
         </ol>
+      </section>
+
+      <section class="card">
+        <h2>このページで対応する検索テーマ</h2>
+        <ul>
+          <li>マイクラポート開放 できない</li>
+          <li>マイクラ サーバー ポート開放</li>
+          <li>25565 ポート開放 確認</li>
+          <li>ポート開放 友達 入れない</li>
+        </ul>
       </section>
 
       <section class="card">
@@ -115,7 +125,7 @@
       <section class="card">
         <h2>次に読む</h2>
         <p class="muted">サーバー自体の作成手順を確認するならこちら。</p>
-        <a href="/docs/growth/windows-minecraft-server-2026/" data-event="growth_article_click" data-source="growth_port_open" data-label="next_windows_2026">Windowsでマイクラサーバーを立てる（2026年版） →</a>
+        <a href="/docs/growth/windows-minecraft-server-2026/" data-event="growth_article_click" data-source="growth_port_open" data-label="next_windows_2026">マイクラサーバーの立て方（Windows/2026年版） →</a>
       </section>
     </main>
     <script>
