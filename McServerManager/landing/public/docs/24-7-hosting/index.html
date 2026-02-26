@@ -164,6 +164,36 @@
         color: var(--muted);
         font-size: 12px;
       }
+
+      @media (max-width: 600px) {
+        body {
+          padding: 20px 12px;
+        }
+
+        .card {
+          padding: 16px;
+        }
+
+        .nav {
+          flex-wrap: wrap;
+        }
+
+        table {
+          display: block;
+          width: 100%;
+          max-width: 100%;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          white-space: normal;
+          table-layout: fixed;
+        }
+
+        th,
+        td {
+          white-space: normal;
+          overflow-wrap: anywhere;
+        }
+      }
     </style>
       <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
