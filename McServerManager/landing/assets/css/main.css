@@ -797,7 +797,11 @@ a {
   color: inherit;
 }
 
-.pr-link-card:hover .pr-cta {
+.pr-media-link {
+  display: block;
+}
+
+.pr-card:hover .pr-cta {
   color: var(--accent);
 }
 
@@ -844,6 +848,7 @@ a {
   gap: 6px;
   font-weight: 700;
   color: var(--accent-2);
+  text-decoration: none;
   transition: color 0.2s ease;
 }
 
@@ -852,7 +857,7 @@ a {
   transition: transform 0.2s ease;
 }
 
-.pr-link-card:hover .pr-cta::after {
+.pr-card:hover .pr-cta::after {
   transform: translateX(3px);
 }
 

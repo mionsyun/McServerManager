@@ -196,7 +196,7 @@ const translations = {
     downloadPrimary: "Download for Windows",
     downloadSecondary: "Setup notes",
     prSectionTitle: "Sponsored options (PR)",
-    prSectionSub: "You can place both banner ads and regular links.",
+    prSectionSub: "Sponsored banners with text links below each banner.",
     prTextLinkLabel: "Text Link (PR)",
     prItems: [
       {
@@ -210,19 +210,22 @@ const translations = {
         eventName: "pr_conoha_click",
       },
       {
-        kind: "link",
-        title: "Shin VPS (PR)",
-        description: "High-spec VPS with strong memory cost performance.",
-        cta: "Open Shin VPS (PR)",
-        href: "https://px.a8.net/svt/ejp?a8mat=4AXJKD+2WSC0Q+5GDG+NTRMQ",
-        eventName: "pr_shinvps_click",
+        kind: "banner",
+        title: "XServer VPS for Game (PR)",
+        description: "Beginner-friendly game VPS with easy templates and low starting cost.",
+        cta: "Open XServer VPS for Game (PR)",
+        href: "https://px.a8.net/svt/ejp?a8mat=4AXKC8+D3JCNU+CO4+2NAN35",
+        imageSrc: "https://www20.a8.net/svt/bgt?aid=260226872792&wid=002&eno=01&mid=s00000001642016006000&mc=1",
+        imageAlt: "XServer VPS for Game sponsored banner",
+        eventName: "pr_xserver_click",
       },
       {
         kind: "banner",
-        title: "Shin VPS Banner (PR)",
-        description: "300x250 sponsored banner from A8 material.",
-        cta: "Open Shin VPS offer (PR)",
+        title: "Shin VPS (PR)",
+        description: "High-memory-cost-performance VPS for players who need more resources.",
+        cta: "Open Shin VPS (PR)",
         href: "https://px.a8.net/svt/ejp?a8mat=4AXJKD+2WSC0Q+5GDG+NVP2P",
+        textHref: "https://px.a8.net/svt/ejp?a8mat=4AXJKD+2WSC0Q+5GDG+NTJWY",
         imageSrc: "https://www29.a8.net/svt/bgt?aid=260225869176&wid=002&eno=01&mid=s00000025450004011000&mc=1",
         imageAlt: "Shin VPS sponsored banner",
         eventName: "pr_shinvps_click",
@@ -445,7 +448,7 @@ const translations = {
     downloadPrimary: "Windows 用を入手",
     downloadSecondary: "セットアップノート",
     prSectionTitle: "スポンサーリンク（PR）",
-    prSectionSub: "バナー広告と通常リンクの両方を掲載できます。",
+    prSectionSub: "各バナーの下にテキストリンクを配置しています。",
     prTextLinkLabel: "テキストリンク（PR）",
     prItems: [
       {
@@ -459,19 +462,22 @@ const translations = {
         eventName: "pr_conoha_click",
       },
       {
-        kind: "link",
-        title: "シンVPS（PR）",
-        description: "メモリ単価重視で選びたい人向けのVPS。",
-        cta: "シンVPSを見る（PR）",
-        href: "https://px.a8.net/svt/ejp?a8mat=4AXJKD+2WSC0Q+5GDG+NTRMQ",
-        eventName: "pr_shinvps_click",
+        kind: "banner",
+        title: "XServer VPS for Game（PR）",
+        description: "ゲーム向けテンプレートがあり、初めてでも始めやすいVPSです。",
+        cta: "XServer VPS for Gameを見る（PR）",
+        href: "https://px.a8.net/svt/ejp?a8mat=4AXKC8+D3JCNU+CO4+2NAN35",
+        imageSrc: "https://www20.a8.net/svt/bgt?aid=260226872792&wid=002&eno=01&mid=s00000001642016006000&mc=1",
+        imageAlt: "XServer VPS for Game スポンサードバナー",
+        eventName: "pr_xserver_click",
       },
       {
         kind: "banner",
-        title: "シンVPSバナー（PR）",
-        description: "A8提供の300x250バナー素材です。",
-        cta: "シンVPSの詳細を見る（PR）",
+        title: "シンVPS（PR）",
+        description: "より高いスペックを選びたいときの候補です。",
+        cta: "シンVPSを見る（PR）",
         href: "https://px.a8.net/svt/ejp?a8mat=4AXJKD+2WSC0Q+5GDG+NVP2P",
+        textHref: "https://px.a8.net/svt/ejp?a8mat=4AXJKD+2WSC0Q+5GDG+NTJWY",
         imageSrc: "https://www29.a8.net/svt/bgt?aid=260225869176&wid=002&eno=01&mid=s00000025450004011000&mc=1",
         imageAlt: "シンVPS スポンサードバナー",
         eventName: "pr_shinvps_click",
@@ -541,9 +547,11 @@ type PrItem = {
   description?: string;
   cta: string;
   href: string;
+  textHref?: string;
   imageSrc?: string;
   imageAlt?: string;
   eventName?: string;
+  textEventName?: string;
 };
 
 const siteUrl = computed(() => {
@@ -596,10 +604,12 @@ const normalizePrItem = (value: unknown): PrItem | null => {
     title,
     cta,
     href,
+    textHref: typeof obj.textHref === "string" ? obj.textHref.trim() : undefined,
     description: typeof obj.description === "string" ? obj.description.trim() : undefined,
     imageSrc: typeof obj.imageSrc === "string" ? obj.imageSrc.trim() : undefined,
     imageAlt: typeof obj.imageAlt === "string" ? obj.imageAlt.trim() : undefined,
     eventName: typeof obj.eventName === "string" ? obj.eventName.trim() : undefined,
+    textEventName: typeof obj.textEventName === "string" ? obj.textEventName.trim() : undefined,
   };
 };
 const prItems = computed<PrItem[]>(() => {
@@ -1066,28 +1076,39 @@ useHead(() => ({
             class="panel pr-card"
             :class="item.kind === 'banner' ? 'is-banner' : 'is-link'"
           >
-            <a
-              :href="item.href"
-              class="pr-link-card"
-              data-affiliate="true"
-              :data-event="item.eventName || 'outbound_affiliate_click'"
-              :target="isExternalUrl(item.href) ? '_blank' : null"
-              :rel="isExternalUrl(item.href) ? 'sponsored nofollow noopener noreferrer' : 'sponsored nofollow'"
-            >
-              <img
-                v-if="item.kind === 'banner' && item.imageSrc"
-                :src="item.imageSrc"
-                :alt="item.imageAlt || item.title"
-                class="pr-banner-image"
-                loading="lazy"
-              />
-              <div v-else class="pr-link-media" aria-hidden="true">
-                <span>{{ t.prTextLinkLabel }}</span>
-              </div>
+            <div class="pr-link-card">
+              <a
+                :href="item.href"
+                class="pr-media-link"
+                data-affiliate="true"
+                :data-event="item.eventName || 'outbound_affiliate_click'"
+                :target="isExternalUrl(item.href) ? '_blank' : null"
+                :rel="isExternalUrl(item.href) ? 'sponsored nofollow noopener noreferrer' : 'sponsored nofollow'"
+              >
+                <img
+                  v-if="item.kind === 'banner' && item.imageSrc"
+                  :src="item.imageSrc"
+                  :alt="item.imageAlt || item.title"
+                  class="pr-banner-image"
+                  loading="lazy"
+                />
+                <div v-else class="pr-link-media" aria-hidden="true">
+                  <span>{{ t.prTextLinkLabel }}</span>
+                </div>
+              </a>
               <h3>{{ item.title }}</h3>
               <p v-if="item.description">{{ item.description }}</p>
-              <span class="pr-cta">{{ item.cta }}</span>
-            </a>
+              <a
+                :href="item.textHref || item.href"
+                class="pr-cta"
+                data-affiliate="true"
+                :data-event="item.textEventName || item.eventName || 'outbound_affiliate_click'"
+                :target="isExternalUrl(item.textHref || item.href) ? '_blank' : null"
+                :rel="isExternalUrl(item.textHref || item.href) ? 'sponsored nofollow noopener noreferrer' : 'sponsored nofollow'"
+              >
+                {{ item.cta }}
+              </a>
+            </div>
           </article>
         </div>
       </section>
