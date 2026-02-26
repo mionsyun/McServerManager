@@ -1,6 +1,8 @@
 param(
     [string]$Configuration = "Release",
-    [string]$Runtime = "win-x64"
+    [string]$Runtime = "win-x64",
+    [string]$PublicDownloadBaseUrl = "https://stmailpilotje.blob.core.windows.net/public/downloads",
+    [string]$ReleaseNotesUrl = "https://www.maipilot.jp/docs/"
 )
 
 $ErrorActionPreference = "Stop"
@@ -64,3 +66,30 @@ if ($canSign) {
         throw "Signing installer failed."
     }
 }
+
+if (-not (Test-Path $setupExe)) {
+    throw "Installer not found: $setupExe"
+}
+
+[xml]$project = Get-Content $projectPath
+$appVersion = ($project.Project.PropertyGroup | Where-Object { $_.Version } | Select-Object -First 1).Version
+if ([string]::IsNullOrWhiteSpace($appVersion)) {
+    throw "Version not found in McServerManager.csproj."
+}
+
+$normalizedBaseUrl = $PublicDownloadBaseUrl.TrimEnd("/")
+$installerUrl = "$normalizedBaseUrl/MaiPilotSetup-$appVersion.exe"
+$sha256 = (Get-FileHash -Path $setupExe -Algorithm SHA256).Hash.ToLowerInvariant()
+$publishedAt = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+$manifestPath = Join-Path $root "installer\dist\update.json"
+
+$manifest = [ordered]@{
+    version = $appVersion
+    installerUrl = $installerUrl
+    sha256 = $sha256
+    publishedAt = $publishedAt
+    releaseNotesUrl = $ReleaseNotesUrl
+}
+
+$manifest | ConvertTo-Json | Set-Content -Path $manifestPath -Encoding utf8
+Write-Host "Generated update manifest: $manifestPath"

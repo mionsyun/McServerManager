@@ -293,7 +293,7 @@ const translations = {
       },
       {
         title: "How do I update?",
-        body: "Download and run the latest installer.",
+        body: "Use \"Check for app updates\" in MaiPilot, then run the latest installer shown in the prompt.",
       },
     ],
     footerDocs: "Docs",
@@ -568,7 +568,7 @@ const translations = {
       },
       {
         title: "アップデート方法は？",
-        body: "最新のインストーラーを入手して実行してください。",
+        body: "MaiPilotの「アプリ更新を確認」から確認し、表示された最新版インストーラーを実行してください。",
       },
     ],
     footerDocs: "ドキュメント",

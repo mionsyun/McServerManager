@@ -20,7 +20,8 @@ public sealed class AppServices
         ThemeService theme,
         JavaService java,
         AddonManagementService addons,
-        AddonCatalogService addonCatalog)
+        AddonCatalogService addonCatalog,
+        AppUpdateService appUpdate)
     {
         Paths = paths;
         Settings = settings;
@@ -40,6 +41,7 @@ public sealed class AppServices
         Java = java;
         Addons = addons;
         AddonCatalog = addonCatalog;
+        AppUpdate = appUpdate;
     }
 
     public AppPathsService Paths { get; }
@@ -60,4 +62,5 @@ public sealed class AppServices
     public JavaService Java { get; }
     public AddonManagementService Addons { get; }
     public AddonCatalogService AddonCatalog { get; }
+    public AppUpdateService AppUpdate { get; }
 }

@@ -8,4 +8,6 @@ public sealed class AppSettings
     public bool EnableUpnp { get; set; }
     public bool PromptUpnp { get; set; } = true;
     public string Theme { get; set; } = "Dark";
+    public string? DeferredAppUpdateVersion { get; set; }
+    public DateTime? DeferredAppUpdateUntilUtc { get; set; }
 }

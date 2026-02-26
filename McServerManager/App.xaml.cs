@@ -33,6 +33,7 @@ public partial class App : System.Windows.Application
             var javaService = new JavaService();
             var addonManagementService = new AddonManagementService();
             var addonCatalogService = new AddonCatalogService();
+            var appUpdateService = new AppUpdateService();
             var jarService = new ServerJarService(versionService, javaService);
             var provisioningService = new ServerProvisioningService(paths, propertiesService, configService, jarService);
 
@@ -57,7 +58,8 @@ public partial class App : System.Windows.Application
                 themeService,
                 javaService,
                 addonManagementService,
-                addonCatalogService);
+                addonCatalogService,
+                appUpdateService);
 
             var mainWindow = new MainWindow
             {
@@ -68,6 +70,10 @@ public partial class App : System.Windows.Application
             mainWindow.Show();
 
             ShowFirstRunGuideIfNeeded(settingsService, mainWindow);
+            if (mainWindow.DataContext is MainViewModel vm)
+            {
+                _ = vm.CheckForAppUpdateOnStartupAsync();
+            }
         }
         catch (Exception ex)
         {

@@ -11,6 +11,7 @@ namespace McServerManager.ViewModels;
 
 public sealed class MainViewModel : ObservableObject
 {
+    private static readonly TimeSpan UpdateSnoozeDuration = TimeSpan.FromHours(24);
     private readonly AppServices _services;
     private readonly AppSettings _settings;
     private ServerViewModel? _selectedServer;
@@ -33,6 +34,7 @@ public sealed class MainViewModel : ObservableObject
         DuplicateServerCommand = new RelayCommand(param => DuplicateServer(param as ServerViewModel ?? SelectedServer),
             param => (param as ServerViewModel ?? SelectedServer) is not null);
         RefreshCommand = new RelayCommand(_ => ReloadServers());
+        CheckAppUpdateCommand = new AsyncRelayCommand(() => CheckForAppUpdateCoreAsync(isManual: true));
 
         LoadServers();
 
@@ -79,11 +81,176 @@ public sealed class MainViewModel : ObservableObject
     public RelayCommand DuplicateServerCommand { get; }
     public RelayCommand RefreshCommand { get; }
     public RelayCommand StartTutorialCommand { get; }
+    public AsyncRelayCommand CheckAppUpdateCommand { get; }
 
     public void StartTutorial()
     {
         _tutorialOpenedCreate = false;
         Tutorial.Start();
+    }
+
+    public Task CheckForAppUpdateOnStartupAsync()
+    {
+        return CheckForAppUpdateCoreAsync(isManual: false);
+    }
+
+    private async Task CheckForAppUpdateCoreAsync(bool isManual)
+    {
+        try
+        {
+            var checkResult = await _services.AppUpdate.CheckForUpdatesAsync();
+            switch (checkResult.Status)
+            {
+                case AppUpdateCheckStatus.Failed:
+                    if (isManual)
+                    {
+                        _services.Dialog.Show(
+                            checkResult.ErrorMessage ?? "更新チェックに失敗しました。",
+                            "アプリ更新",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
+                    }
+                    return;
+                case AppUpdateCheckStatus.UpToDate:
+                    if (isManual)
+                    {
+                        _services.Dialog.Show(
+                            "現在のアプリは最新です。",
+                            "アプリ更新",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                    }
+                    return;
+                case AppUpdateCheckStatus.UpdateAvailable:
+                    break;
+            }
+
+            var manifest = checkResult.Manifest;
+            if (manifest is null)
+            {
+                if (isManual)
+                {
+                    _services.Dialog.Show(
+                        "更新情報が不正です。",
+                        "アプリ更新",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                }
+                return;
+            }
+
+            if (!isManual && IsUpdatePromptDeferred(manifest.Version))
+            {
+                return;
+            }
+
+            await ShowUpdatePromptAndApplyAsync(manifest);
+        }
+        catch (Exception ex)
+        {
+            if (isManual)
+            {
+                _services.Dialog.Show(
+                    $"更新チェック中にエラーが発生しました: {ex.Message}",
+                    "アプリ更新",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+    }
+
+    private async Task ShowUpdatePromptAndApplyAsync(AppUpdateManifest manifest)
+    {
+        var releaseNotesText = string.IsNullOrWhiteSpace(manifest.ReleaseNotesUrl)
+            ? string.Empty
+            : $"\n\nリリースノート: {manifest.ReleaseNotesUrl}";
+        var prompt = $"新しいバージョン {manifest.Version} が利用可能です。\n今すぐ更新しますか？\n\nいいえを選ぶと24時間後に再通知します。{releaseNotesText}";
+        var result = _services.Dialog.Show(prompt, "アプリ更新", MessageBoxButton.YesNo, MessageBoxImage.Information);
+        if (result != MessageBoxResult.Yes)
+        {
+            DeferUpdatePrompt(manifest.Version);
+            return;
+        }
+
+        if (Servers.Any(server => server.Status != ServerStatus.Stopped))
+        {
+            _services.Dialog.Show(
+                "更新前にすべてのサーバーを停止してください。",
+                "アプリ更新",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
+        var applyResult = await _services.AppUpdate.DownloadAndLaunchInstallerAsync(manifest);
+        switch (applyResult.Status)
+        {
+            case AppUpdateDownloadStatus.Success:
+                ClearDeferredUpdatePrompt();
+                _services.Dialog.Show(
+                    "インストーラーを起動しました。アプリを終了します。",
+                    "アプリ更新",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                WpfApplication.Current?.Shutdown();
+                return;
+            case AppUpdateDownloadStatus.HashMismatch:
+                _services.Dialog.Show(
+                    applyResult.ErrorMessage ?? "ダウンロードしたファイルの整合性検証に失敗しました。",
+                    "アプリ更新",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return;
+            case AppUpdateDownloadStatus.SignatureInvalid:
+                _services.Dialog.Show(
+                    applyResult.ErrorMessage ?? "署名検証に失敗しました。",
+                    "アプリ更新",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return;
+            case AppUpdateDownloadStatus.DownloadFailed:
+                _services.Dialog.Show(
+                    applyResult.ErrorMessage ?? "更新処理に失敗しました。",
+                    "アプリ更新",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return;
+        }
+    }
+
+    private bool IsUpdatePromptDeferred(string version)
+    {
+        if (string.IsNullOrWhiteSpace(_settings.DeferredAppUpdateVersion)
+            || _settings.DeferredAppUpdateUntilUtc is null)
+        {
+            return false;
+        }
+
+        if (!string.Equals(_settings.DeferredAppUpdateVersion, version, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        return _settings.DeferredAppUpdateUntilUtc.Value > DateTime.UtcNow;
+    }
+
+    private void DeferUpdatePrompt(string version)
+    {
+        _settings.DeferredAppUpdateVersion = version;
+        _settings.DeferredAppUpdateUntilUtc = DateTime.UtcNow.Add(UpdateSnoozeDuration);
+        _services.Settings.Save(_settings);
+    }
+
+    private void ClearDeferredUpdatePrompt()
+    {
+        if (_settings.DeferredAppUpdateVersion is null && _settings.DeferredAppUpdateUntilUtc is null)
+        {
+            return;
+        }
+
+        _settings.DeferredAppUpdateVersion = null;
+        _settings.DeferredAppUpdateUntilUtc = null;
+        _services.Settings.Save(_settings);
     }
 
     private void OpenTutorialGuideWindow()

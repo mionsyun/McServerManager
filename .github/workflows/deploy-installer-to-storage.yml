@@ -43,7 +43,12 @@ jobs:
 
       - name: Build installer
         shell: pwsh
-        run: .\McServerManager\installer\build.ps1 -Configuration Release -Runtime win-x64
+        run: >
+          .\McServerManager\installer\build.ps1
+          -Configuration Release
+          -Runtime win-x64
+          -PublicDownloadBaseUrl "https://stmailpilotje.blob.core.windows.net/public/downloads"
+          -ReleaseNotesUrl "https://www.maipilot.jp/docs/"
 
       - name: Resolve app version
         id: version
@@ -60,13 +65,17 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: installer
-          path: McServerManager/installer/dist/MaiPilotSetup.exe
+          path: |
+            McServerManager/installer/dist/MaiPilotSetup.exe
+            McServerManager/installer/dist/update.json
           if-no-files-found: error
           retention-days: 14
 
   upload_to_storage:
     needs: build_installer
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
     steps:
@@ -74,7 +83,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: installer
-          path: .
+          path: artifact
 
       - name: Validate Azure settings
         shell: bash
@@ -91,7 +100,7 @@ jobs:
           set -euo pipefail
 
           VERSION="${{ needs.build_installer.outputs.app_version }}"
-          FILE_PATH="MaiPilotSetup.exe"
+          FILE_PATH="artifact/MaiPilotSetup.exe"
           CONTAINER="public"
           PREFIX="downloads"
           PREFIX="${PREFIX#/}"
@@ -157,6 +166,41 @@ jobs:
             echo "versioned_url=$VERSIONED_URL"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Checkout repository for manifest sync
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          token: ${{ secrets.MANIFEST_SYNC_TOKEN != '' && secrets.MANIFEST_SYNC_TOKEN || github.token }}
+
+      - name: Sync update manifest to landing
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SOURCE_MANIFEST="artifact/update.json"
+          TARGET_DIR="McServerManager/landing/public/updates/win-x64"
+          TARGET_MANIFEST="$TARGET_DIR/update.json"
+
+          if [ ! -f "$SOURCE_MANIFEST" ]; then
+            echo "update.json artifact not found: $SOURCE_MANIFEST"
+            exit 1
+          fi
+
+          mkdir -p "$TARGET_DIR"
+          cp "$SOURCE_MANIFEST" "$TARGET_MANIFEST"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet -- "$TARGET_MANIFEST"; then
+            echo "No manifest changes to commit."
+            exit 0
+          fi
+
+          git add "$TARGET_MANIFEST"
+          git commit -m "chore: sync app update manifest"
+          git push origin HEAD:develop
+
       - name: Job summary
         shell: bash
         run: |
@@ -166,4 +210,5 @@ jobs:
             echo "- Container: \`${{ steps.upload.outputs.container }}\`"
             echo "- Latest: ${{ steps.upload.outputs.latest_url }}"
             echo "- Versioned: ${{ steps.upload.outputs.versioned_url }}"
+            echo "- Manifest synced: McServerManager/landing/public/updates/win-x64/update.json"
           } >> "$GITHUB_STEP_SUMMARY"
