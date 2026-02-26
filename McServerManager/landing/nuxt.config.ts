@@ -8,7 +8,7 @@ export default defineNuxtConfig({
       downloadUrl:
         process.env.NUXT_PUBLIC_DOWNLOAD_URL ||
         "https://stmailpilotje.blob.core.windows.net/public/downloads/MaiPilotSetup.exe",
-      gaMeasurementId: process.env.NUXT_PUBLIC_GA_MEASUREMENT_ID || "",
+      gaMeasurementId: process.env.NUXT_PUBLIC_GA_MEASUREMENT_ID || "G-MM106D2B2Z",
       prItemsJson: process.env.NUXT_PUBLIC_PR_ITEMS_JSON || ""
     }
   },
