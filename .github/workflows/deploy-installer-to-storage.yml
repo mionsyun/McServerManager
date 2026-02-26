@@ -100,7 +100,11 @@ jobs:
           set -euo pipefail
 
           VERSION="${{ needs.build_installer.outputs.app_version }}"
-          FILE_PATH="artifact/MaiPilotSetup.exe"
+          FILE_PATH=$(find artifact -type f -name "MaiPilotSetup.exe" | head -n 1 || true)
+          if [ -z "$FILE_PATH" ]; then
+            echo "MaiPilotSetup.exe artifact not found under ./artifact"
+            exit 1
+          fi
           CONTAINER="public"
           PREFIX="downloads"
           PREFIX="${PREFIX#/}"
@@ -177,17 +181,36 @@ jobs:
         run: |
           set -euo pipefail
 
-          SOURCE_MANIFEST="artifact/update.json"
+          SOURCE_MANIFEST=$(find artifact -type f -name "update.json" | head -n 1 || true)
           TARGET_DIR="McServerManager/landing/public/updates/win-x64"
           TARGET_MANIFEST="$TARGET_DIR/update.json"
-
-          if [ ! -f "$SOURCE_MANIFEST" ]; then
-            echo "update.json artifact not found: $SOURCE_MANIFEST"
-            exit 1
-          fi
+          VERSION="${{ needs.build_installer.outputs.app_version }}"
+          VERSIONED_URL="${{ steps.upload.outputs.versioned_url }}"
+          RELEASE_NOTES_URL="https://www.maipilot.jp/docs/"
 
           mkdir -p "$TARGET_DIR"
-          cp "$SOURCE_MANIFEST" "$TARGET_MANIFEST"
+          if [ -n "$SOURCE_MANIFEST" ] && [ -f "$SOURCE_MANIFEST" ]; then
+            cp "$SOURCE_MANIFEST" "$TARGET_MANIFEST"
+          else
+            EXE_PATH=$(find artifact -type f -name "MaiPilotSetup.exe" | head -n 1 || true)
+            if [ -z "$EXE_PATH" ]; then
+              echo "update.json artifact not found, and MaiPilotSetup.exe is also missing."
+              exit 1
+            fi
+
+            SHA256=$(sha256sum "$EXE_PATH" | awk '{print $1}')
+            PUBLISHED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+            cat > "$TARGET_MANIFEST" <<EOF
+{
+  "version": "$VERSION",
+  "installerUrl": "$VERSIONED_URL",
+  "sha256": "$SHA256",
+  "publishedAt": "$PUBLISHED_AT",
+  "releaseNotesUrl": "$RELEASE_NOTES_URL"
+}
+EOF
+          fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
