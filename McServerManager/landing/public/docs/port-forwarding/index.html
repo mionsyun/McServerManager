@@ -111,6 +111,41 @@
       a {
         color: var(--accent-2);
       }
+      .funnel-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .funnel-card {
+        display: grid;
+        gap: 8px;
+        background: var(--panel-2);
+        border: 1px solid rgba(126, 157, 201, 0.3);
+        border-radius: 12px;
+        padding: 12px;
+      }
+      .funnel-card.lp {
+        border-color: rgba(255, 209, 102, 0.45);
+        background: linear-gradient(135deg, rgba(255, 209, 102, 0.12), rgba(51, 168, 255, 0.08)), var(--panel-2);
+      }
+      .funnel-pill {
+        display: inline-block;
+        width: max-content;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 999px;
+        padding: 4px 8px;
+        background: rgba(102, 255, 136, 0.16);
+        color: var(--accent);
+      }
+      .funnel-pill.pr {
+        background: rgba(255, 209, 102, 0.2);
+        color: #ffd166;
+      }
+      .funnel-link {
+        font-weight: 700;
+      }
       footer {
         text-align: center;
         color: var(--muted);
@@ -247,7 +282,7 @@
         <h2>それでも難しい場合</h2>
         <p class="muted">
           24時間稼働が必要なら、VPSという選択肢があります。
-          <a href="/docs/24-7-hosting" data-event="docs_24_7_hosting_click">比較を見る（PR）</a>
+          <a href="/docs/24-7-hosting" data-event="docs_24_7_hosting_click" data-source="docs_port_forwarding" data-label="hosting_comparison">比較を見る（PR）</a>
         </p>
       </section>
 
@@ -255,8 +290,42 @@
         <h2>Still stuck?</h2>
         <p class="muted">
           If you need always-on hosting, VPS can help.
-          <a href="/docs/24-7-hosting" data-event="docs_24_7_hosting_click">See options (PR)</a>
+          <a href="/docs/24-7-hosting" data-event="docs_24_7_hosting_click" data-source="docs_port_forwarding" data-label="hosting_comparison_en">See options (PR)</a>
         </p>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>次のアクション</h2>
+        <p class="muted">ここまで確認したら、ホームページ経由で導入を進めるか、LPで運用比較を確認できます。</p>
+        <div class="funnel-grid">
+          <article class="funnel-card">
+            <span class="funnel-pill">公式ホームページ</span>
+            <p class="muted">機能紹介とダウンロード導線をまとめて確認できます。</p>
+            <a class="funnel-link" href="/?from=docs_port_forwarding_home_banner" data-event="docs_home_banner_click" data-source="docs_port_forwarding" data-label="home_banner">ホームページを見る →</a>
+          </article>
+          <article class="funnel-card lp">
+            <span class="funnel-pill pr">PR</span>
+            <p class="muted">24時間運用を検討するなら、VPS比較LPの広告バナー一覧へ進めます。</p>
+            <a class="funnel-link" href="/docs/24-7-hosting?from=docs_port_forwarding_lp_banner" data-event="docs_lp_banner_click" data-source="docs_port_forwarding" data-label="lp_banner">24時間運用VPS比較LPを見る（PR） →</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="card" data-lang-block="en">
+        <h2>Next action</h2>
+        <p class="muted">After this checklist, continue from the homepage or move to the PR landing page for hosting comparison.</p>
+        <div class="funnel-grid">
+          <article class="funnel-card">
+            <span class="funnel-pill">Official Homepage</span>
+            <p class="muted">See feature overview and download links in one place.</p>
+            <a class="funnel-link" href="/?from=docs_port_forwarding_home_banner" data-event="docs_home_banner_click" data-source="docs_port_forwarding" data-label="home_banner">Open homepage →</a>
+          </article>
+          <article class="funnel-card lp">
+            <span class="funnel-pill pr">PR</span>
+            <p class="muted">For always-on operation, open the hosting comparison LP with ad banners.</p>
+            <a class="funnel-link" href="/docs/24-7-hosting?from=docs_port_forwarding_lp_banner" data-event="docs_lp_banner_click" data-source="docs_port_forwarding" data-label="lp_banner">Open 24/7 hosting LP (PR) →</a>
+          </article>
+        </div>
       </section>
 
       <footer>MaiPilot</footer>
@@ -314,13 +383,15 @@
         }
         const eventName = link.getAttribute("data-event");
         const href = link.getAttribute("href") || "";
-        const text = link.textContent ? link.textContent.trim() : "";
+        const label = link.getAttribute("data-label");
+        const text = label || (link.textContent ? link.textContent.trim() : "");
+        const source = link.getAttribute("data-source") || "cta";
         if (eventName) {
           trackEvent({
             event_name: eventName,
             link_url: href,
             link_text: text,
-            source: "cta",
+            source,
           });
         }
         const rel = (link.getAttribute("rel") || "").toLowerCase();

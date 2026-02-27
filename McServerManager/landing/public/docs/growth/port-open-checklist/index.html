@@ -21,6 +21,12 @@
       .mini{background:var(--panel2);border:1px solid rgba(126,157,201,.25);border-radius:12px;padding:12px;}
       .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
       .chip{font-size:12px;padding:5px 10px;border:1px solid rgba(126,157,201,.35);border-radius:999px;color:var(--muted);} 
+      .banner-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px; margin-top:10px; }
+      .banner-card { display:grid; gap:8px; background:var(--panel2); border:1px solid rgba(126,157,201,.3); border-radius:12px; padding:12px; }
+      .banner-card.lp { border-color: rgba(255,209,102,.45); background:linear-gradient(135deg, rgba(255,209,102,.12), rgba(51,168,255,.08)), var(--panel2); }
+      .banner-pill { display:inline-block; width:max-content; font-size:11px; font-weight:700; border-radius:999px; padding:4px 8px; background:rgba(102,255,136,.16); color:var(--accent); }
+      .banner-pill.pr { background:rgba(255,209,102,.2); color:#ffd166; }
+      .banner-link { font-weight:700; }
     </style>
       <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
@@ -109,6 +115,23 @@
         <ul>
           <li><a href="/docs/24-7-hosting" data-event="docs_24_7_hosting_click" data-source="growth_port_open" data-label="hosting_comparison">ポート開放不要 — VPS比較を見る（PR）</a></li>
         </ul>
+      </section>
+
+      <section class="card">
+        <h2>次のアクション</h2>
+        <p class="muted">切り分けが終わったら、ホームページから導入を進めるか、LPで代替手段を比較できます。</p>
+        <div class="banner-grid">
+          <article class="banner-card">
+            <span class="banner-pill">公式ホームページ</span>
+            <p class="muted">セットアップ全体の流れとダウンロード導線を1ページで確認できます。</p>
+            <a class="banner-link" href="/?from=growth_port_open_home_banner" data-event="growth_home_banner_click" data-source="growth_port_open" data-label="home_banner">ホームページを見る →</a>
+          </article>
+          <article class="banner-card lp">
+            <span class="banner-pill pr">PR</span>
+            <p class="muted">ポート開放が不要な運用を検討する場合は、VPS比較LPの広告バナーへ。</p>
+            <a class="banner-link" href="/docs/24-7-hosting?from=growth_port_open_lp_banner" data-event="growth_lp_banner_click" data-source="growth_port_open" data-label="lp_banner">24時間運用VPS比較LPを見る（PR） →</a>
+          </article>
+        </div>
       </section>
 
       <section class="card cta">
