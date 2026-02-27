@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>マイクラサーバーのバックアップと復元手順（事故防止） | MaiPilot</title>
+    <meta name="description" content="ワールド破損や設定ミスに備えるバックアップ・復元手順。安全な運用フローを初心者向けに整理。" />
+    <style>
+      :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
+      *{box-sizing:border-box;}
+      body{margin:0;padding:32px 16px;font-family:"Noto Sans JP","Segoe UI",sans-serif;color:var(--text);background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%);}
+      .wrap{max-width:980px;margin:0 auto;display:grid;gap:16px;}
+      .card{background:var(--panel);border:1px solid rgba(126,157,201,.25);border-radius:16px;padding:22px;}
+      .hero{background:linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)), var(--panel);}
+      .muted{color:var(--muted);}
+      .cta{border:1px solid rgba(102,255,136,.45);background:rgba(102,255,136,.08);}
+      a{color:var(--accent2);text-decoration:none;}
+      h1,h2,h3{margin:0 0 10px;}
+      ul,ol{margin:8px 0 0 18px;color:var(--muted);}
+      .faq-list{margin:0;display:grid;gap:10px;}
+      .faq-list dt{font-weight:700;color:var(--text);}
+      .faq-list dd{margin:0;color:var(--muted);}
+    </style>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MM106D2B2Z');
+    </script>
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://www.maipilot.jp/docs/growth/backup-restore-guide/" />
+    <meta property="og:title" content="マイクラサーバーのバックアップと復元手順（事故防止） | MaiPilot" />
+    <meta property="og:description" content="ワールド破損や設定ミスに備えるバックアップ・復元手順。安全な運用フローを初心者向けに整理。" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://www.maipilot.jp/docs/growth/backup-restore-guide/" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="マイクラサーバーのバックアップと復元手順（事故防止） | MaiPilot" />
+    <meta name="twitter:description" content="ワールド破損や設定ミスに備えるバックアップ・復元手順。安全な運用フローを初心者向けに整理。" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+          <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://www.maipilot.jp/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Docs",
+      "item": "https://www.maipilot.jp/docs/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Growth",
+      "item": "https://www.maipilot.jp/docs/growth/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "マイクラサーバーのバックアップと復元手順（事故防止）",
+      "item": "https://www.maipilot.jp/docs/growth/backup-restore-guide/"
+    }
+  ]
+}
+  </script>
+          <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "バックアップ頻度はどれくらいが適切ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "小規模なら毎日1回、大きな更新前は必ず追加で1回が目安です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "復元後にプレイヤーデータが消えることはありますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "バックアップ範囲が不十分だと発生します。ワールドだけでなく関連設定も同時に保存してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "クラウドにも置いた方がよいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ローカル障害対策として有効です。最低1世代は別ディスク/クラウド保管を推奨します。"
+      }
+    }
+  ]
+}
+  </script>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="card hero">
+        <a href="/docs/growth/">← ガイド一覧へ</a>
+        <h1>マイクラサーバーのバックアップと復元手順（事故防止）</h1>
+        <p class="muted">更新前・プラグイン導入前にバックアップするだけで、復旧時間を大幅に短縮できます。</p>
+      </section>
+
+      <section class="card">
+        <h2>バックアップの基本</h2>
+        <ul>
+          <li>必ずサーバー停止中に取得する。</li>
+          <li>ワールド + 設定ファイルを同時に保存する。</li>
+          <li>日付付きで世代管理し、最低3世代残す。</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>復元手順</h2>
+        <ol>
+          <li>現行ワールドを退避（念のため再バックアップ）。</li>
+          <li>対象バックアップを展開して配置。</li>
+          <li>起動後にログ・プレイヤーデータを確認。</li>
+          <li>問題なければ通常運用へ戻す。</li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h2>事故を減らす運用</h2>
+        <ul>
+          <li>更新作業前チェックリストを用意する。</li>
+          <li>重要変更（MOD/プラグイン追加）は1つずつ。</li>
+          <li>復元テストを月1回実施する。</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>よくある質問</h2>
+        <dl class="faq-list">
+          <dt data-faq-question>バックアップ頻度はどれくらいが適切ですか？</dt>
+          <dd data-faq-answer>小規模なら毎日1回、大きな更新前は必ず追加で1回が目安です。</dd>
+          <dt data-faq-question>復元後にプレイヤーデータが消えることはありますか？</dt>
+          <dd data-faq-answer>バックアップ範囲が不十分だと発生します。ワールドだけでなく関連設定も同時に保存してください。</dd>
+          <dt data-faq-question>クラウドにも置いた方がよいですか？</dt>
+          <dd data-faq-answer>ローカル障害対策として有効です。最低1世代は別ディスク/クラウド保管を推奨します。</dd>
+        </dl>
+      </section>
+
+      <section class="card">
+        <h2>次のアクション</h2>
+        <p class="muted">この内容を反映したら、まず公式ホームページから導入を進め、24時間運用を想定する場合はVPS比較も確認しておくのがおすすめです。</p>
+        <ul>
+          <li><a href="/?from=growth_backup_restore_home_cta">公式ホームページから導入を進める</a></li>
+          <li><a href="/docs/24-7-hosting/?from=growth_backup_restore_pr_cta">24時間運用VPS比較を見る（PR）</a></li>
+        </ul>
+        <p class="muted">※この記事には広告・PRリンクを含みます。</p>
+      </section>
+      <section class="card cta">
+        <h2>関連ガイド</h2>
+        <ul>
+          <li><a href="/docs/growth/friends-cant-join-error-guide/">友だちが入れない時のエラー別対処</a></li>
+          <li><a href="/docs/growth/server-properties-recommended-settings/">server.propertiesおすすめ設定</a></li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

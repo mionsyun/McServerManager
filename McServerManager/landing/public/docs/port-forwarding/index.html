@@ -118,7 +118,9 @@
         margin-top: 10px;
       }
       .funnel-card {
-        display: grid;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
         gap: 8px;
         background: var(--panel-2);
         border: 1px solid rgba(126, 157, 201, 0.3);
@@ -146,6 +148,19 @@
       .funnel-link {
         font-weight: 700;
       }
+      .faq-list {
+        margin: 0;
+        display: grid;
+        gap: 10px;
+      }
+      .faq-list dt {
+        font-weight: 700;
+        color: var(--text);
+      }
+      .faq-list dd {
+        margin: 0;
+        color: var(--muted);
+      }
       footer {
         text-align: center;
         color: var(--muted);
@@ -171,6 +186,67 @@
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="MaiPilot | マイクラポート開放チェックリスト" />
     <meta name="twitter:description" content="マイクラサーバーのポート開放手順を確認。25565、ルーター設定、Firewall、CGNAT/二重ルーターまでチェック。" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+          <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://www.maipilot.jp/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Docs",
+      "item": "https://www.maipilot.jp/docs/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "マイクラポート開放チェックリスト",
+      "item": "https://www.maipilot.jp/docs/port-forwarding/"
+    }
+  ]
+}
+  </script>
+          <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "ポート開放できているかを最短で確認する方法は？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ローカル接続成功を確認した後、外部回線から接続テストするのが最短です。ローカル未確認のまま外部確認を進めると原因が混ざります。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "UPnPが使えれば手動設定は不要ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "環境によってはUPnPが不安定なため、公開運用では手動転送設定も把握しておくと復旧が速くなります。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "二重ルーターかどうかはどう見分けますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "WAN側IPと公開IPが一致しない場合や、ルーター機器が2段になっている場合は二重ルーターの可能性が高いです。"
+      }
+    }
+  ]
+}
+  </script>
   </head>
   <body>
     <div class="wrap">
@@ -181,7 +257,7 @@
             <span class="tag">Port Forwarding</span>
           </div>
           <div>
-            <a class="back-link" href="/docs">← Docs</a>
+            <a class="back-link" href="/docs/">← Docs</a>
             <span class="muted"> / </span>
             <a class="back-link" href="/">Home</a>
           </div>
@@ -282,7 +358,7 @@
         <h2>それでも難しい場合</h2>
         <p class="muted">
           24時間稼働が必要なら、VPSという選択肢があります。
-          <a href="/docs/24-7-hosting" data-event="docs_24_7_hosting_click" data-source="docs_port_forwarding" data-label="hosting_comparison">比較を見る（PR）</a>
+          <a href="/docs/24-7-hosting/" data-event="docs_24_7_hosting_click" data-source="docs_port_forwarding" data-label="hosting_comparison">比較を見る（PR）</a>
         </p>
       </section>
 
@@ -290,8 +366,20 @@
         <h2>Still stuck?</h2>
         <p class="muted">
           If you need always-on hosting, VPS can help.
-          <a href="/docs/24-7-hosting" data-event="docs_24_7_hosting_click" data-source="docs_port_forwarding" data-label="hosting_comparison_en">See options (PR)</a>
+          <a href="/docs/24-7-hosting/" data-event="docs_24_7_hosting_click" data-source="docs_port_forwarding" data-label="hosting_comparison_en">See options (PR)</a>
         </p>
+      </section>
+
+      <section class="card" data-lang-block="ja">
+        <h2>よくある質問</h2>
+        <dl class="faq-list">
+          <dt data-faq-question>ポート開放できているかを最短で確認する方法は？</dt>
+          <dd data-faq-answer>ローカル接続成功を確認した後、外部回線から接続テストするのが最短です。ローカル未確認のまま外部確認を進めると原因が混ざります。</dd>
+          <dt data-faq-question>UPnPが使えれば手動設定は不要ですか？</dt>
+          <dd data-faq-answer>環境によってはUPnPが不安定なため、公開運用では手動転送設定も把握しておくと復旧が速くなります。</dd>
+          <dt data-faq-question>二重ルーターかどうかはどう見分けますか？</dt>
+          <dd data-faq-answer>WAN側IPと公開IPが一致しない場合や、ルーター機器が2段になっている場合は二重ルーターの可能性が高いです。</dd>
+        </dl>
       </section>
 
       <section class="card" data-lang-block="ja">
@@ -305,8 +393,8 @@
           </article>
           <article class="funnel-card lp">
             <span class="funnel-pill pr">PR</span>
-            <p class="muted">24時間運用を検討するなら、VPS比較LPの広告バナー一覧へ進めます。</p>
-            <a class="funnel-link" href="/docs/24-7-hosting?from=docs_port_forwarding_lp_banner" data-event="docs_lp_banner_click" data-source="docs_port_forwarding" data-label="lp_banner">24時間運用VPS比較LPを見る（PR） →</a>
+            <p class="muted">24時間運用を目指すなら、まずVPS比較LPをチェックするのがおすすめです。</p>
+            <a class="funnel-link" href="/docs/24-7-hosting/?from=docs_port_forwarding_lp_banner" data-event="docs_lp_banner_click" data-source="docs_port_forwarding" data-label="lp_banner">24時間運用VPS比較LPを見る（PR） →</a>
           </article>
         </div>
       </section>
@@ -323,7 +411,7 @@
           <article class="funnel-card lp">
             <span class="funnel-pill pr">PR</span>
             <p class="muted">For always-on operation, open the hosting comparison LP with ad banners.</p>
-            <a class="funnel-link" href="/docs/24-7-hosting?from=docs_port_forwarding_lp_banner" data-event="docs_lp_banner_click" data-source="docs_port_forwarding" data-label="lp_banner">Open 24/7 hosting LP (PR) →</a>
+            <a class="funnel-link" href="/docs/24-7-hosting/?from=docs_port_forwarding_lp_banner" data-event="docs_lp_banner_click" data-source="docs_port_forwarding" data-label="lp_banner">Open 24/7 hosting LP (PR) →</a>
           </article>
         </div>
       </section>

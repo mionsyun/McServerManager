@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>server.propertiesおすすめ設定（公開向け） | MaiPilot</title>
+    <meta name="description" content="server.propertiesの公開向けおすすめ設定を初心者向けに解説。難易度・描画距離・セキュリティ項目を整理。" />
+    <style>
+      :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
+      *{box-sizing:border-box;}
+      body{margin:0;padding:32px 16px;font-family:"Noto Sans JP","Segoe UI",sans-serif;color:var(--text);background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%);}
+      .wrap{max-width:980px;margin:0 auto;display:grid;gap:16px;}
+      .card{background:var(--panel);border:1px solid rgba(126,157,201,.25);border-radius:16px;padding:22px;}
+      .hero{background:linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)), var(--panel);}
+      .muted{color:var(--muted);}
+      .cta{border:1px solid rgba(102,255,136,.45);background:rgba(102,255,136,.08);}
+      a{color:var(--accent2);text-decoration:none;}
+      h1,h2,h3{margin:0 0 10px;}
+      ul,ol{margin:8px 0 0 18px;color:var(--muted);}
+      table{width:100%;border-collapse:collapse;color:var(--muted);}
+      th,td{border:1px solid rgba(126,157,201,.25);padding:8px;text-align:left;}
+      .faq-list{margin:0;display:grid;gap:10px;}
+      .faq-list dt{font-weight:700;color:var(--text);}
+      .faq-list dd{margin:0;color:var(--muted);}
+    </style>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MM106D2B2Z');
+    </script>
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://www.maipilot.jp/docs/growth/server-properties-recommended-settings/" />
+    <meta property="og:title" content="server.propertiesおすすめ設定（公開向け） | MaiPilot" />
+    <meta property="og:description" content="server.propertiesの公開向けおすすめ設定を初心者向けに解説。難易度・描画距離・セキュリティ項目を整理。" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://www.maipilot.jp/docs/growth/server-properties-recommended-settings/" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="server.propertiesおすすめ設定（公開向け） | MaiPilot" />
+    <meta name="twitter:description" content="server.propertiesの公開向けおすすめ設定を初心者向けに解説。難易度・描画距離・セキュリティ項目を整理。" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+          <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://www.maipilot.jp/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Docs",
+      "item": "https://www.maipilot.jp/docs/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Growth",
+      "item": "https://www.maipilot.jp/docs/growth/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "server.propertiesおすすめ設定（公開向け）",
+      "item": "https://www.maipilot.jp/docs/growth/server-properties-recommended-settings/"
+    }
+  ]
+}
+  </script>
+          <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "view-distanceを上げると何が起きますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "描画範囲が広がる分CPU・メモリ負荷が増えます。人数が多いサーバーでは低めが安定します。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "online-modeをfalseにしても大丈夫ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "公開サーバーでは非推奨です。認証が無効になり、なりすましリスクが増えます。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "max-playersは大きめにしても問題ないですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "実際の運用人数より少し多い程度が安全です。過大設定はラグやクラッシュの原因になります。"
+      }
+    }
+  ]
+}
+  </script>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="card hero">
+        <a href="/docs/growth/">← ガイド一覧へ</a>
+        <h1>server.propertiesおすすめ設定（公開向け）</h1>
+        <p class="muted">公開サーバーで迷いやすい設定を、まず触る項目だけに絞って解説します。</p>
+      </section>
+
+      <section class="card">
+        <h2>まず設定する項目</h2>
+        <table>
+          <tr><th>項目</th><th>推奨</th><th>理由</th></tr>
+          <tr><td>online-mode</td><td>true</td><td>なりすまし防止</td></tr>
+          <tr><td>difficulty</td><td>normal</td><td>運用バランスが良い</td></tr>
+          <tr><td>view-distance</td><td>8〜10</td><td>負荷と快適性のバランス</td></tr>
+          <tr><td>max-players</td><td>実人数+2</td><td>過負荷を避ける</td></tr>
+          <tr><td>motd</td><td>短く明確に</td><td>参加者向け案内</td></tr>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>変更手順</h2>
+        <ol>
+          <li>サーバー停止中に `server.properties` を編集。</li>
+          <li>文字コードはUTF-8で保存（BOMなし推奨）。</li>
+          <li>再起動してログに設定反映を確認。</li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h2>よくある質問</h2>
+        <dl class="faq-list">
+          <dt data-faq-question>view-distanceを上げると何が起きますか？</dt>
+          <dd data-faq-answer>描画範囲が広がる分CPU・メモリ負荷が増えます。人数が多いサーバーでは低めが安定します。</dd>
+          <dt data-faq-question>online-modeをfalseにしても大丈夫ですか？</dt>
+          <dd data-faq-answer>公開サーバーでは非推奨です。認証が無効になり、なりすましリスクが増えます。</dd>
+          <dt data-faq-question>max-playersは大きめにしても問題ないですか？</dt>
+          <dd data-faq-answer>実際の運用人数より少し多い程度が安全です。過大設定はラグやクラッシュの原因になります。</dd>
+        </dl>
+      </section>
+
+      <section class="card">
+        <h2>次のアクション</h2>
+        <p class="muted">この内容を反映したら、まず公式ホームページから導入を進め、24時間運用を想定する場合はVPS比較も確認しておくのがおすすめです。</p>
+        <ul>
+          <li><a href="/?from=growth_server_properties_home_cta">公式ホームページから導入を進める</a></li>
+          <li><a href="/docs/24-7-hosting/?from=growth_server_properties_pr_cta">24時間運用VPS比較を見る（PR）</a></li>
+        </ul>
+        <p class="muted">※この記事には広告・PRリンクを含みます。</p>
+      </section>
+      <section class="card cta">
+        <h2>関連ガイド</h2>
+        <ul>
+          <li><a href="/docs/growth/minecraft-server-memory-settings/">メモリ設定（Xms/Xmx目安）</a></li>
+          <li><a href="/docs/growth/server-type-comparison/">Paper / Purpur / Vanilla の選び方比較</a></li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

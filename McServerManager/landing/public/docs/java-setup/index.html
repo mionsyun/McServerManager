@@ -132,6 +132,115 @@
     <meta name="robots" content="index,follow" />
     <meta name="twitter:title" content="MaiPilot | Java導入ガイド - マイクラサーバーに必要なJavaの入れ方" />
     <meta name="twitter:description" content="Minecraft(マイクラ)サーバーを建てるために必要なJavaのインストール方法を初心者向けに解説。Eclipse Temurin / Oracle JDK の導入手順、バージョンの選び方、PATH設定まで丁寧にガイドします。" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+          <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://www.maipilot.jp/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Docs",
+      "item": "https://www.maipilot.jp/docs/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Java導入ガイド - マイクラサーバーに必要なJavaの入れ方",
+      "item": "https://www.maipilot.jp/docs/java-setup/"
+    }
+  ]
+}
+  </script>
+      <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Q. JDK と JRE、どちらを入れればいい？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A. JDK をおすすめします。JRE でもサーバーは動きますが、JDK のほうがトラブルシュート時に便利なツールが含まれています。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Q. Oracle JDK と Eclipse Temurin の違いは？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A. どちらも同じ OpenJDK ベースです。Temurin は完全無料で商用利用も可能。個人利用なら Oracle JDK でも問題ありませんが、ライセンスを気にしなくてよい Temurin がおすすめです。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Q. 「Java が見つかりません」エラーが出る",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A. インストール時に「Add to PATH」を有効にしていない可能性があります。再インストールするか、手動でJavaのパスを設定してください。MaiPilotの「参照」ボタンから C:\\Program Files\\Eclipse Adoptium\\jdk-21...\\bin\\java.exe を選択できます。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Q. 古いバージョン用に Java 8 も必要？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A. 1.16.5以下のサーバーでも Java 21 で動作するケースがほとんどです。まずは Java 21 で試し、問題があれば Java 8 を追加インストールしてください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Q. 複数のJavaバージョンを共存できる？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A. はい。MaiPilotではサーバーごとに個別のJavaパスを指定できるので、バージョンごとに異なるJavaを使い分けられます。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Q. JDK vs JRE — which one?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A. JDK is recommended. It includes the runtime + useful tools for troubleshooting."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Q. Oracle JDK vs Eclipse Temurin?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A. Both are based on OpenJDK. Temurin is completely free for all uses. We recommend Temurin for simplicity."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Q. \"Java not found\" error?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A. Reinstall with \"Add to PATH\" enabled, or manually browse to java.exe using MaiPilot's Browse button."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Q. Can I install multiple Java versions?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A. Yes. MaiPilot lets you set a per-server Java path, so you can mix versions easily."
+      }
+    }
+  ]
+}
+  </script>
   </head>
   <body>
     <div class="wrap">
@@ -242,20 +351,20 @@
       <section class="card lang" data-lang-block="ja">
         <h2>❓ よくある質問（FAQ）</h2>
 
-        <h3>Q. JDK と JRE、どちらを入れればいい？</h3>
-        <p class="muted">A. <strong>JDK</strong> をおすすめします。JRE でもサーバーは動きますが、JDK のほうがトラブルシュート時に便利なツールが含まれています。</p>
+        <h3 data-faq-question>Q. JDK と JRE、どちらを入れればいい？</h3>
+        <p class="muted" data-faq-answer>A. <strong>JDK</strong> をおすすめします。JRE でもサーバーは動きますが、JDK のほうがトラブルシュート時に便利なツールが含まれています。</p>
 
-        <h3>Q. Oracle JDK と Eclipse Temurin の違いは？</h3>
-        <p class="muted">A. どちらも同じ OpenJDK ベースです。Temurin は完全無料で商用利用も可能。個人利用なら Oracle JDK でも問題ありませんが、ライセンスを気にしなくてよい Temurin がおすすめです。</p>
+        <h3 data-faq-question>Q. Oracle JDK と Eclipse Temurin の違いは？</h3>
+        <p class="muted" data-faq-answer>A. どちらも同じ OpenJDK ベースです。Temurin は完全無料で商用利用も可能。個人利用なら Oracle JDK でも問題ありませんが、ライセンスを気にしなくてよい Temurin がおすすめです。</p>
 
-        <h3>Q. 「Java が見つかりません」エラーが出る</h3>
-        <p class="muted">A. インストール時に「Add to PATH」を有効にしていない可能性があります。再インストールするか、手動でJavaのパスを設定してください。MaiPilotの「参照」ボタンから <code>C:\Program Files\Eclipse Adoptium\jdk-21...\bin\java.exe</code> を選択できます。</p>
+        <h3 data-faq-question>Q. 「Java が見つかりません」エラーが出る</h3>
+        <p class="muted" data-faq-answer>A. インストール時に「Add to PATH」を有効にしていない可能性があります。再インストールするか、手動でJavaのパスを設定してください。MaiPilotの「参照」ボタンから <code>C:\Program Files\Eclipse Adoptium\jdk-21...\bin\java.exe</code> を選択できます。</p>
 
-        <h3>Q. 古いバージョン用に Java 8 も必要？</h3>
-        <p class="muted">A. 1.16.5以下のサーバーでも Java 21 で動作するケースがほとんどです。まずは Java 21 で試し、問題があれば Java 8 を追加インストールしてください。</p>
+        <h3 data-faq-question>Q. 古いバージョン用に Java 8 も必要？</h3>
+        <p class="muted" data-faq-answer>A. 1.16.5以下のサーバーでも Java 21 で動作するケースがほとんどです。まずは Java 21 で試し、問題があれば Java 8 を追加インストールしてください。</p>
 
-        <h3>Q. 複数のJavaバージョンを共存できる？</h3>
-        <p class="muted">A. はい。MaiPilotではサーバーごとに個別のJavaパスを指定できるので、バージョンごとに異なるJavaを使い分けられます。</p>
+        <h3 data-faq-question>Q. 複数のJavaバージョンを共存できる？</h3>
+        <p class="muted" data-faq-answer>A. はい。MaiPilotではサーバーごとに個別のJavaパスを指定できるので、バージョンごとに異なるJavaを使い分けられます。</p>
       </section>
 
       <section class="card lang" data-lang-block="ja">
@@ -342,17 +451,17 @@
       <section class="card lang" data-lang-block="en">
         <h2>❓ FAQ</h2>
 
-        <h3>Q. JDK vs JRE — which one?</h3>
-        <p class="muted">A. <strong>JDK</strong> is recommended. It includes the runtime + useful tools for troubleshooting.</p>
+        <h3 data-faq-question>Q. JDK vs JRE — which one?</h3>
+        <p class="muted" data-faq-answer>A. <strong>JDK</strong> is recommended. It includes the runtime + useful tools for troubleshooting.</p>
 
-        <h3>Q. Oracle JDK vs Eclipse Temurin?</h3>
-        <p class="muted">A. Both are based on OpenJDK. Temurin is completely free for all uses. We recommend Temurin for simplicity.</p>
+        <h3 data-faq-question>Q. Oracle JDK vs Eclipse Temurin?</h3>
+        <p class="muted" data-faq-answer>A. Both are based on OpenJDK. Temurin is completely free for all uses. We recommend Temurin for simplicity.</p>
 
-        <h3>Q. "Java not found" error?</h3>
-        <p class="muted">A. Reinstall with "Add to PATH" enabled, or manually browse to <code>java.exe</code> using MaiPilot's Browse button.</p>
+        <h3 data-faq-question>Q. "Java not found" error?</h3>
+        <p class="muted" data-faq-answer>A. Reinstall with "Add to PATH" enabled, or manually browse to <code>java.exe</code> using MaiPilot's Browse button.</p>
 
-        <h3>Q. Can I install multiple Java versions?</h3>
-        <p class="muted">A. Yes. MaiPilot lets you set a per-server Java path, so you can mix versions easily.</p>
+        <h3 data-faq-question>Q. Can I install multiple Java versions?</h3>
+        <p class="muted" data-faq-answer>A. Yes. MaiPilot lets you set a per-server Java path, so you can mix versions easily.</p>
       </section>
 
       <div class="cta-box lang" data-lang-block="en">

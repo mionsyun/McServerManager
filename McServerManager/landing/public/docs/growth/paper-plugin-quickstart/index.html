@@ -21,6 +21,9 @@
       .mini{background:var(--panel2);border:1px solid rgba(126,157,201,.25);border-radius:12px;padding:12px;}
       .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
       .chip{font-size:12px;padding:5px 10px;border:1px solid rgba(126,157,201,.35);border-radius:999px;color:var(--muted);} 
+      .faq-list{margin:0;display:grid;gap:10px;}
+      .faq-list dt{font-weight:700;color:var(--text);}
+      .faq-list dd{margin:0;color:var(--muted);}
     </style>
       <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
@@ -40,6 +43,73 @@
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Paperサーバーにプラグインを入れる最短手順 | MaiPilot" />
     <meta name="twitter:description" content="Paperサーバーでプラグインを安全に導入する最短手順。バージョン不一致や起動失敗の回避策付き。" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+          <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://www.maipilot.jp/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Docs",
+      "item": "https://www.maipilot.jp/docs/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Growth",
+      "item": "https://www.maipilot.jp/docs/growth/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "Paperサーバーにプラグインを入れる最短手順",
+      "item": "https://www.maipilot.jp/docs/growth/paper-plugin-quickstart/"
+    }
+  ]
+}
+  </script>
+          <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "プラグインは何個まで入れて大丈夫ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "上限はありませんが、負荷と競合が増えるため少数から段階的に追加する運用が安全です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "入れた後にサーバーが落ちたらどうすればいいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "直前に追加したJARを外して再起動し、ログのエラー行から依存不足やバージョン不一致を確認します。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Paper本体更新とプラグイン更新は同時にしてもいいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "同時更新は原因切り分けが難しくなります。1つずつ更新して起動確認するのがおすすめです。"
+      }
+    }
+  ]
+}
+  </script>
   </head>
   <body>
     <main class="wrap">
@@ -94,9 +164,21 @@
       </section>
 
       <section class="card">
+        <h2>よくある質問</h2>
+        <dl class="faq-list">
+          <dt data-faq-question>プラグインは何個まで入れて大丈夫ですか？</dt>
+          <dd data-faq-answer>上限はありませんが、負荷と競合が増えるため少数から段階的に追加する運用が安全です。</dd>
+          <dt data-faq-question>入れた後にサーバーが落ちたらどうすればいいですか？</dt>
+          <dd data-faq-answer>直前に追加したJARを外して再起動し、ログのエラー行から依存不足やバージョン不一致を確認します。</dd>
+          <dt data-faq-question>Paper本体更新とプラグイン更新は同時にしてもいいですか？</dt>
+          <dd data-faq-answer>同時更新は原因切り分けが難しくなります。1つずつ更新して起動確認するのがおすすめです。</dd>
+        </dl>
+      </section>
+
+      <section class="card">
         <h2>おすすめ環境（PR）</h2>
         <ul>
-          <li><a href="/docs/24-7-hosting" data-event="docs_24_7_hosting_click" data-source="growth_paper_plugin" data-label="plugin_vps">プラグイン運用向けVPS比較を見る（PR）</a></li>
+          <li><a href="/docs/24-7-hosting/" data-event="docs_24_7_hosting_click" data-source="growth_paper_plugin" data-label="plugin_vps">プラグイン運用向けVPS比較を見る（PR）</a></li>
         </ul>
       </section>
 
@@ -108,7 +190,7 @@
           <li>導入前バックアップを標準機能で提供</li>
           <li>クラッシュ検知 + 自動再起動で障害を最小化</li>
         </ul>
-        <p><a href="/?from=growth_paper_plugin_quickstart" data-event="growth_download_click" data-source="growth_paper_plugin" data-label="download">MaiPilotをダウンロード</a> / <a href="/docs/troubleshooting" data-event="growth_docs_click" data-source="growth_paper_plugin" data-label="troubleshooting">トラブルシュート</a></p>
+        <p><a href="/?from=growth_paper_plugin_quickstart" data-event="growth_download_click" data-source="growth_paper_plugin" data-label="download">MaiPilotをダウンロード</a> / <a href="/docs/troubleshooting/" data-event="growth_docs_click" data-source="growth_paper_plugin" data-label="troubleshooting">トラブルシュート</a></p>
       </section>
 
       <section class="card">

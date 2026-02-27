@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Paper / Purpur / Vanilla の選び方比較 | MaiPilot</title>
+    <meta name="description" content="マイクラサーバー種別の選び方を比較。Vanilla / Paper / Purpur の違いを用途別に整理。" />
+    <style>
+      :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
+      *{box-sizing:border-box;}
+      body{margin:0;padding:32px 16px;font-family:"Noto Sans JP","Segoe UI",sans-serif;color:var(--text);background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%);}
+      .wrap{max-width:980px;margin:0 auto;display:grid;gap:16px;}
+      .card{background:var(--panel);border:1px solid rgba(126,157,201,.25);border-radius:16px;padding:22px;}
+      .hero{background:linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)), var(--panel);}
+      .muted{color:var(--muted);}
+      .cta{border:1px solid rgba(102,255,136,.45);background:rgba(102,255,136,.08);}
+      a{color:var(--accent2);text-decoration:none;}
+      h1,h2,h3{margin:0 0 10px;}
+      ul,ol{margin:8px 0 0 18px;color:var(--muted);}
+      table{width:100%;border-collapse:collapse;color:var(--muted);}
+      th,td{border:1px solid rgba(126,157,201,.25);padding:8px;text-align:left;}
+      .faq-list{margin:0;display:grid;gap:10px;}
+      .faq-list dt{font-weight:700;color:var(--text);}
+      .faq-list dd{margin:0;color:var(--muted);}
+    </style>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MM106D2B2Z');
+    </script>
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://www.maipilot.jp/docs/growth/server-type-comparison/" />
+    <meta property="og:title" content="Paper / Purpur / Vanilla の選び方比較 | MaiPilot" />
+    <meta property="og:description" content="マイクラサーバー種別の選び方を比較。Vanilla / Paper / Purpur の違いを用途別に整理。" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://www.maipilot.jp/docs/growth/server-type-comparison/" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Paper / Purpur / Vanilla の選び方比較 | MaiPilot" />
+    <meta name="twitter:description" content="マイクラサーバー種別の選び方を比較。Vanilla / Paper / Purpur の違いを用途別に整理。" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+          <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://www.maipilot.jp/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Docs",
+      "item": "https://www.maipilot.jp/docs/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Growth",
+      "item": "https://www.maipilot.jp/docs/growth/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "Paper / Purpur / Vanilla の選び方比較",
+      "item": "https://www.maipilot.jp/docs/growth/server-type-comparison/"
+    }
+  ]
+}
+  </script>
+          <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "初心者はどれを選ぶべきですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "公開運用ならPaperが最も無難です。情報量が多く、トラブル時の解決例も見つけやすいです。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "PaperとPurpurはどちらが速いですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "大きな差は構成次第です。まずPaperで始め、必要な機能があればPurpurを検討するのが安全です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "途中で種別を変更できますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "可能です。変更前に必ずバックアップを取り、プラグイン互換性を確認してから切り替えてください。"
+      }
+    }
+  ]
+}
+  </script>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="card hero">
+        <a href="/docs/growth/">← ガイド一覧へ</a>
+        <h1>Paper / Purpur / Vanilla の選び方比較</h1>
+        <p class="muted">最初の種別選びで運用難易度が変わります。目的別に向く選択肢を整理します。</p>
+      </section>
+
+      <section class="card">
+        <h2>比較表</h2>
+        <table>
+          <tr><th>種別</th><th>特徴</th><th>向いている用途</th></tr>
+          <tr><td>Vanilla</td><td>公式そのまま</td><td>検証・純正プレイ</td></tr>
+          <tr><td>Paper</td><td>軽量化 + プラグイン豊富</td><td>公開サーバー全般</td></tr>
+          <tr><td>Purpur</td><td>Paper拡張 + 設定自由度</td><td>細かい調整をしたい運用</td></tr>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>選び方の基準</h2>
+        <ol>
+          <li>まず「プラグインを使うか」を決める。</li>
+          <li>公開人数が多いなら Paper か Purpur。</li>
+          <li>純正挙動を重視するなら Vanilla。</li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h2>よくある質問</h2>
+        <dl class="faq-list">
+          <dt data-faq-question>初心者はどれを選ぶべきですか？</dt>
+          <dd data-faq-answer>公開運用ならPaperが最も無難です。情報量が多く、トラブル時の解決例も見つけやすいです。</dd>
+          <dt data-faq-question>PaperとPurpurはどちらが速いですか？</dt>
+          <dd data-faq-answer>大きな差は構成次第です。まずPaperで始め、必要な機能があればPurpurを検討するのが安全です。</dd>
+          <dt data-faq-question>途中で種別を変更できますか？</dt>
+          <dd data-faq-answer>可能です。変更前に必ずバックアップを取り、プラグイン互換性を確認してから切り替えてください。</dd>
+        </dl>
+      </section>
+
+      <section class="card">
+        <h2>次のアクション</h2>
+        <p class="muted">この内容を反映したら、まず公式ホームページから導入を進め、24時間運用を想定する場合はVPS比較も確認しておくのがおすすめです。</p>
+        <ul>
+          <li><a href="/?from=growth_server_type_home_cta">公式ホームページから導入を進める</a></li>
+          <li><a href="/docs/24-7-hosting/?from=growth_server_type_pr_cta">24時間運用VPS比較を見る（PR）</a></li>
+        </ul>
+        <p class="muted">※この記事には広告・PRリンクを含みます。</p>
+      </section>
+      <section class="card cta">
+        <h2>関連ガイド</h2>
+        <ul>
+          <li><a href="/docs/growth/server-properties-recommended-settings/">server.propertiesおすすめ設定</a></li>
+          <li><a href="/docs/growth/backup-restore-guide/">バックアップと復元手順</a></li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

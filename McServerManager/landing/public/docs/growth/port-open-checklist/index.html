@@ -22,11 +22,14 @@
       .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
       .chip{font-size:12px;padding:5px 10px;border:1px solid rgba(126,157,201,.35);border-radius:999px;color:var(--muted);} 
       .banner-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px; margin-top:10px; }
-      .banner-card { display:grid; gap:8px; background:var(--panel2); border:1px solid rgba(126,157,201,.3); border-radius:12px; padding:12px; }
+      .banner-card { display:flex; flex-direction:column; align-items:flex-start; gap:8px; background:var(--panel2); border:1px solid rgba(126,157,201,.3); border-radius:12px; padding:12px; }
       .banner-card.lp { border-color: rgba(255,209,102,.45); background:linear-gradient(135deg, rgba(255,209,102,.12), rgba(51,168,255,.08)), var(--panel2); }
       .banner-pill { display:inline-block; width:max-content; font-size:11px; font-weight:700; border-radius:999px; padding:4px 8px; background:rgba(102,255,136,.16); color:var(--accent); }
       .banner-pill.pr { background:rgba(255,209,102,.2); color:#ffd166; }
       .banner-link { font-weight:700; }
+      .faq-list{margin:0;display:grid;gap:10px;}
+      .faq-list dt{font-weight:700;color:var(--text);}
+      .faq-list dd{margin:0;color:var(--muted);}
     </style>
       <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
@@ -46,6 +49,73 @@
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="マイクラポート開放できない時のチェックリスト | MaiPilot" />
     <meta name="twitter:description" content="マイクラサーバーのポート開放で接続できない時の対処手順。25565、ルーター、Firewall、CGNATまで順番に確認。" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+          <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://www.maipilot.jp/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Docs",
+      "item": "https://www.maipilot.jp/docs/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Growth",
+      "item": "https://www.maipilot.jp/docs/growth/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "マイクラポート開放できない時のチェックリスト",
+      "item": "https://www.maipilot.jp/docs/growth/port-open-checklist/"
+    }
+  ]
+}
+  </script>
+          <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "LANでは入れるのに外部から入れないのはなぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ルーター転送先IPのずれ、CGNAT、共有回線制限のいずれかが原因です。ローカル成功後は外部経路だけを重点確認してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "UPnPが失敗したらどうすればいいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "手動ポート転送へ切り替え、Firewall受信ルールとLAN IP固定化まで行うと再発を抑えられます。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "ポート25565以外を使っても問題ありませんか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "問題ありません。サーバー設定とルーター設定、接続側入力のポート番号を同じに揃える必要があります。"
+      }
+    }
+  ]
+}
+  </script>
   </head>
   <body>
     <main class="wrap">
@@ -113,7 +183,7 @@
         <h2>代替手段（PR）</h2>
         <p class="muted">自宅回線での公開が難しい場合の選択肢です。</p>
         <ul>
-          <li><a href="/docs/24-7-hosting" data-event="docs_24_7_hosting_click" data-source="growth_port_open" data-label="hosting_comparison">ポート開放不要 — VPS比較を見る（PR）</a></li>
+          <li><a href="/docs/24-7-hosting/" data-event="docs_24_7_hosting_click" data-source="growth_port_open" data-label="hosting_comparison">ポート開放不要 — VPS比較を見る（PR）</a></li>
         </ul>
       </section>
 
@@ -128,10 +198,22 @@
           </article>
           <article class="banner-card lp">
             <span class="banner-pill pr">PR</span>
-            <p class="muted">ポート開放が不要な運用を検討する場合は、VPS比較LPの広告バナーへ。</p>
-            <a class="banner-link" href="/docs/24-7-hosting?from=growth_port_open_lp_banner" data-event="growth_lp_banner_click" data-source="growth_port_open" data-label="lp_banner">24時間運用VPS比較LPを見る（PR） →</a>
+            <p class="muted">ポート開放なしで運用したいなら、VPS比較LPから確認するのがおすすめです。</p>
+            <a class="banner-link" href="/docs/24-7-hosting/?from=growth_port_open_lp_banner" data-event="growth_lp_banner_click" data-source="growth_port_open" data-label="lp_banner">24時間運用VPS比較LPを見る（PR） →</a>
           </article>
         </div>
+      </section>
+
+      <section class="card">
+        <h2>よくある質問</h2>
+        <dl class="faq-list">
+          <dt data-faq-question>LANでは入れるのに外部から入れないのはなぜですか？</dt>
+          <dd data-faq-answer>ルーター転送先IPのずれ、CGNAT、共有回線制限のいずれかが原因です。ローカル成功後は外部経路だけを重点確認してください。</dd>
+          <dt data-faq-question>UPnPが失敗したらどうすればいいですか？</dt>
+          <dd data-faq-answer>手動ポート転送へ切り替え、Firewall受信ルールとLAN IP固定化まで行うと再発を抑えられます。</dd>
+          <dt data-faq-question>ポート25565以外を使っても問題ありませんか？</dt>
+          <dd data-faq-answer>問題ありません。サーバー設定とルーター設定、接続側入力のポート番号を同じに揃える必要があります。</dd>
+        </dl>
       </section>
 
       <section class="card cta">
@@ -141,7 +223,7 @@
           <li>6種のサーバー（Vanilla / Paper / Spigot / Forge / Fabric / Purpur）に対応</li>
           <li>クラッシュ検知 + 自動再起動で障害を最小化</li>
         </ul>
-        <p><a href="/?from=growth_port_open_checklist" data-event="growth_download_click" data-source="growth_port_open" data-label="download">MaiPilotをダウンロード</a> / <a href="/docs/port-forwarding" data-event="growth_docs_click" data-source="growth_port_open" data-label="port_guide">既存のポート開放ガイド</a></p>
+        <p><a href="/?from=growth_port_open_checklist" data-event="growth_download_click" data-source="growth_port_open" data-label="download">MaiPilotをダウンロード</a> / <a href="/docs/port-forwarding/" data-event="growth_docs_click" data-source="growth_port_open" data-label="port_guide">既存のポート開放ガイド</a></p>
       </section>
 
       <section class="card">

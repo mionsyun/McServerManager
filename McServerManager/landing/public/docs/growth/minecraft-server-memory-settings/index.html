@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>マイクラサーバーのメモリ設定（Xms/Xmx目安） | MaiPilot</title>
+    <meta name="description" content="マイクラサーバーのXms/Xmx設定目安を用途別に解説。割り当てすぎで重くなる失敗も回避。" />
+    <style>
+      :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
+      *{box-sizing:border-box;}
+      body{margin:0;padding:32px 16px;font-family:"Noto Sans JP","Segoe UI",sans-serif;color:var(--text);background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%);}
+      .wrap{max-width:980px;margin:0 auto;display:grid;gap:16px;}
+      .card{background:var(--panel);border:1px solid rgba(126,157,201,.25);border-radius:16px;padding:22px;}
+      .hero{background:linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)), var(--panel);}
+      .muted{color:var(--muted);}
+      .cta{border:1px solid rgba(102,255,136,.45);background:rgba(102,255,136,.08);}
+      a{color:var(--accent2);text-decoration:none;}
+      h1,h2,h3{margin:0 0 10px;}
+      ul,ol{margin:8px 0 0 18px;color:var(--muted);}
+      table{width:100%;border-collapse:collapse;color:var(--muted);margin-top:10px;}
+      th,td{border:1px solid rgba(126,157,201,.25);padding:8px;text-align:left;}
+      .faq-list{margin:0;display:grid;gap:10px;}
+      .faq-list dt{font-weight:700;color:var(--text);}
+      .faq-list dd{margin:0;color:var(--muted);}
+    </style>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MM106D2B2Z');
+    </script>
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://www.maipilot.jp/docs/growth/minecraft-server-memory-settings/" />
+    <meta property="og:title" content="マイクラサーバーのメモリ設定（Xms/Xmx目安） | MaiPilot" />
+    <meta property="og:description" content="マイクラサーバーのXms/Xmx設定目安を用途別に解説。割り当てすぎで重くなる失敗も回避。" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://www.maipilot.jp/docs/growth/minecraft-server-memory-settings/" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="マイクラサーバーのメモリ設定（Xms/Xmx目安） | MaiPilot" />
+    <meta name="twitter:description" content="マイクラサーバーのXms/Xmx設定目安を用途別に解説。割り当てすぎで重くなる失敗も回避。" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+          <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://www.maipilot.jp/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Docs",
+      "item": "https://www.maipilot.jp/docs/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Growth",
+      "item": "https://www.maipilot.jp/docs/growth/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "マイクラサーバーのメモリ設定（Xms/Xmx目安）",
+      "item": "https://www.maipilot.jp/docs/growth/minecraft-server-memory-settings/"
+    }
+  ]
+}
+  </script>
+          <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Xmxを大きくすると必ず速くなりますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "必ずしも速くなりません。割り当て過多はGC停止を長くし、逆にカクつく場合があります。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "XmsはXmxと同じ値にすべきですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "固定運用でなければ同値にしなくて問題ありません。Xmxの50〜75%から始めるのが扱いやすいです。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "どれくらいの頻度で見直すべきですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "プレイヤー数やMOD/プラグインを増やしたタイミングで見直すのが効果的です。"
+      }
+    }
+  ]
+}
+  </script>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="card hero">
+        <a href="/docs/growth/">← ガイド一覧へ</a>
+        <h1>マイクラサーバーのメモリ設定（Xms/Xmx目安）</h1>
+        <p class="muted">メモリは多ければ良いわけではありません。用途別の目安で決めるのが最短です。</p>
+      </section>
+
+      <section class="card">
+        <h2>先に結論</h2>
+        <ul>
+          <li>少人数・バニラ: `Xmx 2G` から開始。</li>
+          <li>中規模・軽量プラグイン: `Xmx 4G` 目安。</li>
+          <li>MOD多め・人数多め: `Xmx 6G〜8G` を段階調整。</li>
+          <li>`Xms` は `Xmx` の 50〜75% で十分。</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>用途別の目安</h2>
+        <table>
+          <tr><th>用途</th><th>推奨Xms</th><th>推奨Xmx</th></tr>
+          <tr><td>バニラ 1〜5人</td><td>1G</td><td>2G</td></tr>
+          <tr><td>Paper 5〜15人</td><td>2G</td><td>4G</td></tr>
+          <tr><td>MOD 10人前後</td><td>3G</td><td>6G</td></tr>
+          <tr><td>MOD重め 15人以上</td><td>4G</td><td>8G</td></tr>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>設定のコツ</h2>
+        <ol>
+          <li>まず `Xmx` を決めてから `Xms` を設定する。</li>
+          <li>TPS低下やGC停止が出るなら `Xmx` を1Gずつ増やす。</li>
+          <li>OS側の空きメモリを最低2GB以上残す。</li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h2>よくある質問</h2>
+        <dl class="faq-list">
+          <dt data-faq-question>Xmxを大きくすると必ず速くなりますか？</dt>
+          <dd data-faq-answer>必ずしも速くなりません。割り当て過多はGC停止を長くし、逆にカクつく場合があります。</dd>
+          <dt data-faq-question>XmsはXmxと同じ値にすべきですか？</dt>
+          <dd data-faq-answer>固定運用でなければ同値にしなくて問題ありません。Xmxの50〜75%から始めるのが扱いやすいです。</dd>
+          <dt data-faq-question>どれくらいの頻度で見直すべきですか？</dt>
+          <dd data-faq-answer>プレイヤー数やMOD/プラグインを増やしたタイミングで見直すのが効果的です。</dd>
+        </dl>
+      </section>
+
+      <section class="card">
+        <h2>次のアクション</h2>
+        <p class="muted">この内容を反映したら、まず公式ホームページから導入を進め、24時間運用を想定する場合はVPS比較も確認しておくのがおすすめです。</p>
+        <ul>
+          <li><a href="/?from=growth_memory_settings_home_cta">公式ホームページから導入を進める</a></li>
+          <li><a href="/docs/24-7-hosting/?from=growth_memory_settings_pr_cta">24時間運用VPS比較を見る（PR）</a></li>
+        </ul>
+        <p class="muted">※この記事には広告・PRリンクを含みます。</p>
+      </section>
+      <section class="card cta">
+        <h2>関連ガイド</h2>
+        <ul>
+          <li><a href="/docs/growth/server-properties-recommended-settings/">server.propertiesおすすめ設定</a></li>
+          <li><a href="/docs/growth/server-type-comparison/">Paper / Purpur / Vanilla の選び方比較</a></li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>
