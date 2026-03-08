@@ -2577,7 +2577,18 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     private void UpdateStats()
     {
         var process = _runtime.Process;
-        if (process is null || process.HasExited || Status != ServerStatus.Running)
+        try
+        {
+            if (process is null || process.HasExited || Status != ServerStatus.Running)
+            {
+                CpuUsagePercent = 0;
+                MemoryUsageMb = 0;
+                _lastCpuCheck = DateTime.MinValue;
+                _lastCpuTime = TimeSpan.Zero;
+                return;
+            }
+        }
+        catch
         {
             CpuUsagePercent = 0;
             MemoryUsageMb = 0;

@@ -44,7 +44,7 @@ public partial class ServerDetailControl : System.Windows.Controls.UserControl
         e.Handled = true;
     }
 
-    private void AddonDropZone_OnDrop(object sender, System.Windows.DragEventArgs e)
+    private async void AddonDropZone_OnDrop(object sender, System.Windows.DragEventArgs e)
     {
         if (DataContext is not ServerViewModel vm)
         {
@@ -58,7 +58,18 @@ public partial class ServerDetailControl : System.Windows.Controls.UserControl
 
         if (e.Data.GetData(System.Windows.DataFormats.FileDrop) is string[] paths && paths.Length > 0)
         {
-            _ = vm.ImportAddonsAsync(paths);
+            try
+            {
+                await vm.ImportAddonsAsync(paths);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"アドオンのインポート中にエラーが発生しました:\n{ex.Message}",
+                    "エラー",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
         }
 
         e.Handled = true;

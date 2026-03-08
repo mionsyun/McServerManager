@@ -189,7 +189,7 @@ public sealed class NewServerViewModel : ObservableObject
         try
         {
             var versions = await _services.Versions.GetVersionsAsync();
-            WpfApplication.Current.Dispatcher.Invoke(() =>
+            WpfApplication.Current?.Dispatcher.Invoke(() =>
             {
                 Versions.Clear();
                 foreach (var version in versions)

@@ -257,7 +257,7 @@ public sealed class MainViewModel : ObservableObject
     {
         var guide = new FirstRunWindow
         {
-            Owner = WpfApplication.Current.MainWindow
+            Owner = WpfApplication.Current?.MainWindow
         };
 
         guide.ShowDialog();
@@ -280,7 +280,7 @@ public sealed class MainViewModel : ObservableObject
         if (string.Equals(Tutorial.CurrentTargetName, "NewServerButton", StringComparison.Ordinal))
         {
             _tutorialOpenedCreate = true;
-            WpfApplication.Current.Dispatcher.BeginInvoke(OpenCreateServerWindow);
+            WpfApplication.Current?.Dispatcher.BeginInvoke(OpenCreateServerWindow);
         }
     }
 
@@ -306,7 +306,7 @@ public sealed class MainViewModel : ObservableObject
     {
         var window = new NewServerWindow
         {
-            Owner = WpfApplication.Current.MainWindow
+            Owner = WpfApplication.Current?.MainWindow
         };
 
         var vm = new NewServerViewModel(_services, Servers.Select(s => s.Name));
@@ -319,7 +319,7 @@ public sealed class MainViewModel : ObservableObject
         {
             TrackServerDirectory(config.DirectoryPath);
             var serverVm = new ServerViewModel(_services, config);
-            WpfApplication.Current.Dispatcher.Invoke(() =>
+            WpfApplication.Current?.Dispatcher.Invoke(() =>
             {
                 Servers.Add(serverVm);
                 SelectedServer = serverVm;
