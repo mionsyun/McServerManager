@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>マイクラサーバーのホワイトリスト・OP設定ガイド | MaiPilot</title>
+    <meta name="description" content="マイクラサーバーのwhitelist（ホワイトリスト）設定とOP（管理者権限）の付け方を初心者向けに解説。コマンドの使い方から設定ファイルの直接編集まで手順でまとめ。" />
+    <meta name="keywords" content="マイクラサーバー ホワイトリスト, マイクラ whitelist 設定, マインクラフト OP権限, マイクラ op コマンド, マイクラサーバー 入れない whitelist" />
+    <meta name="author" content="MaiPilot" />
+    <style>
+      :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
+      *{box-sizing:border-box;}
+      body{margin:0;padding:32px 16px;font-family:"Noto Sans JP","Segoe UI",sans-serif;color:var(--text);background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%);}
+      .wrap{max-width:980px;margin:0 auto;display:grid;gap:16px;}
+      .card{background:var(--panel);border:1px solid rgba(126,157,201,.25);border-radius:16px;padding:22px;}
+      .hero{background:linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)), var(--panel);}
+      .muted{color:var(--muted);}
+      .notice{background:rgba(255,209,102,.12);color:#ffd166;border-radius:10px;padding:10px 14px;font-weight:700;font-size:13px;margin-top:12px;}
+      .warn{background:rgba(255,100,100,.1);color:#ff9090;border-radius:10px;padding:10px 14px;font-size:13px;margin-top:12px;border:1px solid rgba(255,100,100,.2);}
+      .cta{border:1px solid rgba(102,255,136,.45);background:rgba(102,255,136,.08);}
+      a{color:var(--accent2);text-decoration:none;}
+      h1,h2,h3{margin:0 0 10px;}
+      ul,ol{margin:8px 0 0 18px;color:var(--muted);}
+      code{background:rgba(22,32,56,.8);border:1px solid rgba(126,157,201,.2);border-radius:6px;padding:2px 7px;font-size:.9em;color:#a8d8ff;font-family:"Consolas","Courier New",monospace;}
+      pre{background:rgba(22,32,56,.8);border:1px solid rgba(126,157,201,.2);border-radius:10px;padding:14px 16px;overflow-x:auto;margin:10px 0;}
+      pre code{background:none;border:none;padding:0;font-size:.88em;}
+      .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+      .chip{font-size:12px;padding:5px 10px;border:1px solid rgba(126,157,201,.35);border-radius:999px;color:var(--muted);}
+      .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;}
+      .mini{background:var(--panel2);border:1px solid rgba(126,157,201,.25);border-radius:12px;padding:12px;}
+      .faq-list{margin:0;display:grid;gap:10px;}
+      .faq-list dt{font-weight:700;color:var(--text);}
+      .faq-list dd{margin:0;color:var(--muted);}
+      .banner-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:10px;}
+      .banner-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px;background:var(--panel2);border:1px solid rgba(126,157,201,.3);border-radius:12px;padding:12px;}
+      .banner-card.lp{border-color:rgba(255,209,102,.45);background:linear-gradient(135deg, rgba(255,209,102,.12), rgba(51,168,255,.08)), var(--panel2);}
+      .banner-pill{display:inline-block;width:max-content;font-size:11px;font-weight:700;border-radius:999px;padding:4px 8px;background:rgba(102,255,136,.16);color:var(--accent);}
+      .banner-pill.pr{background:rgba(255,209,102,.2);color:#ffd166;}
+      .banner-link{font-weight:700;}
+      .site-nav{position:sticky;top:0;z-index:100;background:rgba(11,15,23,.95);backdrop-filter:blur(8px);border-bottom:1px solid rgba(126,157,201,.15);padding:0 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin:-32px -16px 24px;height:52px;}
+      .nav-brand{font-weight:700;font-size:15px;color:var(--accent);text-decoration:none;letter-spacing:.02em;}
+      .nav-links{display:flex;gap:12px;align-items:center;}
+      .nav-links a{color:var(--muted);font-size:13px;text-decoration:none;}
+      .nav-links a:hover{color:var(--text);}
+      .nav-cta{background:rgba(102,255,136,.12);color:var(--accent)!important;border:1px solid rgba(102,255,136,.35);border-radius:8px;padding:5px 12px;font-weight:700;}
+    </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MM106D2B2Z');
+    </script>
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://www.maipilot.jp/docs/growth/whitelist-op-guide/" />
+    <meta property="og:title" content="マイクラサーバーのホワイトリスト・OP設定ガイド | MaiPilot" />
+    <meta property="og:description" content="マイクラサーバーのwhitelist（ホワイトリスト）設定とOP（管理者権限）の付け方を初心者向けに解説。コマンドの使い方から設定ファイルの直接編集まで手順でまとめ。" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://www.maipilot.jp/docs/growth/whitelist-op-guide/" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta property="og:site_name" content="MaiPilot" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="article:published_time" content="2026-03-08T00:00:00+09:00" />
+    <meta property="article:modified_time" content="2026-03-08T00:00:00+09:00" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="マイクラサーバーのホワイトリスト・OP設定ガイド | MaiPilot" />
+    <meta name="twitter:description" content="マイクラサーバーのwhitelist設定とOP権限の付け方を手順で解説。設定後に入れない場合の対処も。" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+    <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.maipilot.jp/" },
+    { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://www.maipilot.jp/docs/" },
+    { "@type": "ListItem", "position": 3, "name": "Growth", "item": "https://www.maipilot.jp/docs/growth/" },
+    { "@type": "ListItem", "position": 4, "name": "マイクラサーバーのホワイトリスト・OP設定ガイド", "item": "https://www.maipilot.jp/docs/growth/whitelist-op-guide/" }
+  ]
+}
+    </script>
+    <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "ホワイトリストに追加したのにサーバーに入れません。",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "よくある原因は3つです。①プレイヤー名の大文字/小文字が一致していない。②サーバーを再起動していない（/whitelist reloadでも可）。③server.propertiesのwhite-list=trueになっていない。これらを順番に確認してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "OP権限を付けたのにコマンドが使えません。",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ops.jsonのlevelを確認してください。レベル4が最大権限です。また、Paperなどのサーバーにはプラグイン独自の権限システムがあり、OPとは別に設定が必要な場合があります。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "online-mode=falseのサーバーでwhitelistは使えますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "使えますが注意が必要です。online-mode=falseの場合、プレイヤーのUUIDが正規のMojang UUIDではなくオフラインUUID（名前から生成）になります。プレイヤー名が完全に一致していれば機能しますが、名前変更時にリストが無効になる場合があります。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "OP権限を削除するには？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "サーバーコンソールまたはゲーム内で /deop プレイヤー名 を実行します。または、サーバー停止中にops.jsonを直接編集して対象エントリを削除してください。"
+      }
+    }
+  ]
+}
+    </script>
+  </head>
+  <body>
+    <nav class="site-nav">
+      <a class="nav-brand" href="/">MaiPilot</a>
+      <div class="nav-links">
+        <a href="/">ホーム</a>
+        <a href="/docs/growth/">ガイド</a>
+        <a href="/?from=docs_nav_whitelist#download" class="nav-cta" data-event="nav_download_click" data-source="whitelist_article">ダウンロード</a>
+      </div>
+    </nav>
+    <main class="wrap">
+      <section class="card hero">
+        <a href="/docs/growth/">← ガイド一覧へ</a>
+        <h1>マイクラサーバーのホワイトリスト・OP設定ガイド</h1>
+        <p class="muted">「特定のプレイヤーしか入れないようにしたい」「管理者権限を付けたい」を一度で解決するガイドです。</p>
+        <div class="chips">
+          <span class="chip">想定読了: 6分</span>
+          <span class="chip">対象: サーバー管理者</span>
+          <span class="chip">目的: アクセス制限・権限管理</span>
+        </div>
+        <div class="notice">※この記事には広告・PRリンクを含みます。</div>
+      </section>
+
+      <section class="card">
+        <h2>先に結論</h2>
+        <ul>
+          <li>ホワイトリストは <code>server.properties</code> で有効化 → <code>/whitelist add 名前</code> で追加する。</li>
+          <li>OP権限は <code>/op 名前</code> コマンドで付与できる（コンソールから実行）。</li>
+          <li>設定変更後はサーバー再起動 or <code>/whitelist reload</code> を忘れずに。</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>ホワイトリスト設定手順</h2>
+        <ol>
+          <li>
+            <strong>server.properties を編集する</strong><br>
+            <p class="muted">サーバーフォルダの <code>server.properties</code> を開き、以下の行を変更します。</p>
+            <pre><code>white-list=true</code></pre>
+          </li>
+          <li>
+            <strong>プレイヤーをホワイトリストに追加する</strong><br>
+            <p class="muted">サーバーコンソールまたはゲーム内（OP権限が必要）で実行します。</p>
+            <pre><code>/whitelist add プレイヤー名</code></pre>
+          </li>
+          <li>
+            <strong>ホワイトリストを反映する</strong><br>
+            <p class="muted">サーバー再起動、またはリロードコマンドで即時反映できます。</p>
+            <pre><code>/whitelist reload</code></pre>
+          </li>
+          <li>
+            <strong>現在のリストを確認する</strong>
+            <pre><code>/whitelist list</code></pre>
+          </li>
+        </ol>
+        <div class="warn">プレイヤー名は大文字・小文字が区別されます。正確に入力してください。</div>
+      </section>
+
+      <section class="card">
+        <h2>whitelist.json の直接編集（応用）</h2>
+        <p class="muted">サーバーフォルダに生成される <code>whitelist.json</code> を直接編集する方法もあります。サーバーは停止状態で行ってください。</p>
+        <pre><code>[
+  {
+    "uuid": "（プレイヤーのUUID）",
+    "name": "プレイヤー名"
+  }
+]</code></pre>
+        <p class="muted" style="margin-top:8px;">UUID は <a href="https://namemc.com/" rel="noopener noreferrer" target="_blank">NameMC</a> などで確認できます。編集後は必ず <code>/whitelist reload</code> またはサーバー再起動で反映してください。</p>
+      </section>
+
+      <section class="card">
+        <h2>OP（管理者権限）設定手順</h2>
+        <ol>
+          <li>
+            <strong>OP権限を付与する</strong><br>
+            <p class="muted">サーバーコンソールから実行します（ゲーム内からは既にOPであれば実行可能）。</p>
+            <pre><code>/op プレイヤー名</code></pre>
+          </li>
+          <li>
+            <strong>OP権限を削除する</strong>
+            <pre><code>/deop プレイヤー名</code></pre>
+          </li>
+          <li>
+            <strong>OPレベルを確認・変更する（ops.json）</strong><br>
+            <p class="muted">サーバーフォルダの <code>ops.json</code> に権限情報が保存されます。</p>
+            <pre><code>[
+  {
+    "uuid": "（UUID）",
+    "name": "プレイヤー名",
+    "level": 4,
+    "bypassesPlayerLimit": false
+  }
+]</code></pre>
+          </li>
+        </ol>
+        <div class="grid" style="margin-top:12px;">
+          <div class="mini"><h3>レベル 1</h3><p class="muted">保護されたスポーンを変更可能。</p></div>
+          <div class="mini"><h3>レベル 2</h3><p class="muted">シングルプレイヤー向けコマンド実行。</p></div>
+          <div class="mini"><h3>レベル 3</h3><p class="muted">他プレイヤーのBANなど管理操作。</p></div>
+          <div class="mini"><h3>レベル 4</h3><p class="muted">すべてのコマンドを実行可能（最大権限）。</p></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>よくあるトラブルと対処</h2>
+        <ul>
+          <li><strong>ホワイトリストに追加したのに入れない</strong> → 名前の大文字/小文字を確認、<code>/whitelist reload</code> 実行、<code>white-list=true</code> の設定確認。</li>
+          <li><strong>OP権限を付けたがコマンドが使えない</strong> → ops.json の level 値が低い可能性。4 に設定して再確認。</li>
+          <li><strong>online-mode=false 環境での注意</strong> → UUIDがオフライン生成になる。プレイヤー名の完全一致は機能するが、プレミアムUUIDとは異なるため混在環境では注意。</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>よくある質問</h2>
+        <dl class="faq-list">
+          <dt data-faq-question>ホワイトリストに追加したのにサーバーに入れません。</dt>
+          <dd data-faq-answer>よくある原因は3つです。①プレイヤー名の大文字/小文字が一致していない。②サーバーを再起動していない（/whitelist reloadでも可）。③server.propertiesのwhite-list=trueになっていない。これらを順番に確認してください。</dd>
+          <dt data-faq-question>OP権限を付けたのにコマンドが使えません。</dt>
+          <dd data-faq-answer>ops.jsonのlevelを確認してください。レベル4が最大権限です。また、Paperなどのサーバーにはプラグイン独自の権限システムがあり、OPとは別に設定が必要な場合があります。</dd>
+          <dt data-faq-question>online-mode=falseのサーバーでwhitelistは使えますか？</dt>
+          <dd data-faq-answer>使えますが注意が必要です。online-mode=falseの場合、プレイヤーのUUIDが正規のMojang UUIDではなくオフラインUUID（名前から生成）になります。プレイヤー名が完全に一致していれば機能しますが、名前変更時にリストが無効になる場合があります。</dd>
+          <dt data-faq-question>OP権限を削除するには？</dt>
+          <dd data-faq-answer>サーバーコンソールまたはゲーム内で /deop プレイヤー名 を実行します。または、サーバー停止中にops.jsonを直接編集して対象エントリを削除してください。</dd>
+        </dl>
+      </section>
+
+      <section class="card">
+        <h2>次のアクション</h2>
+        <div class="banner-grid">
+          <article class="banner-card">
+            <span class="banner-pill">公式ホームページ</span>
+            <p class="muted">MaiPilotではプレイヤー管理・パーミッション設定をUIから操作できます。</p>
+            <a class="banner-link" href="/?from=growth_whitelist_home_banner" data-event="growth_home_banner_click" data-source="growth_whitelist" data-label="home_banner">ホームページを見る →</a>
+          </article>
+          <article class="banner-card lp">
+            <span class="banner-pill pr">PR</span>
+            <p class="muted">24時間安定稼働でプレイヤー管理するなら、VPS比較も確認しましょう。</p>
+            <a class="banner-link" href="/docs/24-7-hosting/?from=growth_whitelist_lp_banner" data-event="growth_lp_banner_click" data-source="growth_whitelist" data-label="lp_banner">24時間運用VPS比較を見る（PR） →</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="card cta">
+        <h2>MaiPilotなら権限管理もGUIで完結</h2>
+        <ul>
+          <li>ホワイトリスト・OPの追加/削除をUIから操作</li>
+          <li>server.propertiesの設定をビジュアルエディタで変更</li>
+          <li>プレイヤー接続ログをリアルタイム確認</li>
+          <li>6種のサーバー（Vanilla / Paper / Spigot / Forge / Fabric / Purpur）に対応</li>
+        </ul>
+        <p><a href="/?from=growth_whitelist" data-event="growth_download_click" data-source="growth_whitelist" data-label="download">MaiPilotをダウンロード</a> / <a href="/docs/growth/server-properties-recommended-settings/" data-event="growth_docs_click" data-source="growth_whitelist" data-label="server_props">server.propertiesの設定ガイド</a></p>
+      </section>
+
+      <section class="card">
+        <h2>次に読む</h2>
+        <p class="muted">アクセス制限ができたら、接続トラブルへの対処も確認しておきましょう。</p>
+        <ul>
+          <li><a href="/docs/growth/friends-cant-join-error-guide/" data-event="growth_article_click" data-source="growth_whitelist" data-label="next_friends">友だちが入れない時のエラー別対処 →</a></li>
+          <li><a href="/docs/growth/server-properties-recommended-settings/" data-event="growth_article_click" data-source="growth_whitelist" data-label="next_props">server.propertiesおすすめ設定 →</a></li>
+        </ul>
+      </section>
+    </main>
+    <script>
+      const trackEvent = ({ event_name, link_url, link_text, source }) => {
+        const win = window;
+        if (typeof win.gtag === "function") {
+          win.gtag("event", event_name, { event_category: source || "cta", event_label: link_text || link_url || "", link_url });
+          return;
+        }
+        if (Array.isArray(win.dataLayer)) {
+          win.dataLayer.push({ event: event_name, link_url, link_text, source: source || "cta" });
+        }
+      };
+      document.addEventListener("click", (event) => {
+        const link = event.target.closest?.("a");
+        if (!link) return;
+        const eventName = link.getAttribute("data-event");
+        const href = link.getAttribute("href") || "";
+        const label = link.getAttribute("data-label");
+        const text = label || (link.textContent?.trim() ?? "");
+        const source = link.getAttribute("data-source") || "cta";
+        if (eventName) trackEvent({ event_name: eventName, link_url: href, link_text: text, source });
+        const rel = (link.getAttribute("rel") || "").toLowerCase();
+        if (rel.includes("sponsored") && eventName !== "outbound_affiliate_click") {
+          trackEvent({ event_name: "outbound_affiliate_click", link_url: href, link_text: text, source: "affiliate" });
+        }
+      }, { passive: true });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>マイクラサーバーの推奨スペック（RAM・CPU目安） | MaiPilot</title>
+    <meta name="description" content="マイクラサーバーに必要なRAM・CPU・ストレージのスペックをプレイ人数別に解説。Xms/Xmxのヒープサイズ設定目安と、スペック不足のサインまで初心者向けにまとめ。" />
+    <meta name="keywords" content="マイクラサーバー スペック, マイクラサーバー RAM 何GB, マインクラフト サーバー 必要スペック, マイクラ サーバー メモリ, マイクラサーバー CPU" />
+    <meta name="author" content="MaiPilot" />
+    <style>
+      :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
+      *{box-sizing:border-box;}
+      body{margin:0;padding:32px 16px;font-family:"Noto Sans JP","Segoe UI",sans-serif;color:var(--text);background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%);}
+      .wrap{max-width:980px;margin:0 auto;display:grid;gap:16px;}
+      .card{background:var(--panel);border:1px solid rgba(126,157,201,.25);border-radius:16px;padding:22px;}
+      .hero{background:linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)), var(--panel);}
+      .muted{color:var(--muted);}
+      .notice{background:rgba(255,209,102,.12);color:#ffd166;border-radius:10px;padding:10px 14px;font-weight:700;font-size:13px;margin-top:12px;}
+      .cta{border:1px solid rgba(102,255,136,.45);background:rgba(102,255,136,.08);}
+      a{color:var(--accent2);text-decoration:none;}
+      h1,h2,h3{margin:0 0 10px;}
+      ul,ol{margin:8px 0 0 18px;color:var(--muted);}
+      table{width:100%;border-collapse:collapse;color:var(--muted);margin-top:10px;}
+      th,td{border:1px solid rgba(126,157,201,.25);padding:9px 10px;text-align:left;}
+      th{background:rgba(22,32,56,.6);color:var(--text);font-weight:700;}
+      .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+      .chip{font-size:12px;padding:5px 10px;border:1px solid rgba(126,157,201,.35);border-radius:999px;color:var(--muted);}
+      .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;}
+      .mini{background:var(--panel2);border:1px solid rgba(126,157,201,.25);border-radius:12px;padding:12px;}
+      code{background:rgba(22,32,56,.8);border:1px solid rgba(126,157,201,.2);border-radius:6px;padding:2px 7px;font-size:.9em;color:#a8d8ff;font-family:"Consolas","Courier New",monospace;}
+      .faq-list{margin:0;display:grid;gap:10px;}
+      .faq-list dt{font-weight:700;color:var(--text);}
+      .faq-list dd{margin:0;color:var(--muted);}
+      .banner-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:10px;}
+      .banner-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px;background:var(--panel2);border:1px solid rgba(126,157,201,.3);border-radius:12px;padding:12px;}
+      .banner-card.lp{border-color:rgba(255,209,102,.45);background:linear-gradient(135deg, rgba(255,209,102,.12), rgba(51,168,255,.08)), var(--panel2);}
+      .banner-pill{display:inline-block;width:max-content;font-size:11px;font-weight:700;border-radius:999px;padding:4px 8px;background:rgba(102,255,136,.16);color:var(--accent);}
+      .banner-pill.pr{background:rgba(255,209,102,.2);color:#ffd166;}
+      .banner-link{font-weight:700;}
+      .site-nav{position:sticky;top:0;z-index:100;background:rgba(11,15,23,.95);backdrop-filter:blur(8px);border-bottom:1px solid rgba(126,157,201,.15);padding:0 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin:-32px -16px 24px;height:52px;}
+      .nav-brand{font-weight:700;font-size:15px;color:var(--accent);text-decoration:none;letter-spacing:.02em;}
+      .nav-links{display:flex;gap:12px;align-items:center;}
+      .nav-links a{color:var(--muted);font-size:13px;text-decoration:none;}
+      .nav-links a:hover{color:var(--text);}
+      .nav-cta{background:rgba(102,255,136,.12);color:var(--accent)!important;border:1px solid rgba(102,255,136,.35);border-radius:8px;padding:5px 12px;font-weight:700;}
+    </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MM106D2B2Z');
+    </script>
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://www.maipilot.jp/docs/growth/minecraft-server-recommended-specs/" />
+    <meta property="og:title" content="マイクラサーバーの推奨スペック（RAM・CPU目安） | MaiPilot" />
+    <meta property="og:description" content="マイクラサーバーに必要なRAM・CPU・ストレージのスペックをプレイ人数別に解説。Xms/Xmxのヒープサイズ設定目安と、スペック不足のサインまで初心者向けにまとめ。" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://www.maipilot.jp/docs/growth/minecraft-server-recommended-specs/" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta property="og:site_name" content="MaiPilot" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="article:published_time" content="2026-03-08T00:00:00+09:00" />
+    <meta property="article:modified_time" content="2026-03-08T00:00:00+09:00" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="マイクラサーバーの推奨スペック（RAM・CPU目安） | MaiPilot" />
+    <meta name="twitter:description" content="マイクラサーバーに必要なRAM・CPU・ストレージのスペックをプレイ人数別に解説。Xms/Xmxのヒープサイズ設定目安と、スペック不足のサインまで。" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+    <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.maipilot.jp/" },
+    { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://www.maipilot.jp/docs/" },
+    { "@type": "ListItem", "position": 3, "name": "Growth", "item": "https://www.maipilot.jp/docs/growth/" },
+    { "@type": "ListItem", "position": 4, "name": "マイクラサーバーの推奨スペック", "item": "https://www.maipilot.jp/docs/growth/minecraft-server-recommended-specs/" }
+  ]
+}
+    </script>
+    <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "マイクラサーバーのRAMは何GB必要ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "バニラ・少人数（1〜5人）なら2〜4GBで動作します。Paperサーバーにプラグインを入れる場合や5〜10人規模なら4〜8GBを目安にしてください。20人以上の公開サーバーは8GB以上推奨です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Xms（最小ヒープ）はXmxと同じ値にすべきですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Paperの推奨（Aikarフラグ）ではXms=Xmxに揃えることが多いです。こうするとJVMがヒープサイズを動的に変えないため、GCの頻度が安定します。ただしシステムRAMの合計を超えないよう注意してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "CPUコア数は何コアあれば十分ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Minecraftサーバーはメインループがシングルスレッドのため、コア数よりもシングルコア性能が重要です。4コア以上のCPUを推奨しますが、クロック周波数（3GHz以上）を優先して選ぶと快適に動作します。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "ストレージはSSDとHDDどちらがよいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "SSD（またはNVMe）を強く推奨します。マイクラサーバーはワールドデータの読み書きが頻繁なため、HDDではチャンク読み込みが遅くなりラグの原因になります。"
+      }
+    }
+  ]
+}
+    </script>
+  </head>
+  <body>
+    <nav class="site-nav">
+      <a class="nav-brand" href="/">MaiPilot</a>
+      <div class="nav-links">
+        <a href="/">ホーム</a>
+        <a href="/docs/growth/">ガイド</a>
+        <a href="/?from=docs_nav_specs#download" class="nav-cta" data-event="nav_download_click" data-source="specs_article">ダウンロード</a>
+      </div>
+    </nav>
+    <main class="wrap">
+      <section class="card hero">
+        <a href="/docs/growth/">← ガイド一覧へ</a>
+        <h1>マイクラサーバーの推奨スペック（RAM・CPU目安）</h1>
+        <p class="muted">プレイ人数・サーバー種別ごとに必要なスペックを整理。スペック不足で起きるラグを事前に防ぐための目安ガイドです。</p>
+        <div class="chips">
+          <span class="chip">想定読了: 5分</span>
+          <span class="chip">対象: Windows / VPS</span>
+          <span class="chip">目的: スペック選定</span>
+        </div>
+        <div class="notice">※この記事には広告・PRリンクを含みます。</div>
+      </section>
+
+      <section class="card">
+        <h2>先に結論</h2>
+        <ul>
+          <li>少人数（1〜5人）のバニラなら RAM 2〜4GB・SSD・4コアCPUで十分。</li>
+          <li>Paperにプラグインを入れる場合は RAM 4GB を最低ラインとして見ておく。</li>
+          <li>CPUはコア数より「シングルコア性能（クロック周波数）」を優先する。</li>
+          <li>ストレージは必ずSSDを使う。HDDではチャンク読み込みでラグが発生する。</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>プレイ人数別 RAM 目安</h2>
+        <table>
+          <tr><th>同時接続人数</th><th>推奨RAM（ヒープ割り当て）</th><th>備考</th></tr>
+          <tr><td>1〜5人</td><td>2〜4 GB</td><td>バニラ・軽量プラグイン構成</td></tr>
+          <tr><td>5〜10人</td><td>4〜6 GB</td><td>Paperにプラグイン10本前後まで</td></tr>
+          <tr><td>10〜20人</td><td>6〜10 GB</td><td>大規模プラグイン・ワールド生成が多い場合</td></tr>
+          <tr><td>20〜50人</td><td>10〜16 GB</td><td>公開サーバー・複数ワールド運用</td></tr>
+          <tr><td>50人以上</td><td>16 GB 以上</td><td>VPS/専用サーバー推奨</td></tr>
+        </table>
+        <p class="muted" style="margin-top:10px;font-size:13px;">※上記はJavaヒープ（Xmx）の目安です。OS・JVM自体のメモリを含めると実機 RAM はヒープより 1〜2GB 多く必要です。</p>
+      </section>
+
+      <section class="card">
+        <h2>Xms / Xmx の設定目安</h2>
+        <p class="muted">Javaの起動オプション <code>-Xms</code>（最小ヒープ）と <code>-Xmx</code>（最大ヒープ）は、サーバー専用機では同じ値に揃えると安定します。</p>
+        <div class="grid">
+          <div class="mini">
+            <h3>4GB マシン例</h3>
+            <p class="muted"><code>-Xms2G -Xmx2G</code></p>
+            <p class="muted">OSに2GBを残し、2GBをサーバーに割り当て。</p>
+          </div>
+          <div class="mini">
+            <h3>8GB マシン例</h3>
+            <p class="muted"><code>-Xms4G -Xmx4G</code></p>
+            <p class="muted">プラグイン10〜20本程度の中規模構成に。</p>
+          </div>
+          <div class="mini">
+            <h3>16GB マシン例</h3>
+            <p class="muted"><code>-Xms8G -Xmx10G</code></p>
+            <p class="muted">大規模プラグイン・MODサーバー向け。</p>
+          </div>
+        </div>
+        <p class="muted" style="margin-top:12px;font-size:13px;">Paperを使う場合は <a href="/docs/growth/minecraft-server-lag-fix/">Aikarフラグ</a> と組み合わせるとGCによるラグを大幅に軽減できます。</p>
+      </section>
+
+      <section class="card">
+        <h2>CPU・ストレージ選びのポイント</h2>
+        <ul>
+          <li><strong>CPU</strong>: Minecraftサーバーはメインループがシングルスレッドのためシングルコア性能が最重要。3GHz以上のクロック周波数を目安に選ぶ。</li>
+          <li><strong>コア数</strong>: 4コア以上があると、GCスレッドや非同期処理が余裕をもって動く。</li>
+          <li><strong>ストレージ</strong>: SSD（SATA SSD以上）必須。NVMe SSDならさらに快適。HDDはチャンク生成・ワールド保存が遅くラグの原因になる。</li>
+          <li><strong>ネットワーク帯域</strong>: 1人あたり約100〜200Kbps。10人なら最低 2〜3Mbps の上り帯域が必要。</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>スペック不足のサイン</h2>
+        <ul>
+          <li>TPS（Ticks Per Second）が 20 を下回り、ゲーム全体がスロー再生のようになる。</li>
+          <li>新しいチャンクに移動するたびにフリーズ感がある（ストレージ不足）。</li>
+          <li>コンソールに <code>Can't keep up!</code> が頻繁に表示される。</li>
+          <li>GCログに長い停止（Stop-the-world）が繰り返される。</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>VPS選びの目安</h2>
+        <p class="muted">自宅PCで運用が難しい場合や24時間稼働を想定する場合はVPSが便利です。</p>
+        <ul>
+          <li>5〜10人規模: 2vCPU / 4GB RAM プランから</li>
+          <li>10〜20人規模: 4vCPU / 8GB RAM プランを推奨</li>
+        </ul>
+        <ul style="margin-top:10px;">
+          <li><a href="/docs/24-7-hosting/" data-event="docs_24_7_hosting_click" data-source="growth_specs" data-label="vps_comparison">VPSプラン比較を見る（PR）</a></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>次のアクション</h2>
+        <p class="muted">スペックが固まったら、セットアップを進めるかVPS比較を確認しましょう。</p>
+        <div class="banner-grid">
+          <article class="banner-card">
+            <span class="banner-pill">公式ホームページ</span>
+            <p class="muted">MaiPilotならサーバー種別の選択からメモリ設定まで自動化できます。</p>
+            <a class="banner-link" href="/?from=growth_specs_home_banner" data-event="growth_home_banner_click" data-source="growth_specs" data-label="home_banner">ホームページを見る →</a>
+          </article>
+          <article class="banner-card lp">
+            <span class="banner-pill pr">PR</span>
+            <p class="muted">自宅スペックが足りない場合はVPS比較から始めるのがおすすめです。</p>
+            <a class="banner-link" href="/docs/24-7-hosting/?from=growth_specs_lp_banner" data-event="growth_lp_banner_click" data-source="growth_specs" data-label="lp_banner">24時間運用VPS比較を見る（PR） →</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>よくある質問</h2>
+        <dl class="faq-list">
+          <dt data-faq-question>マイクラサーバーのRAMは何GB必要ですか？</dt>
+          <dd data-faq-answer>バニラ・少人数（1〜5人）なら2〜4GBで動作します。Paperサーバーにプラグインを入れる場合や5〜10人規模なら4〜8GBを目安にしてください。20人以上の公開サーバーは8GB以上推奨です。</dd>
+          <dt data-faq-question>Xms（最小ヒープ）はXmxと同じ値にすべきですか？</dt>
+          <dd data-faq-answer>Paperの推奨（Aikarフラグ）ではXms=Xmxに揃えることが多いです。こうするとJVMがヒープサイズを動的に変えないため、GCの頻度が安定します。ただしシステムRAMの合計を超えないよう注意してください。</dd>
+          <dt data-faq-question>CPUコア数は何コアあれば十分ですか？</dt>
+          <dd data-faq-answer>Minecraftサーバーはメインループがシングルスレッドのため、コア数よりもシングルコア性能が重要です。4コア以上のCPUを推奨しますが、クロック周波数（3GHz以上）を優先して選ぶと快適に動作します。</dd>
+          <dt data-faq-question>ストレージはSSDとHDDどちらがよいですか？</dt>
+          <dd data-faq-answer>SSD（またはNVMe）を強く推奨します。マイクラサーバーはワールドデータの読み書きが頻繁なため、HDDではチャンク読み込みが遅くなりラグの原因になります。</dd>
+        </dl>
+      </section>
+
+      <section class="card cta">
+        <h2>MaiPilotならスペック管理も簡単</h2>
+        <ul>
+          <li>起動時のメモリ（Xms/Xmx）をUIから設定・変更</li>
+          <li>Java互換チェックで起動前に不一致を警告</li>
+          <li>6種のサーバー（Vanilla / Paper / Spigot / Forge / Fabric / Purpur）に対応</li>
+          <li>サーバーモニタリングでリソース使用状況を確認</li>
+        </ul>
+        <p><a href="/?from=growth_specs" data-event="growth_download_click" data-source="growth_specs" data-label="download">MaiPilotをダウンロード</a> / <a href="/docs/growth/minecraft-server-memory-settings/" data-event="growth_docs_click" data-source="growth_specs" data-label="memory_settings">メモリ設定の詳細ガイド</a></p>
+      </section>
+
+      <section class="card">
+        <h2>次に読む</h2>
+        <p class="muted">スペック確認後は立て方の手順を確認するか、ラグ対策も読んでおきましょう。</p>
+        <ul>
+          <li><a href="/docs/growth/windows-minecraft-server-2026/" data-event="growth_article_click" data-source="growth_specs" data-label="next_windows_2026">マイクラサーバーの立て方（Windows/2026年版） →</a></li>
+          <li><a href="/docs/growth/minecraft-server-lag-fix/" data-event="growth_article_click" data-source="growth_specs" data-label="next_lag_fix">サーバーが重い・ラグの対処法 →</a></li>
+        </ul>
+      </section>
+    </main>
+    <script>
+      const trackEvent = ({ event_name, link_url, link_text, source }) => {
+        const win = window;
+        if (typeof win.gtag === "function") {
+          win.gtag("event", event_name, { event_category: source || "cta", event_label: link_text || link_url || "", link_url });
+          return;
+        }
+        if (Array.isArray(win.dataLayer)) {
+          win.dataLayer.push({ event: event_name, link_url, link_text, source: source || "cta" });
+        }
+      };
+      document.addEventListener("click", (event) => {
+        const link = event.target.closest?.("a");
+        if (!link) return;
+        const eventName = link.getAttribute("data-event");
+        const href = link.getAttribute("href") || "";
+        const label = link.getAttribute("data-label");
+        const text = label || (link.textContent?.trim() ?? "");
+        const source = link.getAttribute("data-source") || "cta";
+        if (eventName) trackEvent({ event_name: eventName, link_url: href, link_text: text, source });
+        const rel = (link.getAttribute("rel") || "").toLowerCase();
+        if (rel.includes("sponsored") && eventName !== "outbound_affiliate_click") {
+          trackEvent({ event_name: "outbound_affiliate_click", link_url: href, link_text: text, source: "affiliate" });
+        }
+      }, { passive: true });
+    </script>
+  </body>
+</html>

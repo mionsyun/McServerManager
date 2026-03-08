@@ -22,6 +22,12 @@
       .faq-list{margin:0;display:grid;gap:10px;}
       .faq-list dt{font-weight:700;color:var(--text);}
       .faq-list dd{margin:0;color:var(--muted);}
+      .site-nav{position:sticky;top:0;z-index:100;background:rgba(11,15,23,.95);backdrop-filter:blur(8px);border-bottom:1px solid rgba(126,157,201,.15);padding:0 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin:-32px -16px 24px;height:52px;}
+      .nav-brand{font-weight:700;font-size:15px;color:var(--accent);text-decoration:none;letter-spacing:.02em;}
+      .nav-links{display:flex;gap:12px;align-items:center;}
+      .nav-links a{color:var(--muted);font-size:13px;text-decoration:none;}
+      .nav-links a:hover{color:var(--text);}
+      .nav-cta{background:rgba(102,255,136,.12);color:var(--accent)!important;border:1px solid rgba(102,255,136,.35);border-radius:8px;padding:5px 12px;font-weight:700;}
     </style>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
     <script>
@@ -42,6 +48,10 @@
     <meta name="twitter:title" content="server.propertiesおすすめ設定（公開向け） | MaiPilot" />
     <meta name="twitter:description" content="server.propertiesの公開向けおすすめ設定を初心者向けに解説。難易度・描画距離・セキュリティ項目を整理。" />
     <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:site_name" content="MaiPilot" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="article:published_time" content="2026-02-27T00:00:00+09:00" />
+    <meta property="article:modified_time" content="2026-03-08T00:00:00+09:00" />
           <script type="application/ld+json" data-seo="breadcrumb">
 {
   "@context": "https://schema.org",
@@ -108,6 +118,14 @@
   </script>
   </head>
   <body>
+    <nav class="site-nav">
+      <a class="nav-brand" href="/">MaiPilot</a>
+      <div class="nav-links">
+        <a href="/">ホーム</a>
+        <a href="/docs/growth/">ガイド</a>
+        <a href="/?from=docs_nav_serverprops#download" class="nav-cta" data-event="nav_download_click" data-source="growth_server_props">ダウンロード</a>
+      </div>
+    </nav>
     <main class="wrap">
       <section class="card hero">
         <a href="/docs/growth/">← ガイド一覧へ</a>
@@ -165,5 +183,31 @@
         </ul>
       </section>
     </main>
+    <script>
+      const trackEvent = ({ event_name, link_url, link_text, source }) => {
+        const win = window;
+        if (typeof win.gtag === "function") {
+          win.gtag("event", event_name, { event_category: source || "cta", event_label: link_text || link_url || "", link_url });
+          return;
+        }
+        if (Array.isArray(win.dataLayer)) {
+          win.dataLayer.push({ event: event_name, link_url, link_text, source: source || "cta" });
+        }
+      };
+      document.addEventListener("click", (event) => {
+        const link = event.target.closest?.("a");
+        if (!link) return;
+        const eventName = link.getAttribute("data-event");
+        const href = link.getAttribute("href") || "";
+        const label = link.getAttribute("data-label");
+        const text = label || (link.textContent?.trim() ?? "");
+        const source = link.getAttribute("data-source") || "cta";
+        if (eventName) trackEvent({ event_name: eventName, link_url: href, link_text: text, source });
+        const rel = (link.getAttribute("rel") || "").toLowerCase();
+        if (rel.includes("sponsored") && eventName !== "outbound_affiliate_click") {
+          trackEvent({ event_name: "outbound_affiliate_click", link_url: href, link_text: text, source: "affiliate" });
+        }
+      }, { passive: true });
+    </script>
   </body>
 </html>

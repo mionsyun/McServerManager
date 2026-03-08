@@ -83,6 +83,12 @@
         background:rgba(22,32,56,.45);
       }
       .kpi strong { display:block; font-size:20px; color:var(--accent); }
+      .site-nav{position:sticky;top:0;z-index:100;background:rgba(11,15,23,.95);backdrop-filter:blur(8px);border-bottom:1px solid rgba(126,157,201,.15);padding:0 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin:-32px -16px 24px;height:52px;}
+      .nav-brand{font-weight:700;font-size:15px;color:var(--accent);text-decoration:none;letter-spacing:.02em;}
+      .nav-links{display:flex;gap:12px;align-items:center;}
+      .nav-links a{color:var(--muted);font-size:13px;text-decoration:none;}
+      .nav-links a:hover{color:var(--text);}
+      .nav-cta{background:rgba(102,255,136,.12);color:var(--accent)!important;border:1px solid rgba(102,255,136,.35);border-radius:8px;padding:5px 12px;font-weight:700;}
     </style>
       <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
@@ -105,6 +111,8 @@
     <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
     <meta property="og:image:alt" content="MaiPilot icon" />
     <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:site_name" content="MaiPilot" />
+    <meta property="og:locale" content="ja_JP" />
           <script type="application/ld+json" data-seo="breadcrumb">
 {
   "@context": "https://schema.org",
@@ -133,6 +141,14 @@
   </script>
   </head>
   <body>
+    <nav class="site-nav">
+      <a class="nav-brand" href="/">MaiPilot</a>
+      <div class="nav-links">
+        <a href="/">ホーム</a>
+        <a href="/docs/">セットアップノート</a>
+        <a href="/?from=docs_growth_nav#download" class="nav-cta" data-event="nav_download_click" data-source="growth_hub">ダウンロード</a>
+      </div>
+    </nav>
     <main class="wrap">
       <section class="card hero">
         <div class="top">
@@ -192,6 +208,21 @@
             <p class="muted">公開規模と目的から最適な種別を選ぶ。</p>
             <a href="/docs/growth/server-type-comparison/" data-event="growth_article_click" data-source="growth_hub" data-label="server-type-comparison">記事を読む →</a>
           </article>
+          <article class="item">
+            <h3>マイクラサーバーの推奨スペック（RAM・CPU目安）</h3>
+            <p class="muted">プレイ人数別のRAM・CPU・ストレージ選びの目安。</p>
+            <a href="/docs/growth/minecraft-server-recommended-specs/" data-event="growth_article_click" data-source="growth_hub" data-label="minecraft-server-recommended-specs">記事を読む →</a>
+          </article>
+          <article class="item">
+            <h3>ホワイトリスト・OP設定ガイド</h3>
+            <p class="muted">whitelist設定とOP権限の付け方をコマンド付きで解説。</p>
+            <a href="/docs/growth/whitelist-op-guide/" data-event="growth_article_click" data-source="growth_hub" data-label="whitelist-op-guide">記事を読む →</a>
+          </article>
+          <article class="item">
+            <h3>サーバーが重い・ラグの原因と対処法</h3>
+            <p class="muted">view-distance・Aikarフラグ・プラグイン精査でTPS改善。</p>
+            <a href="/docs/growth/minecraft-server-lag-fix/" data-event="growth_article_click" data-source="growth_hub" data-label="minecraft-server-lag-fix">記事を読む →</a>
+          </article>
         </div>
       </section>
 
@@ -216,6 +247,9 @@
           <li><a href="/docs/growth/friends-cant-join-error-guide/">友達 入れない timeout refused</a></li>
           <li><a href="/docs/growth/backup-restore-guide/">マイクラ バックアップ 復元 手順</a></li>
           <li><a href="/docs/growth/server-type-comparison/">Paper Purpur Vanilla 比較</a></li>
+          <li><a href="/docs/growth/minecraft-server-recommended-specs/">マイクラサーバー スペック RAM 何GB 必要</a></li>
+          <li><a href="/docs/growth/whitelist-op-guide/">マイクラサーバー ホワイトリスト OP設定 コマンド</a></li>
+          <li><a href="/docs/growth/minecraft-server-lag-fix/">マイクラサーバー 重い ラグ TPS 改善</a></li>
           <li><a href="/docs/24-7-hosting/" data-event="docs_24_7_hosting_click">マイクラサーバー 24時間運用の選択肢（PR）</a></li>
         </ul>
       </section>
