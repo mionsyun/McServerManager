@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>マイクラサーバーが重い・ラグの原因と対処法 | MaiPilot</title>
+    <meta name="description" content="マイクラサーバーのラグ・重い問題を解消する方法。view-distance調整、Aikarフラグ、プラグイン見直しまで原因別に対処手順を解説。TPS確認方法付き。" />
+    <meta name="keywords" content="マイクラサーバー 重い, マイクラサーバー ラグ, Minecraft サーバー TPS, マイクラ view-distance, Aikarフラグ, マイクラサーバー 最適化" />
+    <meta name="author" content="MaiPilot" />
+    <style>
+      :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
+      *{box-sizing:border-box;}
+      body{margin:0;padding:32px 16px;font-family:"Noto Sans JP","Segoe UI",sans-serif;color:var(--text);background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%);}
+      .wrap{max-width:980px;margin:0 auto;display:grid;gap:16px;}
+      .card{background:var(--panel);border:1px solid rgba(126,157,201,.25);border-radius:16px;padding:22px;}
+      .hero{background:linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)), var(--panel);}
+      .muted{color:var(--muted);}
+      .notice{background:rgba(255,209,102,.12);color:#ffd166;border-radius:10px;padding:10px 14px;font-weight:700;font-size:13px;margin-top:12px;}
+      .cta{border:1px solid rgba(102,255,136,.45);background:rgba(102,255,136,.08);}
+      a{color:var(--accent2);text-decoration:none;}
+      h1,h2,h3{margin:0 0 10px;}
+      ul,ol{margin:8px 0 0 18px;color:var(--muted);}
+      code{background:rgba(22,32,56,.8);border:1px solid rgba(126,157,201,.2);border-radius:6px;padding:2px 7px;font-size:.9em;color:#a8d8ff;font-family:"Consolas","Courier New",monospace;}
+      pre{background:rgba(22,32,56,.8);border:1px solid rgba(126,157,201,.2);border-radius:10px;padding:14px 16px;overflow-x:auto;margin:10px 0;}
+      pre code{background:none;border:none;padding:0;font-size:.88em;line-height:1.6;}
+      table{width:100%;border-collapse:collapse;color:var(--muted);margin-top:10px;}
+      th,td{border:1px solid rgba(126,157,201,.25);padding:9px 10px;text-align:left;}
+      th{background:rgba(22,32,56,.6);color:var(--text);font-weight:700;}
+      .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+      .chip{font-size:12px;padding:5px 10px;border:1px solid rgba(126,157,201,.35);border-radius:999px;color:var(--muted);}
+      .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;}
+      .mini{background:var(--panel2);border:1px solid rgba(126,157,201,.25);border-radius:12px;padding:12px;}
+      .faq-list{margin:0;display:grid;gap:10px;}
+      .faq-list dt{font-weight:700;color:var(--text);}
+      .faq-list dd{margin:0;color:var(--muted);}
+      .banner-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:10px;}
+      .banner-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px;background:var(--panel2);border:1px solid rgba(126,157,201,.3);border-radius:12px;padding:12px;}
+      .banner-card.lp{border-color:rgba(255,209,102,.45);background:linear-gradient(135deg, rgba(255,209,102,.12), rgba(51,168,255,.08)), var(--panel2);}
+      .banner-pill{display:inline-block;width:max-content;font-size:11px;font-weight:700;border-radius:999px;padding:4px 8px;background:rgba(102,255,136,.16);color:var(--accent);}
+      .banner-pill.pr{background:rgba(255,209,102,.2);color:#ffd166;}
+      .banner-link{font-weight:700;}
+      .site-nav{position:sticky;top:0;z-index:100;background:rgba(11,15,23,.95);backdrop-filter:blur(8px);border-bottom:1px solid rgba(126,157,201,.15);padding:0 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin:-32px -16px 24px;height:52px;}
+      .nav-brand{font-weight:700;font-size:15px;color:var(--accent);text-decoration:none;letter-spacing:.02em;}
+      .nav-links{display:flex;gap:12px;align-items:center;}
+      .nav-links a{color:var(--muted);font-size:13px;text-decoration:none;}
+      .nav-links a:hover{color:var(--text);}
+      .nav-cta{background:rgba(102,255,136,.12);color:var(--accent)!important;border:1px solid rgba(102,255,136,.35);border-radius:8px;padding:5px 12px;font-weight:700;}
+    </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MM106D2B2Z');
+    </script>
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://www.maipilot.jp/docs/growth/minecraft-server-lag-fix/" />
+    <meta property="og:title" content="マイクラサーバーが重い・ラグの原因と対処法 | MaiPilot" />
+    <meta property="og:description" content="マイクラサーバーのラグ・重い問題を解消する方法。view-distance調整、Aikarフラグ、プラグイン見直しまで原因別に対処手順を解説。TPS確認方法付き。" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://www.maipilot.jp/docs/growth/minecraft-server-lag-fix/" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta property="og:site_name" content="MaiPilot" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="article:published_time" content="2026-03-08T00:00:00+09:00" />
+    <meta property="article:modified_time" content="2026-03-08T00:00:00+09:00" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="マイクラサーバーが重い・ラグの原因と対処法 | MaiPilot" />
+    <meta name="twitter:description" content="マイクラサーバーのラグ・重い問題を解消する方法。view-distance調整、Aikarフラグ、プラグイン見直し手順を解説。" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+    <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.maipilot.jp/" },
+    { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://www.maipilot.jp/docs/" },
+    { "@type": "ListItem", "position": 3, "name": "Growth", "item": "https://www.maipilot.jp/docs/growth/" },
+    { "@type": "ListItem", "position": 4, "name": "マイクラサーバーが重い・ラグの原因と対処法", "item": "https://www.maipilot.jp/docs/growth/minecraft-server-lag-fix/" }
+  ]
+}
+    </script>
+    <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "TPSとは何ですか？どうやって確認しますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "TPS（Ticks Per Second）はサーバーの処理速度の指標で、正常値は20です。Paperサーバーなら /tps コマンドで確認できます。TPS が 15 以下になるとゲームプレイに明確なラグが生じます。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Aikarフラグとは何ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Aikarフラグとは、Paper開発チームのAikar氏が提唱したMinecraftサーバー向けJVM起動オプションです。GCの動作を最適化し、Stop-the-worldポーズを短縮することでTPSを安定させます。Paper公式サイトでも推奨されています。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "view-distanceを下げるとどんな影響がありますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "プレイヤーが見えるチャンクの範囲が狭くなります。デフォルト10チャンクを6〜8に下げると、サーバーが処理するチャンク数が大幅に減り、TPSが改善します。プレイ感への影響は軽微で、まず試すべき設定です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "プラグインがラグの原因か調べるには？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Paperサーバーなら /timings report コマンドで各プラグインの処理時間を計測できます。また、プラグインを1つずつ無効化してTPSを比較する方法も有効です。"
+      }
+    }
+  ]
+}
+    </script>
+  </head>
+  <body>
+    <nav class="site-nav">
+      <a class="nav-brand" href="/">MaiPilot</a>
+      <div class="nav-links">
+        <a href="/">ホーム</a>
+        <a href="/docs/growth/">ガイド</a>
+        <a href="/?from=docs_nav_lag#download" class="nav-cta" data-event="nav_download_click" data-source="lag_article">ダウンロード</a>
+      </div>
+    </nav>
+    <main class="wrap">
+      <section class="card hero">
+        <a href="/docs/growth/">← ガイド一覧へ</a>
+        <h1>マイクラサーバーが重い・ラグの原因と対処法</h1>
+        <p class="muted">TPS低下・ラグの原因を素早く特定し、効果が高い順に対処するためのガイドです。</p>
+        <div class="chips">
+          <span class="chip">想定読了: 8分</span>
+          <span class="chip">対象: Paper / Vanilla サーバー</span>
+          <span class="chip">目的: TPS改善・ラグ解消</span>
+        </div>
+        <div class="notice">※この記事には広告・PRリンクを含みます。</div>
+      </section>
+
+      <section class="card">
+        <h2>先に結論（効果が高い順）</h2>
+        <ol>
+          <li><strong>view-distance を 10 → 6〜8 に下げる</strong>（最も即効性が高い）</li>
+          <li><strong>Aikarフラグ</strong>に切り替えてGCによるラグを減らす</li>
+          <li><strong>RAM割り当てを確認・増加</strong>する（Xms/Xmxを適切に設定）</li>
+          <li><strong>プラグインを精査</strong>して不要なものを無効化する</li>
+          <li><strong>simulation-distance を下げる</strong>（1.18以降）</li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h2>症状別 原因の特定</h2>
+        <table>
+          <tr><th>症状</th><th>考えられる原因</th><th>優先確認箇所</th></tr>
+          <tr><td>全員が同時にラグる</td><td>サーバー側の負荷超過</td><td>TPS / RAM / CPU使用率</td></tr>
+          <tr><td>特定のプレイヤーだけラグる</td><td>そのプレイヤーの回線問題</td><td>pingコマンド・接続環境</td></tr>
+          <tr><td>特定のエリアに入ると重くなる</td><td>大量エンティティ・チャンク生成</td><td>エンティティ数・ワールド境界</td></tr>
+          <tr><td>定期的に一瞬フリーズする</td><td>GC（ガベージコレクション）</td><td>Aikarフラグの有無</td></tr>
+          <tr><td>夜間だけ重くなる</td><td>バックアップ・自動タスク</td><td>バックアップスケジュール</td></tr>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>TPS の確認方法</h2>
+        <p class="muted">まず現在の TPS を確認して、ラグがサーバー側の問題か確認します。</p>
+        <pre><code>/tps</code></pre>
+        <p class="muted">出力例: <code>TPS from last 1m, 5m, 15m: 19.98, 19.54, 18.31</code></p>
+        <p class="muted">TPS 20 が正常値です。15 以下になるとラグが体感されます。</p>
+      </section>
+
+      <section class="card">
+        <h2>対処1: view-distance を下げる</h2>
+        <p class="muted"><code>server.properties</code> を編集します。</p>
+        <pre><code>view-distance=8
+simulation-distance=6</code></pre>
+        <p class="muted">デフォルトは両方 <code>10</code> です。<code>view-distance=8</code>、<code>simulation-distance=6</code> に変更するだけで、サーバーが管理するチャンク数が大幅に減ります。変更後はサーバーを再起動してください。</p>
+      </section>
+
+      <section class="card">
+        <h2>対処2: Aikarフラグへの切り替え</h2>
+        <p class="muted">Paper公式が推奨するJVM起動フラグです。GCによる「一瞬フリーズ」を大幅に軽減します。<br>サーバー起動コマンド（<code>start.bat</code> や起動スクリプト）を以下のように書き換えます。</p>
+        <pre><code>java -Xms4G -Xmx4G \
+  -XX:+UseG1GC \
+  -XX:+ParallelRefProcEnabled \
+  -XX:MaxGCPauseMillis=200 \
+  -XX:+UnlockExperimentalVMOptions \
+  -XX:+DisableExplicitGC \
+  -XX:+AlwaysPreTouch \
+  -XX:G1NewSizePercent=30 \
+  -XX:G1MaxNewSizePercent=40 \
+  -XX:G1HeapRegionSize=8M \
+  -XX:G1ReservePercent=20 \
+  -XX:G1HeapWastePercent=5 \
+  -XX:G1MixedGCCountTarget=4 \
+  -XX:InitiatingHeapOccupancyPercent=15 \
+  -XX:G1MixedGCLiveThresholdPercent=90 \
+  -XX:G1RSetUpdatingPauseTimePercent=5 \
+  -XX:SurvivorRatio=32 \
+  -XX:+PerfDisableSharedMem \
+  -XX:MaxTenuringThreshold=1 \
+  -jar server.jar nogui</code></pre>
+        <p class="muted" style="margin-top:8px;"><code>-Xms4G -Xmx4G</code> の部分はサーバーのRAM搭載量に合わせて変更してください。</p>
+      </section>
+
+      <section class="card">
+        <h2>対処3: プラグインが原因の場合</h2>
+        <p class="muted">Paperサーバーなら <code>/timings report</code> コマンドでプラグインごとの処理時間を確認できます。</p>
+        <ol>
+          <li>コンソールで <code>/timings reset</code> を実行してリセット。</li>
+          <li>ラグが発生する操作を5〜10分行う。</li>
+          <li><code>/timings report</code> を実行してURLを取得し、ブラウザで開く。</li>
+          <li>処理時間が長いプラグインを特定して無効化・設定変更する。</li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h2>対処4: エンティティ数を減らす</h2>
+        <p class="muted"><code>server.properties</code> または <code>spigot.yml</code> でモブの湧き上限を調整できます。</p>
+        <pre><code># server.properties
+max-entities=150
+
+# spigot.yml（より細かく制御）
+mob-spawn-range: 4
+entity-activation-range:
+  animals: 32
+  monsters: 32
+  raiders: 48
+  misc: 16</code></pre>
+        <p class="muted">エンティティ（モブ・ドロップアイテム）が大量に溜まっているチャンクはコマンドで確認できます。</p>
+        <pre><code>/paper entity list</code></pre>
+      </section>
+
+      <section class="card">
+        <h2>よくある質問</h2>
+        <dl class="faq-list">
+          <dt data-faq-question>TPSとは何ですか？どうやって確認しますか？</dt>
+          <dd data-faq-answer>TPS（Ticks Per Second）はサーバーの処理速度の指標で、正常値は20です。Paperサーバーなら /tps コマンドで確認できます。TPS が 15 以下になるとゲームプレイに明確なラグが生じます。</dd>
+          <dt data-faq-question>Aikarフラグとは何ですか？</dt>
+          <dd data-faq-answer>Aikarフラグとは、Paper開発チームのAikar氏が提唱したMinecraftサーバー向けJVM起動オプションです。GCの動作を最適化し、Stop-the-worldポーズを短縮することでTPSを安定させます。Paper公式サイトでも推奨されています。</dd>
+          <dt data-faq-question>view-distanceを下げるとどんな影響がありますか？</dt>
+          <dd data-faq-answer>プレイヤーが見えるチャンクの範囲が狭くなります。デフォルト10チャンクを6〜8に下げると、サーバーが処理するチャンク数が大幅に減り、TPSが改善します。プレイ感への影響は軽微で、まず試すべき設定です。</dd>
+          <dt data-faq-question>プラグインがラグの原因か調べるには？</dt>
+          <dd data-faq-answer>Paperサーバーなら /timings report コマンドで各プラグインの処理時間を計測できます。また、プラグインを1つずつ無効化してTPSを比較する方法も有効です。</dd>
+        </dl>
+      </section>
+
+      <section class="card">
+        <h2>次のアクション</h2>
+        <div class="banner-grid">
+          <article class="banner-card">
+            <span class="banner-pill">公式ホームページ</span>
+            <p class="muted">MaiPilotのサーバーモニタリング機能でリソース使用状況をリアルタイム確認できます。</p>
+            <a class="banner-link" href="/?from=growth_lag_fix_home_banner" data-event="growth_home_banner_click" data-source="growth_lag_fix" data-label="home_banner">ホームページを見る →</a>
+          </article>
+          <article class="banner-card lp">
+            <span class="banner-pill pr">PR</span>
+            <p class="muted">スペック不足が原因なら、高性能VPSへの移行も選択肢です。</p>
+            <a class="banner-link" href="/docs/24-7-hosting/?from=growth_lag_fix_lp_banner" data-event="growth_lp_banner_click" data-source="growth_lag_fix" data-label="lp_banner">24時間運用VPS比較を見る（PR） →</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="card cta">
+        <h2>MaiPilotならパフォーマンス管理も簡単</h2>
+        <ul>
+          <li>起動フラグ（Aikarフラグ含む）をUIから設定・切り替え</li>
+          <li>サーバーモニタリングでCPU・RAM使用率をリアルタイム確認</li>
+          <li>クラッシュ検知 + 自動再起動で障害を最小化</li>
+          <li>view-distance などの設定をGUIの server.properties エディタで変更</li>
+        </ul>
+        <p><a href="/?from=growth_lag_fix" data-event="growth_download_click" data-source="growth_lag_fix" data-label="download">MaiPilotをダウンロード</a> / <a href="/docs/growth/minecraft-server-memory-settings/" data-event="growth_docs_click" data-source="growth_lag_fix" data-label="memory_settings">メモリ設定ガイド</a></p>
+      </section>
+
+      <section class="card">
+        <h2>次に読む</h2>
+        <p class="muted">ラグ対策が終わったら、スペックや設定の最適化も確認しましょう。</p>
+        <ul>
+          <li><a href="/docs/growth/minecraft-server-recommended-specs/" data-event="growth_article_click" data-source="growth_lag_fix" data-label="next_specs">マイクラサーバーの推奨スペック →</a></li>
+          <li><a href="/docs/growth/server-properties-recommended-settings/" data-event="growth_article_click" data-source="growth_lag_fix" data-label="next_props">server.propertiesおすすめ設定 →</a></li>
+        </ul>
+      </section>
+    </main>
+    <script>
+      const trackEvent = ({ event_name, link_url, link_text, source }) => {
+        const win = window;
+        if (typeof win.gtag === "function") {
+          win.gtag("event", event_name, { event_category: source || "cta", event_label: link_text || link_url || "", link_url });
+          return;
+        }
+        if (Array.isArray(win.dataLayer)) {
+          win.dataLayer.push({ event: event_name, link_url, link_text, source: source || "cta" });
+        }
+      };
+      document.addEventListener("click", (event) => {
+        const link = event.target.closest?.("a");
+        if (!link) return;
+        const eventName = link.getAttribute("data-event");
+        const href = link.getAttribute("href") || "";
+        const label = link.getAttribute("data-label");
+        const text = label || (link.textContent?.trim() ?? "");
+        const source = link.getAttribute("data-source") || "cta";
+        if (eventName) trackEvent({ event_name: eventName, link_url: href, link_text: text, source });
+        const rel = (link.getAttribute("rel") || "").toLowerCase();
+        if (rel.includes("sponsored") && eventName !== "outbound_affiliate_click") {
+          trackEvent({ event_name: "outbound_affiliate_click", link_url: href, link_text: text, source: "affiliate" });
+        }
+      }, { passive: true });
+    </script>
+  </body>
+</html>
