@@ -113,6 +113,7 @@
                                                 Margin="8,2,0,0"
                                                 HorizontalAlignment="Right"
                                                 VerticalAlignment="Top"
+                                                ToolTip="サーバーメニュー（削除・複製・更新）"
                                                 Click="OpenServerItemMenu">
                                             <TextBlock Text="︙"
                                                        FontSize="20"
