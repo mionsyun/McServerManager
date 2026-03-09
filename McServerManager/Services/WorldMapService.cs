@@ -2,6 +2,7 @@ using System.IO.Compression;
 using System.Text;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Color = System.Windows.Media.Color;
 
 namespace McServerManager.Services;
 
@@ -302,7 +303,9 @@ public sealed class WorldMapService
         Dictionary<int, Dictionary<string, object?>> sections,
         int lx, int surfaceY, int lz, bool isLegacy, int minY)
     {
-        int sectionY = (surfaceY - minY) >> 4;
+        // Section Y in chunk NBT is absolute (e.g. -4..19 in modern worlds),
+        // so derive it directly from absolute block Y.
+        int sectionY = surfaceY >> 4;
         if (!sections.TryGetValue(sectionY, out var section))
             return string.Empty;
 

@@ -1,9 +1,17 @@
-<Window x:Class="McServerManager.Views.WorldMapWindow"
+﻿<Window x:Class="McServerManager.Views.WorldMapWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="ワールドマッププレビュー"
         Width="960" Height="720"
         MinWidth="480" MinHeight="360">
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Control" Key="Add" Command="{Binding ZoomInCommand}"/>
+        <KeyBinding Modifiers="Control" Key="OemPlus" Command="{Binding ZoomInCommand}"/>
+        <KeyBinding Modifiers="Control" Key="Subtract" Command="{Binding ZoomOutCommand}"/>
+        <KeyBinding Modifiers="Control" Key="OemMinus" Command="{Binding ZoomOutCommand}"/>
+        <KeyBinding Modifiers="Control" Key="D0" Command="{Binding ResetZoomCommand}"/>
+        <KeyBinding Modifiers="Control" Key="NumPad0" Command="{Binding ResetZoomCommand}"/>
+    </Window.InputBindings>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -12,14 +20,13 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Toolbar -->
         <Border Grid.Row="0"
                 Background="{DynamicResource BrushSurface}"
                 BorderBrush="{DynamicResource BrushBorder}"
                 BorderThickness="0,0,0,1"
                 Padding="10,6">
             <WrapPanel>
-                <Button Content="🔄 再読み込み"
+                <Button Content="再読み込み"
                         Command="{Binding ReloadCommand}"
                         Style="{StaticResource PrimaryButton}"
                         Margin="0,0,8,0"/>
@@ -43,16 +50,24 @@
                     <Run Text="倍率:"/>
                     <Run Text="{Binding Scale, StringFormat={}{0:P0}, Mode=OneWay}"/>
                 </TextBlock>
+                <TextBlock VerticalAlignment="Center"
+                           Style="{StaticResource MutedText}"
+                           Margin="10,0,0,0"
+                           Text="Ctrl+ホイール: ズーム / ドラッグ: 移動"/>
             </WrapPanel>
         </Border>
 
-        <!-- Map area -->
-        <ScrollViewer Grid.Row="1"
+        <ScrollViewer x:Name="MapScrollViewer"
+                      Grid.Row="1"
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Auto"
-                      Background="#1A1A1A">
-            <Grid>
-                <!-- Rendered map image -->
+                      Background="#1A1A1A"
+                      PreviewMouseWheel="MapScrollViewer_OnPreviewMouseWheel"
+                      PreviewMouseLeftButtonDown="MapScrollViewer_OnPreviewMouseLeftButtonDown"
+                      PreviewMouseLeftButtonUp="MapScrollViewer_OnPreviewMouseLeftButtonUp"
+                      PreviewMouseMove="MapScrollViewer_OnPreviewMouseMove"
+                      MouseLeave="MapScrollViewer_OnMouseLeave">
+            <Grid x:Name="MapContent">
                 <Image Source="{Binding MapImage}"
                        Stretch="None"
                        HorizontalAlignment="Center"
@@ -63,7 +78,6 @@
                     </Image.LayoutTransform>
                 </Image>
 
-                <!-- No-image placeholder -->
                 <TextBlock HorizontalAlignment="Center"
                            VerticalAlignment="Center"
                            Style="{StaticResource MutedText}"
@@ -71,10 +85,9 @@
                            Visibility="{Binding ShowPlaceholder, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Run Text="マップが表示されていません"/>
                     <LineBreak/>
-                    <Run Text="「🔄 再読み込み」ボタンで生成できます"/>
+                    <Run Text="再読み込みボタンで生成してください"/>
                 </TextBlock>
 
-                <!-- Loading overlay -->
                 <Border Background="#B0000000"
                         Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -91,7 +104,6 @@
             </Grid>
         </ScrollViewer>
 
-        <!-- Status bar -->
         <Border Grid.Row="2"
                 Background="{DynamicResource BrushSurface}"
                 BorderBrush="{DynamicResource BrushBorder}"
