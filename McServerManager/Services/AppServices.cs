@@ -12,6 +12,7 @@ public sealed class AppServices
         ServerProvisioningService provisioning,
         ServerJarService jars,
         WorldService worlds,
+        WorldMapService worldMap,
         PermissionsService permissions,
         FirewallService firewall,
         NetworkService network,
@@ -32,6 +33,7 @@ public sealed class AppServices
         Provisioning = provisioning;
         Jars = jars;
         Worlds = worlds;
+        WorldMap = worldMap;
         Permissions = permissions;
         Firewall = firewall;
         Network = network;
@@ -53,6 +55,7 @@ public sealed class AppServices
     public ServerProvisioningService Provisioning { get; }
     public ServerJarService Jars { get; }
     public WorldService Worlds { get; }
+    public WorldMapService WorldMap { get; }
     public PermissionsService Permissions { get; }
     public FirewallService Firewall { get; }
     public NetworkService Network { get; }

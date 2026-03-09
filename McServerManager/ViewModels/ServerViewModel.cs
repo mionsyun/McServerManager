@@ -142,6 +142,10 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             _ => OpenSelectedWorldDirectory(),
             _ => !string.IsNullOrWhiteSpace(SelectedWorld)
         );
+        OpenWorldMapCommand = new RelayCommand(
+            _ => OpenWorldMap(),
+            _ => !string.IsNullOrWhiteSpace(SelectedWorld)
+        );
         BrowseMapArchiveCommand = new RelayCommand(_ => BrowseMapArchive());
         ImportMapArchiveCommand = new AsyncRelayCommand(ImportMapArchiveAsync, CanImportMapArchive);
         OpenServerDirectoryCommand = new RelayCommand(_ => OpenServerDirectory());
@@ -336,6 +340,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 SwitchWorldCommand.RaiseCanExecuteChanged();
                 DeleteWorldCommand.RaiseCanExecuteChanged();
                 OpenSelectedWorldDirectoryCommand.RaiseCanExecuteChanged();
+                OpenWorldMapCommand.RaiseCanExecuteChanged();
                 CreateWorldBackupCommand.RaiseCanExecuteChanged();
                 OnPropertyChanged(nameof(IsSelectedWorldCurrent));
                 OnPropertyChanged(nameof(WorldSwitchHint));
@@ -841,6 +846,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     public RelayCommand DeleteWorldBackupCommand { get; }
     public RelayCommand RefreshWorldsCommand { get; }
     public RelayCommand OpenSelectedWorldDirectoryCommand { get; }
+    public RelayCommand OpenWorldMapCommand { get; }
     public RelayCommand BrowseMapArchiveCommand { get; }
     public AsyncRelayCommand ImportMapArchiveCommand { get; }
     public RelayCommand OpenServerDirectoryCommand { get; }
@@ -1281,6 +1287,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(WorldSwitchHint));
         SwitchWorldCommand.RaiseCanExecuteChanged();
         OpenSelectedWorldDirectoryCommand.RaiseCanExecuteChanged();
+        OpenWorldMapCommand.RaiseCanExecuteChanged();
         CreateWorldBackupCommand.RaiseCanExecuteChanged();
         RestoreWorldBackupCommand.RaiseCanExecuteChanged();
         ImportMapArchiveCommand.RaiseCanExecuteChanged();
@@ -1295,6 +1302,20 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
         var path = Path.Combine(ServerDirectory, SelectedWorld);
         OpenDirectory(path, "選択したワールドフォルダが見つかりません。");
+    }
+
+    private void OpenWorldMap()
+    {
+        if (string.IsNullOrWhiteSpace(SelectedWorld))
+            return;
+
+        var worldPath = Path.Combine(ServerDirectory, SelectedWorld);
+        var vm = new WorldMapViewModel(_services.WorldMap, worldPath);
+        var window = new Views.WorldMapWindow(vm)
+        {
+            Owner = WpfApplication.Current?.MainWindow
+        };
+        window.Show();
     }
 
     private void OpenServerDirectory()

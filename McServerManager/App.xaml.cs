@@ -24,6 +24,7 @@ public partial class App : System.Windows.Application
             var versionService = new MinecraftVersionService(paths);
             var runtimeManager = new ServerRuntimeManager();
             var worldService = new WorldService();
+            var worldMapService = new WorldMapService();
             var permissionsService = new PermissionsService();
             var firewallService = new FirewallService();
             var networkService = new NetworkService();
@@ -50,6 +51,7 @@ public partial class App : System.Windows.Application
                 provisioningService,
                 jarService,
                 worldService,
+                worldMapService,
                 permissionsService,
                 firewallService,
                 networkService,
