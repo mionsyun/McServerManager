@@ -1,4 +1,4 @@
-name: Build And Upload Installer
+﻿name: Build And Upload Installer
 
 on:
   push:
@@ -23,6 +23,8 @@ concurrency:
   group: deploy-installer-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 jobs:
   build_installer:
     runs-on: windows-latest
@@ -236,3 +238,4 @@ jobs:
             echo "- Versioned: ${{ steps.upload.outputs.versioned_url }}"
             echo "- Manifest synced: McServerManager/landing/public/updates/win-x64/update.json"
           } >> "$GITHUB_STEP_SUMMARY"
+

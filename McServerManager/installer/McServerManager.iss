@@ -77,8 +77,7 @@ begin
     exit;
   end;
 
-  VersionText := GetVersionNumbersString(ExePath);
-  Result := VersionText <> '';
+  Result := GetVersionNumbersString(ExePath, VersionText) and (VersionText <> '');
 end;
 
 function InitializeSetup(): Boolean;
