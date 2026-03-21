@@ -11,6 +11,7 @@ public sealed class NewServerOptions
     public int Port { get; set; } = 25565;
     public int MaxPlayers { get; set; } = 20;
     public bool OnlineMode { get; set; } = true;
+    public bool EnableCommandBlock { get; set; }
     public bool EulaAccepted { get; set; }
     public string JavaPath { get; set; } = string.Empty;
     public string Motd { get; set; } = "A Minecraft Server";

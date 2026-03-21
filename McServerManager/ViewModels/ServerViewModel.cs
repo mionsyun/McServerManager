@@ -40,6 +40,8 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     private string _mapImportStatus = "配布マップ未選択";
     private ArchiveWorldCandidate? _selectedMapArchiveCandidate;
     private MinecraftVersionInfo? _selectedVersion;
+    private VersionFilterOption? _selectedVersionFilter;
+    private string _versionFilterSummary = string.Empty;
     private string _newOpName = string.Empty;
     private string _newWhitelistName = string.Empty;
     private OpEntry? _selectedOp;
@@ -84,6 +86,8 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         WorldBackups = [];
         MapArchiveCandidates = [];
         AvailableVersions = [];
+        FilteredAvailableVersions = [];
+        VersionFilters = [];
         LanIpAddresses = new ObservableCollection<string>(_services.Network.GetLanIpAddresses());
         ExternalChecklist = new ObservableCollection<string>(
             _services.Network.GetExternalChecklist()
@@ -102,6 +106,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         _memoryXmxMb = _config.MemoryXmxMb;
         _javaExtraArguments = _config.JavaExtraArguments ?? string.Empty;
         InitializeLaunchOptions();
+        InitializeVersionFilters();
 
         StartCommand = new AsyncRelayCommand(StartAsync, () => Status == ServerStatus.Stopped);
         StopCommand = new AsyncRelayCommand(StopAsync, () => Status != ServerStatus.Stopped);
@@ -151,7 +156,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         OpenServerDirectoryCommand = new RelayCommand(_ => OpenServerDirectory());
         OpenLogsDirectoryCommand = new RelayCommand(_ => OpenLogsDirectory());
         OpenCrashReportsCommand = new RelayCommand(_ => OpenCrashReports());
-        LoadVersionsCommand = new AsyncRelayCommand(LoadVersionsAsync);
+        LoadVersionsCommand = new AsyncRelayCommand(() => LoadVersionsAsync(forceRefresh: true));
         ChangeVersionCommand = new AsyncRelayCommand(
             ChangeVersionAsync,
             () => SelectedVersion is not null
@@ -245,6 +250,8 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     public ObservableCollection<WorldBackupEntry> WorldBackups { get; }
     public ObservableCollection<ArchiveWorldCandidate> MapArchiveCandidates { get; }
     public ObservableCollection<MinecraftVersionInfo> AvailableVersions { get; }
+    public ObservableCollection<MinecraftVersionInfo> FilteredAvailableVersions { get; }
+    public ObservableCollection<VersionFilterOption> VersionFilters { get; }
     public ObservableCollection<string> LanIpAddresses { get; }
     public ObservableCollection<string> ExternalChecklist { get; }
     public ObservableCollection<OpEntry> Ops { get; }
@@ -715,6 +722,24 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         private set => SetProperty(ref _mapImportStatus, value);
     }
 
+    public VersionFilterOption? SelectedVersionFilter
+    {
+        get => _selectedVersionFilter;
+        set
+        {
+            if (SetProperty(ref _selectedVersionFilter, value))
+            {
+                ApplyVersionFilter();
+            }
+        }
+    }
+
+    public string VersionFilterSummary
+    {
+        get => _versionFilterSummary;
+        private set => SetProperty(ref _versionFilterSummary, value);
+    }
+
     public MinecraftVersionInfo? SelectedVersion
     {
         get => _selectedVersion;
@@ -723,7 +748,27 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             if (SetProperty(ref _selectedVersion, value))
             {
                 ChangeVersionCommand.RaiseCanExecuteChanged();
+                OnPropertyChanged(nameof(SelectedVersionInfo));
             }
+        }
+    }
+
+    public string SelectedVersionInfo
+    {
+        get
+        {
+            if (SelectedVersion is null)
+            {
+                return "バージョン未選択";
+            }
+
+            var typeLabel = string.Equals(SelectedVersion.Type, "release", StringComparison.OrdinalIgnoreCase)
+                ? "正規版"
+                : string.Equals(SelectedVersion.Type, "snapshot", StringComparison.OrdinalIgnoreCase)
+                    ? "スナップショット"
+                    : SelectedVersion.Type;
+
+            return $"{typeLabel} / {SelectedVersion.ReleaseTime.ToLocalTime():yyyy/MM/dd HH:mm}";
         }
     }
 
@@ -888,6 +933,49 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     private void UpdateRestartRequired()
     {
         RestartRequired = Settings.IsDirty;
+    }
+
+    private void InitializeVersionFilters()
+    {
+        VersionFilters.Clear();
+        VersionFilters.Add(new VersionFilterOption("release", "正規版"));
+        VersionFilters.Add(new VersionFilterOption("snapshot", "スナップショット"));
+        VersionFilters.Add(new VersionFilterOption("all", "すべて"));
+        SelectedVersionFilter = VersionFilters.FirstOrDefault();
+    }
+
+    private void ApplyVersionFilter()
+    {
+        var filterId = SelectedVersionFilter?.Id ?? "release";
+        IEnumerable<MinecraftVersionInfo> filteredSource = AvailableVersions;
+
+        filteredSource = filterId switch
+        {
+            "snapshot" => filteredSource.Where(v => string.Equals(v.Type, "snapshot", StringComparison.OrdinalIgnoreCase)),
+            "release" => filteredSource.Where(v => string.Equals(v.Type, "release", StringComparison.OrdinalIgnoreCase)),
+            _ => filteredSource
+        };
+
+        var filteredList = filteredSource.ToList();
+        var selectedVersionId = SelectedVersion?.Id;
+        FilteredAvailableVersions.Clear();
+        foreach (var version in filteredList)
+        {
+            FilteredAvailableVersions.Add(version);
+        }
+
+        SelectedVersion =
+            (!string.IsNullOrWhiteSpace(selectedVersionId)
+                ? FilteredAvailableVersions.FirstOrDefault(v =>
+                    string.Equals(v.Id, selectedVersionId, StringComparison.OrdinalIgnoreCase))
+                : null)
+            ?? FilteredAvailableVersions.FirstOrDefault(v =>
+                string.Equals(v.Id, _config.Version, StringComparison.OrdinalIgnoreCase))
+            ?? FilteredAvailableVersions.FirstOrDefault(v => string.Equals(v.Type, "release", StringComparison.OrdinalIgnoreCase))
+            ?? FilteredAvailableVersions.FirstOrDefault();
+
+        var modHint = IsModdedServerType(ServerType) ? "（Forge/Fabric は正規版推奨）" : string.Empty;
+        VersionFilterSummary = $"表示 {FilteredAvailableVersions.Count} 件 / 全体 {AvailableVersions.Count} 件{modHint}";
     }
 
     private void InitializeLaunchOptions()
@@ -1062,6 +1150,20 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             }
         }
 
+        if (IsModdedServerType(ServerType))
+        {
+            var versionType = AvailableVersions
+                .FirstOrDefault(v => string.Equals(v.Id, _config.Version, StringComparison.OrdinalIgnoreCase))
+                ?.Type;
+            if (!string.IsNullOrWhiteSpace(versionType)
+                && !string.Equals(versionType, "release", StringComparison.OrdinalIgnoreCase))
+            {
+                issues.Add(
+                    $"現在のバージョン {_config.Version} は {versionType} です。Forge/Fabric では起動やMODの読み込みに失敗する場合があります。正規版を推奨します。"
+                );
+            }
+        }
+
         _config.HasCompletedInitialHealthCheck = true;
         _services.Configs.Save(_config);
 
@@ -1207,6 +1309,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             _config.MaxPlayers = props.MaxPlayers;
             _config.Motd = props.Motd;
             _config.OnlineMode = props.OnlineMode;
+            _config.EnableCommandBlock = props.EnableCommandBlock;
             _config.Difficulty = props.Difficulty;
             _config.GameMode = props.GameMode;
             _config.Pvp = props.Pvp;
@@ -1755,6 +1858,28 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             return;
         }
 
+        if (!Settings.EnableCommandBlock)
+        {
+            var result = _services.Dialog.Show(
+                "配布マップにはコマンドブロックが必要な場合があります。\n有効にしますか？（有効にしない場合、正常に動作しない恐れがあります）",
+                "コマンドブロック設定",
+                MessageBoxButton.YesNoCancel,
+                MessageBoxImage.Warning
+            );
+
+            if (result == MessageBoxResult.Cancel)
+            {
+                MapImportStatus = "導入をキャンセルしました。";
+                return;
+            }
+
+            if (result == MessageBoxResult.Yes)
+            {
+                Settings.EnableCommandBlock = true;
+                SaveSettings();
+            }
+        }
+
         var targetDirectory = Path.Combine(ServerDirectory, worldName);
         if (Directory.Exists(targetDirectory) && !ReplaceWorldOnMapImport)
         {
@@ -1916,11 +2041,11 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         return string.IsNullOrWhiteSpace(cleaned) ? "world" : cleaned;
     }
 
-    private async Task LoadVersionsAsync()
+    private async Task LoadVersionsAsync(bool forceRefresh = false)
     {
         try
         {
-            var versions = await _services.Versions.GetVersionsAsync();
+            var versions = await _services.Versions.GetVersionsAsync(forceRefresh);
             WpfApplication.Current.Dispatcher.Invoke(() =>
             {
                 AvailableVersions.Clear();
@@ -1928,12 +2053,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 {
                     AvailableVersions.Add(version);
                 }
-                SelectedVersion =
-                    AvailableVersions.FirstOrDefault(v =>
-                        string.Equals(v.Id, _config.Version, StringComparison.OrdinalIgnoreCase)
-                    )
-                    ?? AvailableVersions.FirstOrDefault(v => v.Type == "release")
-                    ?? AvailableVersions.FirstOrDefault();
+                ApplyVersionFilter();
             });
         }
         catch (Exception ex)
@@ -1963,6 +2083,23 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 MessageBoxImage.Information
             );
             return;
+        }
+
+        if (
+            IsModdedServerType(ServerType)
+            && !string.Equals(SelectedVersion.Type, "release", StringComparison.OrdinalIgnoreCase)
+        )
+        {
+            var modWarningResult = _services.Dialog.Show(
+                $"選択中の {SelectedVersion.Id} は {SelectedVersion.Type} です。Forge/Fabric では動作しない可能性があります。続行しますか？",
+                "バージョン確認",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning
+            );
+            if (modWarningResult != MessageBoxResult.Yes)
+            {
+                return;
+            }
         }
 
         if (
@@ -2593,6 +2730,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
         Whitelist.Remove(SelectedWhitelist);
         _services.Permissions.SaveWhitelist(ServerDirectory, Whitelist);
+    }
+
+    private static bool IsModdedServerType(string? serverType)
+    {
+        return string.Equals(serverType, "Forge", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(serverType, "Fabric", StringComparison.OrdinalIgnoreCase);
     }
 
     private void UpdateStats()

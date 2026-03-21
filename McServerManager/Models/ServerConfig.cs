@@ -16,6 +16,7 @@ public sealed class ServerConfig
     public int Port { get; set; } = 25565;
     public int MaxPlayers { get; set; } = 20;
     public bool OnlineMode { get; set; } = true;
+    public bool EnableCommandBlock { get; set; }
     public string Motd { get; set; } = "A Minecraft Server";
     public string WorldName { get; set; } = "world";
     public string Seed { get; set; } = string.Empty;

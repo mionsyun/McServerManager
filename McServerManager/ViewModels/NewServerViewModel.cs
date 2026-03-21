@@ -23,22 +23,27 @@ public sealed class NewServerViewModel : ObservableObject
     private int _port = 25565;
     private int _maxPlayers = 20;
     private bool _onlineMode = true;
+    private bool _enableCommandBlock;
     private bool _eulaAccepted;
     private string _motd = "A Minecraft Server";
     private MinecraftVersionInfo? _selectedVersion;
     private ServerTypeOption? _selectedServerType;
+    private VersionFilterOption? _selectedVersionFilter;
     private string _statusMessage = string.Empty;
+    private string _versionFilterSummary = string.Empty;
     private bool _isBusy;
     private string _progressMessage = string.Empty;
     private double _progressPercent;
     private string _progressStep = string.Empty;
     private bool _hasError;
+    private List<MinecraftVersionInfo> _allVersions = [];
 
     public NewServerViewModel(AppServices services, IEnumerable<string> existingNames)
     {
         _services = services;
         _existingNames = new HashSet<string>(existingNames, StringComparer.OrdinalIgnoreCase);
         Versions = new ObservableCollection<MinecraftVersionInfo>();
+        VersionFilters = new ObservableCollection<VersionFilterOption>();
         ServerTypes = new ObservableCollection<ServerTypeOption>();
         DirectoryPath = _services.Paths.ServersPath;
 
@@ -46,8 +51,12 @@ public sealed class NewServerViewModel : ObservableObject
         BrowseJavaCommand = new RelayCommand(_ => BrowseJava(), _ => !IsBusy);
         CreateCommand = new AsyncRelayCommand(CreateAsync);
         CancelCommand = new RelayCommand(_ => RequestClose?.Invoke(false), _ => !IsBusy);
-        RefreshVersionsCommand = new AsyncRelayCommand(LoadVersionsAsync);
+        RefreshVersionsCommand = new AsyncRelayCommand(
+            () => LoadVersionsAsync(forceRefresh: true),
+            () => !IsBusy
+        );
 
+        InitializeVersionFilters();
         InitializeDefaults();
     }
 
@@ -102,6 +111,12 @@ public sealed class NewServerViewModel : ObservableObject
         set => SetProperty(ref _onlineMode, value);
     }
 
+    public bool EnableCommandBlock
+    {
+        get => _enableCommandBlock;
+        set => SetProperty(ref _enableCommandBlock, value);
+    }
+
     public bool EulaAccepted
     {
         get => _eulaAccepted;
@@ -115,18 +130,82 @@ public sealed class NewServerViewModel : ObservableObject
     }
 
     public ObservableCollection<MinecraftVersionInfo> Versions { get; }
+    public ObservableCollection<VersionFilterOption> VersionFilters { get; }
     public ObservableCollection<ServerTypeOption> ServerTypes { get; }
 
     public MinecraftVersionInfo? SelectedVersion
     {
         get => _selectedVersion;
-        set => SetProperty(ref _selectedVersion, value);
+        set
+        {
+            if (SetProperty(ref _selectedVersion, value))
+            {
+                OnPropertyChanged(nameof(SelectedVersionInfo));
+            }
+        }
     }
 
     public ServerTypeOption? SelectedServerType
     {
         get => _selectedServerType;
-        set => SetProperty(ref _selectedServerType, value);
+        set
+        {
+            if (SetProperty(ref _selectedServerType, value))
+            {
+                OnPropertyChanged(nameof(ModVersionHint));
+                ApplyVersionFilter(selectCurrentVersion: false);
+            }
+        }
+    }
+
+    public VersionFilterOption? SelectedVersionFilter
+    {
+        get => _selectedVersionFilter;
+        set
+        {
+            if (SetProperty(ref _selectedVersionFilter, value))
+            {
+                ApplyVersionFilter(selectCurrentVersion: false);
+            }
+        }
+    }
+
+    public string VersionFilterSummary
+    {
+        get => _versionFilterSummary;
+        private set => SetProperty(ref _versionFilterSummary, value);
+    }
+
+    public string SelectedVersionInfo
+    {
+        get
+        {
+            if (SelectedVersion is null)
+            {
+                return "バージョン未選択";
+            }
+
+            var typeText = string.Equals(SelectedVersion.Type, "release", StringComparison.OrdinalIgnoreCase)
+                ? "正規版"
+                : string.Equals(SelectedVersion.Type, "snapshot", StringComparison.OrdinalIgnoreCase)
+                    ? "スナップショット"
+                    : SelectedVersion.Type;
+
+            return $"{typeText} / {SelectedVersion.ReleaseTime.ToLocalTime():yyyy/MM/dd}";
+        }
+    }
+
+    public string ModVersionHint
+    {
+        get
+        {
+            if (!IsModdedServerType(SelectedServerType?.Id))
+            {
+                return "Forge/Fabric 以外は用途に応じて選択してください。";
+            }
+
+            return "Forge/Fabric は正規版を推奨します。スナップショットは起動しない場合があります。";
+        }
     }
 
     public string StatusMessage
@@ -145,6 +224,7 @@ public sealed class NewServerViewModel : ObservableObject
                 BrowseDirectoryCommand.RaiseCanExecuteChanged();
                 BrowseJavaCommand.RaiseCanExecuteChanged();
                 CancelCommand.RaiseCanExecuteChanged();
+                RefreshVersionsCommand.RaiseCanExecuteChanged();
             }
         }
     }
@@ -179,7 +259,7 @@ public sealed class NewServerViewModel : ObservableObject
     public RelayCommand CancelCommand { get; }
     public AsyncRelayCommand RefreshVersionsCommand { get; }
 
-    public async Task LoadVersionsAsync()
+    public async Task LoadVersionsAsync(bool forceRefresh = false)
     {
         IsBusy = true;
         ProgressPercent = 0;
@@ -188,15 +268,11 @@ public sealed class NewServerViewModel : ObservableObject
 
         try
         {
-            var versions = await _services.Versions.GetVersionsAsync();
+            var versions = await _services.Versions.GetVersionsAsync(forceRefresh);
             WpfApplication.Current.Dispatcher.Invoke(() =>
             {
-                Versions.Clear();
-                foreach (var version in versions)
-                {
-                    Versions.Add(version);
-                }
-                SelectedVersion = Versions.FirstOrDefault(v => v.Type == "release") ?? Versions.FirstOrDefault();
+                _allVersions = versions.ToList();
+                ApplyVersionFilter(selectCurrentVersion: true);
             });
         }
         catch (Exception ex)
@@ -225,6 +301,24 @@ public sealed class NewServerViewModel : ObservableObject
 
         try
         {
+            if (
+                IsModdedServerType(SelectedServerType?.Id)
+                && SelectedVersion is not null
+                && !string.Equals(SelectedVersion.Type, "release", StringComparison.OrdinalIgnoreCase)
+            )
+            {
+                var confirm = _services.Dialog.Show(
+                    $"選択中の {SelectedVersion.Id} は {SelectedVersion.Type} です。Forge/Fabric では動作しない可能性があります。続行しますか？",
+                    "バージョン確認",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning
+                );
+                if (confirm != MessageBoxResult.Yes)
+                {
+                    return;
+                }
+            }
+
             IsBusy = true;
             ProgressPercent = 0;
             ProgressStep = "0/4";
@@ -241,6 +335,7 @@ public sealed class NewServerViewModel : ObservableObject
                 Port = Port,
                 MaxPlayers = MaxPlayers,
                 OnlineMode = OnlineMode,
+                EnableCommandBlock = EnableCommandBlock,
                 EulaAccepted = EulaAccepted,
                 JavaPath = JavaPath,
                 Motd = Motd
@@ -321,9 +416,50 @@ public sealed class NewServerViewModel : ObservableObject
         }
     }
 
+    private void InitializeVersionFilters()
+    {
+        VersionFilters.Clear();
+        VersionFilters.Add(new VersionFilterOption("release", "正規版"));
+        VersionFilters.Add(new VersionFilterOption("snapshot", "スナップショット"));
+        VersionFilters.Add(new VersionFilterOption("all", "すべて"));
+        SelectedVersionFilter = VersionFilters.FirstOrDefault();
+    }
+
+    private void ApplyVersionFilter(bool selectCurrentVersion)
+    {
+        IEnumerable<MinecraftVersionInfo> source = _allVersions;
+        var filterId = SelectedVersionFilter?.Id ?? "release";
+
+        source = filterId switch
+        {
+            "snapshot" => source.Where(v => string.Equals(v.Type, "snapshot", StringComparison.OrdinalIgnoreCase)),
+            "release" => source.Where(v => string.Equals(v.Type, "release", StringComparison.OrdinalIgnoreCase)),
+            _ => source
+        };
+
+        var filtered = source.ToList();
+        var preferredId = selectCurrentVersion ? null : SelectedVersion?.Id;
+        Versions.Clear();
+        foreach (var version in filtered)
+        {
+            Versions.Add(version);
+        }
+
+        SelectedVersion = !string.IsNullOrWhiteSpace(preferredId)
+            ? Versions.FirstOrDefault(v => string.Equals(v.Id, preferredId, StringComparison.OrdinalIgnoreCase))
+            : null;
+        SelectedVersion ??= Versions.FirstOrDefault(v => string.Equals(v.Type, "release", StringComparison.OrdinalIgnoreCase));
+        SelectedVersion ??= Versions.FirstOrDefault();
+
+        VersionFilterSummary =
+            $"表示 {Versions.Count} 件 / 全体 {_allVersions.Count} 件"
+            + (IsModdedServerType(SelectedServerType?.Id) ? "（Forge/Fabric は正規版推奨）" : string.Empty);
+    }
+
     private void InitializeDefaults()
     {
         JavaPath = _services.Java.FindJavaExecutable() ?? string.Empty;
+        EnableCommandBlock = false;
         ServerTypes.Clear();
         ServerTypes.Add(new ServerTypeOption("Vanilla", "バニラ"));
         ServerTypes.Add(new ServerTypeOption("Forge", "Forge (MOD)"));
@@ -346,6 +482,12 @@ public sealed class NewServerViewModel : ObservableObject
         if (SelectedServerType is null)
         {
             StatusMessage = "サーバー種別を選択してください。";
+            return false;
+        }
+
+        if (SelectedVersion is null)
+        {
+            StatusMessage = "Minecraft バージョンを選択してください。";
             return false;
         }
 
@@ -374,5 +516,11 @@ public sealed class NewServerViewModel : ObservableObject
         }
 
         return true;
+    }
+
+    private static bool IsModdedServerType(string? serverType)
+    {
+        return string.Equals(serverType, "Forge", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(serverType, "Fabric", StringComparison.OrdinalIgnoreCase);
     }
 }

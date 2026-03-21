@@ -226,8 +226,15 @@ public sealed class AddonManagementService
             var fallbackId = NormalizeAddonId(NormalizeAddonKey(fileName));
             var addonId = NormalizeAddonId(string.IsNullOrWhiteSpace(metadata.DeclaredId) ? fallbackId : metadata.DeclaredId);
 
-            importedIds.Add(addonId);
-            importedDependencies[addonId] = metadata.RequiredDependencies;
+            if (string.IsNullOrWhiteSpace(addonId))
+            {
+                warnings.Add($"{fileName}: 識別子を判定できませんでした。");
+            }
+            else
+            {
+                importedIds.Add(addonId);
+                importedDependencies[addonId] = metadata.RequiredDependencies;
+            }
 
             foreach (var parseWarning in metadata.ParseWarnings)
             {
@@ -305,7 +312,21 @@ public sealed class AddonManagementService
 
             if (Directory.Exists(sourcePath))
             {
-                foreach (var filePath in Directory.EnumerateFiles(sourcePath, "*.jar", SearchOption.AllDirectories))
+                IEnumerable<string> files;
+                try
+                {
+                    files = Directory.EnumerateFiles(sourcePath, "*.jar", SearchOption.AllDirectories);
+                }
+                catch (IOException)
+                {
+                    continue;
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    continue;
+                }
+
+                foreach (var filePath in files)
                 {
                     yield return filePath;
                 }

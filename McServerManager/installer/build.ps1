@@ -77,9 +77,16 @@ if ([string]::IsNullOrWhiteSpace($appVersion)) {
     throw "Version not found in McServerManager.csproj."
 }
 
+$versionedSetupExe = Join-Path $root "installer\dist\MaiPilotSetup-$appVersion.exe"
+Copy-Item -Path $setupExe -Destination $versionedSetupExe -Force
+if (-not (Test-Path $versionedSetupExe)) {
+    throw "Versioned installer copy failed: $versionedSetupExe"
+}
+Write-Host "Created versioned installer: $versionedSetupExe"
+
 $normalizedBaseUrl = $PublicDownloadBaseUrl.TrimEnd("/")
 $installerUrl = "$normalizedBaseUrl/MaiPilotSetup-$appVersion.exe"
-$sha256 = (Get-FileHash -Path $setupExe -Algorithm SHA256).Hash.ToLowerInvariant()
+$sha256 = (Get-FileHash -Path $versionedSetupExe -Algorithm SHA256).Hash.ToLowerInvariant()
 $publishedAt = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 $manifestPath = Join-Path $root "installer\dist\update.json"
 
@@ -91,5 +98,7 @@ $manifest = [ordered]@{
     releaseNotesUrl = $ReleaseNotesUrl
 }
 
-$manifest | ConvertTo-Json | Set-Content -Path $manifestPath -Encoding utf8
+$manifestJson = $manifest | ConvertTo-Json
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText($manifestPath, $manifestJson, $utf8NoBom)
 Write-Host "Generated update manifest: $manifestPath"
