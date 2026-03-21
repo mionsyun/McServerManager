@@ -9,6 +9,7 @@ public sealed class ServerSettingsViewModel : ObservableObject
     private int _maxPlayers;
     private string _motd = string.Empty;
     private bool _onlineMode;
+    private bool _enableCommandBlock;
     private string _difficulty = "easy";
     private string _gameMode = "survival";
     private bool _pvp;
@@ -61,6 +62,18 @@ public sealed class ServerSettingsViewModel : ObservableObject
         set
         {
             if (SetProperty(ref _onlineMode, value))
+            {
+                UpdateDirty();
+            }
+        }
+    }
+
+    public bool EnableCommandBlock
+    {
+        get => _enableCommandBlock;
+        set
+        {
+            if (SetProperty(ref _enableCommandBlock, value))
             {
                 UpdateDirty();
             }
@@ -164,6 +177,7 @@ public sealed class ServerSettingsViewModel : ObservableObject
         MaxPlayers = properties.MaxPlayers;
         Motd = properties.Motd;
         OnlineMode = properties.OnlineMode;
+        EnableCommandBlock = properties.EnableCommandBlock;
         Difficulty = properties.Difficulty;
         GameMode = properties.GameMode;
         Pvp = properties.Pvp;
@@ -182,6 +196,7 @@ public sealed class ServerSettingsViewModel : ObservableObject
             MaxPlayers = MaxPlayers,
             Motd = Motd,
             OnlineMode = OnlineMode,
+            EnableCommandBlock = EnableCommandBlock,
             Difficulty = Difficulty,
             GameMode = GameMode,
             Pvp = Pvp,
@@ -199,6 +214,7 @@ public sealed class ServerSettingsViewModel : ObservableObject
             _original.MaxPlayers != MaxPlayers ||
             _original.Motd != Motd ||
             _original.OnlineMode != OnlineMode ||
+            _original.EnableCommandBlock != EnableCommandBlock ||
             _original.Difficulty != Difficulty ||
             _original.GameMode != GameMode ||
             _original.Pvp != Pvp ||

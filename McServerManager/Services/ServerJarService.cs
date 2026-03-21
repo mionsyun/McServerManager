@@ -399,6 +399,14 @@ public sealed class ServerJarService
 
     private async Task DownloadFileAsync(string url, string destinationPath)
     {
+        var destinationDirectory = Path.GetDirectoryName(destinationPath);
+        if (string.IsNullOrWhiteSpace(destinationDirectory))
+        {
+            throw new InvalidOperationException("ダウンロード先フォルダを特定できませんでした。");
+        }
+
+        Directory.CreateDirectory(destinationDirectory);
+
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();

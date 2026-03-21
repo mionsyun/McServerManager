@@ -7,6 +7,10 @@ Release Checklist
 
 2) Build and package
    - Run `installer\\build.ps1` (or `dotnet publish` + ISCC manually).
+   - Confirm both installers exist:
+     - `installer\\dist\\MaiPilotSetup.exe`
+     - `installer\\dist\\MaiPilotSetup-<Version>.exe`
+   - Confirm `installer\\dist\\update.json` is generated with the same `<Version>`.
 
 3) Code signing (optional but recommended for distribution)
    - Install Windows SDK signtool.
@@ -24,3 +28,7 @@ Release Checklist
    - Install the new `installer\\dist\\MaiPilotSetup.exe`
    - Launch from Start Menu and taskbar.
    - Start/stop a sample server.
+
+6) Publish update artifacts
+   - Upload `installer\\dist\\MaiPilotSetup-<Version>.exe` to `public/downloads/`.
+   - Publish `landing/public/updates/win-x64/update.json` with matching version, URL, and sha256.

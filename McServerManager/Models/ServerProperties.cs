@@ -6,6 +6,7 @@ public sealed class ServerProperties
     public int MaxPlayers { get; set; } = 20;
     public string Motd { get; set; } = "A Minecraft Server";
     public bool OnlineMode { get; set; } = true;
+    public bool EnableCommandBlock { get; set; }
     public string Difficulty { get; set; } = "easy";
     public string GameMode { get; set; } = "survival";
     public bool Pvp { get; set; } = true;
