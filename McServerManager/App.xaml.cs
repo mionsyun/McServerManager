@@ -134,14 +134,24 @@ public partial class App : System.Windows.Application
         {
             Current.DispatcherUnhandledException += (_, args) =>
             {
-                LogException("Dispatcher", args.Exception);
-                System.Windows.MessageBox.Show(
-                    $"Unexpected error. Log: {GetLogPath()}",
-                    "MaiPilot",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-                args.Handled = true;
-                Current.Shutdown(-1);
+                try
+                {
+                    LogException("Dispatcher", args.Exception);
+                    args.Handled = true;
+
+                    System.Windows.MessageBox.Show(
+                        $"Unexpected error. Log: {GetLogPath()}",
+                        "MaiPilot",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+
+                    Current?.Shutdown(-1);
+                }
+                catch (Exception ex)
+                {
+                    // Avoid throwing from the global exception handler itself.
+                    LogException("DispatcherHandler", ex);
+                }
             };
         }
 

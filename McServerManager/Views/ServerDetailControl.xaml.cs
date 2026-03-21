@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Media3D;
 using McServerManager.ViewModels;
 
 namespace McServerManager.Views;
@@ -107,9 +108,29 @@ public partial class ServerDetailControl : System.Windows.Controls.UserControl
                 return typed;
             }
 
-            current = VisualTreeHelper.GetParent(current);
+            current = GetParentObject(current);
         }
 
         return null;
+    }
+
+    private static DependencyObject? GetParentObject(DependencyObject current)
+    {
+        if (current is Visual || current is Visual3D)
+        {
+            return VisualTreeHelper.GetParent(current);
+        }
+
+        if (current is FrameworkContentElement frameworkContentElement)
+        {
+            return frameworkContentElement.Parent;
+        }
+
+        if (current is ContentElement contentElement)
+        {
+            return ContentOperations.GetParent(contentElement);
+        }
+
+        return LogicalTreeHelper.GetParent(current);
     }
 }
