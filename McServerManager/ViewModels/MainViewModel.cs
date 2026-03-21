@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Reflection;
 using System.Windows;
 using System.Text;
 using WpfApplication = System.Windows.Application;
@@ -59,10 +60,25 @@ public sealed class MainViewModel : ObservableObject
     }
 
     public string ThemeLabel => IsDarkTheme ? "ダーク" : "ライト";
+    public string AppVersion => ResolveAppVersion();
 
     public ObservableCollection<ServerViewModel> Servers { get; }
     public TutorialViewModel Tutorial { get; }
 
+    private static string ResolveAppVersion()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var informational = assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion;
+
+        if (!string.IsNullOrWhiteSpace(informational))
+        {
+            return informational.Split('+', 2)[0];
+        }
+
+        return assembly.GetName().Version?.ToString() ?? "unknown";
+    }
     public ServerViewModel? SelectedServer
     {
         get => _selectedServer;
@@ -548,3 +564,6 @@ public sealed class MainViewModel : ObservableObject
         _services.Dialog.Show(message, "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
     }
 }
+
+
+
