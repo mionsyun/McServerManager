@@ -1,6 +1,8 @@
 using System.Collections.Specialized;
 using System.Windows.Controls;
 using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
 using McServerManager.ViewModels;
 
 namespace McServerManager.Views;
@@ -62,5 +64,52 @@ public partial class ServerDetailControl : System.Windows.Controls.UserControl
         }
 
         e.Handled = true;
+    }
+
+    private void SettingsScrollViewer_OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        if (sender is not ScrollViewer settingsScrollViewer || e.OriginalSource is not DependencyObject source)
+        {
+            return;
+        }
+
+        var nestedScrollViewer = FindAncestor<ScrollViewer>(source);
+        if (nestedScrollViewer is not null
+            && nestedScrollViewer != settingsScrollViewer
+            && CanScrollInDirection(nestedScrollViewer, e.Delta))
+        {
+            return;
+        }
+
+        var nextOffset = Math.Clamp(
+            settingsScrollViewer.VerticalOffset - (e.Delta / 3.0),
+            0,
+            settingsScrollViewer.ScrollableHeight);
+
+        settingsScrollViewer.ScrollToVerticalOffset(nextOffset);
+        e.Handled = true;
+    }
+
+    private static bool CanScrollInDirection(ScrollViewer scrollViewer, int delta)
+    {
+        return delta > 0
+            ? scrollViewer.VerticalOffset > 0
+            : delta < 0 && scrollViewer.VerticalOffset < scrollViewer.ScrollableHeight;
+    }
+
+    private static T? FindAncestor<T>(DependencyObject? start) where T : DependencyObject
+    {
+        var current = start;
+        while (current is not null)
+        {
+            if (current is T typed)
+            {
+                return typed;
+            }
+
+            current = VisualTreeHelper.GetParent(current);
+        }
+
+        return null;
     }
 }

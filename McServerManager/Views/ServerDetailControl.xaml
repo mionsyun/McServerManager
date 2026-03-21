@@ -124,8 +124,17 @@
             </TabItem>
 
             <TabItem x:Name="SettingsTab" Header="設定">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <ScrollViewer x:Name="SettingsScrollViewer"
+                                  Grid.Row="0"
+                                  VerticalScrollBarVisibility="Auto"
+                                  PreviewMouseWheel="SettingsScrollViewer_OnPreviewMouseWheel">
+                        <StackPanel Margin="12,12,12,8">
                         <Border Style="{StaticResource SurfacePanel}">
                             <StackPanel>
                                 <TextBlock Text="⚙️ サーバー設定" FontWeight="SemiBold" FontSize="14"/>
@@ -357,11 +366,30 @@
                             </Grid>
                         </Border>
 
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
-                            <Button Content="設定を保存" Command="{Binding SaveSettingsCommand}" Style="{StaticResource PrimaryButton}" Width="140"/>
                         </StackPanel>
-                    </StackPanel>
-                </ScrollViewer>
+                    </ScrollViewer>
+
+                    <Border Grid.Row="1"
+                            Background="{DynamicResource BrushCard}"
+                            BorderBrush="{DynamicResource BrushBorder}"
+                            BorderThickness="0,1,0,0"
+                            Padding="12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="変更後は「設定を保存」を押してください。"
+                                       Style="{StaticResource MutedText}"
+                                       VerticalAlignment="Center"/>
+                            <Button Grid.Column="1"
+                                    Content="設定を保存"
+                                    Command="{Binding SaveSettingsCommand}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Width="140"/>
+                        </Grid>
+                    </Border>
+                </Grid>
             </TabItem>
 
             <TabItem Header="ワールド">
