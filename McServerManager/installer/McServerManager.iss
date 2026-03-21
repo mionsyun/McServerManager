@@ -49,7 +49,10 @@ Filename: "{app}\McServerManager.exe"; Description: "{cm:LaunchProgram,MaiPilot}
 var
   ExistingInstallPath: string;
   ExistingInstallDetected: Boolean;
+  ExistingInstallVersion: string;
   OriginalSelectDirLabelCaption: string;
+  OriginalWelcomeLabel1Caption: string;
+  OriginalWelcomeLabel2Caption: string;
 
 function TryGetExistingInstallPath(var InstallPath: string): Boolean;
 var
@@ -58,13 +61,36 @@ begin
   UninstallKey := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{#SetupSetting("AppId")}_is1';
   Result :=
     RegQueryStringValue(HKLM64, UninstallKey, 'Inno Setup: App Path', InstallPath) or
-    RegQueryStringValue(HKLM, UninstallKey, 'Inno Setup: App Path', InstallPath);
+    RegQueryStringValue(HKLM, UninstallKey, 'Inno Setup: App Path', InstallPath) or
+    RegQueryStringValue(HKCU64, UninstallKey, 'Inno Setup: App Path', InstallPath) or
+    RegQueryStringValue(HKCU, UninstallKey, 'Inno Setup: App Path', InstallPath);
+end;
+
+function TryGetExistingInstallVersion(const InstallPath: string; var VersionText: string): Boolean;
+var
+  ExePath: string;
+begin
+  ExePath := AddBackslash(InstallPath) + 'McServerManager.exe';
+  if not FileExists(ExePath) then
+  begin
+    Result := False;
+    exit;
+  end;
+
+  VersionText := GetVersionNumbersString(ExePath);
+  Result := VersionText <> '';
 end;
 
 function InitializeSetup(): Boolean;
 begin
   Result := True;
   ExistingInstallDetected := TryGetExistingInstallPath(ExistingInstallPath);
+  ExistingInstallVersion := '';
+  if ExistingInstallDetected then
+  begin
+    TryGetExistingInstallVersion(ExistingInstallPath, ExistingInstallVersion);
+  end;
+
   if ExistingInstallDetected and (not WizardSilent()) then
   begin
     Result := MsgBox(
@@ -77,18 +103,74 @@ end;
 procedure InitializeWizard();
 begin
   OriginalSelectDirLabelCaption := WizardForm.SelectDirLabel.Caption;
+  OriginalWelcomeLabel1Caption := WizardForm.WelcomeLabel1.Caption;
+  OriginalWelcomeLabel2Caption := WizardForm.WelcomeLabel2.Caption;
+
   if ExistingInstallDetected and (ExistingInstallPath <> '') then
   begin
     WizardForm.DirEdit.Text := ExistingInstallPath;
   end;
 end;
 
-procedure CurPageChanged(CurPageID: Integer);
+function ShouldSkipPage(PageID: Integer): Boolean;
 begin
+  Result := False;
+
+  if ExistingInstallDetected then
+  begin
+    if (PageID = wpSelectDir) or (PageID = wpSelectProgramGroup) then
+    begin
+      Result := True;
+    end;
+  end;
+end;
+
+procedure CurPageChanged(CurPageID: Integer);
+var
+  updateText: string;
+begin
+  if (CurPageID = wpWelcome) then
+  begin
+    if ExistingInstallDetected then
+    begin
+      WizardForm.WelcomeLabel1.Caption := 'MaiPilot Update';
+      if ExistingInstallVersion <> '' then
+      begin
+        WizardForm.WelcomeLabel2.Caption :=
+          'Installed version: ' + ExistingInstallVersion + #13#10 +
+          'New version: {#AppVersion}' + #13#10#13#10 +
+          'Setup will run in update mode and keep your settings/server data.';
+      end
+      else
+      begin
+        WizardForm.WelcomeLabel2.Caption :=
+          'Existing installation detected.' + #13#10 +
+          'New version: {#AppVersion}' + #13#10#13#10 +
+          'Setup will run in update mode and keep your settings/server data.';
+      end;
+    end
+    else
+    begin
+      WizardForm.WelcomeLabel1.Caption := OriginalWelcomeLabel1Caption;
+      WizardForm.WelcomeLabel2.Caption := OriginalWelcomeLabel2Caption;
+    end;
+  end;
+
   if (CurPageID = wpSelectDir) and ExistingInstallDetected then
   begin
     WizardForm.SelectDirLabel.Caption :=
       OriginalSelectDirLabelCaption + #13#10#13#10 + CustomMessage('UpdateModeInfo');
+  end
+  else if (CurPageID = wpReady) and ExistingInstallDetected then
+  begin
+    updateText := 'Update mode: existing install will be replaced in-place (settings/data kept).';
+    if ExistingInstallVersion <> '' then
+    begin
+      updateText := updateText + #13#10 + 'Version: ' + ExistingInstallVersion + ' -> {#AppVersion}';
+    end;
+
+    WizardForm.ReadyMemo.Lines.Add('');
+    WizardForm.ReadyMemo.Lines.Add(updateText);
   end
   else
   begin
