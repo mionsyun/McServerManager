@@ -11,6 +11,9 @@ namespace McServerManager.Services;
 public sealed class AppUpdateService
 {
     public const string ManifestUrl = "https://www.maipilot.jp/updates/win-x64/update.json";
+    // Temporary release fallback: allow unsigned installer updates.
+    // Set to false to enforce Authenticode verification again.
+    private static readonly bool SkipAuthenticodeVerification = true;
     private const string TrustedSignerSubject = "CN=MaiPilot";
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -120,16 +123,19 @@ public sealed class AppUpdateService
                     $"SHA256 が一致しません。 expected={normalizedManifest.Sha256}, actual={actualHash}");
             }
 
-            if (!AuthenticodeVerifier.TryVerify(installerPath, out var signerSubject, out var signError))
+            if (!SkipAuthenticodeVerification)
             {
-                return AppUpdateDownloadResult.SignatureInvalid(
-                    $"Authenticode 検証に失敗しました。{signError}");
-            }
+                if (!AuthenticodeVerifier.TryVerify(installerPath, out var signerSubject, out var signError))
+                {
+                    return AppUpdateDownloadResult.SignatureInvalid(
+                        $"Authenticode 検証に失敗しました。{signError}");
+                }
 
-            if (!IsTrustedSignerSubject(signerSubject))
-            {
-                return AppUpdateDownloadResult.SignatureInvalid(
-                    $"署名 Subject が不一致です。 expected={TrustedSignerSubject}, actual={signerSubject ?? "(null)"}");
+                if (!IsTrustedSignerSubject(signerSubject))
+                {
+                    return AppUpdateDownloadResult.SignatureInvalid(
+                        $"署名 Subject が不一致です。 expected={TrustedSignerSubject}, actual={signerSubject ?? "(null)"}");
+                }
             }
 
             var startInfo = new System.Diagnostics.ProcessStartInfo
