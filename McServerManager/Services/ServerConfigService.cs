@@ -5,6 +5,8 @@ namespace McServerManager.Services;
 
 public sealed class ServerConfigService
 {
+    private static readonly object SaveLock = new();
+    private const int SaveRetryCount = 5;
     private readonly AppPathsService _pathsService;
     private readonly JsonSerializerOptions _options = new() { WriteIndented = true };
 
@@ -127,7 +129,40 @@ public sealed class ServerConfigService
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path) ?? _pathsService.ServersPath);
         var json = JsonSerializer.Serialize(config, _options);
+
+        IOException? lastIoException = null;
+        for (var attempt = 0; attempt < SaveRetryCount; attempt++)
+        {
+            try
+            {
+                lock (SaveLock)
+                {
+                    File.WriteAllText(path, json);
+                }
+                return;
+            }
+            catch (IOException ex) when (IsSharingViolation(ex) && attempt < SaveRetryCount - 1)
+            {
+                lastIoException = ex;
+                var delayMs = 25 * (1 << attempt);
+                Thread.Sleep(delayMs);
+            }
+        }
+
+        if (lastIoException is not null)
+        {
+            throw lastIoException;
+        }
+
         File.WriteAllText(path, json);
+    }
+
+    private static bool IsSharingViolation(IOException ex)
+    {
+        const int sharingViolation = 32;
+        const int lockViolation = 33;
+        var errorCode = ex.HResult & 0xFFFF;
+        return errorCode == sharingViolation || errorCode == lockViolation;
     }
 
     private static IEnumerable<string> EnumerateConfigPaths(string root)

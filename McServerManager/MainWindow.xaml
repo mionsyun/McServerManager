@@ -33,7 +33,6 @@
                            Stretch="Uniform"
                            HorizontalAlignment="Center"/>
                     <TextBlock Text="MaiPilot"
-                               FontFamily="./Fonts/#Press Start 2P"
                                FontSize="15"
                                Foreground="{DynamicResource BrushAccent}"
                                HorizontalAlignment="Center"

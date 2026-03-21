@@ -68,9 +68,11 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     private int _memoryXmsMb;
     private int _memoryXmxMb;
     private bool _isDisposed;
+    private bool _isInitializing;
 
     public ServerViewModel(AppServices services, ServerConfig config)
     {
+        _isInitializing = true;
         _services = services;
         _config = config;
         _runtime = _services.Runtime.GetOrCreate(config);
@@ -99,9 +101,9 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         LaunchModes = [];
         StartupPresets = [];
 
-        AutoRestartOnCrash = _config.AutoRestartOnCrash;
-        AutoRestartDelaySeconds = _config.AutoRestartDelaySeconds;
-        JavaPath = _config.JavaPath;
+        _autoRestartOnCrash = _config.AutoRestartOnCrash;
+        _autoRestartDelaySeconds = _config.AutoRestartDelaySeconds;
+        _javaPath = _config.JavaPath;
         _memoryXmsMb = _config.MemoryXmsMb;
         _memoryXmxMb = _config.MemoryXmxMb;
         _javaExtraArguments = _config.JavaExtraArguments ?? string.Empty;
@@ -236,6 +238,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         _statsTimer.Start();
 
         Status = _runtime.Status;
+        _isInitializing = false;
     }
 
     public string Name => _config.Name;
@@ -319,7 +322,10 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             if (SetProperty(ref _javaPath, value))
             {
                 _config.JavaPath = value;
-                _services.Configs.Save(_config);
+                if (!_isInitializing)
+                {
+                    _services.Configs.Save(_config);
+                }
             }
         }
     }
@@ -828,7 +834,10 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             if (SetProperty(ref _autoRestartOnCrash, value))
             {
                 _config.AutoRestartOnCrash = value;
-                _services.Configs.Save(_config);
+                if (!_isInitializing)
+                {
+                    _services.Configs.Save(_config);
+                }
             }
         }
     }
@@ -842,7 +851,10 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             if (SetProperty(ref _autoRestartDelaySeconds, next))
             {
                 _config.AutoRestartDelaySeconds = next;
-                _services.Configs.Save(_config);
+                if (!_isInitializing)
+                {
+                    _services.Configs.Save(_config);
+                }
             }
         }
     }

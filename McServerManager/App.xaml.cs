@@ -14,6 +14,7 @@ public partial class App : System.Windows.Application
         base.OnStartup(e);
 
         RegisterExceptionLogging();
+        EnsureWindowsEnvironmentForWpf();
 
         try
         {
@@ -149,6 +150,47 @@ public partial class App : System.Windows.Application
             LogException("TaskScheduler", args.Exception);
             args.SetObserved();
         };
+    }
+
+    private static void EnsureWindowsEnvironmentForWpf()
+    {
+        EnsureWindowsPathEnvironmentVariable("windir");
+        EnsureWindowsPathEnvironmentVariable("SystemRoot");
+    }
+
+    private static void EnsureWindowsPathEnvironmentVariable(string variableName)
+    {
+        var current = Environment.GetEnvironmentVariable(variableName);
+        if (LooksLikeValidExistingWindowsPath(current))
+        {
+            return;
+        }
+
+        var windowsPath = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+        if (!LooksLikeValidExistingWindowsPath(windowsPath))
+        {
+            return;
+        }
+
+        Environment.SetEnvironmentVariable(variableName, windowsPath);
+    }
+
+    private static bool LooksLikeValidExistingWindowsPath(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        try
+        {
+            var fullPath = Path.GetFullPath(value);
+            return Path.IsPathRooted(fullPath) && Directory.Exists(fullPath);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private static void LogUnhandled(string context, object exceptionObject)
