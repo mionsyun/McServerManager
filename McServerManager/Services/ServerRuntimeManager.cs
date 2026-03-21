@@ -242,8 +242,16 @@ public sealed class ServerRuntimeManager
         if (!exited)
         {
             runtime.AddLog("停止タイムアウト。強制終了します。");
-            process.Kill(true);
-            runtime.SetStopForced(true);
+            try
+            {
+                process.Kill(true);
+                process.WaitForExit(Math.Max(1000, timeoutSeconds * 1000));
+                runtime.SetStopForced(true);
+            }
+            catch (Exception ex)
+            {
+                runtime.AddLog($"強制終了に失敗しました: {ex.Message}");
+            }
         }
 
         runtime.SetStatus(ServerStatus.Stopped);
@@ -299,7 +307,14 @@ public sealed class ServerRuntimeManager
         _ = Task.Run(async () =>
         {
             await Task.Delay(TimeSpan.FromSeconds(delaySeconds)).ConfigureAwait(false);
-            await StartAsync(runtime.Config, runtime.Config.DirectoryPath).ConfigureAwait(false);
+            try
+            {
+                await StartAsync(runtime.Config, runtime.Config.DirectoryPath).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                runtime.AddLog($"自動再起動に失敗しました: {ex.Message}");
+            }
         });
     }
 }
@@ -364,11 +379,38 @@ public sealed class ServerRuntime
 
     public Task SendCommandAsync(string command)
     {
-        if (_process is null || _process.HasExited)
+        Process? process;
+        lock (_lock)
+        {
+            process = _process;
+        }
+
+        if (process is null || process.HasExited)
         {
             return Task.CompletedTask;
         }
 
-        return _process.StandardInput.WriteLineAsync(command);
+        return WriteCommandAsync(process, command);
+    }
+
+    private static async Task WriteCommandAsync(Process process, string command)
+    {
+        try
+        {
+            await process.StandardInput.WriteLineAsync(command).ConfigureAwait(false);
+            await process.StandardInput.FlushAsync().ConfigureAwait(false);
+        }
+        catch (ObjectDisposedException)
+        {
+            // Process stream was already disposed.
+        }
+        catch (InvalidOperationException)
+        {
+            // Process ended before writing.
+        }
+        catch (IOException)
+        {
+            // Stream became unavailable during shutdown.
+        }
     }
 }

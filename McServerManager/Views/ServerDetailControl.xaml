@@ -151,6 +151,7 @@
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
                                     <TextBlock Grid.Row="0" Grid.Column="0" Text="サーバーポート"/>
@@ -165,39 +166,47 @@
                                     <TextBlock Grid.Row="3" Grid.Column="0" Text="オンラインモード" Margin="0,8,0,0"/>
                                     <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding OnlineMode}" Margin="0,8,0,0"/>
 
-                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="難易度" Margin="0,8,0,0"/>
-                                    <ComboBox Grid.Row="4" Grid.Column="1" SelectedValue="{Binding Difficulty}" SelectedValuePath="Content" Width="160" Margin="0,8,0,0">
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="コマンドブロック" Margin="0,8,0,0"/>
+                                    <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,8,0,0">
+                                        <CheckBox IsChecked="{Binding EnableCommandBlock}" Content="enable-command-block を有効化"/>
+                                        <TextBlock Text="配布マップ・コマンド演出を使うワールドは有効化推奨です。"
+                                                   Style="{StaticResource MutedText}"
+                                                   Margin="0,3,0,0"/>
+                                    </StackPanel>
+
+                                    <TextBlock Grid.Row="5" Grid.Column="0" Text="難易度" Margin="0,8,0,0"/>
+                                    <ComboBox Grid.Row="5" Grid.Column="1" SelectedValue="{Binding Difficulty}" SelectedValuePath="Content" Width="160" Margin="0,8,0,0">
                                         <ComboBoxItem Content="peaceful"/>
                                         <ComboBoxItem Content="easy"/>
                                         <ComboBoxItem Content="normal"/>
                                         <ComboBoxItem Content="hard"/>
                                     </ComboBox>
 
-                                    <TextBlock Grid.Row="5" Grid.Column="0" Text="ゲームモード" Margin="0,8,0,0"/>
-                                    <ComboBox Grid.Row="5" Grid.Column="1" SelectedValue="{Binding GameMode}" SelectedValuePath="Content" Width="160" Margin="0,8,0,0">
+                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="ゲームモード" Margin="0,8,0,0"/>
+                                    <ComboBox Grid.Row="6" Grid.Column="1" SelectedValue="{Binding GameMode}" SelectedValuePath="Content" Width="160" Margin="0,8,0,0">
                                         <ComboBoxItem Content="survival"/>
                                         <ComboBoxItem Content="creative"/>
                                         <ComboBoxItem Content="adventure"/>
                                         <ComboBoxItem Content="spectator"/>
                                     </ComboBox>
 
-                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="PvP" Margin="0,8,0,0"/>
-                                    <CheckBox Grid.Row="6" Grid.Column="1" IsChecked="{Binding Pvp}" Margin="0,8,0,0"/>
+                                    <TextBlock Grid.Row="7" Grid.Column="0" Text="PvP" Margin="0,8,0,0"/>
+                                    <CheckBox Grid.Row="7" Grid.Column="1" IsChecked="{Binding Pvp}" Margin="0,8,0,0"/>
 
-                                    <TextBlock Grid.Row="7" Grid.Column="0" Text="描画距離" Margin="0,8,0,0"/>
-                                    <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding ViewDistance}" Width="120" Margin="0,8,0,0"/>
+                                    <TextBlock Grid.Row="8" Grid.Column="0" Text="描画距離" Margin="0,8,0,0"/>
+                                    <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding ViewDistance}" Width="120" Margin="0,8,0,0"/>
 
-                                    <TextBlock Grid.Row="8" Grid.Column="0" Text="スポーン保護" Margin="0,8,0,0"/>
-                                    <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding SpawnProtection}" Width="120" Margin="0,8,0,0"/>
+                                    <TextBlock Grid.Row="9" Grid.Column="0" Text="スポーン保護" Margin="0,8,0,0"/>
+                                    <TextBox Grid.Row="9" Grid.Column="1" Text="{Binding SpawnProtection}" Width="120" Margin="0,8,0,0"/>
 
-                                    <TextBlock Grid.Row="9" Grid.Column="0" Text="ワールド名" Margin="0,8,0,0"/>
-                                    <TextBox Grid.Row="9" Grid.Column="1" Text="{Binding LevelName}" Width="220" Margin="0,8,0,0"/>
+                                    <TextBlock Grid.Row="10" Grid.Column="0" Text="ワールド名" Margin="0,8,0,0"/>
+                                    <TextBox Grid.Row="10" Grid.Column="1" Text="{Binding LevelName}" Width="220" Margin="0,8,0,0"/>
 
-                                    <TextBlock Grid.Row="10" Grid.Column="0" Text="シード" Margin="0,8,0,0"/>
-                                    <TextBox Grid.Row="10" Grid.Column="1" Text="{Binding Seed}" Width="220" Margin="0,8,0,0"/>
+                                    <TextBlock Grid.Row="11" Grid.Column="0" Text="シード" Margin="0,8,0,0"/>
+                                    <TextBox Grid.Row="11" Grid.Column="1" Text="{Binding Seed}" Width="220" Margin="0,8,0,0"/>
 
-                                    <TextBlock Grid.Row="11" Grid.Column="0" Text="Java パス" Margin="0,8,0,0"/>
-                                    <StackPanel Grid.Row="11" Grid.Column="1" Margin="0,8,0,0">
+                                    <TextBlock Grid.Row="12" Grid.Column="0" Text="Java パス" Margin="0,8,0,0"/>
+                                    <StackPanel Grid.Row="12" Grid.Column="1" Margin="0,8,0,0">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
@@ -509,6 +518,17 @@
                                        Style="{StaticResource MutedText}"
                                        Margin="0,4,0,0"
                                        TextWrapping="Wrap"/>
+                            <Border Background="{DynamicResource BrushWarningSoft}"
+                                    BorderBrush="{DynamicResource BrushWarning}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Padding="10,8"
+                                    Margin="0,8,0,0">
+                                <TextBlock Style="{StaticResource MutedText}" TextWrapping="Wrap">
+                                    <Run Text="配布マップ導入時にコマンドブロック有効化の確認を表示します。"/><LineBreak/>
+                                    <Run Text="有効化しない場合、ギミックが動作しない可能性があります。"/>
+                                </TextBlock>
+                            </Border>
 
                             <TextBlock Text="ZIPファイル" Margin="0,10,0,4"/>
                             <Grid>
@@ -706,13 +726,33 @@
                                 <TextBlock Text="現在:" Margin="12,0,0,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="{Binding Version}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                             </StackPanel>
-                            <ComboBox ItemsSource="{Binding AvailableVersions}" SelectedItem="{Binding SelectedVersion}"
-                                      DisplayMemberPath="Id" Width="260" Margin="0,12,0,0"/>
+
+                            <Grid Margin="0,12,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="180"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ComboBox Grid.Column="0"
+                                          ItemsSource="{Binding VersionFilters}"
+                                          SelectedItem="{Binding SelectedVersionFilter}"
+                                          DisplayMemberPath="Label"/>
+                                <ComboBox Grid.Column="1"
+                                          Margin="8,0,0,0"
+                                          ItemsSource="{Binding FilteredAvailableVersions}"
+                                          SelectedItem="{Binding SelectedVersion}"
+                                          DisplayMemberPath="Id"/>
+                            </Grid>
+                            <TextBlock Text="{Binding VersionFilterSummary}" Style="{StaticResource MutedText}" Margin="0,6,0,0"/>
+                            <TextBlock Text="{Binding SelectedVersionInfo}" Style="{StaticResource MutedText}" Margin="0,2,0,0"/>
+
                             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                 <Button Content="変更" Command="{Binding ChangeVersionCommand}" Width="100"/>
                                 <Button Content="再ダウンロード" Command="{Binding RedownloadJarCommand}" Margin="8,0,0,0"/>
                             </StackPanel>
-                            <TextBlock Text="変更前にバックアップを作成します。" Style="{StaticResource MutedText}" Margin="0,8,0,0"/>
+                            <TextBlock Text="変更前にバックアップを作成します。Forge/Fabric は正規版を推奨します。"
+                                       Style="{StaticResource MutedText}"
+                                       Margin="0,8,0,0"
+                                       TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>

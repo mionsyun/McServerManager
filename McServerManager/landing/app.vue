@@ -14,7 +14,7 @@ const docsPortUrl = "/docs/port-forwarding";
 const docsTroubleUrl = "/docs/troubleshooting";
 const docsPrivacyUrl = "/docs/privacy-and-network";
 const docsJavaUrl = "/docs/java-setup/";
-const version = "1.0.0";
+const version = "1.0.1";
 
 const downloadOptionEvents: Record<string, string> = {
   local: "download_click",
