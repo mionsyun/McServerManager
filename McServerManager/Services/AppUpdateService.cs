@@ -1,4 +1,5 @@
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text.Json;
@@ -30,7 +31,21 @@ public sealed class AppUpdateService
     {
         try
         {
-            var manifestJson = await _httpClient.GetStringAsync(ManifestUrl, cancellationToken).ConfigureAwait(false);
+            using var request = new HttpRequestMessage(HttpMethod.Get, BuildManifestUrl());
+            request.Headers.CacheControl = new CacheControlHeaderValue
+            {
+                NoCache = true,
+                NoStore = true,
+                MaxAge = TimeSpan.Zero
+            };
+            request.Headers.Pragma.ParseAdd("no-cache");
+
+            using var response = await _httpClient
+                .SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken)
+                .ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+
+            var manifestJson = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             var manifest = JsonSerializer.Deserialize<AppUpdateManifest>(manifestJson, JsonOptions);
             if (!TryNormalizeManifest(manifest, out var normalizedManifest, out var manifestError))
             {
@@ -244,6 +259,12 @@ public sealed class AppUpdateService
 
         parsedVersion = new Version(0, 0, 0);
         return false;
+    }
+
+    private static string BuildManifestUrl()
+    {
+        var separator = ManifestUrl.Contains('?', StringComparison.Ordinal) ? "&" : "?";
+        return $"{ManifestUrl}{separator}ts={DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
     }
 
     private static string GetInstallerTempPath(string version)
