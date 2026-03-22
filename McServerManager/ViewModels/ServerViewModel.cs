@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Management;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -18,6 +19,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         @"There are (\d+) of a max of (\d+) players online",
         RegexOptions.Compiled
     );
+    private static readonly TimeSpan GpuSampleInterval = TimeSpan.FromSeconds(2);
     private readonly AppServices _services;
     private readonly ServerRuntime _runtime;
     private readonly AppSettings _appSettings;
@@ -50,9 +52,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     private int _autoRestartDelaySeconds;
     private double _cpuUsagePercent;
     private double _memoryUsageMb;
+    private double _gpuUsagePercent;
+    private bool _gpuMonitoringAvailable = true;
     private int _onlinePlayers;
     private TimeSpan _lastCpuTime;
     private DateTime _lastCpuCheck;
+    private DateTime _lastGpuCheck;
     private bool _upnpOpened;
     private AddonEntry? _selectedAddon;
     private string _addonStatus = string.Empty;
@@ -594,6 +599,8 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             {
                 _config.MemoryXmxMb = next;
                 _services.Configs.Save(_config);
+                OnPropertyChanged(nameof(MemoryUsageDisplayText));
+                OnPropertyChanged(nameof(MemoryUsagePercent));
             }
         }
     }
@@ -862,13 +869,38 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     public double CpuUsagePercent
     {
         get => _cpuUsagePercent;
-        private set => SetProperty(ref _cpuUsagePercent, value);
+        private set
+        {
+            if (SetProperty(ref _cpuUsagePercent, value))
+            {
+                OnPropertyChanged(nameof(CpuUsageDisplayText));
+            }
+        }
     }
 
     public double MemoryUsageMb
     {
         get => _memoryUsageMb;
-        private set => SetProperty(ref _memoryUsageMb, value);
+        private set
+        {
+            if (SetProperty(ref _memoryUsageMb, value))
+            {
+                OnPropertyChanged(nameof(MemoryUsageDisplayText));
+                OnPropertyChanged(nameof(MemoryUsagePercent));
+            }
+        }
+    }
+
+    public double GpuUsagePercent
+    {
+        get => _gpuUsagePercent;
+        private set
+        {
+            if (SetProperty(ref _gpuUsagePercent, value))
+            {
+                OnPropertyChanged(nameof(GpuUsageDisplayText));
+            }
+        }
     }
 
     public int OnlinePlayers
@@ -884,6 +916,16 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     }
 
     public string PlayerCountText => $"{OnlinePlayers}/{MaxPlayers}";
+    public string CpuUsageDisplayText => $"{CpuUsagePercent:F0}%";
+    public string MemoryUsageDisplayText => $"{MemoryUsageMb:F0} MB / {MemoryXmxMb} MB";
+    public double MemoryUsagePercent =>
+        MemoryXmxMb <= 0 ? 0 : Math.Clamp(MemoryUsageMb / MemoryXmxMb * 100, 0, 100);
+    public bool IsGpuMonitoringAvailable => _gpuMonitoringAvailable;
+    public string GpuUsageDisplayText => IsGpuMonitoringAvailable ? $"{GpuUsagePercent:F0}%" : "N/A";
+    public string GpuMonitorHint =>
+        IsGpuMonitoringAvailable
+            ? "GPUエンジン使用率（サーバープロセス）"
+            : "この環境ではGPU使用率を取得できません。";
 
     public AsyncRelayCommand StartCommand { get; }
     public AsyncRelayCommand StopCommand { get; }
@@ -2757,8 +2799,10 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         {
             CpuUsagePercent = 0;
             MemoryUsageMb = 0;
+            GpuUsagePercent = 0;
             _lastCpuCheck = DateTime.MinValue;
             _lastCpuTime = TimeSpan.Zero;
+            _lastGpuCheck = DateTime.MinValue;
             return;
         }
 
@@ -2783,11 +2827,120 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             _lastCpuCheck = now;
             _lastCpuTime = totalCpu;
             MemoryUsageMb = process.WorkingSet64 / (1024.0 * 1024.0);
+            UpdateGpuUsage(process.Id, now);
         }
         catch
         {
             // Ignore sampling errors.
         }
+    }
+
+    private void UpdateGpuUsage(int processId, DateTime now)
+    {
+        if (!_gpuMonitoringAvailable)
+        {
+            return;
+        }
+
+        if (_lastGpuCheck != DateTime.MinValue && (now - _lastGpuCheck) < GpuSampleInterval)
+        {
+            return;
+        }
+
+        _lastGpuCheck = now;
+        try
+        {
+            var sampled = SampleGpuUsagePercent(processId);
+            GpuUsagePercent = Math.Clamp(sampled, 0, 100);
+        }
+        catch (ManagementException)
+        {
+            DisableGpuMonitoring();
+        }
+        catch (InvalidOperationException)
+        {
+            DisableGpuMonitoring();
+        }
+        catch
+        {
+            // Ignore transient sampling errors.
+        }
+    }
+
+    private void DisableGpuMonitoring()
+    {
+        if (!_gpuMonitoringAvailable)
+        {
+            return;
+        }
+
+        _gpuMonitoringAvailable = false;
+        GpuUsagePercent = 0;
+        OnPropertyChanged(nameof(IsGpuMonitoringAvailable));
+        OnPropertyChanged(nameof(GpuUsageDisplayText));
+        OnPropertyChanged(nameof(GpuMonitorHint));
+    }
+
+    private static double SampleGpuUsagePercent(int processId)
+    {
+        var instanceToken = $"pid_{processId}_";
+        var totalPercent = 0.0;
+        using var searcher = new ManagementObjectSearcher(
+            @"root\CIMV2",
+            "SELECT Name, UtilizationPercentage FROM Win32_PerfFormattedData_GPUPerformanceCounters_GPUEngine"
+        );
+        using var results = searcher.Get();
+        foreach (ManagementObject gpuEngine in results)
+        {
+            var name = gpuEngine["Name"]?.ToString();
+            if (
+                string.IsNullOrWhiteSpace(name)
+                || name.IndexOf(instanceToken, StringComparison.OrdinalIgnoreCase) < 0
+            )
+            {
+                continue;
+            }
+
+            var raw = gpuEngine["UtilizationPercentage"];
+            switch (raw)
+            {
+                case byte value:
+                    totalPercent += value;
+                    break;
+                case ushort value:
+                    totalPercent += value;
+                    break;
+                case uint value:
+                    totalPercent += value;
+                    break;
+                case ulong value:
+                    totalPercent += value;
+                    break;
+                case sbyte value:
+                    totalPercent += value;
+                    break;
+                case short value:
+                    totalPercent += value;
+                    break;
+                case int value:
+                    totalPercent += value;
+                    break;
+                case long value:
+                    totalPercent += value;
+                    break;
+                case float value:
+                    totalPercent += value;
+                    break;
+                case double value:
+                    totalPercent += value;
+                    break;
+                case decimal value:
+                    totalPercent += (double)value;
+                    break;
+            }
+        }
+
+        return totalPercent;
     }
 
     private void OnStatusChanged(ServerStatus status)

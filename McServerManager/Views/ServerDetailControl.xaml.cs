@@ -116,11 +116,6 @@ public partial class ServerDetailControl : System.Windows.Controls.UserControl
 
     private static DependencyObject? GetParentObject(DependencyObject current)
     {
-        if (current is Visual || current is Visual3D)
-        {
-            return VisualTreeHelper.GetParent(current);
-        }
-
         if (current is FrameworkContentElement frameworkContentElement)
         {
             return frameworkContentElement.Parent;
@@ -129,6 +124,18 @@ public partial class ServerDetailControl : System.Windows.Controls.UserControl
         if (current is ContentElement contentElement)
         {
             return ContentOperations.GetParent(contentElement);
+        }
+
+        try
+        {
+            if (current is Visual || current is Visual3D)
+            {
+                return VisualTreeHelper.GetParent(current);
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            // Fallback to logical tree for non-visual original sources such as Run.
         }
 
         return LogicalTreeHelper.GetParent(current);

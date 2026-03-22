@@ -6,7 +6,9 @@ namespace McServerManager.Services;
 public sealed class ServerConfigService
 {
     private static readonly object SaveLock = new();
-    private const int SaveRetryCount = 5;
+    private const int SaveRetryCount = 12;
+    private const int SaveRetryBaseDelayMs = 40;
+    private const int SaveRetryMaxDelayMs = 600;
     private readonly AppPathsService _pathsService;
     private readonly JsonSerializerOptions _options = new() { WriteIndented = true };
 
@@ -130,7 +132,7 @@ public sealed class ServerConfigService
         Directory.CreateDirectory(Path.GetDirectoryName(path) ?? _pathsService.ServersPath);
         var json = JsonSerializer.Serialize(config, _options);
 
-        IOException? lastIoException = null;
+        Exception? lastWriteException = null;
         for (var attempt = 0; attempt < SaveRetryCount; attempt++)
         {
             try
@@ -141,23 +143,44 @@ public sealed class ServerConfigService
                 }
                 return;
             }
-            catch (IOException ex) when (IsSharingViolation(ex) && attempt < SaveRetryCount - 1)
+            catch (IOException ex) when (IsTransientWriteError(ex) && attempt < SaveRetryCount - 1)
             {
-                lastIoException = ex;
-                var delayMs = 25 * (1 << attempt);
+                lastWriteException = ex;
+                var delayMs = GetRetryDelayMs(attempt);
+                Thread.Sleep(delayMs);
+            }
+            catch (UnauthorizedAccessException ex) when (attempt < SaveRetryCount - 1)
+            {
+                lastWriteException = ex;
+                var delayMs = GetRetryDelayMs(attempt);
                 Thread.Sleep(delayMs);
             }
         }
 
-        if (lastIoException is not null)
+        if (lastWriteException is IOException lastIoException
+            && IsTransientWriteError(lastIoException))
         {
-            throw lastIoException;
+            // Another process may be briefly holding the file lock.
+            // Keep app flow alive and let the next save attempt retry again.
+            return;
+        }
+
+        if (lastWriteException is not null)
+        {
+            throw lastWriteException;
         }
 
         File.WriteAllText(path, json);
     }
 
-    private static bool IsSharingViolation(IOException ex)
+    private static int GetRetryDelayMs(int attempt)
+    {
+        var exponent = Math.Min(attempt, 4);
+        var delay = SaveRetryBaseDelayMs * (1 << exponent);
+        return Math.Min(delay, SaveRetryMaxDelayMs);
+    }
+
+    private static bool IsTransientWriteError(IOException ex)
     {
         const int sharingViolation = 32;
         const int lockViolation = 33;

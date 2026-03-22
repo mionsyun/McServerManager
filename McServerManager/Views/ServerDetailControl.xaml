@@ -46,6 +46,9 @@
                         <Border Style="{StaticResource StatusBadge}" Margin="0,0,6,4">
                             <TextBlock Text="{Binding MemoryUsageMb, StringFormat=🧠 RAM {0:F0}MB}" FontSize="12"/>
                         </Border>
+                        <Border Style="{StaticResource StatusBadge}" Margin="0,0,6,4">
+                            <TextBlock Text="{Binding GpuUsageDisplayText, StringFormat=🎮 GPU {0}}" FontSize="12"/>
+                        </Border>
                         <Border Style="{StaticResource StatusBadge}" Margin="0,0,0,4">
                             <TextBlock Text="{Binding PlayerCountText, StringFormat=👤 {0}}" FontSize="12"/>
                         </Border>
@@ -121,6 +124,51 @@
                         <Button Content="⚠ クラッシュレポート" Command="{Binding OpenCrashReportsCommand}"/>
                     </WrapPanel>
                 </Grid>
+            </TabItem>
+
+            <TabItem Header="監視">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="12">
+                        <Border Style="{StaticResource SurfacePanel}">
+                            <StackPanel>
+                                <TextBlock Text="📊 稼働モニター" FontWeight="SemiBold" FontSize="14"/>
+                                <TextBlock Text="サーバープロセスの使用率を定期更新しています。"
+                                           Style="{StaticResource MutedText}"
+                                           Margin="0,4,0,0"/>
+
+                                <Grid Margin="0,12,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="72"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="CPU" VerticalAlignment="Center"/>
+                                    <ProgressBar Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding CpuUsagePercent, Mode=OneWay}" Height="8" Margin="8,0,8,0"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding CpuUsageDisplayText}" VerticalAlignment="Center"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="RAM" VerticalAlignment="Center" Margin="0,10,0,0"/>
+                                    <ProgressBar Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding MemoryUsagePercent, Mode=OneWay}" Height="8" Margin="8,10,8,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding MemoryUsageDisplayText}" VerticalAlignment="Center" Margin="0,10,0,0"/>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="GPU" VerticalAlignment="Center" Margin="0,10,0,0"/>
+                                    <ProgressBar Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding GpuUsagePercent, Mode=OneWay}" Height="8" Margin="8,10,8,0"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding GpuUsageDisplayText}" VerticalAlignment="Center" Margin="0,10,0,0"/>
+                                </Grid>
+
+                                <TextBlock Text="{Binding GpuMonitorHint}"
+                                           Style="{StaticResource MutedText}"
+                                           Margin="0,10,0,0"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
 
             <TabItem x:Name="SettingsTab" Header="設定">

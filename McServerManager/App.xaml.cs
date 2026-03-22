@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading;
 using System.Windows;
 using McServerManager.Models;
 using McServerManager.Services;
@@ -9,6 +10,8 @@ namespace McServerManager;
 
 public partial class App : System.Windows.Application
 {
+    private static int _isHandlingDispatcherException;
+
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -81,11 +84,18 @@ public partial class App : System.Windows.Application
         catch (Exception ex)
         {
             LogException("OnStartup", ex);
-            System.Windows.MessageBox.Show(
-                $"Startup failed. Log: {GetLogPath()}",
-                "MaiPilot",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
+            try
+            {
+                System.Windows.MessageBox.Show(
+                    $"Startup failed. Log: {GetLogPath()}",
+                    "MaiPilot",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+            catch
+            {
+                // Avoid throwing while handling startup failure.
+            }
             Shutdown(-1);
         }
     }
@@ -134,9 +144,17 @@ public partial class App : System.Windows.Application
         {
             Current.DispatcherUnhandledException += (_, args) =>
             {
+                if (Interlocked.Exchange(ref _isHandlingDispatcherException, 1) == 1)
+                {
+                    return;
+                }
+
                 try
                 {
-                    LogException("Dispatcher", args.Exception);
+                    if (args.Exception is not null)
+                    {
+                        LogException("Dispatcher", args.Exception);
+                    }
                     args.Handled = true;
 
                     System.Windows.MessageBox.Show(
@@ -152,6 +170,10 @@ public partial class App : System.Windows.Application
                     // Avoid throwing from the global exception handler itself.
                     LogException("DispatcherHandler", ex);
                 }
+                finally
+                {
+                    Interlocked.Exchange(ref _isHandlingDispatcherException, 0);
+                }
             };
         }
 
@@ -166,6 +188,20 @@ public partial class App : System.Windows.Application
     {
         EnsureWindowsPathEnvironmentVariable("windir");
         EnsureWindowsPathEnvironmentVariable("SystemRoot");
+        EnsurePathEnvironmentVariable(
+            "USERPROFILE",
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
+        );
+        EnsurePathEnvironmentVariable(
+            "APPDATA",
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
+        );
+        EnsurePathEnvironmentVariable(
+            "LOCALAPPDATA",
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
+        );
+        EnsureTempEnvironmentVariable("TEMP");
+        EnsureTempEnvironmentVariable("TMP");
     }
 
     private static void EnsureWindowsPathEnvironmentVariable(string variableName)
@@ -183,6 +219,48 @@ public partial class App : System.Windows.Application
         }
 
         Environment.SetEnvironmentVariable(variableName, windowsPath);
+    }
+
+    private static void EnsurePathEnvironmentVariable(string variableName, string fallbackPath)
+    {
+        var current = Environment.GetEnvironmentVariable(variableName);
+        if (LooksLikeValidExistingWindowsPath(current))
+        {
+            return;
+        }
+
+        if (!LooksLikeValidExistingWindowsPath(fallbackPath))
+        {
+            return;
+        }
+
+        Environment.SetEnvironmentVariable(variableName, fallbackPath);
+    }
+
+    private static void EnsureTempEnvironmentVariable(string variableName)
+    {
+        var current = Environment.GetEnvironmentVariable(variableName);
+        if (LooksLikeValidExistingWindowsPath(current))
+        {
+            return;
+        }
+
+        var basePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        if (!LooksLikeValidExistingWindowsPath(basePath))
+        {
+            return;
+        }
+
+        var tempPath = Path.Combine(basePath, "Temp");
+        try
+        {
+            Directory.CreateDirectory(tempPath);
+            Environment.SetEnvironmentVariable(variableName, tempPath);
+        }
+        catch
+        {
+            // Ignore if temp path cannot be prepared.
+        }
     }
 
     private static bool LooksLikeValidExistingWindowsPath(string? value)

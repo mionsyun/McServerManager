@@ -30,15 +30,17 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [CustomMessages]
 japanese.UpdateModeInfo=既存インストールを検出したため、アップデートとして実行します。設定とサーバーデータは保持されます。
-japanese.UpdateWelcomeTitle=MaiPilot の更新
-japanese.UpdateWelcomeBodyWithVersion=インストール済みバージョン: %1%n新しいバージョン: %2%n%nアップデートとして実行します。設定とサーバーデータは保持されます。%n%nインストール先:%n%3
-japanese.UpdateWelcomeBodyWithoutVersion=既存インストールを検出しました。%n新しいバージョン: %1%n%nアップデートとして実行します。設定とサーバーデータは保持されます。%n%nインストール先:%n%2
+japanese.UpdatePageTitle=アップデートモード
+japanese.UpdatePageDescription=既存のインストールを検出しました
+japanese.UpdatePageBodyWithVersion=インストール済みバージョン: %1%n新しいバージョン: %2%n%nアップデートとして実行します。設定とサーバーデータは保持されます。%n%nインストール先:%n%3
+japanese.UpdatePageBodyWithoutVersion=既存インストールを検出しました。%n新しいバージョン: %1%n%nアップデートとして実行します。設定とサーバーデータは保持されます。%n%nインストール先:%n%2
 japanese.UpdateReadyMemo=更新モード: 既存インストールを同じ場所に上書きします（設定/データは保持）。
 japanese.UpdateVersionTransition=バージョン: %1 -> %2
 english.UpdateModeInfo=An existing installation was detected. Setup will run in update mode and keep settings/server data.
-english.UpdateWelcomeTitle=Update MaiPilot
-english.UpdateWelcomeBodyWithVersion=Installed version: %1%nNew version: %2%n%nSetup will run in update mode and keep your settings/server data.%n%nInstall path:%n%3
-english.UpdateWelcomeBodyWithoutVersion=Existing installation detected.%nNew version: %1%n%nSetup will run in update mode and keep your settings/server data.%n%nInstall path:%n%2
+english.UpdatePageTitle=Update Mode
+english.UpdatePageDescription=An existing installation was detected
+english.UpdatePageBodyWithVersion=Installed version: %1%nNew version: %2%n%nSetup will run in update mode and keep your settings/server data.%n%nInstall path:%n%3
+english.UpdatePageBodyWithoutVersion=Existing installation detected.%nNew version: %1%n%nSetup will run in update mode and keep your settings/server data.%n%nInstall path:%n%2
 english.UpdateReadyMemo=Update mode: existing install will be replaced in-place (settings/data kept).
 english.UpdateVersionTransition=Version: %1 -> %2
 
@@ -61,8 +63,8 @@ var
   ExistingInstallDetected: Boolean;
   ExistingInstallVersion: string;
   OriginalSelectDirLabelCaption: string;
-  OriginalWelcomeLabel1Caption: string;
-  OriginalWelcomeLabel2Caption: string;
+  UpdateModePage: TWizardPage;
+  UpdateModeBodyLabel: TNewStaticText;
 
 function TryGetExistingInstallPath(var InstallPath: string): Boolean;
 var
@@ -104,15 +106,40 @@ begin
 end;
 
 procedure InitializeWizard();
+var
+  updateBodyText: string;
 begin
   OriginalSelectDirLabelCaption := WizardForm.SelectDirLabel.Caption;
-  OriginalWelcomeLabel1Caption := WizardForm.WelcomeLabel1.Caption;
-  OriginalWelcomeLabel2Caption := WizardForm.WelcomeLabel2.Caption;
 
   if ExistingInstallDetected and (ExistingInstallPath <> '') then
   begin
     WizardForm.DirEdit.Text := ExistingInstallPath;
   end;
+
+  UpdateModePage := CreateCustomPage(
+    wpWelcome,
+    CustomMessage('UpdatePageTitle'),
+    CustomMessage('UpdatePageDescription'));
+
+  UpdateModeBodyLabel := TNewStaticText.Create(UpdateModePage);
+  UpdateModeBodyLabel.Parent := UpdateModePage.Surface;
+  UpdateModeBodyLabel.Left := 0;
+  UpdateModeBodyLabel.Top := 0;
+  UpdateModeBodyLabel.Width := UpdateModePage.SurfaceWidth;
+  UpdateModeBodyLabel.Height := UpdateModePage.SurfaceHeight;
+  UpdateModeBodyLabel.AutoSize := False;
+  UpdateModeBodyLabel.WordWrap := True;
+
+  if ExistingInstallVersion <> '' then
+  begin
+    updateBodyText := FmtMessage(CustomMessage('UpdatePageBodyWithVersion'), [ExistingInstallVersion, '{#AppVersion}', ExistingInstallPath]);
+  end
+  else
+  begin
+    updateBodyText := FmtMessage(CustomMessage('UpdatePageBodyWithoutVersion'), ['{#AppVersion}', ExistingInstallPath]);
+  end;
+
+  UpdateModeBodyLabel.Caption := updateBodyText;
 end;
 
 function ShouldSkipPage(PageID: Integer): Boolean;
@@ -126,33 +153,17 @@ begin
       Result := True;
     end;
   end;
+
+  if (UpdateModePage <> nil) and (PageID = UpdateModePage.ID) and (not ExistingInstallDetected) then
+  begin
+    Result := True;
+  end;
 end;
 
 procedure CurPageChanged(CurPageID: Integer);
 var
   updateText: string;
 begin
-  if (CurPageID = wpWelcome) then
-  begin
-    if ExistingInstallDetected then
-    begin
-      WizardForm.WelcomeLabel1.Caption := CustomMessage('UpdateWelcomeTitle');
-      if ExistingInstallVersion <> '' then
-      begin
-        WizardForm.WelcomeLabel2.Caption := FmtMessage(CustomMessage('UpdateWelcomeBodyWithVersion'), [ExistingInstallVersion, '{#AppVersion}', ExistingInstallPath]);
-      end
-      else
-      begin
-        WizardForm.WelcomeLabel2.Caption := FmtMessage(CustomMessage('UpdateWelcomeBodyWithoutVersion'), ['{#AppVersion}', ExistingInstallPath]);
-      end;
-    end
-    else
-    begin
-      WizardForm.WelcomeLabel1.Caption := OriginalWelcomeLabel1Caption;
-      WizardForm.WelcomeLabel2.Caption := OriginalWelcomeLabel2Caption;
-    end;
-  end;
-
   if (CurPageID = wpSelectDir) and ExistingInstallDetected then
   begin
     WizardForm.SelectDirLabel.Caption :=
