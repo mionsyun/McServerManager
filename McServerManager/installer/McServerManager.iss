@@ -1,5 +1,6 @@
 #define AppExe "..\\bin\\Release\\net8.0-windows\\win-x64\\publish\\McServerManager.exe"
 #define AppVersion GetVersionNumbersString(AppExe)
+#define AppIdRegistryValue "{D5F6E1C5-2A2D-4E9A-8B0E-9C0C9E6E5A2C}"
 
 [Setup]
 AppId={{D5F6E1C5-2A2D-4E9A-8B0E-9C0C9E6E5A2C}}
@@ -16,6 +17,7 @@ WizardStyle=modern
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 SetupIconFile=..\icon.ico
+UninstallDisplayIcon={app}\McServerManager.exe
 PrivilegesRequired=admin
 CloseApplications=yes
 RestartApplications=no
@@ -27,17 +29,25 @@ Name: "japanese"; MessagesFile: "compiler:Languages\Japanese.isl"
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [CustomMessages]
-japanese.AlreadyInstalledBody=MaiPilot は既にインストールされています。%n%nインストール先:%n%1%n%nアップデート（上書き）を続行しますか？
 japanese.UpdateModeInfo=既存インストールを検出したため、アップデートとして実行します。設定とサーバーデータは保持されます。
-english.AlreadyInstalledBody=MaiPilot is already installed.%n%nInstall path:%n%1%n%nDo you want to continue with an in-place update?
+japanese.UpdateWelcomeTitle=MaiPilot の更新
+japanese.UpdateWelcomeBodyWithVersion=インストール済みバージョン: %1%n新しいバージョン: %2%n%nアップデートとして実行します。設定とサーバーデータは保持されます。%n%nインストール先:%n%3
+japanese.UpdateWelcomeBodyWithoutVersion=既存インストールを検出しました。%n新しいバージョン: %1%n%nアップデートとして実行します。設定とサーバーデータは保持されます。%n%nインストール先:%n%2
+japanese.UpdateReadyMemo=更新モード: 既存インストールを同じ場所に上書きします（設定/データは保持）。
+japanese.UpdateVersionTransition=バージョン: %1 -> %2
 english.UpdateModeInfo=An existing installation was detected. Setup will run in update mode and keep settings/server data.
+english.UpdateWelcomeTitle=Update MaiPilot
+english.UpdateWelcomeBodyWithVersion=Installed version: %1%nNew version: %2%n%nSetup will run in update mode and keep your settings/server data.%n%nInstall path:%n%3
+english.UpdateWelcomeBodyWithoutVersion=Existing installation detected.%nNew version: %1%n%nSetup will run in update mode and keep your settings/server data.%n%nInstall path:%n%2
+english.UpdateReadyMemo=Update mode: existing install will be replaced in-place (settings/data kept).
+english.UpdateVersionTransition=Version: %1 -> %2
 
 [Files]
 Source: "..\\bin\\Release\\net8.0-windows\\win-x64\\publish\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\MaiPilot"; Filename: "{app}\McServerManager.exe"; IconFilename: "{app}\icon.ico"; WorkingDir: "{app}"
-Name: "{commondesktop}\MaiPilot"; Filename: "{app}\McServerManager.exe"; IconFilename: "{app}\icon.ico"; WorkingDir: "{app}"; Tasks: desktopicon
+Name: "{group}\MaiPilot"; Filename: "{app}\McServerManager.exe"; IconFilename: "{app}\McServerManager.exe"; WorkingDir: "{app}"
+Name: "{commondesktop}\MaiPilot"; Filename: "{app}\McServerManager.exe"; IconFilename: "{app}\McServerManager.exe"; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
@@ -58,11 +68,13 @@ function TryGetExistingInstallPath(var InstallPath: string): Boolean;
 var
   UninstallKey: string;
 begin
-  UninstallKey := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{#SetupSetting("AppId")}_is1';
+  UninstallKey := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{#AppIdRegistryValue}_is1';
   Result :=
     RegQueryStringValue(HKLM64, UninstallKey, 'Inno Setup: App Path', InstallPath) or
+    RegQueryStringValue(HKLM32, UninstallKey, 'Inno Setup: App Path', InstallPath) or
     RegQueryStringValue(HKLM, UninstallKey, 'Inno Setup: App Path', InstallPath) or
     RegQueryStringValue(HKCU64, UninstallKey, 'Inno Setup: App Path', InstallPath) or
+    RegQueryStringValue(HKCU32, UninstallKey, 'Inno Setup: App Path', InstallPath) or
     RegQueryStringValue(HKCU, UninstallKey, 'Inno Setup: App Path', InstallPath);
 end;
 
@@ -88,14 +100,6 @@ begin
   if ExistingInstallDetected then
   begin
     TryGetExistingInstallVersion(ExistingInstallPath, ExistingInstallVersion);
-  end;
-
-  if ExistingInstallDetected and (not WizardSilent()) then
-  begin
-    Result := MsgBox(
-      FmtMessage(CustomMessage('AlreadyInstalledBody'), [ExistingInstallPath]),
-      mbConfirmation,
-      MB_YESNO) = IDYES;
   end;
 end;
 
@@ -132,20 +136,14 @@ begin
   begin
     if ExistingInstallDetected then
     begin
-      WizardForm.WelcomeLabel1.Caption := 'MaiPilot Update';
+      WizardForm.WelcomeLabel1.Caption := CustomMessage('UpdateWelcomeTitle');
       if ExistingInstallVersion <> '' then
       begin
-        WizardForm.WelcomeLabel2.Caption :=
-          'Installed version: ' + ExistingInstallVersion + #13#10 +
-          'New version: {#AppVersion}' + #13#10#13#10 +
-          'Setup will run in update mode and keep your settings/server data.';
+        WizardForm.WelcomeLabel2.Caption := FmtMessage(CustomMessage('UpdateWelcomeBodyWithVersion'), [ExistingInstallVersion, '{#AppVersion}', ExistingInstallPath]);
       end
       else
       begin
-        WizardForm.WelcomeLabel2.Caption :=
-          'Existing installation detected.' + #13#10 +
-          'New version: {#AppVersion}' + #13#10#13#10 +
-          'Setup will run in update mode and keep your settings/server data.';
+        WizardForm.WelcomeLabel2.Caption := FmtMessage(CustomMessage('UpdateWelcomeBodyWithoutVersion'), ['{#AppVersion}', ExistingInstallPath]);
       end;
     end
     else
@@ -162,14 +160,18 @@ begin
   end
   else if (CurPageID = wpReady) and ExistingInstallDetected then
   begin
-    updateText := 'Update mode: existing install will be replaced in-place (settings/data kept).';
+    updateText := CustomMessage('UpdateReadyMemo');
     if ExistingInstallVersion <> '' then
     begin
-      updateText := updateText + #13#10 + 'Version: ' + ExistingInstallVersion + ' -> {#AppVersion}';
+      updateText := updateText + #13#10 +
+        FmtMessage(CustomMessage('UpdateVersionTransition'), [ExistingInstallVersion, '{#AppVersion}']);
     end;
 
-    WizardForm.ReadyMemo.Lines.Add('');
-    WizardForm.ReadyMemo.Lines.Add(updateText);
+    if Pos(updateText, WizardForm.ReadyMemo.Text) = 0 then
+    begin
+      WizardForm.ReadyMemo.Lines.Add('');
+      WizardForm.ReadyMemo.Lines.Add(updateText);
+    end;
   end
   else
   begin
