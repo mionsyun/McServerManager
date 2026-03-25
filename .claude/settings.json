@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "language": "japanese",
+  "permissions": {
+    "allow": [
+      "Bash(dotnet:*)",
+      "Bash(git:*)",
+      "Bash(npm:*)",
+      "Bash(node:*)",
+      "Bash(iscc:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
+    ],
+    "deny": [
+      "Edit(**/bin/**)",
+      "Edit(**/obj/**)",
+      "Edit(**/dist/**)",
+      "Edit(**/node_modules/**)",
+      "Write(**/bin/**)",
+      "Write(**/obj/**)",
+      "Write(**/dist/**)",
+      "Write(**/node_modules/**)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file=$(jq -r '.tool_input.file_path // empty' 2>/dev/null); if echo \"$file\" | grep -qE '\\.(cs|xaml)$'; then echo \"[hook] C# / XAML ファイルを編集: $file\"; fi",
+            "statusMessage": "ファイル確認中..."
+          }
+        ]
+      }
+    ]
+  }
+}

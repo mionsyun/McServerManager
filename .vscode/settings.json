@@ -1,0 +1,6 @@
+{
+    "claudeCode.allowDangerouslySkipPermissions": true,
+    "claudeCode.useTerminal": true,
+    "claudeCode.preferredLocation": "sidebar",
+    "claudeCode.initialPermissionMode": "bypassPermissions"
+}
