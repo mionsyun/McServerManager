@@ -3,7 +3,7 @@ using McServerManager.Models;
 
 namespace McServerManager.Services;
 
-public sealed class AppSettingsService
+public sealed class AppSettingsService : IAppSettingsService
 {
     private readonly AppPathsService _pathsService;
     private readonly JsonSerializerOptions _options = new() { WriteIndented = true };

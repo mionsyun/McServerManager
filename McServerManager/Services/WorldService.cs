@@ -5,7 +5,7 @@ using McServerManager.Models;
 
 namespace McServerManager.Services;
 
-public sealed class WorldService
+public sealed class WorldService : IWorldService
 {
     private const string BackupInfoEntryName = "backup-info.txt";
     private const string BackupMetadataEntryName = "backup-metadata.json";

@@ -6,7 +6,7 @@ using Color = System.Windows.Media.Color;
 
 namespace McServerManager.Services;
 
-public sealed class WorldMapService
+public sealed class WorldMapService : IWorldMapService
 {
     private static readonly Dictionary<string, Color> BlockColors = InitBlockColors();
     private static readonly Color DefaultSolidColor = Color.FromRgb(128, 128, 128);

@@ -3,7 +3,7 @@ using McServerManager.Models;
 
 namespace McServerManager.Services;
 
-public sealed class ServerConfigService
+public sealed class ServerConfigService : IServerConfigService
 {
     private static readonly object SaveLock = new();
     private const int SaveRetryCount = 12;

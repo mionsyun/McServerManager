@@ -3,7 +3,7 @@ using McServerManager.Models;
 
 namespace McServerManager.Services;
 
-public sealed class PermissionsService
+public sealed class PermissionsService : IPermissionsService
 {
     private static readonly JsonSerializerOptions Options = new()
     {

@@ -10,14 +10,14 @@ namespace McServerManager.ViewModels;
 public sealed class TutorialViewModel : ObservableObject
 {
     private readonly AppSettings _settings;
-    private readonly AppSettingsService _settingsService;
+    private readonly IAppSettingsService _settingsService;
     private readonly List<TutorialStep> _steps;
     private int _stepIndex;
     private bool _isActive;
     private WpfRect _highlightRect = WpfRect.Empty;
     private WpfPoint _cardPosition = new(80, 80);
 
-    public TutorialViewModel(AppSettings settings, AppSettingsService settingsService)
+    public TutorialViewModel(AppSettings settings, IAppSettingsService settingsService)
     {
         _settings = settings;
         _settingsService = settingsService;

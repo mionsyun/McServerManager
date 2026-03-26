@@ -2,7 +2,7 @@ using System.Windows;
 
 namespace McServerManager.Services;
 
-public sealed class ThemeService
+public sealed class ThemeService : IThemeService
 {
     public const string DarkTheme = "Dark";
     public const string LightTheme = "Light";

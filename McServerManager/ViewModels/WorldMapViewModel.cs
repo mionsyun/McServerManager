@@ -6,7 +6,7 @@ namespace McServerManager.ViewModels;
 
 public sealed class WorldMapViewModel : ObservableObject
 {
-    private readonly WorldMapService _service;
+    private readonly IWorldMapService _service;
     private readonly string _worldPath;
     private BitmapSource? _mapImage;
     private double _scale = 1.0;
@@ -15,7 +15,7 @@ public sealed class WorldMapViewModel : ObservableObject
     private bool _hasImage;
     private CancellationTokenSource? _cts;
 
-    public WorldMapViewModel(WorldMapService service, string worldPath)
+    public WorldMapViewModel(IWorldMapService service, string worldPath)
     {
         _service = service;
         _worldPath = worldPath;

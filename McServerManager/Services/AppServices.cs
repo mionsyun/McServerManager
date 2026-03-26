@@ -1,28 +1,31 @@
 namespace McServerManager.Services;
 
+/// <summary>
+/// サービスロケーター（後方互換のために維持。新規コードでは直接DIを使うこと）。
+/// </summary>
 public sealed class AppServices
 {
     public AppServices(
         AppPathsService paths,
-        AppSettingsService settings,
-        ServerConfigService configs,
-        ServerRuntimeManager runtime,
-        ServerPropertiesService properties,
-        MinecraftVersionService versions,
-        ServerProvisioningService provisioning,
-        ServerJarService jars,
-        WorldService worlds,
-        WorldMapService worldMap,
-        PermissionsService permissions,
-        FirewallService firewall,
-        NetworkService network,
-        UpnpService upnp,
+        IAppSettingsService settings,
+        IServerConfigService configs,
+        IServerRuntimeManager runtime,
+        IServerPropertiesService properties,
+        IMinecraftVersionService versions,
+        IServerProvisioningService provisioning,
+        IServerJarService jars,
+        IWorldService worlds,
+        IWorldMapService worldMap,
+        IPermissionsService permissions,
+        IFirewallService firewall,
+        INetworkService network,
+        IUpnpService upnp,
         IDialogService dialog,
-        ThemeService theme,
-        JavaService java,
-        AddonManagementService addons,
-        AddonCatalogService addonCatalog,
-        AppUpdateService appUpdate)
+        IThemeService theme,
+        IJavaService java,
+        IAddonManagementService addons,
+        IAddonCatalogService addonCatalog,
+        IAppUpdateService appUpdate)
     {
         Paths = paths;
         Settings = settings;
@@ -47,23 +50,23 @@ public sealed class AppServices
     }
 
     public AppPathsService Paths { get; }
-    public AppSettingsService Settings { get; }
-    public ServerConfigService Configs { get; }
-    public ServerRuntimeManager Runtime { get; }
-    public ServerPropertiesService Properties { get; }
-    public MinecraftVersionService Versions { get; }
-    public ServerProvisioningService Provisioning { get; }
-    public ServerJarService Jars { get; }
-    public WorldService Worlds { get; }
-    public WorldMapService WorldMap { get; }
-    public PermissionsService Permissions { get; }
-    public FirewallService Firewall { get; }
-    public NetworkService Network { get; }
-    public UpnpService Upnp { get; }
+    public IAppSettingsService Settings { get; }
+    public IServerConfigService Configs { get; }
+    public IServerRuntimeManager Runtime { get; }
+    public IServerPropertiesService Properties { get; }
+    public IMinecraftVersionService Versions { get; }
+    public IServerProvisioningService Provisioning { get; }
+    public IServerJarService Jars { get; }
+    public IWorldService Worlds { get; }
+    public IWorldMapService WorldMap { get; }
+    public IPermissionsService Permissions { get; }
+    public IFirewallService Firewall { get; }
+    public INetworkService Network { get; }
+    public IUpnpService Upnp { get; }
     public IDialogService Dialog { get; }
-    public ThemeService Theme { get; }
-    public JavaService Java { get; }
-    public AddonManagementService Addons { get; }
-    public AddonCatalogService AddonCatalog { get; }
-    public AppUpdateService AppUpdate { get; }
+    public IThemeService Theme { get; }
+    public IJavaService Java { get; }
+    public IAddonManagementService Addons { get; }
+    public IAddonCatalogService AddonCatalog { get; }
+    public IAppUpdateService AppUpdate { get; }
 }

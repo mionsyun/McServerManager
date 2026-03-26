@@ -61,7 +61,7 @@ public partial class ServerDetailControl : System.Windows.Controls.UserControl
 
         if (e.Data.GetData(System.Windows.DataFormats.FileDrop) is string[] paths && paths.Length > 0)
         {
-            _ = vm.ImportAddonsAsync(paths);
+            _ = vm.Addon.ImportAddonsAsync(paths);
         }
 
         e.Handled = true;
@@ -128,16 +128,12 @@ public partial class ServerDetailControl : System.Windows.Controls.UserControl
 
         try
         {
-            if (current is Visual || current is Visual3D)
-            {
-                return VisualTreeHelper.GetParent(current);
-            }
+            return VisualTreeHelper.GetParent(current);
         }
         catch (InvalidOperationException)
         {
-            // Fallback to logical tree for non-visual original sources such as Run.
+            // Fallback to logical tree for non-visual elements such as Run.
+            return LogicalTreeHelper.GetParent(current);
         }
-
-        return LogicalTreeHelper.GetParent(current);
     }
 }

@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace McServerManager.Services;
 
-public sealed class AddonManagementService
+public sealed class AddonManagementService : IAddonManagementService
 {
     private static readonly HashSet<string> PluginServerTypes = new(StringComparer.OrdinalIgnoreCase)
     {
