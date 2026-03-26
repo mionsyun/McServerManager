@@ -15,9 +15,6 @@
     "preview": "nuxt preview"
   },
   "dependencies": {
-    "nuxt": "3.14.0"
-  },
-  "overrides": {
-    "nitropack": "2.10.4"
+    "nuxt": "3.16.0"
   }
 }
