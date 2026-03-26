@@ -2,7 +2,7 @@ using McServerManager.Models;
 
 namespace McServerManager.Services;
 
-public sealed class ServerPropertiesService
+public sealed class ServerPropertiesService : IServerPropertiesService
 {
     private static readonly Dictionary<string, Action<ServerProperties, string>> Parsers = new(StringComparer.OrdinalIgnoreCase)
     {

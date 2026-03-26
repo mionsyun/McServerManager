@@ -6,7 +6,7 @@ using McServerManager.Models;
 
 namespace McServerManager.Services;
 
-public sealed class ServerRuntimeManager
+public sealed class ServerRuntimeManager : IServerRuntimeManager
 {
     private readonly Dictionary<string, ServerRuntime> _runtimes = new();
     private readonly object _runtimesLock = new();

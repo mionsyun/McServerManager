@@ -2,7 +2,7 @@ using Open.Nat;
 
 namespace McServerManager.Services;
 
-public sealed class UpnpService
+public sealed class UpnpService : IUpnpService
 {
     private readonly NatDiscoverer _discoverer = new();
     private NatDevice? _device;

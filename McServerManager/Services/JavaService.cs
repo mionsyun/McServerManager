@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace McServerManager.Services;
 
-public sealed class JavaService
+public sealed class JavaService : IJavaService
 {
     private static readonly Regex JavaVersionRegex = new(@"version\s+\""?([0-9]+(?:\.[0-9]+)*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 

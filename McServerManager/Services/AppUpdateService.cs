@@ -8,9 +8,9 @@ using McServerManager.Utilities;
 
 namespace McServerManager.Services;
 
-public sealed class AppUpdateService
+public sealed class AppUpdateService : IAppUpdateService
 {
-    public const string ManifestUrl = "https://www.maipilot.jp/updates/win-x64/update.json";
+    public const string ManifestUrl = ExternalApiUrls.AppUpdateManifest;
     // Temporary release fallback: allow unsigned installer updates.
     // Set to false to enforce Authenticode verification again.
     private static readonly bool SkipAuthenticodeVerification = true;

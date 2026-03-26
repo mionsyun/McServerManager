@@ -2,18 +2,18 @@ using McServerManager.Models;
 
 namespace McServerManager.Services;
 
-public sealed class ServerProvisioningService
+public sealed class ServerProvisioningService : IServerProvisioningService
 {
     private readonly AppPathsService _pathsService;
-    private readonly ServerPropertiesService _propertiesService;
-    private readonly ServerConfigService _configService;
-    private readonly ServerJarService _jarService;
+    private readonly IServerPropertiesService _propertiesService;
+    private readonly IServerConfigService _configService;
+    private readonly IServerJarService _jarService;
 
     public ServerProvisioningService(
         AppPathsService pathsService,
-        ServerPropertiesService propertiesService,
-        ServerConfigService configService,
-        ServerJarService jarService)
+        IServerPropertiesService propertiesService,
+        IServerConfigService configService,
+        IServerJarService jarService)
     {
         _pathsService = pathsService;
         _propertiesService = propertiesService;

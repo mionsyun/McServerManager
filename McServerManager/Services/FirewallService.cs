@@ -4,7 +4,7 @@ using McServerManager.Models;
 
 namespace McServerManager.Services;
 
-public sealed class FirewallService
+public sealed class FirewallService : IFirewallService
 {
     public bool IsAdministrator()
     {

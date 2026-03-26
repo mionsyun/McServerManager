@@ -4,7 +4,7 @@ using McServerManager.Models;
 
 namespace McServerManager.Services;
 
-public sealed class MinecraftVersionService
+public sealed class MinecraftVersionService : IMinecraftVersionService
 {
     private const string ManifestUrl = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
     private static readonly TimeSpan ManifestCacheMaxAge = TimeSpan.FromHours(6);

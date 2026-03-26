@@ -6,6 +6,7 @@
         <ResourceDictionary>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <utilities:TutorialDimGeometryConverter x:Key="TutorialDimGeometryConverter"/>
+            <utilities:NullOrEmptyToCollapsedConverter x:Key="NullOrEmptyToCollapsedConverter"/>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Themes/Dark.xaml"/>
                 <ResourceDictionary Source="Resources/BaseStyles.xaml"/>

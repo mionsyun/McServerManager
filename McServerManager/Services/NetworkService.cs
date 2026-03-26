@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace McServerManager.Services;
 
-public sealed class NetworkService
+public sealed class NetworkService : INetworkService
 {
     public IReadOnlyList<string> GetLanIpAddresses()
     {
@@ -51,7 +51,7 @@ public sealed class NetworkService
             {
                 Timeout = TimeSpan.FromSeconds(4)
             };
-            var ip = await client.GetStringAsync("https://api.ipify.org").ConfigureAwait(false);
+            var ip = await client.GetStringAsync(ExternalApiUrls.PublicIpApi).ConfigureAwait(false);
             return string.IsNullOrWhiteSpace(ip) ? null : ip.Trim();
         }
         catch

@@ -4,9 +4,9 @@ using McServerManager.Models;
 
 namespace McServerManager.Services;
 
-public sealed class AddonCatalogService
+public sealed class AddonCatalogService : IAddonCatalogService
 {
-    private const string SearchApi = "https://api.modrinth.com/v2/search";
+    private const string SearchApi = ExternalApiUrls.ModrinthSearch;
     private readonly HttpClient _httpClient;
 
     public AddonCatalogService()

@@ -1,6 +1,7 @@
 using System.IO;
 using System.Threading;
 using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
 using McServerManager.Models;
 using McServerManager.Services;
 using McServerManager.ViewModels;
@@ -21,55 +22,16 @@ public partial class App : System.Windows.Application
 
         try
         {
-            var paths = new AppPathsService();
-            var settingsService = new AppSettingsService(paths);
-            var configService = new ServerConfigService(paths);
-            var propertiesService = new ServerPropertiesService();
-            var versionService = new MinecraftVersionService(paths);
-            var runtimeManager = new ServerRuntimeManager();
-            var worldService = new WorldService();
-            var worldMapService = new WorldMapService();
-            var permissionsService = new PermissionsService();
-            var firewallService = new FirewallService();
-            var networkService = new NetworkService();
-            var upnpService = new UpnpService();
-            var dialogService = new DialogService();
-            var themeService = new ThemeService();
-            var javaService = new JavaService();
-            var addonManagementService = new AddonManagementService();
-            var addonCatalogService = new AddonCatalogService();
-            var appUpdateService = new AppUpdateService();
-            var jarService = new ServerJarService(versionService, javaService);
-            var provisioningService = new ServerProvisioningService(paths, propertiesService, configService, jarService);
+            var provider = ConfigureServices();
 
+            var settingsService = provider.GetRequiredService<IAppSettingsService>();
+            var themeService = provider.GetRequiredService<IThemeService>();
             var appSettings = settingsService.Load();
             themeService.Apply(appSettings.Theme);
 
-            var services = new AppServices(
-                paths,
-                settingsService,
-                configService,
-                runtimeManager,
-                propertiesService,
-                versionService,
-                provisioningService,
-                jarService,
-                worldService,
-                worldMapService,
-                permissionsService,
-                firewallService,
-                networkService,
-                upnpService,
-                dialogService,
-                themeService,
-                javaService,
-                addonManagementService,
-                addonCatalogService,
-                appUpdateService);
-
             var mainWindow = new MainWindow
             {
-                DataContext = new MainViewModel(services)
+                DataContext = provider.GetRequiredService<MainViewModel>()
             };
 
             MainWindow = mainWindow;
@@ -100,7 +62,42 @@ public partial class App : System.Windows.Application
         }
     }
 
-    private void ShowFirstRunGuideIfNeeded(AppSettingsService settingsService, MainWindow mainWindow)
+    private static ServiceProvider ConfigureServices()
+    {
+        var services = new ServiceCollection();
+
+        // インフラ層 — シングルトン
+        services.AddSingleton<AppPathsService>();
+        services.AddSingleton<IAppSettingsService, AppSettingsService>();
+        services.AddSingleton<IServerConfigService, ServerConfigService>();
+        services.AddSingleton<IServerPropertiesService, ServerPropertiesService>();
+        services.AddSingleton<IMinecraftVersionService, MinecraftVersionService>();
+        services.AddSingleton<IServerRuntimeManager, ServerRuntimeManager>();
+        services.AddSingleton<IWorldService, WorldService>();
+        services.AddSingleton<IWorldMapService, WorldMapService>();
+        services.AddSingleton<IPermissionsService, PermissionsService>();
+        services.AddSingleton<IFirewallService, FirewallService>();
+        services.AddSingleton<INetworkService, NetworkService>();
+        services.AddSingleton<IUpnpService, UpnpService>();
+        services.AddSingleton<IDialogService, DialogService>();
+        services.AddSingleton<IThemeService, ThemeService>();
+        services.AddSingleton<IJavaService, JavaService>();
+        services.AddSingleton<IAddonManagementService, AddonManagementService>();
+        services.AddSingleton<IAddonCatalogService, AddonCatalogService>();
+        services.AddSingleton<IAppUpdateService, AppUpdateService>();
+        services.AddSingleton<IServerJarService, ServerJarService>();
+        services.AddSingleton<IServerProvisioningService, ServerProvisioningService>();
+
+        // 後方互換: 既存の ViewModel が AppServices を受け取る間は維持
+        services.AddSingleton<AppServices>();
+
+        // プレゼンテーション層
+        services.AddTransient<MainViewModel>();
+
+        return services.BuildServiceProvider();
+    }
+
+    private void ShowFirstRunGuideIfNeeded(IAppSettingsService settingsService, MainWindow mainWindow)
     {
         var settings = settingsService.Load();
         if (settings.HasShownFirstRun)

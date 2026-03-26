@@ -5,20 +5,14 @@ using System.Xml.Linq;
 
 namespace McServerManager.Services;
 
-public sealed class ServerJarService
+public sealed class ServerJarService : IServerJarService
 {
     private const string PaperProject = "paper";
-    private const string PaperApiBase = "https://api.papermc.io/v2/projects";
-    private const string FabricApiBase = "https://meta.fabricmc.net/v2/versions";
-    private const string PurpurApiBase = "https://api.purpurmc.org/v2/purpur";
-    private const string ForgeMetadataUrl = "https://maven.minecraftforge.net/net/minecraftforge/forge/maven-metadata.xml";
-    private const string SpigotBuildToolsUrl = "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar";
-    private const string SpigotDirectJarUrlTemplate = "https://download.getbukkit.org/spigot/spigot-{0}.jar";
-    private readonly MinecraftVersionService _versionService;
-    private readonly JavaService _javaService;
+    private readonly IMinecraftVersionService _versionService;
+    private readonly IJavaService _javaService;
     private readonly HttpClient _httpClient = new();
 
-    public ServerJarService(MinecraftVersionService versionService, JavaService javaService)
+    public ServerJarService(IMinecraftVersionService versionService, IJavaService javaService)
     {
         _versionService = versionService;
         _javaService = javaService;
@@ -50,7 +44,7 @@ public sealed class ServerJarService
     private async Task DownloadPaperAsync(string versionId, string destinationPath, IProgress<string>? progress)
     {
         progress?.Report("Paper のビルド情報を取得しています...");
-        var buildsUrl = $"{PaperApiBase}/{PaperProject}/versions/{versionId}";
+        var buildsUrl = $"{ExternalApiUrls.PaperApiBase}/{PaperProject}/versions/{versionId}";
         using var buildsResponse = await _httpClient.GetAsync(buildsUrl).ConfigureAwait(false);
         buildsResponse.EnsureSuccessStatusCode();
         var buildsJson = await buildsResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -63,7 +57,7 @@ public sealed class ServerJarService
 
         var latestBuild = buildsElement.EnumerateArray().Select(b => b.GetInt32()).Max();
         var fileName = $"paper-{versionId}-{latestBuild}.jar";
-        var downloadUrl = $"{PaperApiBase}/{PaperProject}/versions/{versionId}/builds/{latestBuild}/downloads/{fileName}";
+        var downloadUrl = $"{ExternalApiUrls.PaperApiBase}/{PaperProject}/versions/{versionId}/builds/{latestBuild}/downloads/{fileName}";
 
         progress?.Report("Paper をダウンロードしています...");
         await DownloadFileAsync(downloadUrl, destinationPath).ConfigureAwait(false);
@@ -87,7 +81,7 @@ public sealed class ServerJarService
             var buildToolsPath = Path.Combine(serverDir, "BuildTools.jar");
 
             progress?.Report("BuildTools をダウンロードしています...");
-            await DownloadFileAsync(SpigotBuildToolsUrl, buildToolsPath).ConfigureAwait(false);
+            await DownloadFileAsync(ExternalApiUrls.SpigotBuildTools, buildToolsPath).ConfigureAwait(false);
 
             progress?.Report("Spigot をビルドしています（数分かかる場合があります）...");
             await RunProcessAsync(javaExe, $"-jar \"{buildToolsPath}\" --rev {versionId}", serverDir, progress).ConfigureAwait(false);
@@ -105,7 +99,7 @@ public sealed class ServerJarService
 
     private async Task DownloadSpigotDirectJarAsync(string versionId, string destinationPath, IProgress<string>? progress)
     {
-        var directUrl = string.Format(SpigotDirectJarUrlTemplate, versionId);
+        var directUrl = string.Format(ExternalApiUrls.SpigotDirectJarTemplate, versionId);
         progress?.Report("Spigot 本体を直接ダウンロードしています...");
 
         // HttpRequestException をそのまま伝播させ、呼び出し元で BuildTools フォールバックを行う
@@ -115,7 +109,7 @@ public sealed class ServerJarService
     private async Task DownloadPurpurAsync(string versionId, string destinationPath, IProgress<string>? progress)
     {
         progress?.Report("Purpur のビルド情報を取得しています...");
-        var buildsUrl = $"{PurpurApiBase}/{versionId}";
+        var buildsUrl = $"{ExternalApiUrls.PurpurApiBase}/{versionId}";
         using var buildsResponse = await _httpClient.GetAsync(buildsUrl).ConfigureAwait(false);
         buildsResponse.EnsureSuccessStatusCode();
         var buildsJson = await buildsResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -132,7 +126,7 @@ public sealed class ServerJarService
         var latestBuild = allElement.EnumerateArray()
             .Select(b => b.ValueKind == JsonValueKind.Number ? b.GetInt32() : int.Parse(b.GetString()!))
             .Max();
-        var downloadUrl = $"{PurpurApiBase}/{versionId}/{latestBuild}/download";
+        var downloadUrl = $"{ExternalApiUrls.PurpurApiBase}/{versionId}/{latestBuild}/download";
 
         progress?.Report("Purpur をダウンロードしています...");
         await DownloadFileAsync(downloadUrl, destinationPath).ConfigureAwait(false);
@@ -144,7 +138,7 @@ public sealed class ServerJarService
         var javaExe = ResolveJavaPath(javaPath);
         var forgeVersion = await GetLatestForgeVersionAsync(versionId).ConfigureAwait(false);
         var serverDir = Path.GetDirectoryName(destinationPath) ?? throw new InvalidOperationException("サーバーディレクトリが見つかりません。");
-        var installerUrl = $"https://maven.minecraftforge.net/net/minecraftforge/forge/{versionId}-{forgeVersion}/forge-{versionId}-{forgeVersion}-installer.jar";
+        var installerUrl = $"{ExternalApiUrls.ForgeMavenBase}/net/minecraftforge/forge/{versionId}-{forgeVersion}/forge-{versionId}-{forgeVersion}-installer.jar";
         var installerPath = Path.Combine(serverDir, $"forge-{versionId}-{forgeVersion}-installer.jar");
 
         progress?.Report("Forge インストーラーをダウンロードしています...");
@@ -216,14 +210,14 @@ public sealed class ServerJarService
         var loaderVersion = await GetLatestFabricLoaderVersionAsync(versionId).ConfigureAwait(false);
         var installerVersion = await GetLatestFabricInstallerVersionAsync().ConfigureAwait(false);
 
-        var downloadUrl = $"{FabricApiBase}/loader/{versionId}/{loaderVersion}/{installerVersion}/server/jar";
+        var downloadUrl = $"{ExternalApiUrls.FabricApiBase}/loader/{versionId}/{loaderVersion}/{installerVersion}/server/jar";
         progress?.Report("Fabric サーバーをダウンロードしています...");
         await DownloadFileAsync(downloadUrl, destinationPath).ConfigureAwait(false);
     }
 
     private async Task<string> GetLatestFabricLoaderVersionAsync(string versionId)
     {
-        var url = $"{FabricApiBase}/loader/{versionId}";
+        var url = $"{ExternalApiUrls.FabricApiBase}/loader/{versionId}";
         var json = await _httpClient.GetStringAsync(url).ConfigureAwait(false);
         using var doc = JsonDocument.Parse(json);
         foreach (var item in doc.RootElement.EnumerateArray())
@@ -245,7 +239,7 @@ public sealed class ServerJarService
 
     private async Task<string> GetLatestFabricInstallerVersionAsync()
     {
-        var url = $"{FabricApiBase}/installer";
+        var url = $"{ExternalApiUrls.FabricApiBase}/installer";
         var json = await _httpClient.GetStringAsync(url).ConfigureAwait(false);
         using var doc = JsonDocument.Parse(json);
         foreach (var item in doc.RootElement.EnumerateArray())
@@ -267,7 +261,7 @@ public sealed class ServerJarService
 
     private async Task<string> GetLatestForgeVersionAsync(string versionId)
     {
-        var xml = await _httpClient.GetStringAsync(ForgeMetadataUrl).ConfigureAwait(false);
+        var xml = await _httpClient.GetStringAsync(ExternalApiUrls.ForgeMavenMetadata).ConfigureAwait(false);
         var doc = XDocument.Parse(xml);
         var versions = doc.Descendants("version")
             .Select(element => element.Value)
