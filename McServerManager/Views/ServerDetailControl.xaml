@@ -106,7 +106,8 @@
                                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
                                  ScrollViewer.CanContentScroll="False"
                                  HorizontalContentAlignment="Left"
-                                 VirtualizingStackPanel.IsVirtualizing="False"/>
+                                 VirtualizingStackPanel.IsVirtualizing="False"
+                                 PreviewMouseWheel="LogListBox_OnPreviewMouseWheel"/>
                     </Border>
 
                     <Grid Grid.Row="1" Margin="0,10,0,0">

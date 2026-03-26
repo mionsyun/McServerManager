@@ -33,6 +33,38 @@ public partial class ServerDetailControl : System.Windows.Controls.UserControl
         }
     }
 
+    private void LogListBox_OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        if (!Keyboard.IsKeyDown(Key.LeftShift) && !Keyboard.IsKeyDown(Key.RightShift)
+            && !Keyboard.IsKeyDown(Key.LeftCtrl) && !Keyboard.IsKeyDown(Key.RightCtrl))
+            return;
+
+        var sv = FindVisualChild<ScrollViewer>(LogListBox);
+        if (sv is null)
+            return;
+
+        var next = Math.Clamp(
+            sv.HorizontalOffset - (e.Delta / 3.0),
+            0,
+            sv.ScrollableWidth);
+        sv.ScrollToHorizontalOffset(next);
+        e.Handled = true;
+    }
+
+    private static T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+    {
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is T typed)
+                return typed;
+            var result = FindVisualChild<T>(child);
+            if (result is not null)
+                return result;
+        }
+        return null;
+    }
+
     private void AddonDropZone_OnDragOver(object sender, System.Windows.DragEventArgs e)
     {
         if (e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
