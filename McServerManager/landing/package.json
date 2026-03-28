@@ -7,11 +7,11 @@
   },
   "scripts": {
     "dev": "nuxt dev",
-    "build": "npm run prepare:seo && npm run prepare:docs-aliases && nuxt build",
+    "build": "npm run prepare:seo && npm run prepare:docs-aliases && nuxt cleanup && nuxt prepare && nuxt build",
     "prepare:seo": "node ./scripts/prepare-doc-seo.mjs",
     "prepare:docs-aliases": "node ./scripts/create-doc-aliases.mjs",
     "sync:docs-output": "node ./scripts/sync-docs-to-output.mjs",
-    "generate": "npm run prepare:seo && npm run prepare:docs-aliases && nuxt generate && npm run sync:docs-output",
+    "generate": "npm run prepare:seo && npm run prepare:docs-aliases && nuxt cleanup && nuxt prepare && nuxt generate && npm run sync:docs-output",
     "preview": "nuxt preview"
   },
   "dependencies": {
