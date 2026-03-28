@@ -40,9 +40,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version-file: McServerManager/landing/.nvmrc
           cache: npm
           cache-dependency-path: McServerManager/landing/package-lock.json
+
+      - name: Show runtime versions
+        working-directory: McServerManager/landing
+        run: |
+          node -v
+          npm -v
 
       - name: Install dependencies
         working-directory: McServerManager/landing
