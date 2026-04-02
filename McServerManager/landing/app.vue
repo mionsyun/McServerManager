@@ -296,11 +296,16 @@ const translations = {
         body: "Use \"Check for app updates\" in MaiPilot, then run the latest installer shown in the prompt.",
       },
     ],
+    boothTitle: "Support MaiPilot's development",
+    boothSub: "MaiPilot is free to download from the official site. There is no difference in features.",
+    boothNote: "The BOOTH listing is for those who want to support ongoing development. Proceeds go toward server maintenance and new features. Try the free version first — support only if you find it useful.",
+    boothCta: "View on BOOTH",
     footerDocs: "Docs",
     footerNotices: "Third-party notices",
     footerLicense: "License",
     footerPrivacy: "Privacy Policy",
     footerTerms: "Terms of Use",
+    footerX: "Official X",
     footerRight: "Built for local worlds.",
     footerDisclosure: "This page includes affiliate links (PR).",
   },
@@ -571,11 +576,16 @@ const translations = {
         body: "MaiPilotの「アプリ更新を確認」から確認し、表示された最新版インストーラーを実行してください。",
       },
     ],
+    boothTitle: "MaiPilotの開発を応援する",
+    boothSub: "MaiPilotは公式サイトから無料でダウンロードできます。機能の違いはありません。",
+    boothNote: "BOOTH版は、開発を続けていくための応援をしてくださる方向けです。いただいた売上はサーバー維持費や新機能の開発に充てます。まずは無料版を試してみて、「便利だな」と感じたら応援いただけると嬉しいです。",
+    boothCta: "BOOTHで応援する",
     footerDocs: "ドキュメント",
     footerNotices: "サードパーティ通知",
     footerLicense: "ライセンス",
     footerPrivacy: "プライバシーポリシー",
     footerTerms: "利用規約",
+    footerX: "公式X",
     footerRight: "ローカル世界のために。",
     footerDisclosure: "本ページにはアフィリエイトリンク（PR）が含まれます。",
   },
@@ -1112,6 +1122,25 @@ useHead(() => ({
       </section>
 
       <section class="section reveal">
+        <div class="callout booth-callout">
+          <div class="booth-text">
+            <h2>{{ t.boothTitle }}</h2>
+            <p>{{ t.boothSub }}</p>
+            <p class="booth-note">{{ t.boothNote }}</p>
+          </div>
+          <div class="callout-actions">
+            <a
+              href="https://booth.pm/ja/items/8118402"
+              class="btn ghost"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-event="booth_click"
+            >{{ t.boothCta }}</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section reveal">
         <div class="section-head">
           <h2>{{ t.prSectionTitle }}</h2>
           <p>{{ t.prSectionSub }}</p>
@@ -1196,6 +1225,7 @@ useHead(() => ({
         <a href="/docs/terms/">{{ t.footerTerms }}</a>
         <a href="/THIRD_PARTY_NOTICES.txt">{{ t.footerNotices }}</a>
         <a href="/LICENSE.txt">{{ t.footerLicense }}</a>
+        <a href="https://x.com/MaipilotOffical" target="_blank" rel="noopener noreferrer">{{ t.footerX }}</a>
       </div>
       <div class="footer-disclosure">{{ t.footerDisclosure }}</div>
     </footer>

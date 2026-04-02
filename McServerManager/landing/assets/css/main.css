@@ -775,6 +775,27 @@ a {
   margin-top: 24px;
 }
 
+.booth-callout {
+  background: linear-gradient(135deg, rgba(255, 190, 60, 0.10), rgba(255, 110, 50, 0.08));
+  border-color: rgba(255, 190, 60, 0.25);
+}
+
+.booth-callout::before {
+  background: radial-gradient(circle, rgba(255, 190, 60, 0.08), transparent 70%);
+}
+
+.booth-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.booth-note {
+  margin-top: 10px;
+  font-size: 0.88rem;
+  opacity: 0.75;
+  line-height: 1.6;
+}
+
 .download-options {
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
