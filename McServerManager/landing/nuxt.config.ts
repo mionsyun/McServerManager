@@ -17,7 +17,7 @@ export default defineNuxtConfig({
     head: {
       title: "MaiPilot",
       meta: [
-        { name: "description", content: "Build and run Minecraft servers fast with a gamer-first WPF tool." },
+        { name: "description", content: "MaiPilotは日本語対応のWindowsマイクラサーバー管理ツール。ポート開放・MOD管理・自動バックアップをGUIで簡単操作。Vanilla・Paper・Forge対応。無料ダウンロード。" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
         { name: "theme-color", content: "#0b0f17" }
       ],

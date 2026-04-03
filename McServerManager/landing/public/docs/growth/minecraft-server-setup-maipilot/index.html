@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>【2026年最新】マイクラサーバーの立て方｜日本語ツールで簡単3ステップ | MaiPilot</title>
+    <meta name="description" content="マイクラサーバーの立て方を3ステップで解説。ポート開放・コマンド操作・バックアップの課題を日本語GUIのMaiPilotでまとめて解決。レンタルサーバーとのコスト比較も。" />
+    <style>
+      :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
+      * { box-sizing:border-box; }
+      body { margin:0; padding:32px 16px; font-family:"Noto Sans JP","Segoe UI",sans-serif; color:var(--text); background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%); }
+      .wrap { max-width:980px; margin:0 auto; display:grid; gap:16px; }
+      .card { background:var(--panel); border:1px solid rgba(126,157,201,.25); border-radius:16px; padding:22px; }
+      .hero { background:linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)), var(--panel); }
+      .muted { color:var(--muted); }
+      .cta { border:1px solid rgba(102,255,136,.45); background:rgba(102,255,136,.08); }
+      a { color:var(--accent2); text-decoration:none; }
+      h1,h2,h3 { margin:0 0 10px; }
+      ul,ol { margin:8px 0 0 18px; color:var(--muted); }
+      li { margin-bottom:6px; }
+      .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+      .chip { font-size:12px; padding:5px 10px; border:1px solid rgba(126,157,201,.35); border-radius:999px; color:var(--muted); }
+      .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+      .mini { background:var(--panel2); border:1px solid rgba(126,157,201,.25); border-radius:12px; padding:12px; }
+      .compare-table { width:100%; border-collapse:collapse; margin-top:12px; font-size:14px; }
+      .compare-table th, .compare-table td { padding:10px 12px; border:1px solid rgba(126,157,201,.2); text-align:center; }
+      .compare-table th { background:var(--panel2); color:var(--muted); font-weight:600; }
+      .compare-table .hl { color:var(--accent); font-weight:700; }
+      .step { display:flex; gap:14px; align-items:flex-start; margin-top:12px; }
+      .step-num { flex-shrink:0; width:32px; height:32px; border-radius:50%; background:rgba(102,255,136,.15); border:1px solid rgba(102,255,136,.4); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--accent); font-size:15px; }
+      .faq-list { margin:0; display:grid; gap:10px; }
+      .faq-list dt { font-weight:700; color:var(--text); }
+      .faq-list dd { margin:0; color:var(--muted); }
+      .banner-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px; margin-top:10px; }
+      .banner-card { display:flex; flex-direction:column; align-items:flex-start; gap:8px; background:var(--panel2); border:1px solid rgba(126,157,201,.3); border-radius:12px; padding:12px; }
+      .banner-pill { display:inline-block; width:max-content; font-size:11px; font-weight:700; border-radius:999px; padding:4px 8px; background:rgba(102,255,136,.16); color:var(--accent); }
+      .banner-link { font-weight:700; }
+      .booth-cta { background:rgba(67,176,112,.1); border:1px solid rgba(67,176,112,.4); border-radius:12px; padding:14px 18px; margin-top:8px; }
+      .booth-cta a { color:#43b070; font-weight:700; }
+      .site-nav { position:sticky; top:0; z-index:100; background:rgba(11,15,23,.95); backdrop-filter:blur(8px); border-bottom:1px solid rgba(126,157,201,.15); padding:0 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; margin:-32px -16px 24px; height:52px; }
+      .nav-brand { font-weight:700; font-size:15px; color:var(--accent); text-decoration:none; letter-spacing:.02em; }
+      .nav-links { display:flex; gap:12px; align-items:center; }
+      .nav-links a { color:var(--muted); font-size:13px; text-decoration:none; }
+      .nav-links a:hover { color:var(--text); }
+      .nav-cta { background:rgba(102,255,136,.12); color:var(--accent)!important; border:1px solid rgba(102,255,136,.35); border-radius:8px; padding:5px 12px; font-weight:700; }
+    </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MM106D2B2Z');
+    </script>
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://www.maipilot.jp/docs/growth/minecraft-server-setup-maipilot/" />
+    <meta property="og:title" content="【2026年最新】マイクラサーバーの立て方｜日本語ツールで簡単3ステップ | MaiPilot" />
+    <meta property="og:description" content="マイクラサーバーの立て方を3ステップで解説。ポート開放・コマンド操作・バックアップの課題を日本語GUIのMaiPilotでまとめて解決。レンタルサーバーとのコスト比較も。" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://www.maipilot.jp/docs/growth/minecraft-server-setup-maipilot/" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="【2026年最新】マイクラサーバーの立て方｜日本語ツールで簡単3ステップ | MaiPilot" />
+    <meta name="twitter:description" content="マイクラサーバーの立て方を3ステップで解説。ポート開放・コマンド操作・バックアップの課題を日本語GUIのMaiPilotでまとめて解決。" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:site_name" content="MaiPilot" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="article:published_time" content="2026-04-04T00:00:00+09:00" />
+    <meta property="article:modified_time" content="2026-04-04T00:00:00+09:00" />
+    <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.maipilot.jp/" },
+    { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://www.maipilot.jp/docs/" },
+    { "@type": "ListItem", "position": 3, "name": "Growth", "item": "https://www.maipilot.jp/docs/growth/" },
+    { "@type": "ListItem", "position": 4, "name": "【2026年最新】マイクラサーバーの立て方｜日本語ツールで簡単3ステップ", "item": "https://www.maipilot.jp/docs/growth/minecraft-server-setup-maipilot/" }
+  ]
+}
+    </script>
+    <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Javaは別途インストールが必要ですか？",
+      "acceptedAnswer": { "@type": "Answer", "text": "MaiPilotがJavaのインストールをガイドします。手順に従って進めるだけで環境を整えられます。" }
+    },
+    {
+      "@type": "Question",
+      "name": "友達がサーバーに繋がらない場合はどうすれば？",
+      "acceptedAnswer": { "@type": "Answer", "text": "MaiPilotの「ネットワーク」タブにトラブルシューティングガイドが内蔵されています。ポート開放チェック・ファイアウォール設定・接続確認をまとめて確認できます。" }
+    },
+    {
+      "@type": "Question",
+      "name": "レンタルサーバーとどちらがおすすめですか？",
+      "acceptedAnswer": { "@type": "Answer", "text": "友達と気軽に遊ぶ用途で自宅PCがある場合はMaiPilot+自宅PCがコスト面で有利です。24時間稼働が必要な場合はレンタルサーバーをおすすめします。" }
+    },
+    {
+      "@type": "Question",
+      "name": "バックアップは自動でできますか？",
+      "acceptedAnswer": { "@type": "Answer", "text": "はい。定期自動バックアップの設定が可能です。「バックアップ」タブから間隔と保存先を指定するだけです。" }
+    }
+  ]
+}
+    </script>
+  </head>
+  <body>
+    <nav class="site-nav">
+      <a class="nav-brand" href="/">MaiPilot</a>
+      <div class="nav-links">
+        <a href="/">ホーム</a>
+        <a href="/docs/growth/">ガイド</a>
+        <a href="/?from=docs_nav_setup_maipilot#download" class="nav-cta" data-event="nav_download_click" data-source="growth_setup_maipilot">ダウンロード</a>
+      </div>
+    </nav>
+    <main class="wrap">
+
+      <section class="card hero">
+        <a href="/docs/growth/">← ガイド一覧へ</a>
+        <h1>【2026年最新】マイクラサーバーの立て方｜日本語ツールで簡単3ステップ</h1>
+        <p class="muted">ポート開放・コマンド操作・バックアップの3つの壁を、日本語GUIのMaiPilotでまとめて解決する方法を解説します。</p>
+        <div class="chips">
+          <span class="chip">想定読了: 7分</span>
+          <span class="chip">対象: Windows 10/11</span>
+          <span class="chip">キーワード: マイクラ サーバー 立て方 / 簡単 / マルチプレイ やり方</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>マイクラでマルチプレイをするには？</h2>
+        <p class="muted">友達と一緒にプレイするには、誰かが「サーバー」を用意する必要があります。サーバーを立てる方法は大きく3つに分かれます。</p>
+        <table class="compare-table">
+          <thead>
+            <tr><th>方法</th><th>コスト</th><th>難易度</th><th>特徴</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>自宅PCで立てる</td><td>ほぼ無料</td><td>★★★</td><td>PCが起動中のみ</td></tr>
+            <tr><td>レンタルサーバー</td><td>月500〜2,000円</td><td>★★</td><td>24時間稼働</td></tr>
+            <tr><td>Minecraft Realms</td><td>月約800円</td><td>★</td><td>10人まで・カスタム制限あり</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>自宅PCで立てる場合の3つの課題</h2>
+        <div class="grid">
+          <div class="mini">
+            <h3>① ポート開放がわからない</h3>
+            <p class="muted">ルーターの設定はメーカーごとに画面が違い、慣れていないと30〜60分かかることも。</p>
+          </div>
+          <div class="mini">
+            <h3>② コマンド操作が必要</h3>
+            <p class="muted">start.batの作成・JVM引数設定・ポート番号の書き換えなど、黒い画面との格闘が続く。</p>
+          </div>
+          <div class="mini">
+            <h3>③ バックアップが面倒</h3>
+            <p class="muted">手動フォルダコピーは忘れがち。クラッシュでワールドデータが消えた経験をした人も多い。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>MaiPilotを使えばこれらが全部解決する</h2>
+        <p class="muted">MaiPilotは、これらの課題をまとめて解決するために開発されたWindows向けマイクラサーバー管理ツールです。日本語対応のGUIで、コマンド操作なしにサーバー管理が完結します。</p>
+        <ul>
+          <li>日本語GUIでボタンひとつ操作</li>
+          <li>ポート開放（UPnP自動設定）＋接続確認チェッカー内蔵</li>
+          <li>スケジュール自動バックアップ</li>
+          <li>Vanilla / Paper / Forge / Fabric / Spigot / Purpur の6種対応</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>MaiPilotでのサーバー構築手順（3ステップ）</h2>
+        <div class="step">
+          <div class="step-num">1</div>
+          <div>
+            <h3>MaiPilotをダウンロード・インストール</h3>
+            <p class="muted">公式サイト（<a href="/?from=growth_setup_maipilot_step1" data-event="growth_download_click" data-source="growth_setup_maipilot">maipilot.jp</a>）からインストーラーをダウンロード。ウィザード形式で「次へ」をクリックするだけで完了します。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div>
+            <h3>新規サーバーを作成</h3>
+            <p class="muted">「新しいサーバーを作成」をクリックして、サーバーの種類・Minecraftバージョン・メモリをGUIで選択。コマンドの入力は一切不要です。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div>
+            <h3>ポート開放を完了させる</h3>
+            <p class="muted">「ネットワーク」タブからUPnP自動設定・ファイアウォール設定・接続確認テストをGUI上で実行。「ポート開放チェック」ボタンを押すだけで友達が繋がれる状態か確認できます。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>レンタルサーバーとのコスト比較</h2>
+        <table class="compare-table">
+          <thead>
+            <tr><th></th><th>レンタルサーバー</th><th class="hl">MaiPilot + 自宅PC</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>月額コスト</td><td>500〜2,000円/月</td><td class="hl">0円</td></tr>
+            <tr><td>1年間の合計</td><td>6,000〜24,000円</td><td class="hl">0円</td></tr>
+            <tr><td>3年間の合計</td><td>18,000〜72,000円</td><td class="hl">0円</td></tr>
+            <tr><td>日本語対応</td><td>△（サービスによる）</td><td class="hl">✅ 完全日本語</td></tr>
+            <tr><td>24時間稼働</td><td>✅</td><td>PC起動中のみ</td></tr>
+          </tbody>
+        </table>
+        <p class="muted" style="margin-top:10px;font-size:13px;">※ 24時間稼働が必要な場合は<a href="/docs/24-7-hosting/">こちらのガイド</a>もご参照ください。</p>
+      </section>
+
+      <section class="card">
+        <h2>よくある質問</h2>
+        <dl class="faq-list">
+          <dt data-faq-question>Javaは別途インストールが必要ですか？</dt>
+          <dd data-faq-answer>MaiPilotがJavaのインストールをガイドします。手順に従って進めるだけで環境を整えられます。</dd>
+          <dt data-faq-question>友達がサーバーに繋がらない場合はどうすれば？</dt>
+          <dd data-faq-answer>MaiPilotの「ネットワーク」タブにトラブルシューティングガイドが内蔵されています。ポート開放チェック・ファイアウォール設定・接続確認をまとめて確認できます。</dd>
+          <dt data-faq-question>レンタルサーバーとどちらがおすすめですか？</dt>
+          <dd data-faq-answer>友達と気軽に遊ぶ用途で自宅PCがある場合はMaiPilot+自宅PCがコスト面で有利です。24時間稼働が必要な場合はレンタルサーバーをおすすめします。</dd>
+          <dt data-faq-question>バックアップは自動でできますか？</dt>
+          <dd data-faq-answer>はい。定期自動バックアップの設定が可能です。「バックアップ」タブから間隔と保存先を指定するだけです。</dd>
+        </dl>
+      </section>
+
+      <section class="card cta">
+        <h2>MaiPilotでサーバーを立ててみよう</h2>
+        <ul>
+          <li>6種のサーバー（Vanilla / Paper / Forge / Fabric / Spigot / Purpur）をGUIで作成</li>
+          <li>ポート開放（UPnP）・ファイアウォール・接続確認チェッカーを内蔵</li>
+          <li>MOD/プラグインをModrinth連携でアプリ内検索・インストール</li>
+          <li>スケジュール自動バックアップとワンクリック復元</li>
+          <li>完全日本語対応 / Windows 10/11 / 無料ダウンロード</li>
+        </ul>
+        <p><a href="/?from=growth_setup_maipilot_cta" data-event="growth_download_click" data-source="growth_setup_maipilot" data-label="cta_download">MaiPilotを無料でダウンロード →</a></p>
+        <div class="booth-cta">
+          <p class="muted" style="margin:0 0 6px;font-size:13px;">開発を応援してくださる方へ</p>
+          <a href="https://maipilot.booth.pm" target="_blank" rel="noopener noreferrer" data-event="booth_click" data-source="growth_setup_maipilot">💚 BOOTHで応援購入する（買い切り980円） →</a>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>次のアクション</h2>
+        <div class="banner-grid">
+          <article class="banner-card">
+            <span class="banner-pill">公式サイト</span>
+            <p class="muted">機能一覧と導入手順をまとめて確認して、そのままダウンロードできます。</p>
+            <a class="banner-link" href="/?from=growth_setup_maipilot_home_banner" data-event="growth_home_banner_click" data-source="growth_setup_maipilot">ホームページを見る →</a>
+          </article>
+          <article class="banner-card">
+            <span class="banner-pill">関連ガイド</span>
+            <p class="muted">ポート開放で詰まった場合はこちら。原因を順番に切り分けられます。</p>
+            <a class="banner-link" href="/docs/growth/port-open-checklist/" data-event="growth_article_click" data-source="growth_setup_maipilot">ポート開放チェックリスト →</a>
+          </article>
+        </div>
+      </section>
+
+    </main>
+    <script>
+      const trackEvent = ({ event_name, link_url, link_text, source }) => {
+        const win = window;
+        if (typeof win.gtag === "function") {
+          win.gtag("event", event_name, { event_category: source || "cta", event_label: link_text || link_url || "", link_url: link_url });
+          return;
+        }
+        if (Array.isArray(win.dataLayer)) {
+          win.dataLayer.push({ event: event_name, link_url, link_text, source: source || "cta" });
+        }
+      };
+      const handleTrackedClick = (event) => {
+        const target = event.target;
+        if (!target || !target.closest) return;
+        const el = target.closest("[data-event]");
+        if (!el) return;
+        const eventName = el.dataset.event;
+        const source = el.dataset.source || "";
+        const label = el.dataset.label || el.textContent?.trim() || "";
+        const href = el.getAttribute("href") || "";
+        if (eventName) trackEvent({ event_name: eventName, link_url: href, link_text: label, source });
+      };
+      document.addEventListener("click", handleTrackedClick, { passive: true });
+    </script>
+  </body>
+</html>

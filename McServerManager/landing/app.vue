@@ -14,6 +14,7 @@ const docsPortUrl = "/docs/port-forwarding";
 const docsTroubleUrl = "/docs/troubleshooting";
 const docsPrivacyUrl = "/docs/privacy-and-network";
 const docsJavaUrl = "/docs/java-setup/";
+const boothUrl = "https://maipilot.booth.pm";
 const version = "1.0.3";
 
 const downloadOptionEvents: Record<string, string> = {
@@ -57,6 +58,7 @@ const translations = {
     heroAffiliateCta: "See hosting options (PR)",
     heroCtaPrimary: "Download",
     heroCtaSecondary: "Read the setup guide",
+    heroBoothCta: "Support development (BOOTH)",
     heroMetaVersion: "Version",
     heroMetaWindows: "Windows 10/11",
     heroMetaRuntime: "Self-contained runtime",
@@ -212,6 +214,7 @@ const translations = {
     ],
     downloadPrimary: "Download for Windows",
     downloadSecondary: "Setup notes",
+    downloadBoothCta: "Support development (BOOTH)",
     prSectionTitle: "Sponsored options (PR)",
     prSectionSub: "Sponsored banners with text links below each banner.",
     prTextLinkLabel: "Text Link (PR)",
@@ -337,6 +340,7 @@ const translations = {
     heroAffiliateCta: "VPSの比較を見る（PR）",
     heroCtaPrimary: "ダウンロード",
     heroCtaSecondary: "セットアップガイド",
+    heroBoothCta: "開発を応援する（BOOTH）",
     heroMetaVersion: "バージョン",
     heroMetaWindows: "Windows 10/11 対応",
     heroMetaRuntime: "ランタイム同梱",
@@ -492,6 +496,7 @@ const translations = {
     ],
     downloadPrimary: "Windows 用を入手",
     downloadSecondary: "セットアップノート",
+    downloadBoothCta: "開発を応援する（BOOTH）",
     prSectionTitle: "スポンサーリンク（PR）",
     prSectionSub: "各バナーの下にテキストリンクを配置しています。",
     prTextLinkLabel: "テキストリンク（PR）",
@@ -956,6 +961,7 @@ useHead(() => ({
           <div class="hero-actions">
             <a :href="downloadUrl" class="btn primary" data-event="download_click">{{ t.heroCtaPrimary }}</a>
             <a :href="docsUrl" class="btn ghost">{{ t.heroCtaSecondary }}</a>
+            <a :href="boothUrl" target="_blank" rel="noopener noreferrer" class="btn booth" data-event="booth_click">{{ t.heroBoothCta }}</a>
           </div>
           <div class="hero-meta">
             <span class="chip">{{ t.heroMetaVersion }} {{ version }}</span>
@@ -1098,6 +1104,7 @@ useHead(() => ({
           <div class="callout-actions">
             <a :href="downloadUrl" class="btn primary" data-event="download_click">{{ t.downloadPrimary }}</a>
             <a :href="docsUrl" class="btn ghost">{{ t.downloadSecondary }}</a>
+            <a :href="boothUrl" target="_blank" rel="noopener noreferrer" class="btn booth" data-event="booth_click">{{ t.downloadBoothCta }}</a>
           </div>
         </div>
         <div class="download-options-block">
