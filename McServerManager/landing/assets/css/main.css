@@ -373,6 +373,17 @@ a {
   background: rgba(51, 168, 255, 0.1);
 }
 
+.btn.booth {
+  border: 1px solid #43b070;
+  color: #43b070;
+  background: transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.25s ease, color 0.25s ease;
+}
+
+.btn.booth:hover {
+  background: rgba(67, 176, 112, 0.12);
+}
+
 .btn.tiny {
   padding: 8px 14px;
   font-size: 12px;
