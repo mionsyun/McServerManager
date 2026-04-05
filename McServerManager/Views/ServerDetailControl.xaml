@@ -951,40 +951,11 @@
                                     リソースパック（テクスチャ・サウンドのカスタマイズZIP）をプレイヤーに自動ダウンロードさせる機能です。
                                     URLを server.properties に書き込むことで、サーバー参加時にプレイヤーへ自動配布されます。
                                 </TextBlock>
-                                <!-- ステップフロー -->
-                                <Border Margin="0,12,0,0"
-                                        Background="{DynamicResource BrushCard}"
-                                        BorderBrush="{DynamicResource BrushBorder}"
-                                        BorderThickness="1"
-                                        CornerRadius="10"
-                                        Padding="12,10">
-                                    <WrapPanel>
-                                        <Border Background="{DynamicResource BrushAccentSoft}" CornerRadius="6" Padding="8,4" Margin="0,2,6,2">
-                                            <TextBlock Text="① ZIPを選択" FontSize="12" Foreground="{DynamicResource BrushAccent}" FontWeight="SemiBold"/>
-                                        </Border>
-                                        <TextBlock Text="→" VerticalAlignment="Center" Margin="0,0,6,0" Style="{StaticResource MutedText}"/>
-                                        <Border Background="{DynamicResource BrushAccentSoft}" CornerRadius="6" Padding="8,4" Margin="0,2,6,2">
-                                            <TextBlock Text="② HTTPサーバー起動" FontSize="12" Foreground="{DynamicResource BrushAccent}" FontWeight="SemiBold"/>
-                                        </Border>
-                                        <TextBlock Text="→" VerticalAlignment="Center" Margin="0,0,6,0" Style="{StaticResource MutedText}"/>
-                                        <Border Background="{DynamicResource BrushAccentSoft}" CornerRadius="6" Padding="8,4" Margin="0,2,6,2">
-                                            <TextBlock Text="③ HTTPS有効化（推奨）" FontSize="12" Foreground="{DynamicResource BrushAccent}" FontWeight="SemiBold"/>
-                                        </Border>
-                                        <TextBlock Text="→" VerticalAlignment="Center" Margin="0,0,6,0" Style="{StaticResource MutedText}"/>
-                                        <Border Background="{DynamicResource BrushAccentSoft}" CornerRadius="6" Padding="8,4" Margin="0,2,6,2">
-                                            <TextBlock Text="④ URLをコピー" FontSize="12" Foreground="{DynamicResource BrushAccent}" FontWeight="SemiBold"/>
-                                        </Border>
-                                        <TextBlock Text="→" VerticalAlignment="Center" Margin="0,0,6,0" Style="{StaticResource MutedText}"/>
-                                        <Border Background="{DynamicResource BrushAccentSoft}" CornerRadius="6" Padding="8,4" Margin="0,2,6,2">
-                                            <TextBlock Text="⑤ server.propertiesに適用" FontSize="12" Foreground="{DynamicResource BrushAccent}" FontWeight="SemiBold"/>
-                                        </Border>
-                                    </WrapPanel>
-                                </Border>
                             </StackPanel>
                         </Border>
 
                         <!-- ファイル選択 -->
-                        <Border Style="{StaticResource SurfacePanel}">
+                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
                             <StackPanel>
                                 <TextBlock Text="📦 リソースパック選択" FontWeight="SemiBold" FontSize="14"/>
                                 <TextBlock Text="配布したいリソースパック（ZIP形式）を選択してください。"
@@ -1020,12 +991,23 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- HTTPサーバー制御 -->
+                        <!-- 配信設定 -->
                         <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
                             <StackPanel>
-                                <TextBlock Text="🌐 HTTPサーバー" FontWeight="SemiBold" FontSize="14"/>
-                                <TextBlock Text="ローカルPCでHTTPサーバーを起動し、リソースパックを外部へ配信します。"
-                                           Style="{StaticResource MutedText}" Margin="0,4,0,0"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🔒 配信設定" FontWeight="SemiBold" FontSize="14"/>
+                                    <Border Background="{DynamicResource BrushAccentSoft}"
+                                            BorderBrush="{DynamicResource BrushAccent}"
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                            Padding="6,2"
+                                            Margin="8,0,0,0"
+                                            VerticalAlignment="Center">
+                                        <TextBlock Text="HTTPS推奨" FontSize="11" Foreground="{DynamicResource BrushAccent}"/>
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Text="MinecraftはHTTPSがほぼ必須です（HTTPだとバージョンによってブロックされます）。アカウント不要・無料のCloudflareトンネルを使用します。初回のみ約25MBダウンロード。"
+                                           Style="{StaticResource MutedText}" Margin="0,4,0,0" TextWrapping="Wrap"/>
                                 <Grid Margin="0,10,0,0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
@@ -1038,8 +1020,18 @@
                                              VerticalAlignment="Center"/>
                                 </Grid>
                                 <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                                    <Button Content="▶ 起動" Command="{Binding StartServerCommand}" Style="{StaticResource PrimaryButton}" Width="100"/>
-                                    <Button Content="■ 停止" Command="{Binding StopServerCommand}" Margin="8,0,0,0" Width="100"/>
+                                    <Button Content="🔒 HTTPS配信を開始" Command="{Binding StartHttpsDistributionCommand}"
+                                            Style="{StaticResource PrimaryButton}" Width="160"/>
+                                    <Button Content="HTTP のみ" Command="{Binding StartServerCommand}"
+                                            Margin="8,0,0,0" Width="100"
+                                            ToolTip="ポート開放が必要。Minecraftの新しいバージョンではブロックされる場合があります。"/>
+                                    <Button Content="■ 停止" Command="{Binding StopServerCommand}" Margin="8,0,0,0" Width="80"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0"
+                                            Visibility="{Binding IsTunnelRunning, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+                                    <Ellipse Width="8" Height="8" Fill="{DynamicResource BrushAccent}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="HTTPS トンネル接続中" Margin="6,0,0,0" VerticalAlignment="Center"
+                                               Foreground="{DynamicResource BrushAccent}" FontWeight="SemiBold"/>
                                 </StackPanel>
                                 <TextBlock Text="{Binding StatusMessage}"
                                            Foreground="{DynamicResource BrushAccent}"
@@ -1047,6 +1039,16 @@
                                            FontWeight="SemiBold"
                                            Margin="0,8,0,0"
                                            Visibility="{Binding StatusMessage, Converter={StaticResource NullOrEmptyToCollapsedConverter}, FallbackValue=Collapsed}"/>
+                                <Expander Header="UPnP ポート操作（HTTP直接接続用）" Margin="0,12,0,0">
+                                    <StackPanel Margin="0,8,0,0">
+                                        <TextBlock Text="HTTPS不使用でHTTP直接接続を使う場合、ルーターのポートをUPnPで開放します。"
+                                                   Style="{StaticResource MutedText}" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="開放" Command="{Binding OpenPortCommand}" Width="110"/>
+                                            <Button Content="閉鎖" Command="{Binding ClosePortCommand}" Margin="8,0,0,0" Width="110"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Expander>
                             </StackPanel>
                         </Border>
 
@@ -1093,49 +1095,6 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- HTTPS トンネル -->
-                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="🔒 HTTPS トンネル" FontWeight="SemiBold" FontSize="14"/>
-                                    <Border Background="{DynamicResource BrushAccentSoft}"
-                                            BorderBrush="{DynamicResource BrushAccent}"
-                                            BorderThickness="1"
-                                            CornerRadius="8"
-                                            Padding="6,2"
-                                            Margin="8,0,0,0"
-                                            VerticalAlignment="Center">
-                                        <TextBlock Text="Cloudflare" FontSize="11" Foreground="{DynamicResource BrushAccent}"/>
-                                    </Border>
-                                </StackPanel>
-                                <TextBlock Text="アカウント不要・無料。HTTPサーバー起動後にトンネルを有効化すると HTTPS URL が発行されます。初回のみバックグラウンドでコンポーネントをダウンロードします（約25MB）。"
-                                           Style="{StaticResource MutedText}" Margin="0,4,0,0" TextWrapping="Wrap"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                                    <Button Content="🔒 HTTPS 有効化" Command="{Binding StartTunnelCommand}"
-                                            Style="{StaticResource PrimaryButton}" Width="140"/>
-                                    <Button Content="切断" Command="{Binding StopTunnelCommand}" Margin="8,0,0,0" Width="80"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0"
-                                            Visibility="{Binding IsTunnelRunning, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
-                                    <Ellipse Width="8" Height="8" Fill="{DynamicResource BrushAccent}" VerticalAlignment="Center"/>
-                                    <TextBlock Text="トンネル接続中" Margin="6,0,0,0" VerticalAlignment="Center"
-                                               Foreground="{DynamicResource BrushAccent}" FontWeight="SemiBold"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- UPnP ポート開放 -->
-                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
-                            <StackPanel>
-                                <TextBlock Text="🔓 UPnP ポート操作（HTTP直接接続用）" FontWeight="SemiBold" FontSize="14"/>
-                                <TextBlock Text="HTTPS トンネル不使用の場合、UPnP でルーターのポートを開放します。"
-                                           Style="{StaticResource MutedText}" Margin="0,4,0,0"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                                    <Button Content="開放" Command="{Binding OpenPortCommand}" Width="110"/>
-                                    <Button Content="閉鎖" Command="{Binding ClosePortCommand}" Margin="8,0,0,0" Width="110"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
 
                     </StackPanel>
                 </ScrollViewer>

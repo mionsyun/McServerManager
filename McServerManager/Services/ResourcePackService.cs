@@ -20,8 +20,21 @@ public sealed class ResourcePackService : IResourcePackService
 
         _filePath = filePath;
         _listener = new HttpListener();
-        _listener.Prefixes.Add($"http://+:{port}/");
-        _listener.Start();
+
+        // http://+:{port}/ はURLACL登録なしでは管理者権限が必要。
+        // 失敗時は localhost にフォールバック（Cloudflareトンネル用途では十分）。
+        try
+        {
+            _listener.Prefixes.Add($"http://+:{port}/");
+            _listener.Start();
+        }
+        catch (HttpListenerException)
+        {
+            _listener.Close();
+            _listener = new HttpListener();
+            _listener.Prefixes.Add($"http://127.0.0.1:{port}/");
+            _listener.Start();
+        }
 
         _cts = new CancellationTokenSource();
         _loopTask = ServeLoopAsync(_cts.Token);

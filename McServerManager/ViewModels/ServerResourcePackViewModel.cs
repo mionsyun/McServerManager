@@ -30,6 +30,7 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
         _cloudflared = new CloudflaredService();
 
         BrowseFileCommand = new RelayCommand(_ => BrowseFile());
+        StartHttpsDistributionCommand = new AsyncRelayCommand(StartHttpsDistributionAsync, () => !_isBusy && !_isServerRunning && File.Exists(_resourcePackPath));
         StartServerCommand = new AsyncRelayCommand(StartServerAsync, () => !_isBusy && !_isServerRunning && File.Exists(_resourcePackPath));
         StopServerCommand = new AsyncRelayCommand(StopServerAsync, () => !_isBusy && _isServerRunning);
         RefreshPublicIpCommand = new AsyncRelayCommand(RefreshPublicIpAsync);
@@ -135,6 +136,7 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
     }
 
     // ─── コマンド ────────────────────────────────────────────────────
+    public AsyncRelayCommand StartHttpsDistributionCommand { get; }
     public AsyncRelayCommand StartServerCommand { get; }
     public AsyncRelayCommand StopServerCommand { get; }
     public AsyncRelayCommand RefreshPublicIpCommand { get; }
@@ -162,6 +164,13 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
         StatusMessage = string.Empty;
     }
 
+    private async Task StartHttpsDistributionAsync()
+    {
+        await StartServerAsync();
+        if (!_isServerRunning) return;
+        await StartTunnelAsync();
+    }
+
     private async Task StartServerAsync()
     {
         IsBusy = true;
@@ -175,9 +184,6 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
         catch (Exception ex)
         {
             StatusMessage = $"起動失敗: {ex.Message}";
-            _services.Dialog.Show(
-                $"HTTPサーバーの起動に失敗しました。\n管理者権限で起動するか、以下のコマンドを実行してください:\n\nnetsh http add urlacl url=http://+:{_httpPort}/ user=Everyone\n\n詳細: {ex.Message}",
-                "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
@@ -297,6 +303,7 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
 
     private void RefreshCommandStates()
     {
+        StartHttpsDistributionCommand.RaiseCanExecuteChanged();
         StartServerCommand.RaiseCanExecuteChanged();
         StopServerCommand.RaiseCanExecuteChanged();
         StartTunnelCommand.RaiseCanExecuteChanged();
@@ -308,7 +315,7 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
 
     private static void CopyToClipboard(string text)
     {
-        try { Clipboard.SetText(text); } catch { }
+        try { System.Windows.Clipboard.SetText(text); } catch { }
     }
 
     public void Dispose()
