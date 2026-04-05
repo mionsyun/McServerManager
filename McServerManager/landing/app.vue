@@ -15,7 +15,7 @@ const docsTroubleUrl = "/docs/troubleshooting";
 const docsPrivacyUrl = "/docs/privacy-and-network";
 const docsJavaUrl = "/docs/java-setup/";
 const boothUrl = "https://maipilot.booth.pm";
-const version = "1.0.3";
+const version = "1.0.6";
 
 const downloadOptionEvents: Record<string, string> = {
   local: "download_click",
