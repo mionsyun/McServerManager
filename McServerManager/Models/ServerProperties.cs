@@ -14,4 +14,6 @@ public sealed class ServerProperties
     public int SpawnProtection { get; set; } = 16;
     public string LevelName { get; set; } = "world";
     public string Seed { get; set; } = string.Empty;
+    public string ResourcePack { get; set; } = string.Empty;
+    public string ResourcePackSha1 { get; set; } = string.Empty;
 }

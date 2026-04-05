@@ -108,6 +108,10 @@ const translations = {
         title: "Safe apply flow",
         body: "Settings are saved instantly but applied after restart to prevent accidents.",
       },
+      {
+        title: "Resource pack hosting",
+        body: "Serve your resource pack over HTTPS with a built-in HTTP server and Cloudflare Quick Tunnel — no account needed. SHA-1 and server.properties applied automatically.",
+      },
     ],
     featuresAffiliateLabel: "Always-on hosting is an option if your PC cannot stay on.",
     featuresAffiliateCta: "Compare hosting options (PR)",
@@ -389,6 +393,10 @@ const translations = {
       {
         title: "安全な反映フロー",
         body: "変更は保存できるが反映は再起動後。事故を防ぎます。",
+      },
+      {
+        title: "リソースパック配布",
+        body: "内蔵HTTPサーバーとCloudflare Quick TunnelでHTTPS配信。アカウント不要・無料。SHA-1計算とserver.properties書き込みも自動。",
       },
     ],
     featuresAffiliateLabel: "PCをつけっぱなしにできない場合は、VPSという選択肢もあります。",

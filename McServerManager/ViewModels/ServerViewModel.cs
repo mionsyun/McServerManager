@@ -94,6 +94,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         World = new ServerWorldViewModel(_services, _config, _settings, () => Status);
         Addon = new ServerAddonViewModel(_services, _config);
         Network = new ServerNetworkViewModel(_services, _config, _appSettings);
+        ResourcePack = new ServerResourcePackViewModel(_services, _config);
 
         StartCommand = new AsyncRelayCommand(StartAsync, () => Status == ServerStatus.Stopped);
         StopCommand = new AsyncRelayCommand(StopAsync, () => Status != ServerStatus.Stopped);
@@ -152,6 +153,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     public ServerWorldViewModel World { get; }
     public ServerAddonViewModel Addon { get; }
     public ServerNetworkViewModel Network { get; }
+    public ServerResourcePackViewModel ResourcePack { get; }
 
     // ─── 識別情報 ────────────────────────────────────────────────
     public string Name => _config.Name;
@@ -1239,6 +1241,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         _runtime.StatusChanged -= OnStatusChanged;
         _runtime.LogReceived -= OnLogReceived;
         _statsTimer.Stop();
+        ResourcePack.Dispose();
         GC.SuppressFinalize(this);
     }
 }

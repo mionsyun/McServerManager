@@ -280,7 +280,13 @@
                                     BorderThickness="0"
                                     CornerRadius="10,10,0,0"
                                     Padding="12,6,12,6">
-                                <TabPanel IsItemsHost="True" VerticalAlignment="Center"/>
+                                <ScrollViewer HorizontalScrollBarVisibility="Hidden"
+                                              VerticalScrollBarVisibility="Disabled"
+                                              Focusable="False">
+                                    <StackPanel IsItemsHost="True"
+                                                Orientation="Horizontal"
+                                                VerticalAlignment="Center"/>
+                                </ScrollViewer>
                             </Border>
                             <Border Background="{DynamicResource BrushCard}"
                                     Padding="{TemplateBinding Padding}"

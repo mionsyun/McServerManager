@@ -17,7 +17,9 @@ public sealed class ServerPropertiesService : IServerPropertiesService
         ["view-distance"] = (p, v) => p.ViewDistance = ParseInt(v, 10),
         ["spawn-protection"] = (p, v) => p.SpawnProtection = ParseInt(v, 16),
         ["level-name"] = (p, v) => p.LevelName = v,
-        ["level-seed"] = (p, v) => p.Seed = v
+        ["level-seed"] = (p, v) => p.Seed = v,
+        ["resource-pack"] = (p, v) => p.ResourcePack = v,
+        ["resource-pack-sha1"] = (p, v) => p.ResourcePackSha1 = v
     };
 
     public ServerProperties Load(string serverDirectory, ServerConfig fallback)
@@ -85,7 +87,9 @@ public sealed class ServerPropertiesService : IServerPropertiesService
             ["view-distance"] = properties.ViewDistance.ToString(),
             ["spawn-protection"] = properties.SpawnProtection.ToString(),
             ["level-name"] = properties.LevelName,
-            ["level-seed"] = properties.Seed
+            ["level-seed"] = properties.Seed,
+            ["resource-pack"] = properties.ResourcePack,
+            ["resource-pack-sha1"] = properties.ResourcePackSha1
         };
 
         var lines = File.Exists(path) ? File.ReadAllLines(path).ToList() : new List<string>();
