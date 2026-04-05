@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>マイクラのポート開放できない時の対処法【2026年版・安全チェックリスト】 | MaiPilot</title>
+    <meta name="description" content="マイクラのポート開放できない原因TOP5と対処法。二重ルーター・ISP制限・Windowsファイアウォール・IPv6環境への対応を解説。代替手段も紹介。" />
+    <style>
+      :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
+      * { box-sizing:border-box; }
+      body { margin:0; padding:32px 16px; font-family:"Noto Sans JP","Segoe UI",sans-serif; color:var(--text); background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%); }
+      .wrap { max-width:980px; margin:0 auto; display:grid; gap:16px; }
+      .card { background:var(--panel); border:1px solid rgba(126,157,201,.25); border-radius:16px; padding:22px; }
+      .hero { background:linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)), var(--panel); }
+      .muted { color:var(--muted); }
+      .notice { background:rgba(255,209,102,.12); color:#ffd166; border-radius:10px; padding:10px 14px; font-weight:700; font-size:13px; margin-top:12px; }
+      .cta { border:1px solid rgba(102,255,136,.45); background:rgba(102,255,136,.08); }
+      .warn { background:rgba(255,100,100,.1); border:1px solid rgba(255,100,100,.3); border-radius:10px; padding:12px 16px; margin-top:10px; }
+      a { color:var(--accent2); text-decoration:none; }
+      h1,h2,h3 { margin:0 0 10px; }
+      ul,ol { margin:8px 0 0 18px; color:var(--muted); }
+      li { margin-bottom:4px; }
+      .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+      .chip { font-size:12px; padding:5px 10px; border:1px solid rgba(126,157,201,.35); border-radius:999px; color:var(--muted); }
+      .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+      .mini { background:var(--panel2); border:1px solid rgba(126,157,201,.25); border-radius:12px; padding:12px; }
+      .checklist { list-style:none; margin:8px 0 0 0; padding:0; display:grid; gap:6px; }
+      .checklist li { display:flex; align-items:flex-start; gap:8px; color:var(--muted); }
+      .checklist li::before { content:"☐"; flex-shrink:0; color:var(--accent); font-size:16px; line-height:1.4; }
+      .banner-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px; margin-top:10px; }
+      .banner-card { display:flex; flex-direction:column; align-items:flex-start; gap:8px; background:var(--panel2); border:1px solid rgba(126,157,201,.3); border-radius:12px; padding:12px; }
+      .banner-card.lp { border-color:rgba(255,209,102,.45); background:linear-gradient(135deg, rgba(255,209,102,.12), rgba(51,168,255,.08)), var(--panel2); }
+      .banner-pill { display:inline-block; width:max-content; font-size:11px; font-weight:700; border-radius:999px; padding:4px 8px; background:rgba(102,255,136,.16); color:var(--accent); }
+      .banner-pill.pr { background:rgba(255,209,102,.2); color:#ffd166; }
+      .banner-link { font-weight:700; }
+      .faq-list { margin:0; display:grid; gap:10px; }
+      .faq-list dt { font-weight:700; color:var(--text); }
+      .faq-list dd { margin:0; color:var(--muted); }
+      .step-num { display:inline-block; background:var(--accent); color:#000; font-weight:700; font-size:12px; border-radius:50%; width:22px; height:22px; text-align:center; line-height:22px; margin-right:6px; flex-shrink:0; }
+      .site-nav { position:sticky; top:0; z-index:100; background:rgba(11,15,23,.95); backdrop-filter:blur(8px); border-bottom:1px solid rgba(126,157,201,.15); padding:0 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; margin:-32px -16px 24px; height:52px; }
+      .nav-brand { font-weight:700; font-size:15px; color:var(--accent); text-decoration:none; letter-spacing:.02em; }
+      .nav-links { display:flex; gap:12px; align-items:center; }
+      .nav-links a { color:var(--muted); font-size:13px; text-decoration:none; }
+      .nav-links a:hover { color:var(--text); }
+      .nav-cta { background:rgba(102,255,136,.12); color:var(--accent)!important; border:1px solid rgba(102,255,136,.35); border-radius:8px; padding:5px 12px; font-weight:700; }
+    </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MM106D2B2Z');
+    </script>
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://www.maipilot.jp/docs/growth/port-kaihou-dekinai/" />
+    <meta property="og:title" content="マイクラのポート開放できない時の対処法【2026年版・安全チェックリスト】 | MaiPilot" />
+    <meta property="og:description" content="マイクラのポート開放できない原因TOP5と対処法。二重ルーター・ISP制限・Windowsファイアウォール・IPv6環境への対応を解説。代替手段も紹介。" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://www.maipilot.jp/docs/growth/port-kaihou-dekinai/" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="マイクラのポート開放できない時の対処法【2026年版】 | MaiPilot" />
+    <meta name="twitter:description" content="マイクラのポート開放できない原因TOP5と対処法。二重ルーター・ISP制限・Windowsファイアウォール・IPv6環境への対応を解説。" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:site_name" content="MaiPilot" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="article:published_time" content="2026-04-06T00:00:00+09:00" />
+    <meta property="article:modified_time" content="2026-04-06T00:00:00+09:00" />
+    <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.maipilot.jp/" },
+    { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://www.maipilot.jp/docs/" },
+    { "@type": "ListItem", "position": 3, "name": "Growth", "item": "https://www.maipilot.jp/docs/growth/" },
+    { "@type": "ListItem", "position": 4, "name": "マイクラのポート開放できない時の対処法", "item": "https://www.maipilot.jp/docs/growth/port-kaihou-dekinai/" }
+  ]
+}
+    </script>
+    <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "ポート開放するとハッキングされませんか？",
+      "acceptedAnswer": { "@type": "Answer", "text": "25565番ポートのみを適切に開放し、online-mode=trueでMicrosoftアカウント認証を有効にしていれば、通常のリスクは限定的です。ホワイトリスト設定も有効です。" }
+    },
+    {
+      "@type": "Question",
+      "name": "自分のIPアドレスが知られるのが心配です。",
+      "acceptedAnswer": { "@type": "Answer", "text": "直接IPアドレスを教える場合はその通りです。気になる場合はplayit.ggなどのトンネリングサービスを使うと、自分のIPを隠せます。" }
+    },
+    {
+      "@type": "Question",
+      "name": "ポート開放できているか確認する方法は？",
+      "acceptedAnswer": { "@type": "Answer", "text": "ポート確認ツールなどで外部からのアクセスをチェックできます。MaiPilotにも接続確認の案内があります。" }
+    },
+    {
+      "@type": "Question",
+      "name": "v6プラス・transix環境ではポート開放できませんか？",
+      "acceptedAnswer": { "@type": "Answer", "text": "v6プラスなどのIPv6接続環境では、通常のポート開放ができないことがあります。playit.ggなどのトンネリングサービスか、レンタルサーバーへの移行を検討してください。" }
+    }
+  ]
+}
+    </script>
+  </head>
+  <body>
+    <nav class="site-nav">
+      <a class="nav-brand" href="/">MaiPilot</a>
+      <div class="nav-links">
+        <a href="/">ホーム</a>
+        <a href="/docs/growth/">ガイド</a>
+        <a href="/?from=growth_port_kaihou#download" class="nav-cta" data-event="nav_download_click" data-source="growth_port_kaihou">ダウンロード</a>
+      </div>
+    </nav>
+    <main class="wrap">
+
+      <section class="card hero">
+        <a href="/docs/growth/">← ガイド一覧へ</a>
+        <h1>マイクラのポート開放できない時の対処法【2026年版・安全チェックリスト】</h1>
+        <p class="muted">マイクラサーバーを立てたのに友達が接続できない。その原因の多くはポート開放にあります。原因TOP5と対処法、代替手段まで解説します。</p>
+        <div class="chips">
+          <span class="chip">想定読了: 7分</span>
+          <span class="chip">対象: Windows 10/11</span>
+          <span class="chip">KW: ポート開放 できない</span>
+        </div>
+        <div class="notice">※この記事には広告・PRリンクを含みます。</div>
+      </section>
+
+      <section class="card">
+        <h2>30秒で結論</h2>
+        <ul>
+          <li>ポート開放できない原因の多くは<strong>二重ルーター</strong>か<strong>ISPの制限（v6プラス等）</strong>。</li>
+          <li>ISPの制限は解決できないので、その場合は<strong>playit.gg</strong>など代替手段を使う。</li>
+          <li>MaiPilotのUPnP補助機能でルーター管理画面に入らず開放できるケースもある。</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>ポート開放とは（30秒で理解）</h2>
+        <p class="muted">インターネットからあなたのPCへの通信は、ルーターが「門番」として制御しています。初期状態では外部からの接続はすべてブロックされています。</p>
+        <p class="muted" style="margin-top:8px">マイクラサーバーを外部公開するには、<strong>25565番ポートへの接続だけを通過させる</strong>ようルーターに設定する必要があります。これがポート開放です。</p>
+      </section>
+
+      <section class="card">
+        <h2>ポート開放できない原因 TOP5</h2>
+
+        <div class="mini" style="margin-bottom:10px">
+          <h3><span class="step-num">1</span>二重ルーター（最多）</h3>
+          <p class="muted">プロバイダ提供のONUやホームゲートウェイの後ろに、自分で買ったルーターをつないでいると、両方で設定が必要になります。</p>
+          <p class="muted" style="margin-top:6px"><strong>対処法：</strong>ルーターを1段にするか、プロバイダのホームゲートウェイのDMZ設定を使う。</p>
+        </div>
+
+        <div class="mini" style="margin-bottom:10px">
+          <h3><span class="step-num">2</span>ISPによるポート制限</h3>
+          <p class="muted">格安SIM回線やマンション共有回線では、そもそもポート開放ができない場合があります。</p>
+          <p class="muted" style="margin-top:6px"><strong>対処法：</strong>プロバイダに確認するか、後述のトンネリングサービスを使う。</p>
+        </div>
+
+        <div class="mini" style="margin-bottom:10px">
+          <h3><span class="step-num">3</span>Windowsファイアウォールのブロック</h3>
+          <p class="muted">ルーターの設定が正しくても、Windows側のファイアウォールがブロックしていることがあります。</p>
+          <p class="muted" style="margin-top:6px"><strong>対処法：</strong>「Windowsセキュリティ」→「ファイアウォール」→「アプリをファイアウォール経由で許可する」でJavaを許可する。</p>
+        </div>
+
+        <div class="mini" style="margin-bottom:10px">
+          <h3><span class="step-num">4</span>ポート番号の間違い</h3>
+          <p class="muted">server.propertiesのserver-portが25565以外なのに、ルーターは25565を開けているケース。</p>
+          <p class="muted" style="margin-top:6px"><strong>対処法：</strong>server.propertiesのserver-portとルーターの設定を一致させる。</p>
+        </div>
+
+        <div class="mini">
+          <h3><span class="step-num">5</span>IPv6環境（v6プラス・transix等）</h3>
+          <p class="muted">「v6プラス」「transix」などのIPv6接続環境では、ポート番号が固定されないため通常のポート開放ができないことがあります。</p>
+          <p class="muted" style="margin-top:6px"><strong>対処法：</strong>プロバイダの設定を確認するか、トンネリングサービスを利用する。</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>安全チェックリスト</h2>
+        <p class="muted">ポート開放前に以下を確認してください。</p>
+        <ul class="checklist">
+          <li>Windowsのファイアウォールで Java を許可している</li>
+          <li>server.propertiesの <code>online-mode=true</code> になっている（正規アカウントのみ接続可）</li>
+          <li><code>white-list=true</code> にして、知人のみ入れるようにしている</li>
+          <li>ルーターで開放するのは 25565/TCP のみ（不要なポートは開けない）</li>
+          <li>定期的にサーバーログを確認し、知らないアカウントが入っていないかチェックしている</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>どうしてもできない時の代替手段3選</h2>
+        <div class="grid">
+          <div class="mini">
+            <h3>MaiPilotのUPnP機能</h3>
+            <p class="muted">ルーターの管理画面に手動ログインしなくても、アプリの画面からUPnPを使ったポート開放を補助。UPnP対応ルーターであれば設定不要。</p>
+            <p style="margin-top:8px"><a href="/?from=growth_port_kaihou_upnp" data-event="growth_download_click" data-source="growth_port_kaihou" data-label="upnp">MaiPilotを試す →</a></p>
+          </div>
+          <div class="mini">
+            <h3>playit.gg（無料トンネリング）</h3>
+            <p class="muted">ポート開放なしでマイクラサーバーを公開できる無料サービス。専用アドレスが発行され、友達はそのアドレスに接続するだけ。</p>
+          </div>
+          <div class="mini">
+            <h3>レンタルサーバー（VPS）</h3>
+            <p class="muted">ポート開放の問題を根本的に回避。月500〜2,000円程度で24時間稼働も可能。</p>
+            <p style="margin-top:8px"><a href="/docs/24-7-hosting/" data-event="docs_24_7_hosting_click" data-source="growth_port_kaihou" data-label="vps">VPS比較を見る（PR） →</a></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>よくある質問</h2>
+        <dl class="faq-list">
+          <dt data-faq-question>ポート開放するとハッキングされませんか？</dt>
+          <dd data-faq-answer>25565番ポートのみを適切に開放し、online-mode=trueでMicrosoftアカウント認証を有効にしていれば、通常のリスクは限定的です。ホワイトリスト設定も有効です。</dd>
+          <dt data-faq-question>自分のIPアドレスが知られるのが心配です。</dt>
+          <dd data-faq-answer>直接IPアドレスを教える場合はその通りです。気になる場合はplayit.ggなどのトンネリングサービスを使うと、自分のIPを隠せます。</dd>
+          <dt data-faq-question>ポート開放できているか確認する方法は？</dt>
+          <dd data-faq-answer>「ポート確認ツール」で外部からのアクセスをチェックできます。MaiPilotにも接続確認の案内があります。</dd>
+          <dt data-faq-question>v6プラス・transix環境ではポート開放できませんか？</dt>
+          <dd data-faq-answer>v6プラスなどのIPv6接続環境では、通常のポート開放ができないことがあります。playit.ggなどのトンネリングサービスか、レンタルサーバーへの移行を検討してください。</dd>
+        </dl>
+      </section>
+
+      <section class="card cta">
+        <h2>MaiPilotのポート開放補助機能</h2>
+        <ul>
+          <li>UPnP対応ルーターならアプリ画面からポート開放を補助</li>
+          <li>ルーターの管理画面に手動でログイン不要</li>
+          <li>接続確認の案内も内蔵</li>
+          <li>完全日本語対応・無料ダウンロード</li>
+        </ul>
+        <p>
+          <a href="/?from=growth_port_kaihou" data-event="growth_download_click" data-source="growth_port_kaihou" data-label="cta_download">MaiPilotを無料ダウンロード →</a>
+          &nbsp;／&nbsp;
+          <a href="https://maipilot.booth.pm/" target="_blank" rel="noopener noreferrer" data-event="booth_click" data-source="growth_port_kaihou" data-label="cta_booth">開発を応援する（BOOTH）</a>
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>次に読む</h2>
+        <div class="banner-grid">
+          <article class="banner-card">
+            <span class="banner-pill">関連記事</span>
+            <p class="muted">サーバーの立て方から確認したい方はこちら。</p>
+            <a class="banner-link" href="/docs/growth/minecraft-server-tatekkata-2026/" data-event="growth_article_click" data-source="growth_port_kaihou" data-label="next_tatekkata">マイクラサーバーの立て方（2026年版） →</a>
+          </article>
+          <article class="banner-card">
+            <span class="banner-pill">関連記事</span>
+            <p class="muted">接続できない時の総合トラブルシューティング。</p>
+            <a class="banner-link" href="/docs/troubleshooting/" data-event="growth_article_click" data-source="growth_port_kaihou" data-label="next_trouble">接続トラブルシューティング →</a>
+          </article>
+          <article class="banner-card lp">
+            <span class="banner-pill pr">PR</span>
+            <p class="muted">ポート開放の手間をなくすならVPSも選択肢。</p>
+            <a class="banner-link" href="/docs/24-7-hosting/?from=growth_port_kaihou_lp" data-event="docs_24_7_hosting_click" data-source="growth_port_kaihou" data-label="lp_banner">24時間運用VPS比較LPを見る（PR） →</a>
+          </article>
+        </div>
+      </section>
+
+    </main>
+    <script>
+      const trackEvent = ({ event_name, link_url, link_text, source }) => {
+        const win = window;
+        if (typeof win.gtag === "function") {
+          win.gtag("event", event_name, { event_category: source || "cta", event_label: link_text || link_url || "", link_url });
+          return;
+        }
+        if (Array.isArray(win.dataLayer)) {
+          win.dataLayer.push({ event: event_name, link_url, link_text, source: source || "cta" });
+        }
+      };
+      document.addEventListener("click", (event) => {
+        const link = event.target?.closest?.("a");
+        if (!link) return;
+        const eventName = link.getAttribute("data-event");
+        const href = link.getAttribute("href") || "";
+        const label = link.getAttribute("data-label");
+        const text = label || (link.textContent?.trim() ?? "");
+        const source = link.getAttribute("data-source") || "cta";
+        if (eventName) trackEvent({ event_name: eventName, link_url: href, link_text: text, source });
+        const rel = (link.getAttribute("rel") || "").toLowerCase();
+        if (rel.includes("sponsored") && eventName !== "outbound_affiliate_click") {
+          trackEvent({ event_name: "outbound_affiliate_click", link_url: href, link_text: text, source: "affiliate" });
+        }
+      }, { passive: true });
+    </script>
+  </body>
+</html>
