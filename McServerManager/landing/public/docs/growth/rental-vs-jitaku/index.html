@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>マイクラサーバーはレンタルと自宅PCどっちがいい？コスト・手間・自由度を徹底比較 | MaiPilot</title>
+    <meta name="description" content="マイクラサーバーをレンタルサーバー（VPS）と自宅PCで比較。1年間の総費用・セットアップの手間・自由度を正直に解説。どちらが向いているか判定フロー付き。" />
+    <style>
+      :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
+      * { box-sizing:border-box; }
+      body { margin:0; padding:32px 16px; font-family:"Noto Sans JP","Segoe UI",sans-serif; color:var(--text); background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%); }
+      .wrap { max-width:980px; margin:0 auto; display:grid; gap:16px; }
+      .card { background:var(--panel); border:1px solid rgba(126,157,201,.25); border-radius:16px; padding:22px; }
+      .hero { background:linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)), var(--panel); }
+      .muted { color:var(--muted); }
+      .notice { background:rgba(255,209,102,.12); color:#ffd166; border-radius:10px; padding:10px 14px; font-weight:700; font-size:13px; margin-top:12px; }
+      .cta { border:1px solid rgba(102,255,136,.45); background:rgba(102,255,136,.08); }
+      a { color:var(--accent2); text-decoration:none; }
+      h1,h2,h3 { margin:0 0 10px; }
+      ul,ol { margin:8px 0 0 18px; color:var(--muted); }
+      li { margin-bottom:4px; }
+      .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+      .chip { font-size:12px; padding:5px 10px; border:1px solid rgba(126,157,201,.35); border-radius:999px; color:var(--muted); }
+      .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+      .mini { background:var(--panel2); border:1px solid rgba(126,157,201,.25); border-radius:12px; padding:12px; }
+      .table-wrap { overflow-x:auto; margin-top:10px; }
+      table { border-collapse:collapse; width:100%; font-size:14px; }
+      th,td { border:1px solid rgba(126,157,201,.25); padding:8px 12px; text-align:left; }
+      th { background:var(--panel2); color:var(--text); }
+      td { color:var(--muted); }
+      .judge { background:var(--panel2); border:1px solid rgba(102,255,136,.3); border-radius:12px; padding:16px; }
+      .judge h3 { color:var(--accent); margin:0 0 8px; }
+      .banner-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px; margin-top:10px; }
+      .banner-card { display:flex; flex-direction:column; align-items:flex-start; gap:8px; background:var(--panel2); border:1px solid rgba(126,157,201,.3); border-radius:12px; padding:12px; }
+      .banner-card.lp { border-color:rgba(255,209,102,.45); background:linear-gradient(135deg, rgba(255,209,102,.12), rgba(51,168,255,.08)), var(--panel2); }
+      .banner-pill { display:inline-block; width:max-content; font-size:11px; font-weight:700; border-radius:999px; padding:4px 8px; background:rgba(102,255,136,.16); color:var(--accent); }
+      .banner-pill.pr { background:rgba(255,209,102,.2); color:#ffd166; }
+      .banner-link { font-weight:700; }
+      .faq-list { margin:0; display:grid; gap:10px; }
+      .faq-list dt { font-weight:700; color:var(--text); }
+      .faq-list dd { margin:0; color:var(--muted); }
+      .site-nav { position:sticky; top:0; z-index:100; background:rgba(11,15,23,.95); backdrop-filter:blur(8px); border-bottom:1px solid rgba(126,157,201,.15); padding:0 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; margin:-32px -16px 24px; height:52px; }
+      .nav-brand { font-weight:700; font-size:15px; color:var(--accent); text-decoration:none; letter-spacing:.02em; }
+      .nav-links { display:flex; gap:12px; align-items:center; }
+      .nav-links a { color:var(--muted); font-size:13px; text-decoration:none; }
+      .nav-links a:hover { color:var(--text); }
+      .nav-cta { background:rgba(102,255,136,.12); color:var(--accent)!important; border:1px solid rgba(102,255,136,.35); border-radius:8px; padding:5px 12px; font-weight:700; }
+    </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MM106D2B2Z');
+    </script>
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://www.maipilot.jp/docs/growth/rental-vs-jitaku/" />
+    <meta property="og:title" content="マイクラサーバーはレンタルと自宅PCどっちがいい？コスト・手間・自由度を徹底比較 | MaiPilot" />
+    <meta property="og:description" content="マイクラサーバーをレンタルサーバー（VPS）と自宅PCで比較。1年間の総費用・セットアップの手間・自由度を正直に解説。どちらが向いているか判定フロー付き。" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://www.maipilot.jp/docs/growth/rental-vs-jitaku/" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="マイクラサーバー レンタルvs自宅PC どっちがいい？ | MaiPilot" />
+    <meta name="twitter:description" content="1年間の総費用・手間・自由度を正直に比較。判定フロー付き。" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:site_name" content="MaiPilot" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="article:published_time" content="2026-04-06T00:00:00+09:00" />
+    <meta property="article:modified_time" content="2026-04-06T00:00:00+09:00" />
+    <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.maipilot.jp/" },
+    { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://www.maipilot.jp/docs/" },
+    { "@type": "ListItem", "position": 3, "name": "Growth", "item": "https://www.maipilot.jp/docs/growth/" },
+    { "@type": "ListItem", "position": 4, "name": "マイクラサーバー レンタルvs自宅PC 比較", "item": "https://www.maipilot.jp/docs/growth/rental-vs-jitaku/" }
+  ]
+}
+    </script>
+    <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "ConoHa VPSやXserver VPSなどどのレンタルサーバーがおすすめですか？",
+      "acceptedAnswer": { "@type": "Answer", "text": "ConoHa VPSやXserver VPSはマイクラサーバー向けのテンプレートが用意されており、初心者にも比較的セットアップしやすいです。" }
+    },
+    {
+      "@type": "Question",
+      "name": "自宅PCでサーバーを立てると電気代はどのくらい増えますか？",
+      "acceptedAnswer": { "@type": "Answer", "text": "一般的なゲーミングPCをサーバー用途で動かした場合、月200〜500円程度の増加が目安です（使用時間・スペックによって異なります）。" }
+    },
+    {
+      "@type": "Question",
+      "name": "自宅PCとレンタルサーバーを途中で切り替えられますか？",
+      "acceptedAnswer": { "@type": "Answer", "text": "ワールドデータをエクスポート・インポートすることで移行できます。バックアップさえとっておけば乗り換えは難しくありません。" }
+    },
+    {
+      "@type": "Question",
+      "name": "友達が多く参加する場合はどちらがいいですか？",
+      "acceptedAnswer": { "@type": "Answer", "text": "10人以上が常時接続する場合はレンタルサーバーが安定します。5人以下で週末のみであれば、スペックのあるPCなら自宅PCでも問題ありません。" }
+    }
+  ]
+}
+    </script>
+  </head>
+  <body>
+    <nav class="site-nav">
+      <a class="nav-brand" href="/">MaiPilot</a>
+      <div class="nav-links">
+        <a href="/">ホーム</a>
+        <a href="/docs/growth/">ガイド</a>
+        <a href="/?from=growth_rental_vs#download" class="nav-cta" data-event="nav_download_click" data-source="growth_rental_vs">ダウンロード</a>
+      </div>
+    </nav>
+    <main class="wrap">
+
+      <section class="card hero">
+        <a href="/docs/growth/">← ガイド一覧へ</a>
+        <h1>マイクラサーバーはレンタルと自宅PCどっちがいい？コスト・手間・自由度を徹底比較</h1>
+        <p class="muted">レンタルサーバー（VPS）と自宅PCで迷っている方向け。1年間の総費用・手間・自由度を正直に比較します。</p>
+        <div class="chips">
+          <span class="chip">想定読了: 6分</span>
+          <span class="chip">KW: レンタル 自宅 比較</span>
+          <span class="chip">判定フロー付き</span>
+        </div>
+        <div class="notice">※この記事には広告・PRリンクを含みます。</div>
+      </section>
+
+      <section class="card">
+        <h2>30秒で結論</h2>
+        <ul>
+          <li>週末・夜だけ遊ぶなら<strong>自宅PCが圧倒的にコスパが高い</strong>（1年ほぼ0円 vs レンタル6,000〜24,000円）。</li>
+          <li>24時間稼働・10人以上常時接続ならレンタルサーバーが安定。</li>
+          <li>自宅PCで立てるなら、MaiPilotでセットアップの手間を大幅に削減できる。</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>レンタルサーバー（VPS）のメリット・デメリット</h2>
+        <div class="grid">
+          <div class="mini">
+            <h3 style="color:var(--accent)">メリット</h3>
+            <ul>
+              <li>24時間稼働できる</li>
+              <li>自分のPCへの負荷がない</li>
+              <li>ポート開放不要</li>
+              <li>電気代が増えない</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h3 style="color:#ff6464">デメリット</h3>
+            <ul>
+              <li>月額費用がかかる（500〜2,000円）</li>
+              <li>SSH・コマンド操作の知識が必要</li>
+              <li>データが外部にある</li>
+              <li>プラン変更にコストがかかる</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>自宅PCのメリット・デメリット</h2>
+        <div class="grid">
+          <div class="mini">
+            <h3 style="color:var(--accent)">メリット</h3>
+            <ul>
+              <li>費用がほぼゼロ</li>
+              <li>自由なカスタマイズ</li>
+              <li>データが手元にある</li>
+              <li>スペックアップが自由</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h3 style="color:#ff6464">デメリット</h3>
+            <ul>
+              <li>PCを起動したままにする必要がある</li>
+              <li>ポート開放が必要</li>
+              <li>停電・PC故障リスク</li>
+              <li>初期セットアップに手順がある</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>1年間の総費用比較</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th>自宅PC + MaiPilot</th><th>レンタルサーバー（VPS）</th></tr></thead>
+            <tbody>
+              <tr><td>初期費用</td><td>0円</td><td>0〜2,000円</td></tr>
+              <tr><td>月額費用</td><td>0円（電気代除く）</td><td>500〜2,000円</td></tr>
+              <tr><td><strong>1年間の目安</strong></td><td><strong>ほぼ0円</strong></td><td><strong>6,000〜24,000円</strong></td></tr>
+              <tr><td>電気代（目安）</td><td>月200〜500円増</td><td>変化なし</td></tr>
+              <tr><td>24時間稼働</td><td>△ PC起動中のみ</td><td>○</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>あなたはどっちが向いている？</h2>
+        <div class="grid">
+          <div class="judge">
+            <h3>レンタルサーバーが向いている人</h3>
+            <ul>
+              <li>24時間ずっとサーバーを動かしたい</li>
+              <li>自分のPCのスペックが低い（RAM 8GB未満）</li>
+              <li>ポート開放がどうしてもできない環境にいる</li>
+              <li>コマンド操作が好き・勉強したい</li>
+              <li>10人以上が常時接続する</li>
+            </ul>
+          </div>
+          <div class="judge" style="border-color:rgba(51,168,255,.3)">
+            <h3 style="color:var(--accent2)">自宅PCが向いている人</h3>
+            <ul>
+              <li>週末や夜だけ友達と遊ぶ程度</li>
+              <li>とにかく費用を抑えたい</li>
+              <li>PCのスペックに余裕がある（RAM 16GB以上推奨）</li>
+              <li>GUIで簡単に管理したい</li>
+              <li>5人以下の少人数で遊ぶ</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>自宅PCで立てるならMaiPilotが便利</h2>
+        <p class="muted">自宅PCを選んだ場合、セットアップの手間を大幅に減らせるのが<strong>MaiPilot</strong>（Windows向け、日本語対応・無料）です。</p>
+        <ul>
+          <li>完全日本語GUIでサーバーを起動・停止・管理</li>
+          <li>ポート開放補助機能（UPnP対応）</li>
+          <li>自動バックアップのスケジュール設定</li>
+          <li>Vanilla・Paper・Forge・Fabric対応</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>よくある質問</h2>
+        <dl class="faq-list">
+          <dt data-faq-question>ConoHa VPSやXserver VPSなど、どのレンタルサーバーがおすすめですか？</dt>
+          <dd data-faq-answer>ConoHa VPSやXserver VPSはマイクラサーバー向けのテンプレートが用意されており、初心者にも比較的セットアップしやすいです。24時間稼働したい場合の選択肢として参考にしてください。</dd>
+          <dt data-faq-question>自宅PCでサーバーを立てると、電気代はどのくらい増えますか？</dt>
+          <dd data-faq-answer>一般的なゲーミングPCをサーバー用途で動かした場合、月200〜500円程度の増加が目安です（使用時間・スペックによって大きく異なります）。</dd>
+          <dt data-faq-question>自宅PCとレンタルサーバーを途中で切り替えられますか？</dt>
+          <dd data-faq-answer>ワールドデータをエクスポート・インポートすることで移行できます。バックアップさえとっておけば乗り換えは難しくありません。</dd>
+          <dt data-faq-question>友達が多く参加する場合はどちらがいいですか？</dt>
+          <dd data-faq-answer>10人以上が常時接続する場合はレンタルサーバーが安定します。5人以下で週末のみであれば、スペックのあるPCなら自宅PCでも問題ありません。</dd>
+        </dl>
+      </section>
+
+      <section class="card cta">
+        <h2>まとめ：自宅PCで立てるならMaiPilotを使う</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th>自宅PC</th><th>レンタルサーバー</th></tr></thead>
+            <tbody>
+              <tr><td>コスト</td><td>◎ ほぼ無料</td><td>△ 月500〜2,000円</td></tr>
+              <tr><td>セットアップ</td><td>○ ツール活用で簡単</td><td>△ コマンド操作が必要</td></tr>
+              <tr><td>24時間稼働</td><td>△</td><td>◎</td></tr>
+              <tr><td>自由度</td><td>◎</td><td>○</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin-top:12px">
+          <a href="/?from=growth_rental_vs" data-event="growth_download_click" data-source="growth_rental_vs" data-label="cta_download">MaiPilotを無料ダウンロード →</a>
+          &nbsp;／&nbsp;
+          <a href="https://maipilot.booth.pm/" target="_blank" rel="noopener noreferrer" data-event="booth_click" data-source="growth_rental_vs" data-label="cta_booth">開発を応援する（BOOTH）</a>
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>次に読む</h2>
+        <div class="banner-grid">
+          <article class="banner-card">
+            <span class="banner-pill">関連記事</span>
+            <p class="muted">自宅PCでのセットアップ手順はこちら。</p>
+            <a class="banner-link" href="/docs/growth/minecraft-server-tatekkata-2026/" data-event="growth_article_click" data-source="growth_rental_vs" data-label="next_tatekkata">マイクラサーバーの立て方（2026年版） →</a>
+          </article>
+          <article class="banner-card">
+            <span class="banner-pill">関連記事</span>
+            <p class="muted">ポート開放でつまずいた方はこちら。</p>
+            <a class="banner-link" href="/docs/growth/port-kaihou-dekinai/" data-event="growth_article_click" data-source="growth_rental_vs" data-label="next_port">ポート開放できない時の対処法 →</a>
+          </article>
+          <article class="banner-card lp">
+            <span class="banner-pill pr">PR</span>
+            <p class="muted">レンタルサーバーを詳しく比較したい方はこちら。</p>
+            <a class="banner-link" href="/docs/24-7-hosting/?from=growth_rental_vs_lp" data-event="docs_24_7_hosting_click" data-source="growth_rental_vs" data-label="lp_banner">24時間運用VPS比較LPを見る（PR） →</a>
+          </article>
+        </div>
+      </section>
+
+    </main>
+    <script>
+      const trackEvent = ({ event_name, link_url, link_text, source }) => {
+        const win = window;
+        if (typeof win.gtag === "function") {
+          win.gtag("event", event_name, { event_category: source || "cta", event_label: link_text || link_url || "", link_url });
+          return;
+        }
+        if (Array.isArray(win.dataLayer)) {
+          win.dataLayer.push({ event: event_name, link_url, link_text, source: source || "cta" });
+        }
+      };
+      document.addEventListener("click", (event) => {
+        const link = event.target?.closest?.("a");
+        if (!link) return;
+        const eventName = link.getAttribute("data-event");
+        const href = link.getAttribute("href") || "";
+        const label = link.getAttribute("data-label");
+        const text = label || (link.textContent?.trim() ?? "");
+        const source = link.getAttribute("data-source") || "cta";
+        if (eventName) trackEvent({ event_name: eventName, link_url: href, link_text: text, source });
+        const rel = (link.getAttribute("rel") || "").toLowerCase();
+        if (rel.includes("sponsored") && eventName !== "outbound_affiliate_click") {
+          trackEvent({ event_name: "outbound_affiliate_click", link_url: href, link_text: text, source: "affiliate" });
+        }
+      }, { passive: true });
+    </script>
+  </body>
+</html>
