@@ -12,6 +12,7 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
     private readonly AppServices _services;
     private readonly ServerConfig _config;
     private readonly IResourcePackService _resourcePackService;
+    private readonly ICloudflaredService _cloudflared;
 
     private string _resourcePackPath = string.Empty;
     private int _httpPort = 8000;
@@ -26,11 +27,14 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
         _services = services;
         _config = config;
         _resourcePackService = new ResourcePackService();
+        _cloudflared = new CloudflaredService();
 
         BrowseFileCommand = new RelayCommand(_ => BrowseFile());
         StartServerCommand = new AsyncRelayCommand(StartServerAsync, () => !_isBusy && !_isServerRunning && File.Exists(_resourcePackPath));
         StopServerCommand = new AsyncRelayCommand(StopServerAsync, () => !_isBusy && _isServerRunning);
         RefreshPublicIpCommand = new AsyncRelayCommand(RefreshPublicIpAsync);
+        StartTunnelCommand = new AsyncRelayCommand(StartTunnelAsync, () => !_isBusy && _isServerRunning && !_cloudflared.IsRunning);
+        StopTunnelCommand = new AsyncRelayCommand(StopTunnelAsync, () => !_isBusy && _cloudflared.IsRunning);
         CopyUrlCommand = new RelayCommand(_ => CopyToClipboard(ResourcePackUrl), _ => !string.IsNullOrEmpty(ResourcePackUrl));
         CopySha1Command = new RelayCommand(_ => CopyToClipboard(_sha1Hash), _ => !string.IsNullOrEmpty(_sha1Hash));
         ApplyToPropertiesCommand = new AsyncRelayCommand(ApplyToPropertiesAsync, () => !string.IsNullOrEmpty(ResourcePackUrl));
@@ -38,6 +42,7 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
         ClosePortCommand = new AsyncRelayCommand(ClosePortAsync);
     }
 
+    // ─── ファイル ───────────────────────────────────────────────────
     public string ResourcePackPath
     {
         get => _resourcePackPath;
@@ -56,6 +61,13 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
     public string ResourcePackFileName =>
         string.IsNullOrEmpty(_resourcePackPath) ? "（未選択）" : Path.GetFileName(_resourcePackPath);
 
+    public string Sha1Hash
+    {
+        get => _sha1Hash;
+        private set => SetProperty(ref _sha1Hash, value);
+    }
+
+    // ─── HTTP サーバー ───────────────────────────────────────────────
     public int HttpPort
     {
         get => _httpPort;
@@ -76,6 +88,10 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
         }
     }
 
+    // ─── HTTPS トンネル ──────────────────────────────────────────────
+    public bool IsTunnelRunning => _cloudflared.IsRunning;
+
+    // ─── URL / IP ────────────────────────────────────────────────────
     public string PublicIp
     {
         get => _publicIp;
@@ -86,17 +102,22 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
         }
     }
 
-    public string ResourcePackUrl =>
-        _publicIp == "-" || string.IsNullOrEmpty(_resourcePackPath)
-            ? string.Empty
-            : $"http://{_publicIp}:{_httpPort}/{Path.GetFileName(_resourcePackPath)}";
-
-    public string Sha1Hash
+    /// <summary>トンネルURL（HTTPS）を優先し、なければ直接IPのHTTP URLを返す。</summary>
+    public string ResourcePackUrl
     {
-        get => _sha1Hash;
-        private set => SetProperty(ref _sha1Hash, value);
+        get
+        {
+            if (string.IsNullOrEmpty(_resourcePackPath)) return string.Empty;
+            var filename = Path.GetFileName(_resourcePackPath);
+            if (!string.IsNullOrEmpty(_cloudflared.TunnelUrl))
+                return $"{_cloudflared.TunnelUrl}/{filename}";
+            if (_publicIp != "-")
+                return $"http://{_publicIp}:{_httpPort}/{filename}";
+            return string.Empty;
+        }
     }
 
+    // ─── ステータス ──────────────────────────────────────────────────
     public string StatusMessage
     {
         get => _statusMessage;
@@ -113,9 +134,12 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
         }
     }
 
+    // ─── コマンド ────────────────────────────────────────────────────
     public AsyncRelayCommand StartServerCommand { get; }
     public AsyncRelayCommand StopServerCommand { get; }
     public AsyncRelayCommand RefreshPublicIpCommand { get; }
+    public AsyncRelayCommand StartTunnelCommand { get; }
+    public AsyncRelayCommand StopTunnelCommand { get; }
     public AsyncRelayCommand ApplyToPropertiesCommand { get; }
     public AsyncRelayCommand OpenPortCommand { get; }
     public AsyncRelayCommand ClosePortCommand { get; }
@@ -163,6 +187,9 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
 
     private async Task StopServerAsync()
     {
+        if (_cloudflared.IsRunning)
+            await StopTunnelAsync();
+
         IsBusy = true;
         StatusMessage = "HTTPサーバーを停止中...";
         try
@@ -175,6 +202,44 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
         {
             IsBusy = false;
         }
+    }
+
+    private async Task StartTunnelAsync()
+    {
+        IsBusy = true;
+        var progress = new Progress<string>(msg => StatusMessage = msg);
+        try
+        {
+            await _cloudflared.EnsureInstalledAsync(progress);
+            await _cloudflared.StartTunnelAsync(_httpPort, progress);
+            OnPropertyChanged(nameof(IsTunnelRunning));
+            OnPropertyChanged(nameof(ResourcePackUrl));
+            StatusMessage = "HTTPS トンネル接続済み";
+            RefreshCommandStates();
+        }
+        catch (OperationCanceledException)
+        {
+            StatusMessage = "トンネル確立タイムアウト";
+            _services.Dialog.Show("HTTPS トンネルの確立がタイムアウトしました。\nネットワーク環境を確認してください。", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"トンネル失敗: {ex.Message}";
+            _services.Dialog.Show($"HTTPS トンネルの起動に失敗しました:\n{ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task StopTunnelAsync()
+    {
+        await _cloudflared.StopAsync();
+        OnPropertyChanged(nameof(IsTunnelRunning));
+        OnPropertyChanged(nameof(ResourcePackUrl));
+        StatusMessage = "トンネルを切断しました";
+        RefreshCommandStates();
     }
 
     private async Task RefreshPublicIpAsync()
@@ -195,14 +260,12 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
             props.ResourcePackSha1 = _sha1Hash;
             _services.Properties.Save(_config.DirectoryPath, props);
             _services.Dialog.Show(
-                $"server.properties にリソースパック設定を書き込みました。\n\nresource-pack={ResourcePackUrl}\nresource-pack-sha1={_sha1Hash}",
+                $"server.properties に書き込みました。\n\nresource-pack={ResourcePackUrl}\nresource-pack-sha1={_sha1Hash}",
                 "完了", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            _services.Dialog.Show(
-                $"server.properties への書き込みに失敗しました: {ex.Message}",
-                "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            _services.Dialog.Show($"書き込みに失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         await Task.CompletedTask;
@@ -213,9 +276,7 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
         var (ok, error) = await _services.Upnp.TryOpenPortAsync(_httpPort, $"MaiPilot_ResourcePack_{_config.Name}");
         if (!ok)
         {
-            _services.Dialog.Show(
-                error ?? "ポート開放に失敗しました。",
-                "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+            _services.Dialog.Show(error ?? "ポート開放に失敗しました。", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
         _services.Dialog.Show($"TCP {_httpPort} のポート開放を実行しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -229,25 +290,17 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
 
     private void RefreshSha1()
     {
-        if (!File.Exists(_resourcePackPath))
-        {
-            Sha1Hash = string.Empty;
-            return;
-        }
-        try
-        {
-            Sha1Hash = _resourcePackService.ComputeSha1(_resourcePackPath);
-        }
-        catch
-        {
-            Sha1Hash = string.Empty;
-        }
+        if (!File.Exists(_resourcePackPath)) { Sha1Hash = string.Empty; return; }
+        try { Sha1Hash = _resourcePackService.ComputeSha1(_resourcePackPath); }
+        catch { Sha1Hash = string.Empty; }
     }
 
     private void RefreshCommandStates()
     {
         StartServerCommand.RaiseCanExecuteChanged();
         StopServerCommand.RaiseCanExecuteChanged();
+        StartTunnelCommand.RaiseCanExecuteChanged();
+        StopTunnelCommand.RaiseCanExecuteChanged();
         CopyUrlCommand.RaiseCanExecuteChanged();
         CopySha1Command.RaiseCanExecuteChanged();
         ApplyToPropertiesCommand.RaiseCanExecuteChanged();
@@ -255,13 +308,13 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
 
     private static void CopyToClipboard(string text)
     {
-        try { Clipboard.SetText(text); }
-        catch { }
+        try { Clipboard.SetText(text); } catch { }
     }
 
     public void Dispose()
     {
         if (_isServerRunning)
             _ = _resourcePackService.StopAsync();
+        _cloudflared.Dispose();
     }
 }
