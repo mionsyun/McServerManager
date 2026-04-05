@@ -942,6 +942,47 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="12" DataContext="{Binding ResourcePack}">
 
+                        <!-- 概要カード -->
+                        <Border Style="{StaticResource SurfacePanel}">
+                            <StackPanel>
+                                <TextBlock Text="📦 リソースパック自動配布" FontWeight="Bold" FontSize="16"/>
+                                <TextBlock Margin="0,6,0,0" TextWrapping="Wrap"
+                                           Style="{StaticResource MutedText}">
+                                    リソースパック（テクスチャ・サウンドのカスタマイズZIP）をプレイヤーに自動ダウンロードさせる機能です。
+                                    URLを server.properties に書き込むことで、サーバー参加時にプレイヤーへ自動配布されます。
+                                </TextBlock>
+                                <!-- ステップフロー -->
+                                <Border Margin="0,12,0,0"
+                                        Background="{DynamicResource BrushCard}"
+                                        BorderBrush="{DynamicResource BrushBorder}"
+                                        BorderThickness="1"
+                                        CornerRadius="10"
+                                        Padding="12,10">
+                                    <WrapPanel>
+                                        <Border Background="{DynamicResource BrushAccentSoft}" CornerRadius="6" Padding="8,4" Margin="0,2,6,2">
+                                            <TextBlock Text="① ZIPを選択" FontSize="12" Foreground="{DynamicResource BrushAccent}" FontWeight="SemiBold"/>
+                                        </Border>
+                                        <TextBlock Text="→" VerticalAlignment="Center" Margin="0,0,6,0" Style="{StaticResource MutedText}"/>
+                                        <Border Background="{DynamicResource BrushAccentSoft}" CornerRadius="6" Padding="8,4" Margin="0,2,6,2">
+                                            <TextBlock Text="② HTTPサーバー起動" FontSize="12" Foreground="{DynamicResource BrushAccent}" FontWeight="SemiBold"/>
+                                        </Border>
+                                        <TextBlock Text="→" VerticalAlignment="Center" Margin="0,0,6,0" Style="{StaticResource MutedText}"/>
+                                        <Border Background="{DynamicResource BrushAccentSoft}" CornerRadius="6" Padding="8,4" Margin="0,2,6,2">
+                                            <TextBlock Text="③ HTTPS有効化（推奨）" FontSize="12" Foreground="{DynamicResource BrushAccent}" FontWeight="SemiBold"/>
+                                        </Border>
+                                        <TextBlock Text="→" VerticalAlignment="Center" Margin="0,0,6,0" Style="{StaticResource MutedText}"/>
+                                        <Border Background="{DynamicResource BrushAccentSoft}" CornerRadius="6" Padding="8,4" Margin="0,2,6,2">
+                                            <TextBlock Text="④ URLをコピー" FontSize="12" Foreground="{DynamicResource BrushAccent}" FontWeight="SemiBold"/>
+                                        </Border>
+                                        <TextBlock Text="→" VerticalAlignment="Center" Margin="0,0,6,0" Style="{StaticResource MutedText}"/>
+                                        <Border Background="{DynamicResource BrushAccentSoft}" CornerRadius="6" Padding="8,4" Margin="0,2,6,2">
+                                            <TextBlock Text="⑤ server.propertiesに適用" FontSize="12" Foreground="{DynamicResource BrushAccent}" FontWeight="SemiBold"/>
+                                        </Border>
+                                    </WrapPanel>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+
                         <!-- ファイル選択 -->
                         <Border Style="{StaticResource SurfacePanel}">
                             <StackPanel>

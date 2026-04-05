@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Minecraftサーバーにリソースパックを自動配布する方法 | MaiPilot</title>
+    <meta name="description" content="Minecraftサーバーのリソースパックをプレイヤーに自動ダウンロードさせる手順。HTTPサーバーの立て方、SHA-1取得、server.propertiesへの設定方法を解説。" />
+    <style>
+      :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
+      *{box-sizing:border-box;}
+      body{margin:0;padding:32px 16px;font-family:"Noto Sans JP","Segoe UI",sans-serif;color:var(--text);background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%);}
+      .wrap{max-width:980px;margin:0 auto;display:grid;gap:16px;}
+      .card{background:var(--panel);border:1px solid rgba(126,157,201,.25);border-radius:16px;padding:22px;}
+      .hero{background:linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)), var(--panel);}
+      .muted{color:var(--muted);}
+      .notice{background:rgba(255,209,102,.12);color:#ffd166;border-radius:10px;padding:10px 14px;font-weight:700;font-size:13px;margin-top:12px;}
+      .cta{border:1px solid rgba(102,255,136,.45);background:rgba(102,255,136,.08);}
+      a{color:var(--accent2);text-decoration:none;}
+      h1,h2,h3{margin:0 0 10px;} ul,ol{margin:8px 0 0 18px;color:var(--muted);}
+      .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;}
+      .mini{background:var(--panel2);border:1px solid rgba(126,157,201,.25);border-radius:12px;padding:12px;}
+      .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+      .chip{font-size:12px;padding:5px 10px;border:1px solid rgba(126,157,201,.35);border-radius:999px;color:var(--muted);}
+      .faq-list{margin:0;display:grid;gap:10px;}
+      .faq-list dt{font-weight:700;color:var(--text);}
+      .faq-list dd{margin:0;color:var(--muted);}
+      .steps{counter-reset:step;display:grid;gap:10px;margin-top:10px;}
+      .step{display:flex;gap:12px;align-items:flex-start;}
+      .step-num{counter-increment:step;content:counter(step);min-width:28px;height:28px;border-radius:50%;background:rgba(102,255,136,.15);border:1px solid rgba(102,255,136,.4);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--accent);flex-shrink:0;}
+      .step-body h3{margin:0 0 4px;font-size:14px;}
+      .step-body p{margin:0;color:var(--muted);font-size:13px;}
+      code{background:var(--panel2);border:1px solid rgba(126,157,201,.25);border-radius:6px;padding:2px 7px;font-size:12px;color:var(--accent);}
+      .props-block{background:var(--panel2);border:1px solid rgba(126,157,201,.25);border-radius:10px;padding:14px;margin-top:10px;font-family:"Cascadia Mono","Consolas",monospace;font-size:13px;line-height:1.7;}
+      .props-block .key{color:var(--muted);}
+      .props-block .val{color:var(--accent);}
+      .badge{display:inline-block;font-size:11px;padding:3px 9px;border-radius:999px;background:rgba(102,255,136,.12);border:1px solid rgba(102,255,136,.35);color:var(--accent);font-weight:700;margin-left:8px;vertical-align:middle;}
+      .site-nav{position:sticky;top:0;z-index:100;background:rgba(11,15,23,.95);backdrop-filter:blur(8px);border-bottom:1px solid rgba(126,157,201,.15);padding:0 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin:-32px -16px 24px;height:52px;}
+      .nav-brand{font-weight:700;font-size:15px;color:var(--accent);text-decoration:none;letter-spacing:.02em;}
+      .nav-links{display:flex;gap:12px;align-items:center;}
+      .nav-links a{color:var(--muted);font-size:13px;text-decoration:none;}
+      .nav-links a:hover{color:var(--text);}
+      .nav-cta{background:rgba(102,255,136,.12);color:var(--accent)!important;border:1px solid rgba(102,255,136,.35);border-radius:8px;padding:5px 12px;font-weight:700;}
+    </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MM106D2B2Z');
+    </script>
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://www.maipilot.jp/docs/growth/resource-pack-distribution/" />
+    <meta property="og:title" content="Minecraftサーバーにリソースパックを自動配布する方法 | MaiPilot" />
+    <meta property="og:description" content="Minecraftサーバーのリソースパックをプレイヤーに自動ダウンロードさせる手順。HTTPサーバーの立て方、SHA-1取得、server.propertiesへの設定方法を解説。" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://www.maipilot.jp/docs/growth/resource-pack-distribution/" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Minecraftサーバーにリソースパックを自動配布する方法 | MaiPilot" />
+    <meta name="twitter:description" content="Minecraftサーバーのリソースパックをプレイヤーに自動ダウンロードさせる手順。HTTPサーバーの立て方、SHA-1取得、server.propertiesへの設定方法を解説。" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:site_name" content="MaiPilot" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="article:published_time" content="2026-04-05T00:00:00+09:00" />
+    <meta property="article:modified_time" content="2026-04-05T00:00:00+09:00" />
+    <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.maipilot.jp/" },
+    { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://www.maipilot.jp/docs/" },
+    { "@type": "ListItem", "position": 3, "name": "Growth", "item": "https://www.maipilot.jp/docs/growth/" },
+    { "@type": "ListItem", "position": 4, "name": "Minecraftサーバーにリソースパックを自動配布する方法", "item": "https://www.maipilot.jp/docs/growth/resource-pack-distribution/" }
+  ]
+}
+    </script>
+    <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "リソースパックのURLにHTTPSは必要ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "必須ではありませんがHTTPSが推奨されます。MaiPilotはCloudflare Quick Tunnelを利用して無料でHTTPS URLを発行できます。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "SHA-1ハッシュはどうやって取得しますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "MaiPilotではZIPファイルを選択すると自動でSHA-1ハッシュを計算して表示します。手動の場合はcertutil -hashfile resourcepack.zip SHA1をコマンドプロンプトで実行します。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "プレイヤーがリソースパックを拒否した場合はどうなりますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "server.propertiesのresource-pack-promptをtrueにすると強制適用できます。拒否した場合はサーバーへの参加を拒否する設定も可能です。"
+      }
+    }
+  ]
+}
+    </script>
+  </head>
+  <body>
+    <nav class="site-nav">
+      <a class="nav-brand" href="/">MaiPilot</a>
+      <div class="nav-links">
+        <a href="/">ホーム</a>
+        <a href="/docs/growth/">ガイド</a>
+        <a href="/?from=docs_nav_resourcepack#download" class="nav-cta" data-event="nav_download_click" data-source="growth_resource_pack">ダウンロード</a>
+      </div>
+    </nav>
+    <main class="wrap">
+
+      <section class="card hero">
+        <a href="/docs/growth/">← ガイド一覧へ</a>
+        <h1>Minecraftサーバーにリソースパックを自動配布する方法</h1>
+        <p class="muted">プレイヤーがサーバーに参加した瞬間、テクスチャやサウンドを自動ダウンロードさせる手順です。</p>
+        <div class="chips">
+          <span class="chip">想定読了: 7分</span>
+          <span class="chip">対象: サーバー管理者</span>
+          <span class="chip">目的: リソースパック配布</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>リソースパック配布の仕組み</h2>
+        <p class="muted">Minecraftは <code>server.properties</code> に記載されたURLからリソースパックをダウンロードします。そのため、<strong>ZIPファイルをHTTPSで公開するサーバー</strong>が必要です。</p>
+        <div class="grid" style="margin-top:12px;">
+          <div class="mini">
+            <h3>プレイヤー側</h3>
+            <p class="muted">初回参加時にZIPを自動ダウンロード。2回目以降はSHA-1が一致すればスキップ。</p>
+          </div>
+          <div class="mini">
+            <h3>サーバー側</h3>
+            <p class="muted">server.propertiesにURLとSHA-1を設定。HTTPSが推奨。</p>
+          </div>
+          <div class="mini">
+            <h3>配信サーバー</h3>
+            <p class="muted">ZIPを公開するHTTPサーバーが必要。外部から到達できるURLであること。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>手順の全体像</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h3>リソースパックZIPを用意する</h3>
+              <p>Minecraftのリソースパック形式（pack.mcmeta + assetsフォルダをZIP圧縮）であること。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h3>HTTPサーバーでZIPを公開する</h3>
+              <p>ローカルPCでHTTPサーバーを起動し、インターネットから到達できる状態にします。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h3>SHA-1ハッシュを取得する</h3>
+              <p>ZIPファイルのSHA-1を計算します。Minecraftがダウンロードの整合性チェックに使用します。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <h3>server.propertiesに設定を書き込む</h3>
+              <p><code>resource-pack</code> と <code>resource-pack-sha1</code> を設定します。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <h3>サーバーを再起動する</h3>
+              <p>設定反映のため再起動が必要です。次回参加時からプレイヤーへ自動配布されます。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>server.properties の設定例</h2>
+        <p class="muted">以下の2行を追記または編集します。</p>
+        <div class="props-block">
+          <div><span class="key">resource-pack=</span><span class="val">https://xxxx.trycloudflare.com/resourcepack.zip</span></div>
+          <div><span class="key">resource-pack-sha1=</span><span class="val">a1b2c3d4e5f6...</span></div>
+          <div style="margin-top:8px;"><span class="key"># 強制適用（任意）</span></div>
+          <div><span class="key">require-resource-pack=</span><span class="val">false</span></div>
+        </div>
+        <p class="muted" style="margin-top:10px;font-size:13px;">SHA-1が空でも動作しますが、毎回ダウンロードが走るため設定推奨です。</p>
+      </section>
+
+      <section class="card">
+        <h2>HTTPSで公開する方法（比較）</h2>
+        <div class="grid">
+          <div class="mini">
+            <h3>Cloudflare Quick Tunnel <span class="badge">無料・推奨</span></h3>
+            <p class="muted">アカウント不要。*.trycloudflare.com のHTTPS URLを即発行。MaiPilotから1クリックで起動できます。</p>
+          </div>
+          <div class="mini">
+            <h3>UPnP + グローバルIP</h3>
+            <p class="muted">ルーターのポートを開放してHTTPで公開。HTTP（非暗号化）のため一部クライアントで警告が出る場合があります。</p>
+          </div>
+          <div class="mini">
+            <h3>VPS / クラウドストレージ</h3>
+            <p class="muted">常時稼働・高速配信が必要な場合。GitHub ReleasesやS3/Azure Blobなども利用可能。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>よくある質問</h2>
+        <dl class="faq-list">
+          <dt data-faq-question>リソースパックのURLにHTTPSは必要ですか？</dt>
+          <dd data-faq-answer>必須ではありませんがHTTPSが推奨されます。MaiPilotはCloudflare Quick Tunnelを利用して無料でHTTPS URLを発行できます。</dd>
+          <dt data-faq-question>SHA-1ハッシュはどうやって取得しますか？</dt>
+          <dd data-faq-answer>MaiPilotではZIPファイルを選択すると自動でSHA-1ハッシュを計算して表示します。手動の場合は <code>certutil -hashfile resourcepack.zip SHA1</code> をコマンドプロンプトで実行します。</dd>
+          <dt data-faq-question>プレイヤーがリソースパックを拒否した場合はどうなりますか？</dt>
+          <dd data-faq-answer>server.propertiesの <code>require-resource-pack=true</code> を設定すると強制適用できます。拒否したプレイヤーはサーバーへの参加が拒否されます。</dd>
+          <dt data-faq-question>ZIPのサイズ制限はありますか？</dt>
+          <dd data-faq-answer>Minecraftクライアント側の制限はありませんが、大きすぎると参加時の待ち時間が長くなります。目安として50MB以下を推奨します。</dd>
+          <dt data-faq-question>リソースパックを更新したらどうすればいいですか？</dt>
+          <dd data-faq-answer>ZIPを差し替えると SHA-1 が変わります。MaiPilotで再度「server.propertiesに適用」ボタンを押し、サーバーを再起動してください。</dd>
+        </dl>
+      </section>
+
+      <section class="card cta">
+        <h2>MaiPilotならここまで自動です</h2>
+        <ul>
+          <li>ZIPを選択するとSHA-1を自動計算</li>
+          <li>Cloudflare Quick TunnelでHTTPS URLをワンクリック生成（アカウント不要）</li>
+          <li>「server.propertiesに適用」ボタンで設定を自動書き込み</li>
+          <li>サーバー停止時にトンネルを自動切断</li>
+        </ul>
+        <p><a href="/?from=growth_resource_pack_distribution" data-event="growth_download_click" data-source="growth_resource_pack" data-label="download">MaiPilotをダウンロード</a></p>
+      </section>
+
+      <section class="card">
+        <h2>次に読む</h2>
+        <p class="muted">サーバーを外部公開する際のネットワーク設定も合わせて確認しましょう。</p>
+        <a href="/docs/growth/port-open-checklist/" data-event="growth_article_click" data-source="growth_resource_pack" data-label="next_port_open">ポート開放できない時のチェックリスト →</a>
+      </section>
+
+    </main>
+    <script>
+      const trackEvent = ({ event_name, link_url, link_text, source }) => {
+        const win = window;
+        if (typeof win.gtag === "function") {
+          win.gtag("event", event_name, { event_category: source || "cta", event_label: link_text || link_url || "", link_url });
+          return;
+        }
+        if (Array.isArray(win.dataLayer)) {
+          win.dataLayer.push({ event: event_name, link_url, link_text, source: source || "cta" });
+        }
+      };
+      document.addEventListener("click", (event) => {
+        const link = event.target?.closest?.("a");
+        if (!link) return;
+        const eventName = link.getAttribute("data-event");
+        if (!eventName) return;
+        const href = link.getAttribute("href") || "";
+        const label = link.getAttribute("data-label");
+        const text = label || (link.textContent?.trim() ?? "");
+        const source = link.getAttribute("data-source") || "cta";
+        trackEvent({ event_name: eventName, link_url: href, link_text: text, source });
+      }, { passive: true });
+    </script>
+  </body>
+</html>
