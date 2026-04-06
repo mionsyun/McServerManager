@@ -102,7 +102,13 @@ public sealed class MainViewModel : ObservableObject
     public void StartTutorial()
     {
         _tutorialOpenedCreate = false;
-        Tutorial.Start();
+        Tutorial.Start(GuideType.InitialSetup);
+    }
+
+    public void StartGuide(GuideType type)
+    {
+        _tutorialOpenedCreate = false;
+        Tutorial.Start(type);
     }
 
     public Task CheckForAppUpdateOnStartupAsync()
@@ -271,13 +277,15 @@ public sealed class MainViewModel : ObservableObject
 
     private void OpenTutorialGuideWindow()
     {
-        var guide = new FirstRunWindow
+        var picker = new GuidePickerWindow
         {
             Owner = WpfApplication.Current.MainWindow
         };
 
-        guide.ShowDialog();
-        StartTutorial();
+        if (picker.ShowDialog() == true && picker.SelectedGuide.HasValue)
+        {
+            StartGuide(picker.SelectedGuide.Value);
+        }
     }
 
     private void OnTutorialStepChanged(object? sender, EventArgs e)

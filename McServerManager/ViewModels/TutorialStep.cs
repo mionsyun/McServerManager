@@ -1,5 +1,14 @@
 namespace McServerManager.ViewModels;
 
+public enum GuideType
+{
+    InitialSetup,
+    DistributionMap,
+    Mod,
+    Plugin,
+    ResourcePack
+}
+
 public enum TutorialPlacement
 {
     Center,

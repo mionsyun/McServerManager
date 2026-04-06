@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>マイクラ MOD 入れ方・導入ガイド（Forge / Fabric）Windows版 | MaiPilot</title>
+    <meta name="description" content="マイクラサーバーへのMOD入れ方を解説。ForgeとFabricの違い、MODのダウンロード先、サーバーへの追加手順、クライアント側の設定まで初心者向けにまとめ。" />
+    <style>
+      :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
+      * { box-sizing:border-box; }
+      body { margin:0; padding:32px 16px; font-family:"Noto Sans JP","Segoe UI",sans-serif; color:var(--text); background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%); }
+      .wrap { max-width:980px; margin:0 auto; display:grid; gap:16px; }
+      .card { background:var(--panel); border:1px solid rgba(126,157,201,.25); border-radius:16px; padding:22px; }
+      .hero { background:linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)), var(--panel); }
+      .muted { color:var(--muted); }
+      .notice { background:rgba(255,209,102,.12); color:#ffd166; border-radius:10px; padding:10px 14px; font-weight:700; font-size:13px; margin-top:12px; }
+      .cta { border:1px solid rgba(102,255,136,.45); background:rgba(102,255,136,.08); }
+      a { color:var(--accent2); text-decoration:none; }
+      h1,h2,h3 { margin:0 0 10px; }
+      ul,ol { margin:8px 0 0 18px; color:var(--muted); }
+      li { margin-bottom:6px; }
+      .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+      .chip { font-size:12px; padding:5px 10px; border:1px solid rgba(126,157,201,.35); border-radius:999px; color:var(--muted); }
+      .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+      .mini { background:var(--panel2); border:1px solid rgba(126,157,201,.25); border-radius:12px; padding:14px; }
+      .faq-list { margin:0; display:grid; gap:14px; }
+      .faq-list dt { font-weight:700; color:var(--text); margin-bottom:4px; }
+      .faq-list dd { margin:0; color:var(--muted); }
+      .step-list { list-style:none; margin:10px 0 0; padding:0; display:grid; gap:10px; }
+      .step-list li { display:grid; grid-template-columns:28px 1fr; gap:8px; align-items:start; }
+      .step-num { width:28px; height:28px; border-radius:50%; background:rgba(102,255,136,.15); color:var(--accent); font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+      .step-body { color:var(--muted); padding-top:4px; }
+      .step-body strong { color:var(--text); }
+      .cta-btn { display:inline-block; background:var(--accent); color:#03110a; font-weight:700; border-radius:10px; padding:12px 28px; font-size:15px; margin-top:8px; }
+      .warn { background:rgba(255,100,100,.12); color:#ff9a9a; border-radius:10px; padding:10px 14px; font-size:13px; margin-top:10px; }
+      .site-nav { position:sticky; top:0; z-index:100; background:rgba(11,15,23,.95); backdrop-filter:blur(8px); border-bottom:1px solid rgba(126,157,201,.15); padding:0 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; margin:-32px -16px 24px; height:52px; }
+      .nav-brand { font-weight:700; font-size:15px; color:var(--accent); text-decoration:none; letter-spacing:.02em; }
+      .nav-links { display:flex; gap:12px; align-items:center; }
+      .nav-links a { color:var(--muted); font-size:13px; text-decoration:none; }
+      .nav-links a:hover { color:var(--text); }
+      .nav-cta { background:rgba(102,255,136,.12); color:var(--accent)!important; border:1px solid rgba(102,255,136,.35); border-radius:8px; padding:5px 12px; font-weight:700; }
+      table { width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
+      th { background:rgba(102,255,136,.1); color:var(--accent); padding:8px 10px; text-align:left; border-bottom:1px solid rgba(126,157,201,.25); }
+      td { padding:8px 10px; color:var(--muted); border-bottom:1px solid rgba(126,157,201,.12); }
+    </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MM106D2B2Z');
+    </script>
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://www.maipilot.jp/docs/growth/forge-fabric-mod-installation/" />
+    <meta property="og:title" content="マイクラ MOD 入れ方・導入ガイド（Forge / Fabric）Windows版 | MaiPilot" />
+    <meta property="og:description" content="マイクラサーバーへのMOD入れ方を解説。ForgeとFabricの違い、MODのダウンロード先、サーバーへの追加手順、クライアント側の設定まで初心者向けにまとめ。" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://www.maipilot.jp/docs/growth/forge-fabric-mod-installation/" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta property="og:site_name" content="MaiPilot" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="マイクラ MOD 入れ方・導入ガイド（Forge / Fabric）Windows版 | MaiPilot" />
+    <meta name="twitter:description" content="マイクラサーバーへのMOD入れ方を解説。ForgeとFabricの違い、MODのダウンロード先、サーバーへの追加手順、クライアント側の設定まで初心者向けにまとめ。" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+    <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://www.maipilot.jp/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Docs",
+      "item": "https://www.maipilot.jp/docs/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Growth",
+      "item": "https://www.maipilot.jp/docs/growth/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "マイクラ MOD 入れ方・導入ガイド（Forge / Fabric）Windows版",
+      "item": "https://www.maipilot.jp/docs/growth/forge-fabric-mod-installation/"
+    }
+  ]
+}
+  </script>
+    <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "ForgeとFabricはどっちがいい？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "使いたいMODがどちらに対応しているかで決めます。Create MODなど人気のMODはForge対応が多く、軽量化系はFabricが強いです。MODの配布ページで「Forge」「Fabric」の記載を確認してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "クライアントにもMODは必要ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "はい、必要です。サーバーとクライアントの両方に同じMODを同じバージョンで入れる必要があります。プレイヤー全員のPCに同様の設定が必要です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "MODを削除するには？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "MaiPilotの「MOD/プラグイン」タブで無効化または削除できます。手動で削除する場合はサーバーフォルダ内の mods フォルダから .jar ファイルを削除してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "VanillaサーバーにMODは入れられますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "入れられません。MODを使う場合はサーバーの種別をForgeまたはFabricに変更する必要があります。MaiPilotで新しいサーバーを作成してください。"
+      }
+    }
+  ]
+}
+  </script>
+  </head>
+  <body>
+    <div class="wrap">
+      <nav class="site-nav">
+        <a class="nav-brand" href="/">MaiPilot</a>
+        <div class="nav-links">
+          <a href="/docs/">ガイド一覧</a>
+          <a href="/docs/growth/">記事ハブ</a>
+          <a href="/" class="nav-cta">ダウンロード</a>
+        </div>
+      </nav>
+
+      <div class="card hero">
+        <div class="chips">
+          <span class="chip">MOD 入れ方</span>
+          <span class="chip">Forge / Fabric</span>
+          <span class="chip">Windows 10/11</span>
+          <span class="chip">初心者向け</span>
+        </div>
+        <h1 style="margin-top:14px;font-size:clamp(20px,3vw,30px)">マイクラ MOD 入れ方ガイド<br>（Forge / Fabric サーバー）</h1>
+        <p class="muted" style="margin-top:8px">マイクラサーバーへのMOD導入手順を、Forge・Fabric 別に分かりやすく解説します。ダウンロード先からクライアント設定まで、初心者でも迷わず進める完全ガイド。</p>
+        <div class="notice">⚠️ MODはサーバーとクライアント（Minecraftを起動するPC）の両方に同じものを入れる必要があります。</div>
+      </div>
+
+      <div class="card">
+        <h2>Forge と Fabric の違い</h2>
+        <p class="muted" style="margin-top:6px">どちらを選ぶかでインストール手順が変わります。まず確認しましょう。</p>
+        <table>
+          <thead>
+            <tr><th>ローダー</th><th>特徴</th><th>主なMOD</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Forge</td><td>MOD数が多く、歴史が長い。1.12〜1.20系で主流</td><td>Create・Biomes O' Plenty など重量級</td></tr>
+            <tr><td>Fabric</td><td>軽量・高速。1.18以降の新バージョンに強い</td><td>Sodium・Iris・Lithium など軽量系</td></tr>
+          </tbody>
+        </table>
+        <p class="muted" style="margin-top:10px">使いたいMODの配布ページを確認し、「Forge対応」か「Fabric対応」かで選んでください。両対応のMODもあります。</p>
+      </div>
+
+      <div class="card">
+        <h2>手順 1：Forge / Fabric 対応サーバーを準備する</h2>
+        <ul class="step-list">
+          <li>
+            <span class="step-num">1</span>
+            <span class="step-body"><strong>MaiPilotでサーバーを作成します。</strong>「サーバーを追加」からサーバー種別に <strong>Forge</strong> または <strong>Fabric</strong> を選んでください。Vanilla サーバーには MOD を追加できません。</span>
+          </li>
+          <li>
+            <span class="step-num">2</span>
+            <span class="step-body"><strong>バージョンを選択します。</strong>MODが対応しているMinecraftのバージョンに合わせてください。バージョン確認は Modrinth や CurseForge のMOD配布ページで行えます。</span>
+          </li>
+          <li>
+            <span class="step-num">3</span>
+            <span class="step-body"><strong>サーバーを一度起動します。</strong>初回起動でローダーのインストールが自動で行われます。「Done!」のログが出れば準備完了です。</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>手順 2：MODをダウンロードする</h2>
+        <p class="muted" style="margin-top:6px">信頼できる配布サイトからダウンロードします。</p>
+        <div class="grid" style="margin-top:12px">
+          <div class="mini">
+            <strong style="color:var(--accent)">Modrinth</strong>
+            <p class="muted" style="margin:6px 0 0;font-size:13px">modrinth.com — 新しい主流。MaiPilot内から直接検索・インストール可能。</p>
+          </div>
+          <div class="mini">
+            <strong style="color:var(--accent2)">CurseForge</strong>
+            <p class="muted" style="margin:6px 0 0;font-size:13px">curseforge.com — MOD数が豊富。.jar ファイルを個別ダウンロード。</p>
+          </div>
+        </div>
+        <div class="warn">⚠️ 非公式サイトは改ざんのリスクがあります。必ず上記の公式配布サイトを利用してください。</div>
+        <p class="muted" style="margin-top:10px">ダウンロードしたファイルは <code>.jar</code> 形式です。ZIP のまま使わず、解凍不要です。</p>
+      </div>
+
+      <div class="card">
+        <h2>手順 3：サーバーに MOD を追加する</h2>
+        <ul class="step-list">
+          <li>
+            <span class="step-num">1</span>
+            <span class="step-body"><strong>MaiPilot の「MOD/プラグイン」タブを開きます。</strong></span>
+          </li>
+          <li>
+            <span class="step-num">2</span>
+            <span class="step-body"><strong>「追加」ボタンを押してダウンロードした .jar ファイルを選択します。</strong>または Modrinth 検索欄でMOD名を検索し、直接インストールすることもできます。</span>
+          </li>
+          <li>
+            <span class="step-num">3</span>
+            <span class="step-body"><strong>サーバーを再起動します。</strong>コンソールで MOD の読み込みログが表示されれば成功です。</span>
+          </li>
+        </ul>
+        <div class="notice" style="margin-top:14px">Forge では mods フォルダ、Fabric では mods フォルダにMODが配置されます。手動配置する場合もこのフォルダを使います。</div>
+      </div>
+
+      <div class="card">
+        <h2>手順 4：クライアント（自分のMinecraft）にも MOD を入れる</h2>
+        <p class="muted" style="margin-top:6px">サーバー側のMODは、接続するプレイヤー全員のMinecraftにも同じMODが必要です。</p>
+        <ul class="step-list">
+          <li>
+            <span class="step-num">1</span>
+            <span class="step-body"><strong>Minecraft Launcher で Forge / Fabric のプロファイルを作成します。</strong>Forge は installer.jar を実行、Fabric は Fabric Installer を使います。</span>
+          </li>
+          <li>
+            <span class="step-num">2</span>
+            <span class="step-body"><strong>クライアント側の mods フォルダ（%AppData%\\.minecraft\\mods）に同じ .jar ファイルをコピーします。</strong>サーバーとバージョンが一致していることを確認してください。</span>
+          </li>
+          <li>
+            <span class="step-num">3</span>
+            <span class="step-body"><strong>Minecraft を起動してサーバーに接続します。</strong>MODが正しく入っていれば問題なく接続できます。</span>
+          </li>
+        </ul>
+        <p class="muted" style="margin-top:10px">友達も接続する場合は、友達のPCにも同じMODと同じバージョンのForge/Fabricをインストールしてもらう必要があります。</p>
+      </div>
+
+      <div class="card">
+        <h2>MOD追加後に起動しない場合</h2>
+        <div class="grid">
+          <div class="mini">
+            <strong>バージョン不一致</strong>
+            <p class="muted" style="font-size:13px;margin-top:4px">MODのバージョンがサーバーのMinecraftバージョンと一致しているか確認してください。</p>
+          </div>
+          <div class="mini">
+            <strong>MOD同士の競合</strong>
+            <p class="muted" style="font-size:13px;margin-top:4px">1つずつ追加してどのMODが原因か特定してください。コンソールのエラーログが手がかりになります。</p>
+          </div>
+          <div class="mini">
+            <strong>依存MODが不足</strong>
+            <p class="muted" style="font-size:13px;margin-top:4px">一部のMODは別のMOD（API）が必要です。配布ページの「Dependencies（必要なMOD）」を確認してください。</p>
+          </div>
+        </div>
+        <p class="muted" style="margin-top:10px">コンソールのエラーログは MaiPilot の「コンソール」タブ → 「ログフォルダを開く」から確認できます。</p>
+      </div>
+
+      <div class="card">
+        <h2>よくある質問</h2>
+        <dl class="faq-list">
+          <dt data-faq-question>ForgeとFabricはどっちがいい？</dt>
+          <dd data-faq-answer>使いたいMODがどちらに対応しているかで決めます。Create MODなど人気のMODはForge対応が多く、軽量化系はFabricが強いです。MODの配布ページで「Forge」「Fabric」の記載を確認してください。</dd>
+          <dt data-faq-question>クライアントにもMODは必要ですか？</dt>
+          <dd data-faq-answer>はい、必要です。サーバーとクライアントの両方に同じMODを同じバージョンで入れる必要があります。プレイヤー全員のPCに同様の設定が必要です。</dd>
+          <dt data-faq-question>MODを削除するには？</dt>
+          <dd data-faq-answer>MaiPilotの「MOD/プラグイン」タブで無効化または削除できます。手動で削除する場合はサーバーフォルダ内の mods フォルダから .jar ファイルを削除してください。</dd>
+          <dt data-faq-question>VanillaサーバーにMODは入れられますか？</dt>
+          <dd data-faq-answer>入れられません。MODを使う場合はサーバーの種別をForgeまたはFabricに変更する必要があります。MaiPilotで新しいサーバーを作成してください。</dd>
+        </dl>
+      </div>
+
+      <div class="card cta" style="text-align:center">
+        <h2 style="margin-bottom:6px">MaiPilotでMOD管理を簡単に</h2>
+        <p class="muted">GUIでMODの追加・有効化・無効化。Modrinth検索もアプリ内で完結。</p>
+        <a class="cta-btn" href="/" data-event="download_click">無料でダウンロード（Windows）</a>
+      </div>
+
+      <div class="card">
+        <h2>関連ガイド</h2>
+        <ul>
+          <li><a href="/docs/growth/paper-spigot-plugin-installation/">マイクラ プラグイン入れ方（Paper/Spigot）</a></li>
+          <li><a href="/docs/growth/server-type-comparison/">Paper / Purpur / Vanilla の選び方比較</a></li>
+          <li><a href="/docs/growth/forge-fabric-server-setup/">Forge/Fabricサーバーの立て方（初心者向け）</a></li>
+          <li><a href="/docs/growth/windows-minecraft-server-2026/">マイクラサーバーの立て方（Windows/2026年版）</a></li>
+          <li><a href="/docs/troubleshooting/">トラブルシュート</a></li>
+          <li><a href="/docs/">セットアップガイド一覧</a></li>
+        </ul>
+      </div>
+
+      <footer style="text-align:center;color:var(--muted);font-size:12px;padding:16px 0">
+        <a href="/">MaiPilot</a> — <a href="/docs/">Docs</a> — <a href="/docs/growth/">記事ハブ</a>
+      </footer>
+    </div>
+  </body>
+</html>
