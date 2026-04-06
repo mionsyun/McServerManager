@@ -1,5 +1,5 @@
 export default defineNuxtConfig({
-  devtools: { enabled: process.env.NODE_ENV === "development" },
+  devtools: { enabled: false },
   css: ["~/assets/css/main.css"],
 
   runtimeConfig: {

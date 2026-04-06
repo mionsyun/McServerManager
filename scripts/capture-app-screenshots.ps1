@@ -110,7 +110,7 @@ function Detect-And-Mosaic([System.Drawing.Bitmap]$bmp, [System.Windows.Automati
                 $text = ""
                 try { $vp = $el.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern); $text = $vp.Current.Value } catch {}
                 if (-not $text) { try { $text = $el.Current.Name } catch {} }
-                if ($text -and $ipPat.IsMatch($text)) {
+                if ($text -and ($ipPat.IsMatch($text) -or $pathPat.IsMatch($text))) {
                     Apply-Mosaic $bmp $rx $ry $rw $rh -Block $MosaicBlockSize; $count++
                 }
             }
@@ -199,6 +199,40 @@ function Select-Tab($root, [string]$header) {
     return $false
 }
 
+
+# ===== 開いているダイアログを全て閉じる =====
+function Dismiss-AllDialogs {
+    $proc = Get-Process -Name 'McServerManager' -ErrorAction SilentlyContinue
+    if (-not $proc) { return }
+    $mainHwnd = [int64]$proc.MainWindowHandle
+    $desktop  = [System.Windows.Automation.AutomationElement]::RootElement
+
+    # プロセスIDで直接絞り込み
+    $pidCond = [System.Windows.Automation.PropertyCondition]::new(
+        [System.Windows.Automation.AutomationElement]::ProcessIdProperty, $proc.Id)
+    $appWins = $desktop.FindAll([System.Windows.Automation.TreeScope]::Children, $pidCond)
+
+    $dismissed = 0
+    foreach ($w in $appWins) {
+        try {
+            $h = [int64]$w.Current.NativeWindowHandle
+            if ($h -le 0 -or $h -eq $mainHwnd) { continue }
+            # メインウィンドウ以外 = ダイアログ → 前面に出して Escape
+            [WinApi]::SetForegroundWindow([IntPtr]::new($h)) | Out-Null
+            Start-Sleep -Milliseconds 300
+            [System.Windows.Forms.SendKeys]::SendWait('{ESC}')
+            Start-Sleep -Milliseconds 500
+            $dismissed++
+        } catch {}
+    }
+    # メインウィンドウを前面に戻す
+    try { [WinApi]::SetForegroundWindow($proc.MainWindowHandle) | Out-Null } catch {}
+    if ($dismissed -gt 0) {
+        Start-Sleep -Milliseconds 800
+        Log-Info "ダイアログを ${dismissed} 個閉じました"
+    }
+}
+
 function Press-Escape {
     [System.Windows.Forms.SendKeys]::SendWait("{ESC}")
     Start-Sleep -Milliseconds 500
@@ -238,13 +272,15 @@ if (-not (Test-Path $exePath)) { throw "実行ファイルが見つかりませ�
 
 # ===== STEP 2: 起動 =====
 Log-Step "アプリ起動"
+# クリーンな状態にするため既存プロセスを終了してから再起動する
 $existing = Get-Process -Name "McServerManager" -ErrorAction SilentlyContinue
 if ($existing) {
-    Log-Warn "既に起動中のプロセスを使用します"
-} else {
-    Start-Process $exePath -WorkingDirectory (Split-Path $exePath)
-    Log-Info "起動しました: $exePath"
+    Log-Info "既存プロセスを終了中..."
+    $existing | Stop-Process -Force
+    Start-Sleep -Milliseconds 1200
 }
+Start-Process $exePath -WorkingDirectory (Split-Path $exePath)
+Log-Info "起動しました: $exePath"
 
 $winEl = Wait-ForWindow 30
 $proc  = Get-Process -Name "McServerManager"
@@ -256,6 +292,7 @@ $hwnd  = $proc.MainWindowHandle
 Start-Sleep -Milliseconds 1500   # 初回ロード待ち
 
 Log-Ok "ウィンドウ取得完了"
+Dismiss-AllDialogs   # 起動時に残っているダイアログを全て閉じる
 
 # ===== STEP 3: スクリーンショット撮影 =====
 Log-Step "スクリーンショット撮影開始"
@@ -263,76 +300,12 @@ Log-Step "スクリーンショット撮影開始"
 # ---- 01: メイン画面 ----
 Log-Info "01-main-window"
 $winEl = Get-MainWindowElement
+# アプリを確実に前面に出してから撮影
+[WinApi]::ShowWindow($hwnd, 9) | Out-Null   # SW_RESTORE
+[WinApi]::SetForegroundWindow($hwnd) | Out-Null
+Start-Sleep -Milliseconds 1000
 Save-Screenshot $winEl "01-main-window"
 
-# ---- 08: ガイド選択ダイアログ ----
-Log-Info "08-guide-picker"
-$clicked = Click-Button $winEl "セットアップガイド"
-if ($clicked) {
-    Start-Sleep -Milliseconds 800
-    # ダイアログウィンドウを探す
-    $dlgEl = $null
-    $sw2 = [System.Diagnostics.Stopwatch]::StartNew()
-    while ($sw2.ElapsedMilliseconds -lt 4000) {
-        try {
-            $desktop = [System.Windows.Automation.AutomationElement]::RootElement
-            $cond = [System.Windows.Automation.PropertyCondition]::new(
-                [System.Windows.Automation.AutomationElement]::NameProperty, "セットアップガイドを選択")
-            $dlgEl = $desktop.FindFirst([System.Windows.Automation.TreeScope]::Children, $cond)
-            if ($dlgEl) { break }
-        } catch {}
-        Start-Sleep -Milliseconds 200
-    }
-    if ($dlgEl) {
-        Save-Screenshot $dlgEl "08-guide-picker"
-        Press-Escape
-        Start-Sleep -Milliseconds 500
-    } else {
-        Log-Warn "ガイドダイアログが見つかりませんでした"
-        Press-Escape
-    }
-} else {
-    Log-Warn "「セットアップガイド」ボタンが見つかりません"
-}
-
-$winEl = Get-MainWindowElement
-
-# ---- 09: 新規サーバーダイアログ ----
-Log-Info "09-new-server-dialog"
-$clicked = Click-Button $winEl "＋ サーバーを追加"
-if ($clicked) {
-    Start-Sleep -Milliseconds 800
-    $dlgEl = $null
-    $sw2 = [System.Diagnostics.Stopwatch]::StartNew()
-    while ($sw2.ElapsedMilliseconds -lt 4000) {
-        try {
-            $desktop = [System.Windows.Automation.AutomationElement]::RootElement
-            $cond = [System.Windows.Automation.PropertyCondition]::new(
-                [System.Windows.Automation.AutomationElement]::NameProperty, "新規サーバー作成")
-            $dlgEl = $desktop.FindFirst([System.Windows.Automation.TreeScope]::Children, $cond)
-            if ($dlgEl) { break }
-        } catch {}
-        Start-Sleep -Milliseconds 200
-    }
-    if ($dlgEl) {
-        Save-Screenshot $dlgEl "09-new-server-dialog"
-        Press-Escape
-    } else {
-        # ウィンドウタイトルでもう一度探す
-        $winEl2 = Get-MainWindowElement
-        if ($winEl2 -and $winEl2.Current.Name -ne (Get-MainWindowElement).Current.Name) {
-            Save-Screenshot $winEl2 "09-new-server-dialog"
-        } else {
-            Log-Warn "新規サーバーダイアログが見つかりませんでした"
-        }
-        Press-Escape
-    }
-} else {
-    Log-Warn "「＋ サーバーを追加」ボタンが見つかりません"
-}
-
-[WinApi]::SetForegroundWindow($hwnd) | Out-Null
-Start-Sleep -Milliseconds 600
 $winEl = Get-MainWindowElement
 
 # ---- サーバーリスト内の最初のアイテムをクリック ----
@@ -374,6 +347,7 @@ if ($firstServer) {
     $winEl = Get-MainWindowElement
     foreach ($s in $tabShots) {
         Log-Info "$($s.File)"
+        Dismiss-AllDialogs   # タブ切り替え前に残っているダイアログを閉じる
         $ok = Select-Tab $winEl $s.Tab
         if ($ok) {
             $winEl = Get-MainWindowElement
