@@ -277,7 +277,7 @@ if ($clicked) {
         try {
             $desktop = [System.Windows.Automation.AutomationElement]::RootElement
             $cond = [System.Windows.Automation.PropertyCondition]::new(
-                [System.Windows.Automation.AutomationElement]::NameProperty, "ガイドを選択")
+                [System.Windows.Automation.AutomationElement]::NameProperty, "セットアップガイドを選択")
             $dlgEl = $desktop.FindFirst([System.Windows.Automation.TreeScope]::Children, $cond)
             if ($dlgEl) { break }
         } catch {}
@@ -308,7 +308,7 @@ if ($clicked) {
         try {
             $desktop = [System.Windows.Automation.AutomationElement]::RootElement
             $cond = [System.Windows.Automation.PropertyCondition]::new(
-                [System.Windows.Automation.AutomationElement]::NameProperty, "新規サーバー")
+                [System.Windows.Automation.AutomationElement]::NameProperty, "新規サーバー作成")
             $dlgEl = $desktop.FindFirst([System.Windows.Automation.TreeScope]::Children, $cond)
             if ($dlgEl) { break }
         } catch {}

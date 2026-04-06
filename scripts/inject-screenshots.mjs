@@ -43,10 +43,10 @@ const articleScreenshots = [
     article: 'paper-spigot-plugin-installation',
     insertions: [
       {
-        after: 'プラグインタブ',
+        after: 'MaiPilot の「MOD/プラグイン」タブを開きます。</strong></span>',
         image: '05-addon-tab.png',
-        alt: 'プラグインタブのスクリーンショット',
-        caption: 'プラグインタブ：追加済みのプラグイン一覧と追加ボタン。',
+        alt: 'MOD/プラグインタブのスクリーンショット',
+        caption: 'MOD/プラグインタブ：プラグインファイルをここに追加します。',
       },
     ],
   },
@@ -65,7 +65,7 @@ const articleScreenshots = [
     article: 'resource-pack-distribution',
     insertions: [
       {
-        after: 'リソースパックタブ',
+        after: '<h2>MaiPilotならここまで自動です</h2>',
         image: '06-resource-pack-tab.png',
         alt: 'リソースパックタブのスクリーンショット',
         caption: 'リソースパックタブ：配布するリソースパックを設定します。',
@@ -76,13 +76,13 @@ const articleScreenshots = [
     article: 'minecraft-server-tatekkata-2026',
     insertions: [
       {
-        after: 'サーバー一覧',
+        after: '<h2>30秒で結論</h2>',
         image: '01-main-window.png',
         alt: 'MaiPilot メイン画面のスクリーンショット',
         caption: 'MaiPilot のメイン画面。複数サーバーをまとめて管理できます。',
       },
       {
-        after: 'コンソール',
+        after: 'GUIだけで3ステップで起動できる。</li>',
         image: '02-server-console.png',
         alt: 'コンソールタブのスクリーンショット',
         caption: 'コンソールタブ：サーバーログをリアルタイムで確認できます。',
@@ -104,7 +104,7 @@ const articleScreenshots = [
     article: 'server-properties-recommended-settings',
     insertions: [
       {
-        after: '設定タブ',
+        after: '<h2>変更手順</h2>',
         image: '07-settings-tab.png',
         alt: '設定タブのスクリーンショット',
         caption: '設定タブ：server.properties をGUIで編集できます。',
