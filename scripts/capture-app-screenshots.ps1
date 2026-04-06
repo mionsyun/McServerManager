@@ -126,23 +126,18 @@ function Detect-And-Mosaic([System.Drawing.Bitmap]$bmp, [System.Windows.Automati
 # ===== タブ別・座標ベース強制モザイク =====
 # UIAutomation でテキストが取れない要素向けのフォールバック
 function Mosaic-SensitiveAreas([System.Drawing.Bitmap]$bmp, [string]$shotName) {
-    # 右パネル上部のサーバー詳細ヘッダー (保存先パス・サーバー名): 全スクリーンショット共通
-    # y=7%〜32% の右 65% をカバー（パスは y≈26% 付近に表示される）
-    $rx = [int]($bmp.Width  * 0.35)
-    $ry = [int]($bmp.Height * 0.07)
-    $rw = $bmp.Width  - $rx
-    $rh = [int]($bmp.Height * 0.26)
-    Apply-Mosaic $bmp $rx $ry $rw $rh -Block $MosaicBlockSize
+    # 1) 保存先パス行 (右パネルヘッダー 3行目): 全タブ共通 y≈27-34%
+    Apply-Mosaic $bmp ([int]($bmp.Width*0.34)) ([int]($bmp.Height*0.27)) `
+                      ([int]($bmp.Width*0.66)) ([int]($bmp.Height*0.08)) -Block $MosaicBlockSize
 
-    switch ($shotName) {
-        # ネットワークタブ: 追加でアドレス表示エリア右下をモザイク (LAN IP / グローバルIP)
-        '03-network-tab' {
-            $rx2 = [int]($bmp.Width  * 0.50)
-            $ry2 = [int]($bmp.Height * 0.45)
-            $rw2 = $bmp.Width  - $rx2
-            $rh2 = $bmp.Height - $ry2
-            Apply-Mosaic $bmp $rx2 $ry2 $rw2 $rh2 -Block $MosaicBlockSize
-        }
+    # 2) クラッシュレポートパス行 (右パネル下部): 全タブ共通 y≈85-91%
+    Apply-Mosaic $bmp ([int]($bmp.Width*0.34)) ([int]($bmp.Height*0.84)) `
+                      ([int]($bmp.Width*0.66)) ([int]($bmp.Height*0.08)) -Block $MosaicBlockSize
+
+    # 3) ネットワークタブ: アドレスセクション全体 (LAN IP / グローバルIP) y≈64-88%, x≈34%〜
+    if ($shotName -eq '03-network-tab') {
+        Apply-Mosaic $bmp ([int]($bmp.Width*0.34)) ([int]($bmp.Height*0.64)) `
+                          ([int]($bmp.Width*0.66)) ([int]($bmp.Height*0.26)) -Block $MosaicBlockSize
     }
 }
 
