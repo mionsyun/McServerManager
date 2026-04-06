@@ -52,29 +52,20 @@ function Log-Ok([string]$msg)   { Write-Host "  ✓ $msg" -ForegroundColor Green
 function Log-Warn([string]$msg) { Write-Host "  ! $msg" -ForegroundColor Yellow }
 function Log-Info([string]$msg) { Write-Host "  $msg" -ForegroundColor Gray }
 
-# ===== モザイク =====
-function Apply-Mosaic {
-    param([System.Drawing.Bitmap]$Bmp, [int]$X, [int]$Y, [int]$W, [int]$H, [int]$Block = 14)
-    $X = [Math]::Max(0, $X - 2);  $Y = [Math]::Max(0, $Y - 2)
-    $W = [Math]::Min($Bmp.Width - $X, $W + 4);  $H = [Math]::Min($Bmp.Height - $Y, $H + 4)
-    $bx = $X
-    while ($bx -lt $X + $W) {
-        $by = $Y
-        while ($by -lt $Y + $H) {
-            $cx = [Math]::Min($bx + [int]($Block/2), $Bmp.Width-1)
-            $cy = [Math]::Min($by + [int]($Block/2), $Bmp.Height-1)
-            $color = $Bmp.GetPixel($cx, $cy)
-            $ex = [Math]::Min($bx + $Block, $X + $W)
-            $ey = [Math]::Min($by + $Block, $Y + $H)
-            for ($px = $bx; $px -lt $ex; $px++) {
-                for ($py = $by; $py -lt $ey; $py++) {
-                    if ($px -lt $Bmp.Width -and $py -lt $Bmp.Height) { $Bmp.SetPixel($px,$py,$color) }
-                }
-            }
-            $by += $Block
-        }
-        $bx += $Block
-    }
+# ===== べた塗りリダクション (モザイク廃止) =====
+# アプリの背景色 (#0f1318) と同色で塗り潰し、視覚的ノイズを最小化
+$RedactColor = [System.Drawing.Color]::FromArgb(15, 19, 24)
+
+function Apply-Redact {
+    param([System.Drawing.Bitmap]$Bmp, [int]$X, [int]$Y, [int]$W, [int]$H)
+    $pad = 2
+    $X = [Math]::Max(0, $X - $pad);  $Y = [Math]::Max(0, $Y - $pad)
+    $W = [Math]::Min($Bmp.Width - $X, $W + $pad*2)
+    $H = [Math]::Min($Bmp.Height - $Y, $H + $pad*2)
+    $g = [System.Drawing.Graphics]::FromImage($Bmp)
+    $brush = New-Object System.Drawing.SolidBrush($RedactColor)
+    $g.FillRectangle($brush, $X, $Y, $W, $H)
+    $brush.Dispose(); $g.Dispose()
 }
 
 $ipPat   = [regex]'(?<!\d)(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?!\d)'
@@ -92,7 +83,7 @@ function Get-ElementText([System.Windows.Automation.AutomationElement]$el) {
     return ""
 }
 
-function Detect-And-Mosaic([System.Drawing.Bitmap]$bmp, [System.Windows.Automation.AutomationElement]$win, [System.Drawing.Rectangle]$winRect) {
+function Detect-And-Redact([System.Drawing.Bitmap]$bmp, [System.Windows.Automation.AutomationElement]$win, [System.Drawing.Rectangle]$winRect) {
     if ($NoMosaic) { return 0 }
     $count = 0
     try {
@@ -111,33 +102,27 @@ function Detect-And-Mosaic([System.Drawing.Bitmap]$bmp, [System.Windows.Automati
             # パスワードフィールド
             $isPass = $false
             try { $isPass = [bool]$el.Current.IsPassword } catch {}
-            if ($isPass) { Apply-Mosaic $bmp $rx $ry $rw $rh -Block $MosaicBlockSize; $count++; continue }
+            if ($isPass) { Apply-Redact $bmp $rx $ry $rw $rh; $count++; continue }
 
-            # テキスト取得 (ValuePattern / TextPattern / Name すべて試みる)
+            # テキストがIP・パスに一致する要素をべた塗り
             $text = Get-ElementText $el
             if ($text -and ($ipPat.IsMatch($text) -or $pathPat.IsMatch($text))) {
-                Apply-Mosaic $bmp $rx $ry $rw $rh -Block $MosaicBlockSize; $count++
+                Apply-Redact $bmp $rx $ry $rw $rh; $count++
             }
         } catch {}
     }
     return $count
 }
 
-# ===== タブ別・座標ベース強制モザイク =====
-# UIAutomation でテキストが取れない要素向けのフォールバック
-function Mosaic-SensitiveAreas([System.Drawing.Bitmap]$bmp, [string]$shotName) {
-    # 1) 保存先パス行 (右パネルヘッダー 3行目): 全タブ共通 y≈27-34%
-    Apply-Mosaic $bmp ([int]($bmp.Width*0.34)) ([int]($bmp.Height*0.27)) `
-                      ([int]($bmp.Width*0.66)) ([int]($bmp.Height*0.08)) -Block $MosaicBlockSize
-
-    # 2) クラッシュレポートパス行 (右パネル下部): 全タブ共通 y≈85-91%
-    Apply-Mosaic $bmp ([int]($bmp.Width*0.34)) ([int]($bmp.Height*0.84)) `
-                      ([int]($bmp.Width*0.66)) ([int]($bmp.Height*0.08)) -Block $MosaicBlockSize
-
-    # 3) ネットワークタブ: アドレスセクション全体 (LAN IP / グローバルIP) y≈64-88%, x≈34%〜
-    if ($shotName -eq '03-network-tab') {
-        Apply-Mosaic $bmp ([int]($bmp.Width*0.34)) ([int]($bmp.Height*0.64)) `
-                          ([int]($bmp.Width*0.66)) ([int]($bmp.Height*0.26)) -Block $MosaicBlockSize
+# ===== 座標ベースフォールバック (ネットワークタブのIPのみ) =====
+# UIAutomation で IP が取れなかった場合のみ、IP 値行を限定リダクション
+function Redact-SensitiveAreas([System.Drawing.Bitmap]$bmp, [string]$shotName, [int]$uaCount) {
+    if ($shotName -ne '03-network-tab') { return }
+    # UIAutomation がパス1件しか検出していない = IP を取れていない
+    if ($uaCount -lt 2) {
+        # アドレス値行のみ (y=70-87%)。UPnP・Firewall セクションは対象外
+        Apply-Redact $bmp ([int]($bmp.Width*0.34)) ([int]($bmp.Height*0.70)) `
+                          ([int]($bmp.Width*0.66)) ([int]($bmp.Height*0.17))
     }
 }
 
@@ -172,18 +157,17 @@ function Save-Screenshot([System.Windows.Automation.AutomationElement]$winEl, [s
     $g.CopyFromScreen($rect.Location, [System.Drawing.Point]::Empty, $rect.Size)
     $g.Dispose()
 
-    $mosaicCount = Detect-And-Mosaic $bmp $winEl $rect
-
-    # 座標ベースの強制モザイク（UIAutomation でテキストが取れない領域向け）
+    $redactCount = Detect-And-Redact $bmp $winEl $rect
+    # UIAutomation で取れなかった場合のみ座標ベースフォールバック
     if (-not $NoMosaic) {
-        Mosaic-SensitiveAreas $bmp $name
+        Redact-SensitiveAreas $bmp $name $redactCount
     }
 
     $outPath = Join-Path $outDir "$name.png"
     $bmp.Save($outPath, [System.Drawing.Imaging.ImageFormat]::Png)
     $bmp.Dispose()
-    $mosaicStr = if ($mosaicCount -gt 0) { " (モザイク:${mosaicCount}箇所)" } else { "" }
-    Log-Ok "保存: $name.png$mosaicStr"
+    $redactStr = if ($redactCount -gt 0) { " (リダクション:${redactCount}箇所)" } else { "" }
+    Log-Ok "保存: $name.png$redactStr"
 }
 
 # ===== UIAutomation ヘルパー =====
