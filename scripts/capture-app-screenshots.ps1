@@ -114,15 +114,50 @@ function Detect-And-Redact([System.Drawing.Bitmap]$bmp, [System.Windows.Automati
     return $count
 }
 
-# ===== 座標ベースフォールバック (ネットワークタブのIPのみ) =====
-# UIAutomation で IP が取れなかった場合のみ、IP 値行を限定リダクション
-function Redact-SensitiveAreas([System.Drawing.Bitmap]$bmp, [string]$shotName, [int]$uaCount) {
+# ===== ネットワークタブ: アドレスセクションをUIAutomationで特定して塗り潰し =====
+function Redact-NetworkAddressSection([System.Drawing.Bitmap]$bmp,
+                                      [System.Windows.Automation.AutomationElement]$win,
+                                      [System.Drawing.Rectangle]$winRect) {
+    try {
+        # "🌐 アドレス" (上端) と "共有アドレス" (下端マーカー) の Text 要素で範囲を確定
+        $condText = [System.Windows.Automation.PropertyCondition]::new(
+            [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
+            [System.Windows.Automation.ControlType]::Text)
+        $condTop = [System.Windows.Automation.AndCondition]::new($condText,
+            [System.Windows.Automation.PropertyCondition]::new(
+                [System.Windows.Automation.AutomationElement]::NameProperty, "🌐 アドレス"))
+        $condBot = [System.Windows.Automation.AndCondition]::new($condText,
+            [System.Windows.Automation.PropertyCondition]::new(
+                [System.Windows.Automation.AutomationElement]::NameProperty, "共有アドレス"))
+
+        $topEl = $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $condTop)
+        $botEl = $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $condBot)
+
+        if ($topEl -and $botEl) {
+            $ebTop = $topEl.Current.BoundingRectangle
+            $ebBot = $botEl.Current.BoundingRectangle
+            $ry = [Math]::Max(0, [int]($ebTop.Y - $winRect.Y) - 8)
+            $rx = [Math]::Max(0, [int]($ebTop.X - $winRect.X) - 16)
+            $rw = $bmp.Width - $rx
+            $bottom = [int]($ebBot.Y + $ebBot.Height - $winRect.Y) + 50
+            $rh = [Math]::Min($bmp.Height - $ry, $bottom - $ry)
+            Apply-Redact $bmp $rx $ry $rw $rh
+            return $true
+        }
+    } catch {}
+    return $false
+}
+
+function Redact-SensitiveAreas([System.Drawing.Bitmap]$bmp, [string]$shotName, [int]$uaCount,
+                                [System.Windows.Automation.AutomationElement]$win,
+                                [System.Drawing.Rectangle]$winRect) {
     if ($shotName -ne '03-network-tab') { return }
-    # UIAutomation がパス1件しか検出していない = IP を取れていない
-    if ($uaCount -lt 2) {
-        # アドレス値行のみ (y=70-87%)。UPnP・Firewall セクションは対象外
-        Apply-Redact $bmp ([int]($bmp.Width*0.34)) ([int]($bmp.Height*0.70)) `
-                          ([int]($bmp.Width*0.66)) ([int]($bmp.Height*0.17))
+    # UIAutomation でアドレスセクション上端を特定できれば使う、なければ座標ベース
+    $ok = Redact-NetworkAddressSection $bmp $win $winRect
+    if (-not $ok) {
+        # フォールバック: アドレスセクション全体 (y=77-92%)
+        Apply-Redact $bmp ([int]($bmp.Width*0.34)) ([int]($bmp.Height*0.77)) `
+                          ([int]($bmp.Width*0.66)) ([int]($bmp.Height*0.15))
     }
 }
 
@@ -158,9 +193,8 @@ function Save-Screenshot([System.Windows.Automation.AutomationElement]$winEl, [s
     $g.Dispose()
 
     $redactCount = Detect-And-Redact $bmp $winEl $rect
-    # UIAutomation で取れなかった場合のみ座標ベースフォールバック
     if (-not $NoMosaic) {
-        Redact-SensitiveAreas $bmp $name $redactCount
+        Redact-SensitiveAreas $bmp $name $redactCount $winEl $rect
     }
 
     $outPath = Join-Path $outDir "$name.png"
