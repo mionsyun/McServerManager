@@ -77,7 +77,20 @@ function Apply-Mosaic {
     }
 }
 
-$ipPat = [regex]'(?<!\d)(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?!\d)'
+$ipPat   = [regex]'(?<!\d)(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?!\d)'
+$pathPat = [regex]'(?i)[A-Za-z]:\\(?:Users|ユーザー)\\[^\\\s/]+'
+
+function Get-ElementText([System.Windows.Automation.AutomationElement]$el) {
+    # WPF TextBlock は Name にテキストが入る。コンテナ全体を誤検知しないよう
+    # 500文字未満のものだけ対象にする。
+    try {
+        $n = $el.Current.Name
+        if ($n -and $n.Length -gt 0 -and $n.Length -lt 500) { return $n }
+    } catch {}
+    # TextBox / ComboBox は ValuePattern
+    try { return $el.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern).Current.Value } catch {}
+    return ""
+}
 
 function Detect-And-Mosaic([System.Drawing.Bitmap]$bmp, [System.Windows.Automation.AutomationElement]$win, [System.Drawing.Rectangle]$winRect) {
     if ($NoMosaic) { return 0 }
@@ -100,23 +113,37 @@ function Detect-And-Mosaic([System.Drawing.Bitmap]$bmp, [System.Windows.Automati
             try { $isPass = [bool]$el.Current.IsPassword } catch {}
             if ($isPass) { Apply-Mosaic $bmp $rx $ry $rw $rh -Block $MosaicBlockSize; $count++; continue }
 
-            # テキスト値を取得してIP検査
-            $ct = $el.Current.ControlType
-            if ($ct -eq [System.Windows.Automation.ControlType]::Edit -or
-                $ct -eq [System.Windows.Automation.ControlType]::Text -or
-                $ct -eq [System.Windows.Automation.ControlType]::Document -or
-                $ct -eq [System.Windows.Automation.ControlType]::DataItem -or
-                $ct -eq [System.Windows.Automation.ControlType]::ListItem) {
-                $text = ""
-                try { $vp = $el.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern); $text = $vp.Current.Value } catch {}
-                if (-not $text) { try { $text = $el.Current.Name } catch {} }
-                if ($text -and ($ipPat.IsMatch($text) -or $pathPat.IsMatch($text))) {
-                    Apply-Mosaic $bmp $rx $ry $rw $rh -Block $MosaicBlockSize; $count++
-                }
+            # テキスト取得 (ValuePattern / TextPattern / Name すべて試みる)
+            $text = Get-ElementText $el
+            if ($text -and ($ipPat.IsMatch($text) -or $pathPat.IsMatch($text))) {
+                Apply-Mosaic $bmp $rx $ry $rw $rh -Block $MosaicBlockSize; $count++
             }
         } catch {}
     }
     return $count
+}
+
+# ===== タブ別・座標ベース強制モザイク =====
+# UIAutomation でテキストが取れない要素向けのフォールバック
+function Mosaic-SensitiveAreas([System.Drawing.Bitmap]$bmp, [string]$shotName) {
+    # 右パネル上部のサーバー詳細ヘッダー (保存先パス・サーバー名): 全スクリーンショット共通
+    # y=7%〜32% の右 65% をカバー（パスは y≈26% 付近に表示される）
+    $rx = [int]($bmp.Width  * 0.35)
+    $ry = [int]($bmp.Height * 0.07)
+    $rw = $bmp.Width  - $rx
+    $rh = [int]($bmp.Height * 0.26)
+    Apply-Mosaic $bmp $rx $ry $rw $rh -Block $MosaicBlockSize
+
+    switch ($shotName) {
+        # ネットワークタブ: 追加でアドレス表示エリア右下をモザイク (LAN IP / グローバルIP)
+        '03-network-tab' {
+            $rx2 = [int]($bmp.Width  * 0.50)
+            $ry2 = [int]($bmp.Height * 0.45)
+            $rw2 = $bmp.Width  - $rx2
+            $rh2 = $bmp.Height - $ry2
+            Apply-Mosaic $bmp $rx2 $ry2 $rw2 $rh2 -Block $MosaicBlockSize
+        }
+    }
 }
 
 # ===== スクリーンショット保存 =====
@@ -124,19 +151,41 @@ function Save-Screenshot([System.Windows.Automation.AutomationElement]$winEl, [s
     $proc = Get-Process -Name "McServerManager" -ErrorAction SilentlyContinue
     if ($proc) {
         [WinApi]::SetForegroundWindow($proc.MainWindowHandle) | Out-Null
+        # 最大化状態を UIAutomation で保証
+        try {
+            $wp = $winEl.GetCurrentPattern([System.Windows.Automation.WindowPattern]::Pattern)
+            if ($wp.Current.WindowVisualState -ne [System.Windows.Automation.WindowVisualState]::Maximized) {
+                $wp.SetWindowVisualState([System.Windows.Automation.WindowVisualState]::Maximized)
+                Start-Sleep -Milliseconds 600
+            }
+        } catch {
+            [WinApi]::ShowWindow($proc.MainWindowHandle, 3) | Out-Null
+        }
         Start-Sleep -Milliseconds 300
     }
 
     $b = $winEl.Current.BoundingRectangle
-    $rect = [System.Drawing.Rectangle]::new([int]$b.X, [int]$b.Y, [int]$b.Width, [int]$b.Height)
+    # Windows 11 の角丸・ウィンドウ枠による背景透過を避けるため 4px 内側でクロップ
+    $inset = 4
+    $rect = [System.Drawing.Rectangle]::new(
+        [int]$b.X + $inset,
+        [int]$b.Y + $inset,
+        [int]$b.Width  - $inset * 2,
+        [int]$b.Height - $inset * 2)
     $bmp = New-Object System.Drawing.Bitmap($rect.Width, $rect.Height)
     $g   = [System.Drawing.Graphics]::FromImage($bmp)
     $g.CopyFromScreen($rect.Location, [System.Drawing.Point]::Empty, $rect.Size)
     $g.Dispose()
 
     $mosaicCount = Detect-And-Mosaic $bmp $winEl $rect
-    $path = Join-Path $outDir "$name.png"
-    $bmp.Save($path, [System.Drawing.Imaging.ImageFormat]::Png)
+
+    # 座標ベースの強制モザイク（UIAutomation でテキストが取れない領域向け）
+    if (-not $NoMosaic) {
+        Mosaic-SensitiveAreas $bmp $name
+    }
+
+    $outPath = Join-Path $outDir "$name.png"
+    $bmp.Save($outPath, [System.Drawing.Imaging.ImageFormat]::Png)
     $bmp.Dispose()
     $mosaicStr = if ($mosaicCount -gt 0) { " (モザイク:${mosaicCount}箇所)" } else { "" }
     Log-Ok "保存: $name.png$mosaicStr"
@@ -286,10 +335,15 @@ $winEl = Wait-ForWindow 30
 $proc  = Get-Process -Name "McServerManager"
 $hwnd  = $proc.MainWindowHandle
 
-# ウィンドウを最大化して前面に
-[WinApi]::ShowWindow($hwnd, 3) | Out-Null   # SW_MAXIMIZE
+# ウィンドウを最大化して前面に (UIAutomation WindowPattern を優先、Win32 をフォールバック)
 [WinApi]::SetForegroundWindow($hwnd) | Out-Null
-Start-Sleep -Milliseconds 1500   # 初回ロード待ち
+try {
+    $winPat = $winEl.GetCurrentPattern([System.Windows.Automation.WindowPattern]::Pattern)
+    $winPat.SetWindowVisualState([System.Windows.Automation.WindowVisualState]::Maximized)
+} catch {
+    [WinApi]::ShowWindow($hwnd, 3) | Out-Null   # SW_MAXIMIZE フォールバック
+}
+Start-Sleep -Milliseconds 1800   # 最大化アニメーション + 初回ロード待ち
 
 Log-Ok "ウィンドウ取得完了"
 Dismiss-AllDialogs   # 起動時に残っているダイアログを全て閉じる
@@ -300,10 +354,6 @@ Log-Step "スクリーンショット撮影開始"
 # ---- 01: メイン画面 ----
 Log-Info "01-main-window"
 $winEl = Get-MainWindowElement
-# アプリを確実に前面に出してから撮影
-[WinApi]::ShowWindow($hwnd, 9) | Out-Null   # SW_RESTORE
-[WinApi]::SetForegroundWindow($hwnd) | Out-Null
-Start-Sleep -Milliseconds 1000
 Save-Screenshot $winEl "01-main-window"
 
 $winEl = Get-MainWindowElement
