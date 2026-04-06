@@ -119,28 +119,22 @@ function Redact-NetworkAddressSection([System.Drawing.Bitmap]$bmp,
                                       [System.Windows.Automation.AutomationElement]$win,
                                       [System.Drawing.Rectangle]$winRect) {
     try {
-        # "🌐 アドレス" (上端) と "共有アドレス" (下端マーカー) の Text 要素で範囲を確定
+        # "LAN IP" ラベル TextBlock は DataTemplate 外なので UIAutomation で取得できる
         $condText = [System.Windows.Automation.PropertyCondition]::new(
             [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
             [System.Windows.Automation.ControlType]::Text)
-        $condTop = [System.Windows.Automation.AndCondition]::new($condText,
+        $condLan = [System.Windows.Automation.AndCondition]::new($condText,
             [System.Windows.Automation.PropertyCondition]::new(
-                [System.Windows.Automation.AutomationElement]::NameProperty, "🌐 アドレス"))
-        $condBot = [System.Windows.Automation.AndCondition]::new($condText,
-            [System.Windows.Automation.PropertyCondition]::new(
-                [System.Windows.Automation.AutomationElement]::NameProperty, "共有アドレス"))
+                [System.Windows.Automation.AutomationElement]::NameProperty, "LAN IP"))
 
-        $topEl = $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $condTop)
-        $botEl = $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $condBot)
-
-        if ($topEl -and $botEl) {
-            $ebTop = $topEl.Current.BoundingRectangle
-            $ebBot = $botEl.Current.BoundingRectangle
-            $ry = [Math]::Max(0, [int]($ebTop.Y - $winRect.Y) - 8)
-            $rx = [Math]::Max(0, [int]($ebTop.X - $winRect.X) - 16)
+        $lanEl = $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $condLan)
+        if ($lanEl) {
+            $eb = $lanEl.Current.BoundingRectangle
+            # ラベル上端から 80px ぶん (ラベル行 + IP値行 1〜3行) を塗り潰す
+            $ry = [Math]::Max(0, [int]($eb.Y - $winRect.Y) - 2)
+            $rx = [Math]::Max(0, [int]($eb.X - $winRect.X) - 4)
             $rw = $bmp.Width - $rx
-            $bottom = [int]($ebBot.Y + $ebBot.Height - $winRect.Y) + 50
-            $rh = [Math]::Min($bmp.Height - $ry, $bottom - $ry)
+            $rh = [Math]::Min($bmp.Height - $ry, 60)
             Apply-Redact $bmp $rx $ry $rw $rh
             return $true
         }
@@ -155,9 +149,9 @@ function Redact-SensitiveAreas([System.Drawing.Bitmap]$bmp, [string]$shotName, [
     # UIAutomation でアドレスセクション上端を特定できれば使う、なければ座標ベース
     $ok = Redact-NetworkAddressSection $bmp $win $winRect
     if (-not $ok) {
-        # フォールバック: アドレスセクション全体 (y=77-92%)
-        Apply-Redact $bmp ([int]($bmp.Width*0.34)) ([int]($bmp.Height*0.77)) `
-                          ([int]($bmp.Width*0.66)) ([int]($bmp.Height*0.15))
+        # フォールバック: LAN IP 値行のみ (y=74-83%)
+        Apply-Redact $bmp ([int]($bmp.Width*0.34)) ([int]($bmp.Height*0.74)) `
+                          ([int]($bmp.Width*0.66)) ([int]($bmp.Height*0.09))
     }
 }
 
