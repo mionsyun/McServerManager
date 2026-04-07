@@ -1,0 +1,122 @@
+<Window x:Class="McServerManager.Views.GuidePickerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="セットアップガイドを選択"
+        Width="520"
+        Height="560"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{DynamicResource BrushBg}"
+        Foreground="{DynamicResource BrushText}">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Margin="0,0,0,16">
+            <TextBlock Text="📖 ガイドを選択してください" FontSize="17" FontWeight="Bold"/>
+            <TextBlock Text="目的に合ったガイドを選ぶとハイライト付きで手順を案内します。"
+                       Style="{StaticResource MutedText}" Margin="0,6,0,0" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- 初期セットアップ -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,10" Cursor="Hand">
+                    <Border.InputBindings>
+                        <MouseBinding MouseAction="LeftClick" Command="{Binding SelectInitialSetupCommand}"/>
+                    </Border.InputBindings>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="🚀 初期セットアップ" FontWeight="SemiBold" FontSize="14"/>
+                            <TextBlock Text="初めてサーバーを立ち上げる方向け。Java 確認・サーバー作成・起動・外部公開までの全手順を案内します。"
+                                       Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                        </StackPanel>
+                        <TextBlock Grid.Column="1" Text="›" FontSize="20" VerticalAlignment="Center" Margin="16,0,0,0" Opacity="0.5"/>
+                    </Grid>
+                </Border>
+
+                <!-- 配布マップ -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,10" Cursor="Hand">
+                    <Border.InputBindings>
+                        <MouseBinding MouseAction="LeftClick" Command="{Binding SelectDistributionMapCommand}"/>
+                    </Border.InputBindings>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="🗺️ 配布マップを導入する" FontWeight="SemiBold" FontSize="14"/>
+                            <TextBlock Text="Planet Minecraft などで公開されている配布マップをサーバーで使えるようにする手順を案内します。"
+                                       Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                        </StackPanel>
+                        <TextBlock Grid.Column="1" Text="›" FontSize="20" VerticalAlignment="Center" Margin="16,0,0,0" Opacity="0.5"/>
+                    </Grid>
+                </Border>
+
+                <!-- MOD -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,10" Cursor="Hand">
+                    <Border.InputBindings>
+                        <MouseBinding MouseAction="LeftClick" Command="{Binding SelectModCommand}"/>
+                    </Border.InputBindings>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="⚙️ MOD を導入する" FontWeight="SemiBold" FontSize="14"/>
+                            <TextBlock Text="Forge / Fabric サーバーに MOD を追加する手順を案内します。クライアント側の設定も含みます。"
+                                       Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                        </StackPanel>
+                        <TextBlock Grid.Column="1" Text="›" FontSize="20" VerticalAlignment="Center" Margin="16,0,0,0" Opacity="0.5"/>
+                    </Grid>
+                </Border>
+
+                <!-- プラグイン -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,10" Cursor="Hand">
+                    <Border.InputBindings>
+                        <MouseBinding MouseAction="LeftClick" Command="{Binding SelectPluginCommand}"/>
+                    </Border.InputBindings>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="🔌 プラグインを導入する" FontWeight="SemiBold" FontSize="14"/>
+                            <TextBlock Text="Paper / Spigot サーバーにプラグインを追加する手順を案内します。クライアント側の変更は不要です。"
+                                       Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                        </StackPanel>
+                        <TextBlock Grid.Column="1" Text="›" FontSize="20" VerticalAlignment="Center" Margin="16,0,0,0" Opacity="0.5"/>
+                    </Grid>
+                </Border>
+
+                <!-- リソースパック -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,10" Cursor="Hand">
+                    <Border.InputBindings>
+                        <MouseBinding MouseAction="LeftClick" Command="{Binding SelectResourcePackCommand}"/>
+                    </Border.InputBindings>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="📦 リソースパックを配布する" FontWeight="SemiBold" FontSize="14"/>
+                            <TextBlock Text="テクスチャやサウンドのリソースパックをプレイヤーに自動配布する手順を案内します。"
+                                       Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                        </StackPanel>
+                        <TextBlock Grid.Column="1" Text="›" FontSize="20" VerticalAlignment="Center" Margin="16,0,0,0" Opacity="0.5"/>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

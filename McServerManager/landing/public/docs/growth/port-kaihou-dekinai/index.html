@@ -59,8 +59,8 @@
     <meta property="og:type" content="article" />
     <meta property="og:url" content="https://www.maipilot.jp/docs/growth/port-kaihou-dekinai/" />
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="マイクラのポート開放できない時の対処法【2026年版】 | MaiPilot" />
-    <meta name="twitter:description" content="マイクラのポート開放できない原因TOP5と対処法。二重ルーター・ISP制限・Windowsファイアウォール・IPv6環境への対応を解説。" />
+    <meta name="twitter:title" content="マイクラのポート開放できない時の対処法【2026年版・安全チェックリスト】 | MaiPilot" />
+    <meta name="twitter:description" content="マイクラのポート開放できない原因TOP5と対処法。二重ルーター・ISP制限・Windowsファイアウォール・IPv6環境への対応を解説。代替手段も紹介。" />
     <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
     <meta property="og:image:alt" content="MaiPilot icon" />
     <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
@@ -68,19 +68,39 @@
     <meta property="og:locale" content="ja_JP" />
     <meta property="article:published_time" content="2026-04-06T00:00:00+09:00" />
     <meta property="article:modified_time" content="2026-04-06T00:00:00+09:00" />
-    <script type="application/ld+json" data-seo="breadcrumb">
+      <script type="application/ld+json" data-seo="breadcrumb">
 {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.maipilot.jp/" },
-    { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://www.maipilot.jp/docs/" },
-    { "@type": "ListItem", "position": 3, "name": "Growth", "item": "https://www.maipilot.jp/docs/growth/" },
-    { "@type": "ListItem", "position": 4, "name": "マイクラのポート開放できない時の対処法", "item": "https://www.maipilot.jp/docs/growth/port-kaihou-dekinai/" }
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://www.maipilot.jp/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Docs",
+      "item": "https://www.maipilot.jp/docs/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Growth",
+      "item": "https://www.maipilot.jp/docs/growth/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "マイクラのポート開放できない時の対処法【2026年版・安全チェックリスト】",
+      "item": "https://www.maipilot.jp/docs/growth/port-kaihou-dekinai/"
+    }
   ]
 }
-    </script>
-    <script type="application/ld+json" data-seo="faq">
+  </script>
+      <script type="application/ld+json" data-seo="faq">
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -88,26 +108,38 @@
     {
       "@type": "Question",
       "name": "ポート開放するとハッキングされませんか？",
-      "acceptedAnswer": { "@type": "Answer", "text": "25565番ポートのみを適切に開放し、online-mode=trueでMicrosoftアカウント認証を有効にしていれば、通常のリスクは限定的です。ホワイトリスト設定も有効です。" }
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "25565番ポートのみを適切に開放し、online-mode=trueでMicrosoftアカウント認証を有効にしていれば、通常のリスクは限定的です。ホワイトリスト設定も有効です。"
+      }
     },
     {
       "@type": "Question",
       "name": "自分のIPアドレスが知られるのが心配です。",
-      "acceptedAnswer": { "@type": "Answer", "text": "直接IPアドレスを教える場合はその通りです。気になる場合はplayit.ggなどのトンネリングサービスを使うと、自分のIPを隠せます。" }
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "直接IPアドレスを教える場合はその通りです。気になる場合はplayit.ggなどのトンネリングサービスを使うと、自分のIPを隠せます。"
+      }
     },
     {
       "@type": "Question",
       "name": "ポート開放できているか確認する方法は？",
-      "acceptedAnswer": { "@type": "Answer", "text": "ポート確認ツールなどで外部からのアクセスをチェックできます。MaiPilotにも接続確認の案内があります。" }
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "「ポート確認ツール」で外部からのアクセスをチェックできます。MaiPilotにも接続確認の案内があります。"
+      }
     },
     {
       "@type": "Question",
       "name": "v6プラス・transix環境ではポート開放できませんか？",
-      "acceptedAnswer": { "@type": "Answer", "text": "v6プラスなどのIPv6接続環境では、通常のポート開放ができないことがあります。playit.ggなどのトンネリングサービスか、レンタルサーバーへの移行を検討してください。" }
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "v6プラスなどのIPv6接続環境では、通常のポート開放ができないことがあります。playit.ggなどのトンネリングサービスか、レンタルサーバーへの移行を検討してください。"
+      }
     }
   ]
 }
-    </script>
+  </script>
   </head>
   <body>
     <nav class="site-nav">

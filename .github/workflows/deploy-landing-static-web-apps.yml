@@ -8,17 +8,6 @@ on:
       - "McServerManager/landing/**"
       - ".github/workflows/deploy-landing-static-web-apps.yml"
   workflow_dispatch:
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - closed
-    branches:
-      - develop
-    paths:
-      - "McServerManager/landing/**"
-      - ".github/workflows/deploy-landing-static-web-apps.yml"
 
 concurrency:
   group: deploy-landing-swa-${{ github.ref }}
@@ -28,7 +17,6 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 jobs:
   build_and_deploy:
-    if: github.event_name == 'push' || github.event.action != 'closed'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -70,13 +58,4 @@ jobs:
           skip_app_build: true
           app_location: McServerManager/landing/.output/public
 
-  close_preview_environment:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Close Pull Request Preview
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_LP }}
-          action: close
 

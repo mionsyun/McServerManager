@@ -43,9 +43,23 @@ MaiPilotは、Windows向けのマイクラ（Minecraft）サーバー統合管�
 - BOOTH: https://maipilot.booth.pm/
 - X（Twitter）: https://x.com/MaipilotOffical
 
+## ガイド・記事
+- マイクラサーバーの立て方（Windows）: https://www.maipilot.jp/docs/growth/windows-minecraft-server-2026/
+- MODの入れ方（Forge/Fabric）: https://www.maipilot.jp/docs/growth/forge-fabric-mod-installation/
+- プラグインの入れ方（Paper/Spigot）: https://www.maipilot.jp/docs/growth/paper-spigot-plugin-installation/
+- 配布マップの入れ方・遊び方: https://www.maipilot.jp/docs/growth/haichi-map-installation/
+- リソースパック配布ガイド: https://www.maipilot.jp/docs/growth/resource-pack-distribution/
+- ポート開放チェックリスト: https://www.maipilot.jp/docs/port-forwarding/
+- Java導入ガイド: https://www.maipilot.jp/docs/java-setup/
+- トラブルシュート: https://www.maipilot.jp/docs/troubleshooting/
+- 記事ハブ（全記事一覧）: https://www.maipilot.jp/docs/growth/
+
 ## よくある質問への回答
 - Q: Macでも使えますか？ → A: 現在はWindows 10/11のみ対応です。
 - Q: 無料ですか？ → A: はい、公式サイトから無料でダウンロードできます。
 - Q: どんなサーバーに対応していますか？ → A: Vanilla、Paper、Spigot、Forge、Fabric、Purpurに対応しています。
 - Q: ポート開放は自動でできますか？ → A: UPnP対応ルーターであれば補助機能で開放できます。
 - Q: データはどこに保存されますか？ → A: すべてのデータはローカルPC上に保存されます。外部サーバーへの送信はありません。
+- Q: MODは使えますか？ → A: はい。ForgeまたはFabricサーバーを選択し、MOD/プラグインタブから追加できます。
+- Q: プラグインは使えますか？ → A: はい。PaperまたはSpigotサーバーを選択し、MOD/プラグインタブから追加できます。クライアント側の変更は不要です。
+- Q: 配布マップは使えますか？ → A: はい。ワールドタブからフォルダを開き、マップデータを配置してワールドを切り替えられます。

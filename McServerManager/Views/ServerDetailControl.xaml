@@ -463,7 +463,7 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="ワールド">
+            <TabItem x:Name="WorldTab" Header="ワールド">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <Grid Margin="12" DataContext="{Binding World}">
                     <Grid.ColumnDefinitions>
@@ -678,7 +678,7 @@
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="MOD/プラグイン">
+            <TabItem x:Name="AddonTab" Header="MOD/プラグイン">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="12" DataContext="{Binding Addon}">
 
@@ -938,7 +938,7 @@
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
-            <TabItem Header="リソースパック">
+            <TabItem x:Name="ResourcePackTab" Header="リソースパック">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="12" DataContext="{Binding ResourcePack}">
 

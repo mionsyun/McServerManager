@@ -255,6 +255,19 @@ const translations = {
         eventName: "pr_shinvps_click",
       },
     ],
+    guidesTitle: "Guides & Articles",
+    guidesSub: "Step-by-step docs for common tasks.",
+    guides: [
+      { title: "🚀 How to set up a Minecraft server (Windows)", href: "/docs/growth/windows-minecraft-server-2026/" },
+      { title: "⚙️ How to install MODs (Forge / Fabric)", href: "/docs/growth/forge-fabric-mod-installation/" },
+      { title: "🔌 How to install Plugins (Paper / Spigot)", href: "/docs/growth/paper-spigot-plugin-installation/" },
+      { title: "🗺️ How to install a map (distribution map)", href: "/docs/growth/haichi-map-installation/" },
+      { title: "📦 Resource pack distribution guide", href: "/docs/growth/resource-pack-distribution/" },
+      { title: "🛡️ Port-forwarding checklist", href: "/docs/port-forwarding/" },
+      { title: "☕ Java setup guide", href: "/docs/java-setup/" },
+      { title: "🔧 Troubleshooting", href: "/docs/troubleshooting/" },
+    ],
+    guidesMore: "See all guides",
     faqTitle: "FAQ",
     faqSub: "Quick answers for a smooth start.",
     faq: [
@@ -541,6 +554,19 @@ const translations = {
         eventName: "pr_shinvps_click",
       },
     ],
+    guidesTitle: "ガイド・攻略記事",
+    guidesSub: "よくある作業をステップごとに解説。",
+    guides: [
+      { title: "🚀 マイクラサーバーの立て方（Windows 2026年版）", href: "/docs/growth/windows-minecraft-server-2026/" },
+      { title: "⚙️ MOD の入れ方（Forge / Fabric）", href: "/docs/growth/forge-fabric-mod-installation/" },
+      { title: "🔌 プラグインの入れ方（Paper / Spigot）", href: "/docs/growth/paper-spigot-plugin-installation/" },
+      { title: "🗺️ 配布マップの入れ方・遊び方", href: "/docs/growth/haichi-map-installation/" },
+      { title: "📦 リソースパック配布ガイド", href: "/docs/growth/resource-pack-distribution/" },
+      { title: "🛡️ ポート開放チェックリスト", href: "/docs/port-forwarding/" },
+      { title: "☕ Java 導入ガイド（初心者向け）", href: "/docs/java-setup/" },
+      { title: "🔧 トラブルシュート", href: "/docs/troubleshooting/" },
+    ],
+    guidesMore: "記事をすべて見る",
     faqTitle: "よくある質問",
     faqSub: "スムーズに始めるためのヒント。",
     faq: [
@@ -930,6 +956,18 @@ useHead(() => ({
             sameAs: ["https://x.com/MaipilotOffical", boothUrl],
           },
         },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: t.value.faq.map((item) => ({
+            "@type": "Question",
+            name: item.title,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: item.body,
+            },
+          })),
+        },
       ]),
     },
   ],
@@ -1233,6 +1271,26 @@ useHead(() => ({
               </a>
             </div>
           </article>
+        </div>
+      </section>
+
+      <section id="guides" class="section reveal">
+        <div class="section-head">
+          <h2>{{ t.guidesTitle }}</h2>
+          <p>{{ t.guidesSub }}</p>
+        </div>
+        <div class="guides-grid">
+          <a
+            v-for="guide in t.guides"
+            :key="guide.href"
+            :href="guide.href"
+            class="guide-card"
+          >
+            {{ guide.title }}
+          </a>
+        </div>
+        <div class="guides-more-wrap">
+          <a :href="docsUrl" class="guides-more-link">{{ t.guidesMore }} →</a>
         </div>
       </section>
 
