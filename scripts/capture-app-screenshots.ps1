@@ -130,11 +130,11 @@ function Redact-NetworkAddressSection([System.Drawing.Bitmap]$bmp,
         $lanEl = $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $condLan)
         if ($lanEl) {
             $eb = $lanEl.Current.BoundingRectangle
-            # "LAN IP" ラベルの下端から IP 値行分 (30px) だけ塗り潰す
+            # "LAN IP" ラベルの直下・IP数値の幅 (約160px) だけ塗り潰す
+            $rx = [int]($eb.X - $winRect.X)
             $ry = [int]($eb.Y + $eb.Height - $winRect.Y) + 2
-            $rx = [Math]::Max(0, [int]($eb.X - $winRect.X) - 4)
-            $rw = $bmp.Width - $rx
-            $rh = [Math]::Min($bmp.Height - $ry, 32)
+            $rw = 160   # IP アドレス文字列の最大幅
+            $rh = 26    # 1行ぶん
             Apply-Redact $bmp $rx $ry $rw $rh
             return $true
         }
@@ -149,9 +149,10 @@ function Redact-SensitiveAreas([System.Drawing.Bitmap]$bmp, [string]$shotName, [
     # UIAutomation でアドレスセクション上端を特定できれば使う、なければ座標ベース
     $ok = Redact-NetworkAddressSection $bmp $win $winRect
     if (-not $ok) {
-        # フォールバック: LAN IP 値行のみ (y=76-82%)
-        Apply-Redact $bmp ([int]($bmp.Width*0.34)) ([int]($bmp.Height*0.76)) `
-                          ([int]($bmp.Width*0.66)) ([int]($bmp.Height*0.06))
+        # フォールバック: IP 値テキストの実測範囲
+        # x: 右パネル内 (x=36-50%)、y: IP値行 (y=79-85%)
+        Apply-Redact $bmp ([int]($bmp.Width*0.36)) ([int]($bmp.Height*0.79)) `
+                          ([int]($bmp.Width*0.14)) ([int]($bmp.Height*0.05))
     }
 }
 
