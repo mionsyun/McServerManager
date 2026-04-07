@@ -130,11 +130,11 @@ function Redact-NetworkAddressSection([System.Drawing.Bitmap]$bmp,
         $lanEl = $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $condLan)
         if ($lanEl) {
             $eb = $lanEl.Current.BoundingRectangle
-            # ラベル上端から 80px ぶん (ラベル行 + IP値行 1〜3行) を塗り潰す
-            $ry = [Math]::Max(0, [int]($eb.Y - $winRect.Y) - 2)
+            # "LAN IP" ラベルの下端から IP 値行分 (30px) だけ塗り潰す
+            $ry = [int]($eb.Y + $eb.Height - $winRect.Y) + 2
             $rx = [Math]::Max(0, [int]($eb.X - $winRect.X) - 4)
             $rw = $bmp.Width - $rx
-            $rh = [Math]::Min($bmp.Height - $ry, 60)
+            $rh = [Math]::Min($bmp.Height - $ry, 32)
             Apply-Redact $bmp $rx $ry $rw $rh
             return $true
         }
@@ -149,9 +149,9 @@ function Redact-SensitiveAreas([System.Drawing.Bitmap]$bmp, [string]$shotName, [
     # UIAutomation でアドレスセクション上端を特定できれば使う、なければ座標ベース
     $ok = Redact-NetworkAddressSection $bmp $win $winRect
     if (-not $ok) {
-        # フォールバック: LAN IP 値行のみ (y=74-83%)
-        Apply-Redact $bmp ([int]($bmp.Width*0.34)) ([int]($bmp.Height*0.74)) `
-                          ([int]($bmp.Width*0.66)) ([int]($bmp.Height*0.09))
+        # フォールバック: LAN IP 値行のみ (y=76-82%)
+        Apply-Redact $bmp ([int]($bmp.Width*0.34)) ([int]($bmp.Height*0.76)) `
+                          ([int]($bmp.Width*0.66)) ([int]($bmp.Height*0.06))
     }
 }
 
