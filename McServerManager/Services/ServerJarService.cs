@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
 namespace McServerManager.Services;
@@ -8,6 +10,7 @@ namespace McServerManager.Services;
 public sealed class ServerJarService : IServerJarService
 {
     private const string PaperProject = "paper";
+    private static readonly Regex ChecksumRegex = new(@"\b(?<hash>[A-Fa-f0-9]{40}|[A-Fa-f0-9]{64})\b", RegexOptions.Compiled);
     private readonly IMinecraftVersionService _versionService;
     private readonly IJavaService _javaService;
     private readonly HttpClient _httpClient = new();
@@ -22,12 +25,12 @@ public sealed class ServerJarService : IServerJarService
 
     public Task DownloadAsync(string serverType, string versionId, string destinationPath, string? javaPath, IProgress<string>? progress = null)
     {
-        progress?.Report($"サーバーソフトを取得中: {serverType} {versionId}");
+        progress?.Report($"Downloading server software: {serverType} {versionId}");
 
         return serverType switch
         {
             "Forge" => DownloadForgeAsync(versionId, destinationPath, javaPath, progress),
-            "Spigot" => DownloadSpigotAsync(versionId, destinationPath, javaPath, progress),
+            "Spigot" => DownloadSpigotAsync(versionId, destinationPath, progress),
             "Purpur" => DownloadPurpurAsync(versionId, destinationPath, progress),
             "Paper" => DownloadPaperAsync(versionId, destinationPath, progress),
             "Fabric" => DownloadFabricAsync(versionId, destinationPath, progress),
@@ -37,13 +40,13 @@ public sealed class ServerJarService : IServerJarService
 
     private async Task DownloadVanillaAsync(string versionId, string destinationPath, IProgress<string>? progress)
     {
-        progress?.Report("Vanilla server.jar をダウンロードしています...");
+        progress?.Report("Downloading Vanilla server.jar...");
         await _versionService.DownloadServerJarAsync(versionId, destinationPath).ConfigureAwait(false);
     }
 
     private async Task DownloadPaperAsync(string versionId, string destinationPath, IProgress<string>? progress)
     {
-        progress?.Report("Paper のビルド情報を取得しています...");
+        progress?.Report("Fetching Paper build information...");
         var buildsUrl = $"{ExternalApiUrls.PaperApiBase}/{PaperProject}/versions/{versionId}";
         using var buildsResponse = await _httpClient.GetAsync(buildsUrl).ConfigureAwait(false);
         buildsResponse.EnsureSuccessStatusCode();
@@ -52,63 +55,62 @@ public sealed class ServerJarService : IServerJarService
 
         if (!buildsDoc.RootElement.TryGetProperty("builds", out var buildsElement) || buildsElement.GetArrayLength() == 0)
         {
-            throw new InvalidOperationException("Paper のビルド情報が見つかりません。");
+            throw new InvalidOperationException("Paper build information was not found.");
         }
 
         var latestBuild = buildsElement.EnumerateArray().Select(b => b.GetInt32()).Max();
         var fileName = $"paper-{versionId}-{latestBuild}.jar";
         var downloadUrl = $"{ExternalApiUrls.PaperApiBase}/{PaperProject}/versions/{versionId}/builds/{latestBuild}/downloads/{fileName}";
 
-        progress?.Report("Paper をダウンロードしています...");
+        progress?.Report("Downloading Paper...");
         await DownloadFileAsync(downloadUrl, destinationPath).ConfigureAwait(false);
     }
 
-    private async Task DownloadSpigotAsync(string versionId, string destinationPath, string? javaPath, IProgress<string>? progress)
+    private async Task DownloadSpigotAsync(string versionId, string destinationPath, IProgress<string>? progress)
     {
-        progress?.Report("Spigot 本体の直接ダウンロードを試行しています...");
-        try
+        progress?.Report("Trying direct Spigot download...");
+
+        HttpRequestException? lastHttpError = null;
+        var endpoints = new[]
         {
-            await DownloadSpigotDirectJarAsync(versionId, destinationPath, progress).ConfigureAwait(false);
-        }
-        catch (HttpRequestException)
+            string.Format(ExternalApiUrls.SpigotDirectJarTemplate, versionId),
+            string.Format(ExternalApiUrls.SpigotDirectJarFallbackTemplate, versionId)
+        };
+
+        for (var i = 0; i < endpoints.Length; i++)
         {
-            progress?.Report("直接ダウンロードに失敗したため、BuildTools ビルドに切り替えます...");
-
-            var javaExe = ResolveJavaPath(javaPath);
-            EnsureGitAvailable();
-
-            var serverDir = Path.GetDirectoryName(destinationPath) ?? throw new InvalidOperationException("サーバーディレクトリが見つかりません。");
-            var buildToolsPath = Path.Combine(serverDir, "BuildTools.jar");
-
-            progress?.Report("BuildTools をダウンロードしています...");
-            await DownloadFileAsync(ExternalApiUrls.SpigotBuildTools, buildToolsPath).ConfigureAwait(false);
-
-            progress?.Report("Spigot をビルドしています（数分かかる場合があります）...");
-            await RunProcessAsync(javaExe, $"-jar \"{buildToolsPath}\" --rev {versionId}", serverDir, progress).ConfigureAwait(false);
-
-            var builtJar = Directory.EnumerateFiles(serverDir, $"spigot-{versionId}.jar", SearchOption.TopDirectoryOnly)
-                .FirstOrDefault();
-            if (string.IsNullOrWhiteSpace(builtJar))
+            var endpoint = endpoints[i];
+            try
             {
-                throw new InvalidOperationException("Spigot のビルドに失敗しました。");
+                await DownloadSpigotDirectJarAsync(endpoint, destinationPath, progress).ConfigureAwait(false);
+                return;
             }
-
-            File.Copy(builtJar, destinationPath, true);
+            catch (HttpRequestException ex)
+            {
+                lastHttpError = ex;
+                if (i < endpoints.Length - 1)
+                {
+                    progress?.Report("Primary Spigot endpoint failed. Trying fallback endpoint...");
+                }
+            }
         }
+
+        throw new InvalidOperationException(
+            "Spigot 直リンクのダウンロードに失敗しました。セキュリティ対策として BuildTools の自動実行は無効化されています。手動で BuildTools を実行して生成した jar を配置してください。",
+            lastHttpError);
     }
 
-    private async Task DownloadSpigotDirectJarAsync(string versionId, string destinationPath, IProgress<string>? progress)
+    private async Task DownloadSpigotDirectJarAsync(string url, string destinationPath, IProgress<string>? progress)
     {
-        var directUrl = string.Format(ExternalApiUrls.SpigotDirectJarTemplate, versionId);
-        progress?.Report("Spigot 本体を直接ダウンロードしています...");
+        progress?.Report($"Downloading Spigot directly: {url}");
 
-        // HttpRequestException をそのまま伝播させ、呼び出し元で BuildTools フォールバックを行う
-        await DownloadFileAsync(directUrl, destinationPath).ConfigureAwait(false);
+        // Propagate HttpRequestException and handle policy at caller.
+        await DownloadFileAsync(url, destinationPath).ConfigureAwait(false);
     }
 
     private async Task DownloadPurpurAsync(string versionId, string destinationPath, IProgress<string>? progress)
     {
-        progress?.Report("Purpur のビルド情報を取得しています...");
+        progress?.Report("Fetching Purpur build information...");
         var buildsUrl = $"{ExternalApiUrls.PurpurApiBase}/{versionId}";
         using var buildsResponse = await _httpClient.GetAsync(buildsUrl).ConfigureAwait(false);
         buildsResponse.EnsureSuccessStatusCode();
@@ -119,41 +121,43 @@ public sealed class ServerJarService : IServerJarService
             !buildsElement.TryGetProperty("all", out var allElement) ||
             allElement.GetArrayLength() == 0)
         {
-            throw new InvalidOperationException("Purpur のビルド情報が見つかりません。");
+            throw new InvalidOperationException("Purpur build information was not found.");
         }
 
-        // Purpur API はビルド番号を文字列で返すため GetString → int.Parse で取得
+        // Purpur API may return build number as either number or string.
         var latestBuild = allElement.EnumerateArray()
             .Select(b => b.ValueKind == JsonValueKind.Number ? b.GetInt32() : int.Parse(b.GetString()!))
             .Max();
         var downloadUrl = $"{ExternalApiUrls.PurpurApiBase}/{versionId}/{latestBuild}/download";
 
-        progress?.Report("Purpur をダウンロードしています...");
+        progress?.Report("Downloading Purpur...");
         await DownloadFileAsync(downloadUrl, destinationPath).ConfigureAwait(false);
     }
 
     private async Task DownloadForgeAsync(string versionId, string destinationPath, string? javaPath, IProgress<string>? progress)
     {
-        progress?.Report("Forge のインストーラー情報を取得しています...");
+        progress?.Report("Fetching Forge installer information...");
         var javaExe = ResolveJavaPath(javaPath);
         var forgeVersion = await GetLatestForgeVersionAsync(versionId).ConfigureAwait(false);
-        var serverDir = Path.GetDirectoryName(destinationPath) ?? throw new InvalidOperationException("サーバーディレクトリが見つかりません。");
+        var serverDir = Path.GetDirectoryName(destinationPath) ?? throw new InvalidOperationException("Destination directory could not be resolved.");
         var installerUrl = $"{ExternalApiUrls.ForgeMavenBase}/net/minecraftforge/forge/{versionId}-{forgeVersion}/forge-{versionId}-{forgeVersion}-installer.jar";
         var installerPath = Path.Combine(serverDir, $"forge-{versionId}-{forgeVersion}-installer.jar");
 
-        progress?.Report("Forge インストーラーをダウンロードしています...");
+        progress?.Report("Downloading Forge installer...");
         await DownloadFileAsync(installerUrl, installerPath).ConfigureAwait(false);
+        progress?.Report("Verifying Forge installer checksum...");
+        await VerifyDownloadedFileChecksumAsync(installerUrl, installerPath).ConfigureAwait(false);
 
         if (!File.Exists(installerPath))
         {
-            throw new InvalidOperationException("Forge インストーラーのダウンロードに失敗しました。");
+            throw new InvalidOperationException("Failed to download Forge installer.");
         }
 
-        progress?.Report("Forge サーバーをセットアップしています（数分かかる場合があります）...");
+        progress?.Report("Running Forge installer (this may take a while)...");
         await RunProcessAsync(javaExe, $"-jar \"{installerPath}\" --installServer", serverDir, progress).ConfigureAwait(false);
 
-        // Forge 1.17+ は run.sh/run.bat を生成し、jarは libraries/ 以下に配置される
-        // まず従来形式（1.16以前）の jar を探す
+        // Forge 1.17+ typically provides run scripts and stores jars under libraries/.
+        // First, try traditional jar patterns.
         var serverJar = FindForgeServerJar(serverDir, versionId, forgeVersion);
         if (!string.IsNullOrWhiteSpace(serverJar))
         {
@@ -161,28 +165,28 @@ public sealed class ServerJarService : IServerJarService
             {
                 File.Copy(serverJar, destinationPath, true);
             }
-            progress?.Report("Forge セットアップが完了しました。");
+            progress?.Report("Forge setup completed.");
             return;
         }
 
-        // Forge 1.17+ 形式: run.bat / run.sh が存在するか確認
+        // Forge 1.17+ format: check run.bat / run.sh presence.
         var runBat = Path.Combine(serverDir, "run.bat");
         var runSh = Path.Combine(serverDir, "run.sh");
         var userJvmArgs = Path.Combine(serverDir, "user_jvm_args.txt");
 
         if (File.Exists(runBat) || File.Exists(runSh))
         {
-            // 1.17+形式の場合、server.jar は不要（run.bat/run.sh で起動する）
-            // ダミーの server.jar を作成してアプリの起動ロジックと互換性を保つ
+            // In 1.17+ layout, server.jar is often not used directly by run scripts.
+            // Keep compatibility with the app startup flow by placing a compatible jar if available.
             if (!File.Exists(destinationPath))
             {
-                // user_jvm_args.txt がなければ作成
+                // Create user_jvm_args.txt if missing.
                 if (!File.Exists(userJvmArgs))
                 {
                     await File.WriteAllTextAsync(userJvmArgs, "# Xmx and Xms are set by the launcher\n").ConfigureAwait(false);
                 }
 
-                // run.bat の内容からメインjarを読み取ってコピー
+                // Try to locate Forge main jar in libraries and copy it.
                 var forgeJarInLibs = FindForgeLibraryJar(serverDir, versionId, forgeVersion);
                 if (!string.IsNullOrWhiteSpace(forgeJarInLibs))
                 {
@@ -190,28 +194,28 @@ public sealed class ServerJarService : IServerJarService
                 }
                 else
                 {
-                    // フォールバック: 空のマーカーファイル（起動は run.bat 経由）
+                    // Fallback marker file. Actual launch remains via run.bat/run.sh.
                     await File.WriteAllTextAsync(destinationPath, "").ConfigureAwait(false);
                 }
             }
-            progress?.Report("Forge セットアップが完了しました（1.17+ 形式）。");
+            progress?.Report("Forge setup completed (1.17+ layout).");
             return;
         }
 
         throw new InvalidOperationException(
-            "Forge のセットアップ後にサーバーファイルが見つかりません。\n" +
-            "インストーラーの実行に問題があった可能性があります。\n" +
-            $"サーバーディレクトリ: {serverDir}");
+            "Forge setup files were not found after installer execution.\n" +
+            "Installer may have failed or generated an unexpected layout.\n" +
+            $"Server directory: {serverDir}");
     }
 
     private async Task DownloadFabricAsync(string versionId, string destinationPath, IProgress<string>? progress)
     {
-        progress?.Report("Fabric Loader 情報を取得しています...");
+        progress?.Report("Fetching Fabric Loader information...");
         var loaderVersion = await GetLatestFabricLoaderVersionAsync(versionId).ConfigureAwait(false);
         var installerVersion = await GetLatestFabricInstallerVersionAsync().ConfigureAwait(false);
 
         var downloadUrl = $"{ExternalApiUrls.FabricApiBase}/loader/{versionId}/{loaderVersion}/{installerVersion}/server/jar";
-        progress?.Report("Fabric サーバーをダウンロードしています...");
+        progress?.Report("Downloading Fabric server...");
         await DownloadFileAsync(downloadUrl, destinationPath).ConfigureAwait(false);
     }
 
@@ -234,7 +238,7 @@ public sealed class ServerJarService : IServerJarService
             .Select(item => item.GetProperty("loader").GetProperty("version").GetString())
             .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
 
-        return fallback ?? throw new InvalidOperationException("Fabric Loader のバージョンが取得できませんでした。");
+        return fallback ?? throw new InvalidOperationException("Fabric loader version could not be determined.");
     }
 
     private async Task<string> GetLatestFabricInstallerVersionAsync()
@@ -256,7 +260,7 @@ public sealed class ServerJarService : IServerJarService
             .Select(item => item.GetProperty("version").GetString())
             .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
 
-        return fallback ?? throw new InvalidOperationException("Fabric Installer のバージョンが取得できませんでした。");
+        return fallback ?? throw new InvalidOperationException("Fabric installer version could not be determined.");
     }
 
     private async Task<string> GetLatestForgeVersionAsync(string versionId)
@@ -271,7 +275,7 @@ public sealed class ServerJarService : IServerJarService
 
         if (versions.Count == 0)
         {
-            throw new InvalidOperationException("Forge のバージョンが取得できませんでした。");
+            throw new InvalidOperationException("Forge version metadata was not found.");
         }
 
         versions.Sort(CompareForgeVersions);
@@ -315,7 +319,7 @@ public sealed class ServerJarService : IServerJarService
             return universalJar;
         }
 
-        // shim jar（1.17+の一部バージョン）
+        // shim jar (some 1.17+ versions)
         var shimJar = candidates.FirstOrDefault(path => path.EndsWith("-shim.jar", StringComparison.OrdinalIgnoreCase));
         if (!string.IsNullOrWhiteSpace(shimJar))
         {
@@ -352,43 +356,7 @@ public sealed class ServerJarService : IServerJarService
             return detected;
         }
 
-        throw new InvalidOperationException("Java が見つかりません。設定で java.exe を指定してください。");
-    }
-
-    private static void EnsureGitAvailable()
-    {
-        try
-        {
-            var info = new ProcessStartInfo
-            {
-                FileName = "git",
-                Arguments = "--version",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-
-            using var process = Process.Start(info);
-            if (process is null)
-            {
-                throw new InvalidOperationException("Git が見つかりません。Spigot のビルドには Git が必要です。");
-            }
-
-            process.WaitForExit(1000);
-            if (process.ExitCode != 0)
-            {
-                throw new InvalidOperationException("Git が見つかりません。Spigot のビルドには Git が必要です。");
-            }
-        }
-        catch (InvalidOperationException)
-        {
-            throw;
-        }
-        catch
-        {
-            throw new InvalidOperationException("Git が見つかりません。Spigot のビルドには Git が必要です。");
-        }
+        throw new InvalidOperationException("Java executable was not found. Configure java.exe first.");
     }
 
     private async Task DownloadFileAsync(string url, string destinationPath)
@@ -396,7 +364,7 @@ public sealed class ServerJarService : IServerJarService
         var destinationDirectory = Path.GetDirectoryName(destinationPath);
         if (string.IsNullOrWhiteSpace(destinationDirectory))
         {
-            throw new InvalidOperationException("ダウンロード先フォルダを特定できませんでした。");
+            throw new InvalidOperationException("Destination directory is invalid.");
         }
 
         Directory.CreateDirectory(destinationDirectory);
@@ -406,6 +374,86 @@ public sealed class ServerJarService : IServerJarService
         response.EnsureSuccessStatusCode();
         await using var output = File.Create(destinationPath);
         await response.Content.CopyToAsync(output).ConfigureAwait(false);
+    }
+
+    private async Task VerifyDownloadedFileChecksumAsync(string artifactUrl, string downloadedPath)
+    {
+        var (expectedHash, algorithm) = await GetExpectedChecksumAsync(artifactUrl).ConfigureAwait(false);
+        var actualHash = await ComputeFileHashAsync(downloadedPath, algorithm).ConfigureAwait(false);
+
+        if (!string.Equals(expectedHash, actualHash, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"ダウンロードファイルのチェックサムが一致しません。expected={expectedHash}, actual={actualHash}, algorithm={algorithm.Name}");
+        }
+    }
+
+    private async Task<(string Hash, HashAlgorithmName Algorithm)> GetExpectedChecksumAsync(string artifactUrl)
+    {
+        var candidates = new (string Suffix, int Length, HashAlgorithmName Algorithm)[]
+        {
+            (".sha256", 64, HashAlgorithmName.SHA256),
+            (".sha1", 40, HashAlgorithmName.SHA1)
+        };
+
+        foreach (var candidate in candidates)
+        {
+            var checksumUrl = artifactUrl + candidate.Suffix;
+            try
+            {
+                using var response = await _httpClient.GetAsync(checksumUrl).ConfigureAwait(false);
+                if (!response.IsSuccessStatusCode)
+                {
+                    continue;
+                }
+
+                var text = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var hash = ExtractHash(text, candidate.Length);
+                if (!string.IsNullOrWhiteSpace(hash))
+                {
+                    return (hash, candidate.Algorithm);
+                }
+            }
+            catch
+            {
+                // Try next checksum format.
+            }
+        }
+
+        throw new InvalidOperationException("チェックサム情報 (.sha256/.sha1) を取得できなかったため、実行を中止しました。");
+    }
+
+    private static string ExtractHash(string text, int requiredLength)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return string.Empty;
+        }
+
+        foreach (Match match in ChecksumRegex.Matches(text))
+        {
+            var hash = match.Groups["hash"].Value;
+            if (hash.Length == requiredLength)
+            {
+                return hash.ToLowerInvariant();
+            }
+        }
+
+        return string.Empty;
+    }
+
+    private static async Task<string> ComputeFileHashAsync(string path, HashAlgorithmName algorithm)
+    {
+        await using var stream = File.OpenRead(path);
+        using HashAlgorithm hasher = algorithm.Name switch
+        {
+            nameof(HashAlgorithmName.SHA256) => SHA256.Create(),
+            nameof(HashAlgorithmName.SHA1) => SHA1.Create(),
+            _ => throw new InvalidOperationException($"未対応のハッシュアルゴリズムです: {algorithm.Name}")
+        };
+
+        var hash = await hasher.ComputeHashAsync(stream).ConfigureAwait(false);
+        return Convert.ToHexString(hash).ToLowerInvariant();
     }
 
     private static Task RunProcessAsync(string fileName, string arguments, string workingDirectory)
@@ -427,12 +475,12 @@ public sealed class ServerJarService : IServerJarService
         using var process = Process.Start(startInfo);
         if (process is null)
         {
-            throw new InvalidOperationException("プロセスの起動に失敗しました。");
+            throw new InvalidOperationException("Failed to start process.");
         }
 
         var stderrBuilder = new System.Text.StringBuilder();
 
-        // progress が渡された場合は行単位でリアルタイム報告
+        // If progress is available, stream stdout line-by-line in near real-time.
         if (progress is not null)
         {
             var stdoutLineTask = Task.Run(async () =>
@@ -457,12 +505,12 @@ public sealed class ServerJarService : IServerJarService
             {
                 var detail = stderrBuilder.ToString();
                 if (detail.Length > 500) detail = "..." + detail[^500..];
-                throw new InvalidOperationException($"プロセスがエラーコード {process.ExitCode} で終了しました:\n{detail}");
+                throw new InvalidOperationException($"Process exited with code {process.ExitCode}:\n{detail}");
             }
         }
         else
         {
-            // progress なし: 一括読み取り
+            // Without progress callback, read stdout/stderr in bulk.
             var stdoutTask = process.StandardOutput.ReadToEndAsync();
             var stderrTask = process.StandardError.ReadToEndAsync();
 
@@ -475,8 +523,9 @@ public sealed class ServerJarService : IServerJarService
                 var stdout = await stdoutTask.ConfigureAwait(false);
                 var detail = !string.IsNullOrWhiteSpace(stderr) ? stderr : stdout;
                 if (detail.Length > 500) detail = "..." + detail[^500..];
-                throw new InvalidOperationException($"プロセスがエラーコード {process.ExitCode} で終了しました:\n{detail}");
+                throw new InvalidOperationException($"Process exited with code {process.ExitCode}:\n{detail}");
             }
         }
     }
 }
+

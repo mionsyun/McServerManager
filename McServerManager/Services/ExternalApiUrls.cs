@@ -21,6 +21,8 @@ internal static class ExternalApiUrls
         "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar";
     public const string SpigotDirectJarTemplate =
         "https://download.getbukkit.org/spigot/spigot-{0}.jar";
+    public const string SpigotDirectJarFallbackTemplate =
+        "https://cdn.getbukkit.org/spigot/spigot-{0}.jar";
 
     // アドオンカタログ
     public const string ModrinthSearch = "https://api.modrinth.com/v2/search";

@@ -4,9 +4,11 @@ namespace McServerManager.Services;
 
 public sealed class AppPathsService
 {
+    public const string AppDataRootOverrideEnvVar = "MCSM_APPDATA_ROOT";
+
     public AppPathsService()
     {
-        var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var appDataPath = ResolveAppDataPath();
         RootPath = Path.Combine(appDataPath, "MaiPilot");
         MigrateLegacyData(RootPath, Path.Combine(appDataPath, "BlockPilot"), Path.Combine(appDataPath, "McServerManager"));
         ServersPath = Path.Combine(RootPath, "servers");
@@ -86,5 +88,16 @@ public sealed class AppPathsService
             var destinationDirectoryPath = Path.Combine(destinationPath, Path.GetFileName(directoryPath));
             CopyDirectory(directoryPath, destinationDirectoryPath);
         }
+    }
+
+    private static string ResolveAppDataPath()
+    {
+        var overridePath = Environment.GetEnvironmentVariable(AppDataRootOverrideEnvVar);
+        if (!string.IsNullOrWhiteSpace(overridePath))
+        {
+            return Path.GetFullPath(overridePath);
+        }
+
+        return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
     }
 }

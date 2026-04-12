@@ -367,14 +367,28 @@ public sealed class ServerRuntime
         var timestamp = DateTime.Now.ToString("HH:mm:ss");
         var line = $"[{timestamp}] {message}";
         LogReceived?.Invoke(message);
-        WpfApplication.Current.Dispatcher.Invoke(() =>
+
+        void AppendLogLine()
         {
             Logs.Add(line);
             while (Logs.Count > maxLines)
             {
                 Logs.RemoveAt(0);
             }
-        });
+        }
+
+        var dispatcher = WpfApplication.Current?.Dispatcher;
+        if (dispatcher is null)
+        {
+            lock (_lock)
+            {
+                AppendLogLine();
+            }
+
+            return;
+        }
+
+        dispatcher.Invoke(AppendLogLine);
     }
 
     public Task SendCommandAsync(string command)

@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Windows;
 using System.Text;
+using System.Text.Json;
 using WpfApplication = System.Windows.Application;
 using McServerManager.Models;
 using McServerManager.Services;
@@ -385,9 +386,19 @@ public sealed class MainViewModel : ObservableObject
         var directory = target.ServerDirectory;
         if (!string.IsNullOrWhiteSpace(directory) && Directory.Exists(directory))
         {
+            if (!TryResolveSafeServerDirectoryForDeletion(directory, target.ServerId, out var safeDirectory, out var validationError))
+            {
+                _services.Dialog.Show(
+                    $"削除を中止しました。{validationError}",
+                    "エラー",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return;
+            }
+
             try
             {
-                ForceDeleteDirectory(directory);
+                ForceDeleteDirectory(safeDirectory);
             }
             catch (IOException ex)
             {
@@ -424,22 +435,244 @@ public sealed class MainViewModel : ObservableObject
     /// </summary>
     private static void ForceDeleteDirectory(string path)
     {
-        var di = new DirectoryInfo(path);
-        foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
+        var root = new DirectoryInfo(path);
+        if (!root.Exists)
         {
-            if (fi.Attributes.HasFlag(FileAttributes.ReadOnly))
+            return;
+        }
+
+        var stack = new Stack<DirectoryInfo>();
+        var postOrder = new Stack<DirectoryInfo>();
+        stack.Push(root);
+
+        while (stack.Count > 0)
+        {
+            var current = stack.Pop();
+            postOrder.Push(current);
+
+            foreach (var file in current.EnumerateFiles())
             {
-                fi.Attributes = FileAttributes.Normal;
+                if (file.Attributes.HasFlag(FileAttributes.ReadOnly))
+                {
+                    file.Attributes = FileAttributes.Normal;
+                }
+
+                file.Delete();
+            }
+
+            foreach (var directory in current.EnumerateDirectories())
+            {
+                if (directory.Attributes.HasFlag(FileAttributes.ReparsePoint))
+                {
+                    if (directory.Attributes.HasFlag(FileAttributes.ReadOnly))
+                    {
+                        directory.Attributes = FileAttributes.Normal;
+                    }
+
+                    directory.Delete();
+                    continue;
+                }
+
+                stack.Push(directory);
             }
         }
-        foreach (var sub in di.EnumerateDirectories("*", SearchOption.AllDirectories))
+
+        while (postOrder.Count > 0)
         {
-            if (sub.Attributes.HasFlag(FileAttributes.ReadOnly))
+            var directory = postOrder.Pop();
+            if (!directory.Exists)
             {
-                sub.Attributes = FileAttributes.Normal;
+                continue;
+            }
+
+            if (directory.Attributes.HasFlag(FileAttributes.ReadOnly))
+            {
+                directory.Attributes = FileAttributes.Normal;
+            }
+
+            directory.Delete();
+        }
+    }
+
+    private bool TryResolveSafeServerDirectoryForDeletion(
+        string directory,
+        string expectedServerId,
+        out string safeDirectory,
+        out string validationError)
+    {
+        safeDirectory = string.Empty;
+        validationError = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(directory))
+        {
+            validationError = "削除対象ディレクトリが空です。";
+            return false;
+        }
+
+        string fullDirectory;
+        try
+        {
+            fullDirectory = Path.GetFullPath(directory);
+        }
+        catch (Exception ex)
+        {
+            validationError = $"削除対象ディレクトリが不正です: {ex.Message}";
+            return false;
+        }
+
+        var normalizedDirectory = fullDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        if (string.IsNullOrWhiteSpace(normalizedDirectory))
+        {
+            validationError = "削除対象ディレクトリが不正です。";
+            return false;
+        }
+
+        var rootPath = Path.GetPathRoot(normalizedDirectory)?.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) ?? string.Empty;
+        if (string.Equals(normalizedDirectory, rootPath, StringComparison.OrdinalIgnoreCase))
+        {
+            validationError = "ドライブ直下は削除できません。";
+            return false;
+        }
+
+        var directoryInfo = new DirectoryInfo(normalizedDirectory);
+        if (directoryInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
+        {
+            validationError = "シンボリックリンク/ジャンクションは削除できません。";
+            return false;
+        }
+
+        if (!IsUnderManagedServerRoots(normalizedDirectory, out var managedRoot))
+        {
+            validationError = "管理対象外のディレクトリのため削除できません。";
+            return false;
+        }
+
+        if (string.Equals(
+                normalizedDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
+                managedRoot.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
+                StringComparison.OrdinalIgnoreCase))
+        {
+            validationError = "サーバー一覧のルートディレクトリ自体は削除できません。";
+            return false;
+        }
+
+        var configPath = Path.Combine(normalizedDirectory, "config.json");
+        if (!TryReadServerIdFromConfig(configPath, out var configServerId))
+        {
+            validationError = "config.json の ServerId を確認できません。";
+            return false;
+        }
+
+        if (!string.Equals(configServerId, expectedServerId, StringComparison.OrdinalIgnoreCase))
+        {
+            validationError = "config.json の ServerId が選択中サーバーと一致しません。";
+            return false;
+        }
+
+        safeDirectory = normalizedDirectory;
+        return true;
+    }
+
+    private bool IsUnderManagedServerRoots(string fullPath, out string matchedRoot)
+    {
+        matchedRoot = string.Empty;
+        foreach (var root in EnumerateManagedServerRoots())
+        {
+            if (!IsPathUnderRoot(fullPath, root))
+            {
+                continue;
+            }
+
+            matchedRoot = root;
+            return true;
+        }
+
+        return false;
+    }
+
+    private IEnumerable<string> EnumerateManagedServerRoots()
+    {
+        var roots = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        void AddRoot(string? path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return;
+            }
+
+            try
+            {
+                var normalized = Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                if (!string.IsNullOrWhiteSpace(normalized))
+                {
+                    roots.Add(normalized);
+                }
+            }
+            catch
+            {
+                // Ignore invalid paths from settings.
             }
         }
-        di.Delete(true);
+
+        AddRoot(_services.Paths.ServersPath);
+        foreach (var directory in _settings.ServerDirectories)
+        {
+            AddRoot(directory);
+        }
+
+        return roots;
+    }
+
+    private static bool IsPathUnderRoot(string path, string root)
+    {
+        var normalizedPath = Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var normalizedRoot = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        if (string.Equals(normalizedPath, normalizedRoot, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var relative = Path.GetRelativePath(normalizedRoot, normalizedPath);
+        if (Path.IsPathRooted(relative))
+        {
+            return false;
+        }
+
+        return relative != ".."
+            && !relative.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+            && !relative.StartsWith($"..{Path.AltDirectorySeparatorChar}", StringComparison.Ordinal);
+    }
+
+    private static bool TryReadServerIdFromConfig(string configPath, out string serverId)
+    {
+        serverId = string.Empty;
+        if (!File.Exists(configPath))
+        {
+            return false;
+        }
+
+        try
+        {
+            using var stream = File.OpenRead(configPath);
+            using var document = JsonDocument.Parse(stream);
+            var root = document.RootElement;
+
+            if (root.TryGetProperty("ServerId", out var serverIdElement) && serverIdElement.ValueKind == JsonValueKind.String)
+            {
+                serverId = serverIdElement.GetString() ?? string.Empty;
+            }
+            else if (root.TryGetProperty("serverId", out var camelServerIdElement) && camelServerIdElement.ValueKind == JsonValueKind.String)
+            {
+                serverId = camelServerIdElement.GetString() ?? string.Empty;
+            }
+
+            return !string.IsNullOrWhiteSpace(serverId);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private void DuplicateServer(ServerViewModel? target)

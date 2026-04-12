@@ -22,9 +22,9 @@ public sealed class AppUpdateService : IAppUpdateService
 
     private readonly HttpClient _httpClient;
 
-    public AppUpdateService()
+    public AppUpdateService(HttpClient? httpClient = null)
     {
-        _httpClient = new HttpClient
+        _httpClient = httpClient ?? new HttpClient
         {
             Timeout = TimeSpan.FromSeconds(5)
         };
@@ -292,6 +292,18 @@ public sealed class AppUpdateService : IAppUpdateService
         if (string.IsNullOrWhiteSpace(signerSubject))
         {
             return false;
+        }
+
+        if (signerSubject.Contains(TrustedSignerSubject, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        var compactSubject = signerSubject.Replace(" ", string.Empty);
+        var compactExpected = TrustedSignerSubject.Replace(" ", string.Empty);
+        if (compactSubject.Contains(compactExpected, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
         }
 
         return signerSubject
