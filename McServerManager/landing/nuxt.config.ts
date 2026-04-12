@@ -22,7 +22,10 @@ export default defineNuxtConfig({
         { name: "theme-color", content: "#0b0f17" }
       ],
       link: [
-        { rel: "icon", type: "image/png", href: "/icon.png" }
+        { rel: "icon", type: "image/png", href: "/icon.png" },
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" },
+        { rel: "preconnect", href: "https://www.googletagmanager.com" }
       ]
     }
   },

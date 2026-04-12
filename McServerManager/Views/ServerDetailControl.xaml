@@ -1006,7 +1006,7 @@
                                         <TextBlock Text="HTTPS推奨" FontSize="11" Foreground="{DynamicResource BrushAccent}"/>
                                     </Border>
                                 </StackPanel>
-                                <TextBlock Text="MinecraftはHTTPSがほぼ必須です（HTTPだとバージョンによってブロックされます）。アカウント不要・無料のCloudflareトンネルを使用します。初回のみ約25MBダウンロード。"
+                                <TextBlock Text="無料のCloudflareトンネルでHTTPS配信。アカウント不要。"
                                            Style="{StaticResource MutedText}" Margin="0,4,0,0" TextWrapping="Wrap"/>
                                 <Grid Margin="0,10,0,0">
                                     <Grid.ColumnDefinitions>
