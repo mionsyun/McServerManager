@@ -9,9 +9,9 @@ public sealed class AddonCatalogService : IAddonCatalogService
     private const string SearchApi = ExternalApiUrls.ModrinthSearch;
     private readonly HttpClient _httpClient;
 
-    public AddonCatalogService()
+    public AddonCatalogService(HttpClient? httpClient = null)
     {
-        _httpClient = new HttpClient();
+        _httpClient = httpClient ?? new HttpClient();
         _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("McServerManager/1.0 (shunki@github)");
     }
 

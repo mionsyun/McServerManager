@@ -60,10 +60,7 @@ public sealed class ServerConfigService : IServerConfigService
                     {
                         continue;
                     }
-                    if (string.IsNullOrWhiteSpace(config.DirectoryPath))
-                    {
-                        config.DirectoryPath = Path.GetDirectoryName(configPath) ?? string.Empty;
-                    }
+                    config.DirectoryPath = Path.GetDirectoryName(fullConfigPath) ?? string.Empty;
 
                     var updatedAtUtc = File.GetLastWriteTimeUtc(configPath);
                     if (byServerId.TryGetValue(config.ServerId, out var existing)
@@ -98,7 +95,7 @@ public sealed class ServerConfigService : IServerConfigService
         {
             var json = File.ReadAllText(path);
             var config = JsonSerializer.Deserialize<ServerConfig>(json);
-            if (config is not null && string.IsNullOrWhiteSpace(config.DirectoryPath))
+            if (config is not null)
             {
                 config.DirectoryPath = Path.GetDirectoryName(path) ?? string.Empty;
             }
@@ -160,9 +157,9 @@ public sealed class ServerConfigService : IServerConfigService
         if (lastWriteException is IOException lastIoException
             && IsTransientWriteError(lastIoException))
         {
-            // Another process may be briefly holding the file lock.
-            // Keep app flow alive and let the next save attempt retry again.
-            return;
+            throw new IOException(
+                $"Failed to save settings file because file lock was not released: {path}",
+                lastIoException);
         }
 
         if (lastWriteException is not null)

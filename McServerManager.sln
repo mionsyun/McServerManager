@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McServerManager", "McServerManager\McServerManager.csproj", "{1C02061B-448C-42A6-9ECF-E7E3E8C9F020}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McServerManager.Tests", "McServerManager.Tests\McServerManager.Tests.csproj", "{948C4323-52A9-4312-B938-3D7BBB45660B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{1C02061B-448C-42A6-9ECF-E7E3E8C9F020}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C02061B-448C-42A6-9ECF-E7E3E8C9F020}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C02061B-448C-42A6-9ECF-E7E3E8C9F020}.Release|Any CPU.Build.0 = Release|Any CPU
+		{948C4323-52A9-4312-B938-3D7BBB45660B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{948C4323-52A9-4312-B938-3D7BBB45660B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{948C4323-52A9-4312-B938-3D7BBB45660B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{948C4323-52A9-4312-B938-3D7BBB45660B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

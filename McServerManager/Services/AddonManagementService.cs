@@ -18,10 +18,10 @@ public sealed class AddonManagementService : IAddonManagementService
     };
 
     private static readonly Regex VersionSuffixRegex = new(@"([\-_.]?v?\d+[\w\-\.]*)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex ForgeModIdRegex = new(@"modId\s*=\s*\""""(?<id>[A-Za-z0-9_\-\.]+)\""""", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex ForgeModIdRegex = new(@"modId\s*=\s*""(?<id>[A-Za-z0-9_\-\.]+)""", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex ForgeDependencyBlockRegex = new(@"\[\[dependencies\.[^\]]+\]\](?<body>[\s\S]*?)(?=(\r?\n\[\[)|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex ForgeMandatoryRegex = new(@"mandatory\s*=\s*(?<value>true|false)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex ForgeDependencyIdRegex = new(@"modId\s*=\s*\""""(?<id>[A-Za-z0-9_\-\.]+)\""""", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex ForgeDependencyIdRegex = new(@"modId\s*=\s*""(?<id>[A-Za-z0-9_\-\.]+)""", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     private enum AddonKind
     {

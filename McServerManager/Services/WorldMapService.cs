@@ -8,6 +8,9 @@ namespace McServerManager.Services;
 
 public sealed class WorldMapService : IWorldMapService
 {
+    private const int RegionPixelSize = 512;
+    private const int MaxMapDimensionPixels = 8192;
+    private const long MaxMapPixelCount = 40_000_000;
     private static readonly Dictionary<string, Color> BlockColors = InitBlockColors();
     private static readonly Color DefaultSolidColor = Color.FromRgb(128, 128, 128);
 
@@ -44,19 +47,34 @@ public sealed class WorldMapService : IWorldMapService
         int minRz = regions.Min(r => r.rz);
         int maxRz = regions.Max(r => r.rz);
 
-        int mapWidth = (maxRx - minRx + 1) * 512;
-        int mapHeight = (maxRz - minRz + 1) * 512;
+        var regionWidth = checked(maxRx - minRx + 1);
+        var regionHeight = checked(maxRz - minRz + 1);
+        var mapWidth = checked(regionWidth * RegionPixelSize);
+        var mapHeight = checked(regionHeight * RegionPixelSize);
 
-        var pixels = new byte[mapWidth * mapHeight * 4]; // BGRA32
+        if (mapWidth > MaxMapDimensionPixels || mapHeight > MaxMapDimensionPixels)
+        {
+            throw new InvalidOperationException(
+                $"World map dimensions exceed limit. width={mapWidth}, height={mapHeight}, limit={MaxMapDimensionPixels}");
+        }
+
+        var pixelCount = checked((long)mapWidth * mapHeight);
+        if (pixelCount > MaxMapPixelCount)
+        {
+            throw new InvalidOperationException(
+                $"World map pixel count exceeds limit. pixels={pixelCount}, limit={MaxMapPixelCount}");
+        }
+
+        var pixels = new byte[checked((int)(pixelCount * 4))]; // BGRA32
 
         int done = 0;
         foreach (var (rx, rz, path) in regions)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            progress?.Report($"レンダリング中... ({++done}/{regions.Count})  r.{rx}.{rz}");
+            progress?.Report($"繝ｬ繝ｳ繝繝ｪ繝ｳ繧ｰ荳ｭ... ({++done}/{regions.Count})  r.{rx}.{rz}");
 
-            int offsetX = (rx - minRx) * 512;
-            int offsetZ = (rz - minRz) * 512;
+            int offsetX = checked((rx - minRx) * RegionPixelSize);
+            int offsetZ = checked((rz - minRz) * RegionPixelSize);
 
             await Task.Run(() => RenderRegion(path, offsetX, offsetZ, mapWidth, pixels), cancellationToken);
         }
@@ -234,7 +252,7 @@ public sealed class WorldMapService : IWorldMapService
                     // hmValue = (absoluteY - minY) + 1, where 0 means no block
                     if (hmValue == 0)
                     {
-                        // No surface block found – render as void
+                        // No surface block found 窶・render as void
                         WritePixel(pixels, offsetX + cx * 16 + lx, offsetZ + cz * 16 + lz, mapWidth, Color.FromRgb(20, 20, 20));
                         continue;
                     }
@@ -587,11 +605,11 @@ public sealed class WorldMapService : IWorldMapService
 
 /// <summary>
 /// Minimal NBT (Named Binary Tag) parser that returns a nested object graph.
-/// Compound tags → Dictionary&lt;string, object?&gt;
-/// List tags     → List&lt;object?&gt;
-/// Long arrays   → long[]
-/// Other numeric → sbyte / short / int / long / float / double
-/// Strings       → string
+/// Compound tags 竊・Dictionary&lt;string, object?&gt;
+/// List tags     竊・List&lt;object?&gt;
+/// Long arrays   竊・long[]
+/// Other numeric 竊・sbyte / short / int / long / float / double
+/// Strings       竊・string
 /// </summary>
 internal static class NbtParser
 {
