@@ -21,6 +21,7 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
     private string _sha1Hash = string.Empty;
     private string _statusMessage = string.Empty;
     private bool _isBusy;
+    private readonly Task _prefetchTask;
 
     public ServerResourcePackViewModel(AppServices services, ServerConfig config)
     {
@@ -28,6 +29,8 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
         _config = config;
         _resourcePackService = new ResourcePackService();
         _cloudflared = new CloudflaredService();
+
+        _prefetchTask = PrefetchCloudflaredAsync();
 
         BrowseFileCommand = new RelayCommand(_ => BrowseFile());
         StartHttpsDistributionCommand = new AsyncRelayCommand(StartHttpsDistributionAsync, () => !_isBusy && !_isServerRunning && File.Exists(_resourcePackPath));
@@ -210,13 +213,27 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
         }
     }
 
+    private async Task PrefetchCloudflaredAsync()
+    {
+        try
+        {
+            await _cloudflared.EnsureInstalledAsync(new Progress<string>(_ => { })).ConfigureAwait(false);
+        }
+        catch
+        {
+            // サイレント失敗。StartTunnelAsync で再試行・エラー表示する
+        }
+    }
+
     private async Task StartTunnelAsync()
     {
         IsBusy = true;
         var progress = new Progress<string>(msg => StatusMessage = msg);
         try
         {
-            await _cloudflared.EnsureInstalledAsync(progress);
+            // プレフェッチ完了を待つ（成功済みなら即返却、失敗なら再試行）
+            if (!_prefetchTask.IsCompletedSuccessfully)
+                await _cloudflared.EnsureInstalledAsync(progress);
             await _cloudflared.StartTunnelAsync(_httpPort, progress);
             OnPropertyChanged(nameof(IsTunnelRunning));
             OnPropertyChanged(nameof(ResourcePackUrl));
