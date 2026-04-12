@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>マイクラサーバーのプレイヤー管理完全ガイド｜BAN・キック・OP権限【2026年版】 | MaiPilot</title>
+    <meta name="description" content="マイクラJava版サーバーのプレイヤー管理を完全解説。ban・kick・op・deop・whitelist コマンドの使い方、BANリスト確認・解除方法まで網羅。" />
+    <style>
+      :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
+      * { box-sizing:border-box; }
+      body { margin:0; padding:32px 16px; font-family:"Noto Sans JP","Segoe UI",sans-serif; color:var(--text); background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%); }
+      .wrap { max-width:980px; margin:0 auto; display:grid; gap:16px; }
+      .card { background:var(--panel); border:1px solid rgba(126,157,201,.25); border-radius:16px; padding:22px; }
+      .hero { background:linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)), var(--panel); }
+      .muted { color:var(--muted); }
+      .notice { background:rgba(255,209,102,.12); color:#ffd166; border-radius:10px; padding:10px 14px; font-weight:700; font-size:13px; margin-top:12px; }
+      .tip { background:rgba(51,168,255,.1); color:#33a8ff; border-radius:10px; padding:10px 14px; font-size:13px; margin-top:12px; }
+      .cta { border:1px solid rgba(102,255,136,.45); background:rgba(102,255,136,.08); }
+      a { color:var(--accent2); text-decoration:none; }
+      h1,h2,h3 { margin:0 0 10px; }
+      ul,ol { margin:8px 0 0 18px; color:var(--muted); }
+      li { margin-bottom:6px; }
+      .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+      .chip { font-size:12px; padding:5px 10px; border:1px solid rgba(126,157,201,.35); border-radius:999px; color:var(--muted); }
+      .code { background:var(--panel2); border:1px solid rgba(126,157,201,.25); border-radius:8px; padding:10px 14px; font-family:monospace; font-size:13px; color:var(--accent); margin-top:8px; word-break:break-all; }
+      .cmd-block { margin-bottom:16px; }
+      .cmd-label { font-weight:700; font-size:14px; margin-bottom:4px; }
+      .cmd-desc { color:var(--muted); font-size:13px; margin:6px 0 0; }
+      .table-wrap { overflow-x:auto; margin-top:12px; }
+      table { border-collapse:collapse; width:100%; font-size:13px; }
+      th,td { border:1px solid rgba(126,157,201,.25); padding:8px 12px; text-align:left; }
+      th { background:var(--panel2); color:var(--text); }
+      td { color:var(--muted); }
+      td code { background:var(--panel2); padding:2px 5px; border-radius:4px; color:var(--accent); font-size:12px; }
+      .faq-list { margin:0; display:grid; gap:10px; }
+      .faq-list dt { font-weight:700; color:var(--text); }
+      .faq-list dd { margin:0; color:var(--muted); }
+      .site-nav { position:sticky; top:0; z-index:100; background:rgba(11,15,23,.95); backdrop-filter:blur(8px); border-bottom:1px solid rgba(126,157,201,.15); padding:0 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; margin:-32px -16px 24px; height:52px; }
+      .nav-brand { font-weight:700; font-size:15px; color:var(--accent); text-decoration:none; letter-spacing:.02em; }
+      .nav-links { display:flex; gap:12px; align-items:center; }
+      .nav-links a { color:var(--muted); font-size:13px; text-decoration:none; }
+      .nav-links a:hover { color:var(--text); }
+      .nav-cta { background:rgba(102,255,136,.12); color:var(--accent)!important; border:1px solid rgba(102,255,136,.35); border-radius:8px; padding:5px 12px; font-weight:700; }
+    </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MM106D2B2Z');
+    </script>
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://www.maipilot.jp/docs/growth/minecraft-server-player-management/" />
+    <meta property="og:title" content="マイクラサーバーのプレイヤー管理完全ガイド｜BAN・キック・OP権限【2026年版】 | MaiPilot" />
+    <meta property="og:description" content="マイクラJava版サーバーのプレイヤー管理を完全解説。ban・kick・op・deop・whitelist コマンドの使い方、BANリスト確認・解除方法まで網羅。" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://www.maipilot.jp/docs/growth/minecraft-server-player-management/" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="マイクラサーバーのプレイヤー管理完全ガイド｜BAN・キック・OP権限【2026年版】 | MaiPilot" />
+    <meta name="twitter:description" content="マイクラJava版サーバーのプレイヤー管理を完全解説。ban・kick・op・deop・whitelist コマンドの使い方、BANリスト確認・解除方法まで網羅。" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:site_name" content="MaiPilot" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="article:published_time" content="2026-04-12T00:00:00+09:00" />
+    <meta property="article:modified_time" content="2026-04-12T00:00:00+09:00" />
+    <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.maipilot.jp/" },
+    { "@type": "ListItem", "position": 2, "name": "ガイド一覧", "item": "https://www.maipilot.jp/docs/growth/" },
+    { "@type": "ListItem", "position": 3, "name": "プレイヤー管理ガイド", "item": "https://www.maipilot.jp/docs/growth/minecraft-server-player-management/" }
+  ]
+}
+</script>
+    <script type="application/ld+json" data-seo="article">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "マイクラサーバーのプレイヤー管理完全ガイド｜BAN・キック・OP権限【2026年版】",
+  "description": "マイクラJava版サーバーのプレイヤー管理を完全解説。ban・kick・op・deop・whitelist コマンドの使い方、BANリスト確認・解除方法まで網羅。",
+  "datePublished": "2026-04-12T00:00:00+09:00",
+  "dateModified": "2026-04-12T00:00:00+09:00",
+  "author": { "@type": "Organization", "name": "MaiPilot" },
+  "publisher": { "@type": "Organization", "name": "MaiPilot", "url": "https://www.maipilot.jp" },
+  "url": "https://www.maipilot.jp/docs/growth/minecraft-server-player-management/",
+  "image": "https://www.maipilot.jp/icon.png"
+}
+</script>
+    <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "マイクラサーバーでBANしたプレイヤーを解除するには？",
+      "acceptedAnswer": { "@type": "Answer", "text": "サーバーのコンソールまたはOP権限のあるプレイヤーが /pardon <プレイヤー名> コマンドを実行することでBANを解除できます。IPBANの場合は /pardon-ip <IPアドレス> を使います。" }
+    },
+    {
+      "@type": "Question",
+      "name": "OPとホワイトリストの違いは何ですか？",
+      "acceptedAnswer": { "@type": "Answer", "text": "OPはサーバー管理コマンドを実行できる権限です。ホワイトリストはサーバーに参加できるプレイヤーを制限する機能です。ホワイトリストを有効にすると、リストに載っていないプレイヤーは参加できなくなります。" }
+    },
+    {
+      "@type": "Question",
+      "name": "OP権限のレベル（1〜4）の違いは何ですか？",
+      "acceptedAnswer": { "@type": "Answer", "text": "レベル1は基本コマンドのみ。レベル2はgameruleやtpなどの管理コマンド。レベル3はban・kickなどのプレイヤー管理。レベル4はサーバーのstopも含む全権限です。通常の管理者にはレベル3または4を付与します。" }
+    }
+  ]
+}
+</script>
+  </head>
+  <body>
+    <nav class="site-nav">
+      <a class="nav-brand" href="/">MaiPilot</a>
+      <div class="nav-links">
+        <a href="/docs/growth/">ガイド一覧</a>
+        <a href="/#download" class="nav-cta">無料ダウンロード</a>
+      </div>
+    </nav>
+    <div class="wrap">
+
+      <!-- Hero -->
+      <div class="card hero">
+        <nav style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+          <a href="/">MaiPilot</a> &rsaquo; <a href="/docs/growth/">ガイド一覧</a> &rsaquo; プレイヤー管理ガイド
+        </nav>
+        <h1 style="font-size:clamp(18px,4vw,26px);line-height:1.4;">マイクラサーバーのプレイヤー管理完全ガイド｜BAN・キック・OP権限【2026年版】</h1>
+        <p class="muted" style="margin:8px 0 0;">対象: Java版 / サーバーOP権限またはコンソールアクセスが必要</p>
+        <div class="chips">
+          <span class="chip">BAN</span>
+          <span class="chip">キック</span>
+          <span class="chip">OP権限</span>
+          <span class="chip">ホワイトリスト</span>
+          <span class="chip">プレイヤー管理</span>
+        </div>
+      </div>
+
+      <!-- コマンド一覧表 -->
+      <div class="card">
+        <h2 style="font-size:17px;">プレイヤー管理コマンド一覧</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>コマンド</th><th>効果</th><th>必要権限</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>/kick &lt;名前&gt; [理由]</code></td><td>プレイヤーをサーバーから追い出す（再参加可）</td><td>OP Lv3+</td></tr>
+              <tr><td><code>/ban &lt;名前&gt; [理由]</code></td><td>プレイヤーをBANする（名前ベース）</td><td>OP Lv3+</td></tr>
+              <tr><td><code>/ban-ip &lt;IPアドレス&gt; [理由]</code></td><td>指定IPをBANする</td><td>OP Lv3+</td></tr>
+              <tr><td><code>/pardon &lt;名前&gt;</code></td><td>BANを解除する</td><td>OP Lv3+</td></tr>
+              <tr><td><code>/pardon-ip &lt;IPアドレス&gt;</code></td><td>IPBANを解除する</td><td>OP Lv3+</td></tr>
+              <tr><td><code>/banlist</code></td><td>BANリストを表示する</td><td>OP Lv3+</td></tr>
+              <tr><td><code>/op &lt;名前&gt;</code></td><td>OP権限を付与する</td><td>OP Lv4 / コンソール</td></tr>
+              <tr><td><code>/deop &lt;名前&gt;</code></td><td>OP権限を剥奪する</td><td>OP Lv4 / コンソール</td></tr>
+              <tr><td><code>/whitelist add &lt;名前&gt;</code></td><td>ホワイトリストに追加する</td><td>OP Lv3+</td></tr>
+              <tr><td><code>/whitelist remove &lt;名前&gt;</code></td><td>ホワイトリストから削除する</td><td>OP Lv3+</td></tr>
+              <tr><td><code>/whitelist on</code></td><td>ホワイトリストを有効化する</td><td>OP Lv3+</td></tr>
+              <tr><td><code>/whitelist off</code></td><td>ホワイトリストを無効化する</td><td>OP Lv3+</td></tr>
+              <tr><td><code>/whitelist list</code></td><td>ホワイトリスト一覧を表示する</td><td>OP Lv3+</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- BAN の使い方 -->
+      <div class="card">
+        <h2 style="font-size:17px;">BAN の使い方</h2>
+
+        <div class="cmd-block" style="margin-top:14px;">
+          <div class="cmd-label">プレイヤーをBANする</div>
+          <div class="code">/ban PlayerName 荒らし行為のため</div>
+          <div class="cmd-desc">BANすると次回ログイン時に「あなたはBANされています」と表示されます。理由を指定するとその理由も表示されます。</div>
+        </div>
+
+        <div class="cmd-block">
+          <div class="cmd-label">BANリストを確認する</div>
+          <div class="code">/banlist players<br>/banlist ips</div>
+          <div class="cmd-desc">players でプレイヤー名BAN一覧、ips でIPBAN一覧が表示されます。</div>
+        </div>
+
+        <div class="cmd-block">
+          <div class="cmd-label">BANを解除する</div>
+          <div class="code">/pardon PlayerName</div>
+          <div class="cmd-desc">BANを解除するとそのプレイヤーは再びサーバーに参加できるようになります。</div>
+        </div>
+
+        <div class="tip">BANデータは <code>banned-players.json</code> / <code>banned-ips.json</code> に保存されています。MaiPilotの「ワールド」→「フォルダを開く」から直接編集することも可能です。</div>
+      </div>
+
+      <!-- OP権限 -->
+      <div class="card">
+        <h2 style="font-size:17px;">OP権限の管理</h2>
+
+        <div class="cmd-block" style="margin-top:14px;">
+          <div class="cmd-label">OP権限を付与する</div>
+          <div class="code">/op PlayerName</div>
+          <div class="cmd-desc">コンソールから実行するか、既にOP Lv4のプレイヤーが実行できます。</div>
+        </div>
+
+        <div class="cmd-block">
+          <div class="cmd-label">OP権限を剥奪する</div>
+          <div class="code">/deop PlayerName</div>
+        </div>
+
+        <h3 style="font-size:14px;margin-top:16px;">OPレベル（op-permission-level）の意味</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>レベル</th><th>できること</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>OP専用コマンドを使えるが、シングルプレイヤーのチート相当の制限あり</td></tr>
+              <tr><td>2</td><td>gamerule・tp・time set などの管理コマンドが使える（デフォルト）</td></tr>
+              <tr><td>3</td><td>ban・kick・whitelist などのプレイヤー管理コマンドが使える</td></tr>
+              <tr><td>4</td><td>stop コマンドを含む全管理コマンドが使える（最高権限）</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="notice">OPレベルのデフォルトは server.properties の op-permission-level で設定できます。</div>
+      </div>
+
+      <!-- ホワイトリスト -->
+      <div class="card">
+        <h2 style="font-size:17px;">ホワイトリストの使い方</h2>
+        <p class="muted" style="margin:8px 0 12px;font-size:14px;">ホワイトリストを有効にすると、リストに登録されたプレイヤーのみサーバーに参加できます。友達だけのプライベートサーバーを作るときに便利です。</p>
+
+        <div class="cmd-block">
+          <div class="cmd-label">1. ホワイトリストを有効化する</div>
+          <div class="code">/whitelist on</div>
+        </div>
+
+        <div class="cmd-block">
+          <div class="cmd-label">2. プレイヤーを追加する</div>
+          <div class="code">/whitelist add PlayerName</div>
+        </div>
+
+        <div class="cmd-block">
+          <div class="cmd-label">3. 一覧を確認する</div>
+          <div class="code">/whitelist list</div>
+        </div>
+
+        <div class="tip">whitelist.json を直接編集した後は <code>/whitelist reload</code> を実行して反映させてください。</div>
+        <p class="muted" style="margin:10px 0 0;font-size:14px;">ホワイトリストは <a href="/docs/growth/whitelist-op-guide/">ホワイトリスト・OP権限設定ガイド</a> も参照してください。</p>
+      </div>
+
+      <!-- FAQ -->
+      <div class="card">
+        <h2 style="font-size:17px;">よくある質問</h2>
+        <dl class="faq-list" style="margin-top:14px;">
+          <dt>マイクラサーバーでBANしたプレイヤーを解除するには？</dt>
+          <dd>コンソールまたはOP権限のあるプレイヤーが /pardon &lt;プレイヤー名&gt; を実行することでBANを解除できます。IPBANの場合は /pardon-ip &lt;IPアドレス&gt; を使います。</dd>
+          <dt style="margin-top:10px;">OPとホワイトリストの違いは何ですか？</dt>
+          <dd>OPはサーバー管理コマンドを実行できる権限です。ホワイトリストはサーバーに参加できるプレイヤーを制限する機能です。ホワイトリストを有効にすると、リストに載っていないプレイヤーは参加できなくなります。</dd>
+          <dt style="margin-top:10px;">OP権限のレベル（1〜4）の違いは何ですか？</dt>
+          <dd>レベル1は基本コマンドのみ。レベル2はgameruleやtpなどの管理コマンド。レベル3はban・kickなどのプレイヤー管理。レベル4はサーバーのstopも含む全権限です。</dd>
+        </dl>
+      </div>
+
+      <!-- 関連記事 -->
+      <div class="card">
+        <h2 style="font-size:17px;">関連ガイド</h2>
+        <ul style="margin-top:10px;">
+          <li><a href="/docs/growth/whitelist-op-guide/">ホワイトリスト・OP権限設定ガイド</a></li>
+          <li><a href="/docs/growth/minecraft-server-gamerule-settings/">gamerule（ゲームルール）設定完全ガイド</a></li>
+          <li><a href="/docs/growth/server-properties-recommended-settings/">server.properties おすすめ設定</a></li>
+          <li><a href="/docs/growth/friends-cant-join-error-guide/">フレンドがサーバーに参加できないときの対処法</a></li>
+        </ul>
+      </div>
+
+      <!-- CTA -->
+      <div class="card cta" style="text-align:center;">
+        <div style="font-weight:700;font-size:16px;">MaiPilotでサーバー管理をもっと楽に</div>
+        <p class="muted" style="margin:8px 0 12px;font-size:14px;">コンソールからBANやホワイトリスト操作も即実行。完全無料・日本語対応。</p>
+        <a href="/#download" style="display:inline-block;background:var(--accent);color:#0b0f17;font-weight:700;border-radius:10px;padding:10px 28px;font-size:15px;">無料ダウンロード</a>
+      </div>
+
+    </div>
+  </body>
+</html>

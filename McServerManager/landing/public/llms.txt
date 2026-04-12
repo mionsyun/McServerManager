@@ -48,6 +48,9 @@ MaiPilotは、Windows向けのマイクラ（Minecraft）サーバー統合管�
 - MODの入れ方（Forge/Fabric）: https://www.maipilot.jp/docs/growth/forge-fabric-mod-installation/
 - プラグインの入れ方（Paper/Spigot）: https://www.maipilot.jp/docs/growth/paper-spigot-plugin-installation/
 - 配布マップの入れ方・遊び方: https://www.maipilot.jp/docs/growth/haichi-map-installation/
+- データパックの入れ方: https://www.maipilot.jp/docs/growth/minecraft-server-datapack-install/
+- gamerule（ゲームルール）設定完全ガイド: https://www.maipilot.jp/docs/growth/minecraft-server-gamerule-settings/
+- プレイヤー管理（BAN・OP・ホワイトリスト）: https://www.maipilot.jp/docs/growth/minecraft-server-player-management/
 - リソースパック配布ガイド: https://www.maipilot.jp/docs/growth/resource-pack-distribution/
 - ポート開放チェックリスト: https://www.maipilot.jp/docs/port-forwarding/
 - Java導入ガイド: https://www.maipilot.jp/docs/java-setup/

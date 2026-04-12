@@ -4,13 +4,13 @@
     <loc>https://www.maipilot.jp/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <lastmod>2026-04-06</lastmod>
+    <lastmod>2026-04-12</lastmod>
   </url>
   <url>
     <loc>https://www.maipilot.jp/docs/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2026-04-06</lastmod>
+    <lastmod>2026-04-12</lastmod>
   </url>
   <url>
     <loc>https://www.maipilot.jp/docs/24-7-hosting/</loc>
@@ -22,7 +22,7 @@
     <loc>https://www.maipilot.jp/docs/growth/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2026-04-06</lastmod>
+    <lastmod>2026-04-12</lastmod>
   </url>
   <url>
     <loc>https://www.maipilot.jp/docs/growth/backup-restore-guide/</loc>
@@ -55,6 +55,18 @@
     <lastmod>2026-04-06</lastmod>
   </url>
   <url>
+    <loc>https://www.maipilot.jp/docs/growth/minecraft-server-datapack-install/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-04-12</lastmod>
+  </url>
+  <url>
+    <loc>https://www.maipilot.jp/docs/growth/minecraft-server-gamerule-settings/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-04-12</lastmod>
+  </url>
+  <url>
     <loc>https://www.maipilot.jp/docs/growth/minecraft-server-lag-fix/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -65,6 +77,12 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <lastmod>2026-04-06</lastmod>
+  </url>
+  <url>
+    <loc>https://www.maipilot.jp/docs/growth/minecraft-server-player-management/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-04-12</lastmod>
   </url>
   <url>
     <loc>https://www.maipilot.jp/docs/growth/minecraft-server-recommended-specs/</loc>

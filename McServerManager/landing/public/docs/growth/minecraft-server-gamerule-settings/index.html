@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>マイクラサーバーのgamerule（ゲームルール）設定完全ガイド【2026年版】 | MaiPilot</title>
+    <meta name="description" content="マイクラJava版サーバーのgameruleコマンド一覧と推奨設定を解説。keepInventory・mobGriefing・doDaylightCycleなど人気設定の使い方を網羅。" />
+    <style>
+      :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
+      * { box-sizing:border-box; }
+      body { margin:0; padding:32px 16px; font-family:"Noto Sans JP","Segoe UI",sans-serif; color:var(--text); background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%); }
+      .wrap { max-width:980px; margin:0 auto; display:grid; gap:16px; }
+      .card { background:var(--panel); border:1px solid rgba(126,157,201,.25); border-radius:16px; padding:22px; }
+      .hero { background:linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)), var(--panel); }
+      .muted { color:var(--muted); }
+      .notice { background:rgba(255,209,102,.12); color:#ffd166; border-radius:10px; padding:10px 14px; font-weight:700; font-size:13px; margin-top:12px; }
+      .tip { background:rgba(51,168,255,.1); color:#33a8ff; border-radius:10px; padding:10px 14px; font-size:13px; margin-top:12px; }
+      .cta { border:1px solid rgba(102,255,136,.45); background:rgba(102,255,136,.08); }
+      a { color:var(--accent2); text-decoration:none; }
+      h1,h2,h3 { margin:0 0 10px; }
+      ul,ol { margin:8px 0 0 18px; color:var(--muted); }
+      li { margin-bottom:6px; }
+      .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+      .chip { font-size:12px; padding:5px 10px; border:1px solid rgba(126,157,201,.35); border-radius:999px; color:var(--muted); }
+      .code { background:var(--panel2); border:1px solid rgba(126,157,201,.25); border-radius:8px; padding:10px 14px; font-family:monospace; font-size:13px; color:var(--accent); margin-top:8px; word-break:break-all; }
+      .table-wrap { overflow-x:auto; margin-top:12px; }
+      table { border-collapse:collapse; width:100%; font-size:13px; }
+      th,td { border:1px solid rgba(126,157,201,.25); padding:8px 12px; text-align:left; }
+      th { background:var(--panel2); color:var(--text); }
+      td { color:var(--muted); }
+      td code { background:var(--panel2); padding:2px 5px; border-radius:4px; color:var(--accent); font-size:12px; }
+      .faq-list { margin:0; display:grid; gap:10px; }
+      .faq-list dt { font-weight:700; color:var(--text); }
+      .faq-list dd { margin:0; color:var(--muted); }
+      .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+      .mini { background:var(--panel2); border:1px solid rgba(126,157,201,.25); border-radius:12px; padding:12px; }
+      .site-nav { position:sticky; top:0; z-index:100; background:rgba(11,15,23,.95); backdrop-filter:blur(8px); border-bottom:1px solid rgba(126,157,201,.15); padding:0 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; margin:-32px -16px 24px; height:52px; }
+      .nav-brand { font-weight:700; font-size:15px; color:var(--accent); text-decoration:none; letter-spacing:.02em; }
+      .nav-links { display:flex; gap:12px; align-items:center; }
+      .nav-links a { color:var(--muted); font-size:13px; text-decoration:none; }
+      .nav-links a:hover { color:var(--text); }
+      .nav-cta { background:rgba(102,255,136,.12); color:var(--accent)!important; border:1px solid rgba(102,255,136,.35); border-radius:8px; padding:5px 12px; font-weight:700; }
+    </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MM106D2B2Z');
+    </script>
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://www.maipilot.jp/docs/growth/minecraft-server-gamerule-settings/" />
+    <meta property="og:title" content="マイクラサーバーのgamerule（ゲームルール）設定完全ガイド【2026年版】 | MaiPilot" />
+    <meta property="og:description" content="マイクラJava版サーバーのgameruleコマンド一覧と推奨設定を解説。keepInventory・mobGriefing・doDaylightCycleなど人気設定の使い方を網羅。" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://www.maipilot.jp/docs/growth/minecraft-server-gamerule-settings/" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="マイクラサーバーのgamerule（ゲームルール）設定完全ガイド【2026年版】 | MaiPilot" />
+    <meta name="twitter:description" content="マイクラJava版サーバーのgameruleコマンド一覧と推奨設定を解説。keepInventory・mobGriefing・doDaylightCycleなど人気設定の使い方を網羅。" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:site_name" content="MaiPilot" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="article:published_time" content="2026-04-12T00:00:00+09:00" />
+    <meta property="article:modified_time" content="2026-04-12T00:00:00+09:00" />
+    <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.maipilot.jp/" },
+    { "@type": "ListItem", "position": 2, "name": "ガイド一覧", "item": "https://www.maipilot.jp/docs/growth/" },
+    { "@type": "ListItem", "position": 3, "name": "gamerule設定ガイド", "item": "https://www.maipilot.jp/docs/growth/minecraft-server-gamerule-settings/" }
+  ]
+}
+</script>
+    <script type="application/ld+json" data-seo="article">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "マイクラサーバーのgamerule（ゲームルール）設定完全ガイド【2026年版】",
+  "description": "マイクラJava版サーバーのgameruleコマンド一覧と推奨設定を解説。keepInventory・mobGriefing・doDaylightCycleなど人気設定の使い方を網羅。",
+  "datePublished": "2026-04-12T00:00:00+09:00",
+  "dateModified": "2026-04-12T00:00:00+09:00",
+  "author": { "@type": "Organization", "name": "MaiPilot" },
+  "publisher": { "@type": "Organization", "name": "MaiPilot", "url": "https://www.maipilot.jp" },
+  "url": "https://www.maipilot.jp/docs/growth/minecraft-server-gamerule-settings/",
+  "image": "https://www.maipilot.jp/icon.png"
+}
+</script>
+    <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "gameruleの設定はサーバー再起動後も保持されますか？",
+      "acceptedAnswer": { "@type": "Answer", "text": "はい。/gamerule コマンドで設定した値はワールドデータに保存されるため、サーバーを再起動しても維持されます。" }
+    },
+    {
+      "@type": "Question",
+      "name": "keepInventoryをtrueにするとどうなりますか？",
+      "acceptedAnswer": { "@type": "Answer", "text": "プレイヤーが死亡してもアイテムをドロップせず、そのままインベントリを保持できます。友達同士のカジュアルサーバーに向いています。" }
+    },
+    {
+      "@type": "Question",
+      "name": "gameruleはワールドごとに設定できますか？",
+      "acceptedAnswer": { "@type": "Answer", "text": "Java版のgameruleはワールド（ディメンション）ごとではなく、サーバー全体に適用されます。ディメンション別に設定したい場合はデータパックを使う方法があります。" }
+    }
+  ]
+}
+</script>
+  </head>
+  <body>
+    <nav class="site-nav">
+      <a class="nav-brand" href="/">MaiPilot</a>
+      <div class="nav-links">
+        <a href="/docs/growth/">ガイド一覧</a>
+        <a href="/#download" class="nav-cta">無料ダウンロード</a>
+      </div>
+    </nav>
+    <div class="wrap">
+
+      <!-- Hero -->
+      <div class="card hero">
+        <nav style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+          <a href="/">MaiPilot</a> &rsaquo; <a href="/docs/growth/">ガイド一覧</a> &rsaquo; gamerule設定ガイド
+        </nav>
+        <h1 style="font-size:clamp(18px,4vw,26px);line-height:1.4;">マイクラサーバーのgamerule（ゲームルール）設定完全ガイド【2026年版】</h1>
+        <p class="muted" style="margin:8px 0 0;">対象: Java版 1.13以降 / OP権限（レベル2以上）が必要</p>
+        <div class="chips">
+          <span class="chip">gamerule</span>
+          <span class="chip">ゲームルール</span>
+          <span class="chip">サーバー設定</span>
+          <span class="chip">コマンド</span>
+        </div>
+        <div class="notice">設定を変更する前に必ずバックアップを取ってください。特にkeepInventoryなどはサーバーのプレイスタイルに大きく影響します。</div>
+      </div>
+
+      <!-- gameruleとは -->
+      <div class="card">
+        <h2 style="font-size:17px;">gameruleとは？</h2>
+        <p class="muted" style="margin:8px 0 0;font-size:14px;">gamerule（ゲームルール）はマイクラのゲームプレイに関する細かい挙動を制御するコマンドです。OPユーザーがゲーム内でコマンドを実行するだけで適用でき、サーバーを再起動する必要がありません。</p>
+        <div class="code">/gamerule &lt;ルール名&gt; &lt;値&gt;</div>
+        <p class="muted" style="margin:10px 0 0;font-size:14px;">現在の設定値を確認するには値を省略します：</p>
+        <div class="code">/gamerule keepInventory</div>
+      </div>
+
+      <!-- 人気のgamerule一覧 -->
+      <div class="card">
+        <h2 style="font-size:17px;">よく使うgamerule一覧</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>gamerule名</th>
+                <th>デフォルト</th>
+                <th>説明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>keepInventory</code></td>
+                <td>false</td>
+                <td>trueにすると死亡時にアイテムをドロップしない</td>
+              </tr>
+              <tr>
+                <td><code>mobGriefing</code></td>
+                <td>true</td>
+                <td>falseにするとCreeper爆発・Endermanのブロック持ち去りを防止</td>
+              </tr>
+              <tr>
+                <td><code>doDaylightCycle</code></td>
+                <td>true</td>
+                <td>falseにすると昼夜サイクルを停止（建築サーバー向け）</td>
+              </tr>
+              <tr>
+                <td><code>doWeatherCycle</code></td>
+                <td>true</td>
+                <td>falseにすると天気の変化を停止</td>
+              </tr>
+              <tr>
+                <td><code>doFireTick</code></td>
+                <td>true</td>
+                <td>falseにすると火の延焼を停止</td>
+              </tr>
+              <tr>
+                <td><code>pvp</code></td>
+                <td>server.properties で設定</td>
+                <td>gameruleではなくserver.propertiesのpvp項目で制御</td>
+              </tr>
+              <tr>
+                <td><code>doMobSpawning</code></td>
+                <td>true</td>
+                <td>falseにするとMobの自然スポーンを停止</td>
+              </tr>
+              <tr>
+                <td><code>naturalRegeneration</code></td>
+                <td>true</td>
+                <td>falseにすると自然回復を停止（難易度UP）</td>
+              </tr>
+              <tr>
+                <td><code>announceAdvancements</code></td>
+                <td>true</td>
+                <td>falseにするとアドバンスメント達成のチャット通知を消す</td>
+              </tr>
+              <tr>
+                <td><code>randomTickSpeed</code></td>
+                <td>3</td>
+                <td>農作物の成長速度などに影響（大きくするほど高負荷）</td>
+              </tr>
+              <tr>
+                <td><code>maxEntityCramming</code></td>
+                <td>24</td>
+                <td>1ブロックに詰め込めるMob数の上限（サーバー負荷対策）</td>
+              </tr>
+              <tr>
+                <td><code>spawnRadius</code></td>
+                <td>10</td>
+                <td>スポーン地点からの最大半径（ブロック）</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 用途別おすすめ設定 -->
+      <div class="card">
+        <h2 style="font-size:17px;">用途別おすすめ設定</h2>
+        <div class="grid" style="margin-top:14px;">
+          <div class="mini">
+            <div style="color:var(--accent);font-weight:700;font-size:13px;margin-bottom:8px;">友達サーバー（カジュアル）</div>
+            <div class="code" style="margin:0;font-size:12px;">/gamerule keepInventory true
+/gamerule mobGriefing false
+/gamerule announceAdvancements false</div>
+          </div>
+          <div class="mini">
+            <div style="color:var(--accent);font-weight:700;font-size:13px;margin-bottom:8px;">建築・クリエイティブ</div>
+            <div class="code" style="margin:0;font-size:12px;">/gamerule doDaylightCycle false
+/gamerule doWeatherCycle false
+/gamerule doFireTick false
+/gamerule doMobSpawning false</div>
+          </div>
+          <div class="mini">
+            <div style="color:var(--accent);font-weight:700;font-size:13px;margin-bottom:8px;">サーバー負荷軽減</div>
+            <div class="code" style="margin:0;font-size:12px;">/gamerule maxEntityCramming 16
+/gamerule randomTickSpeed 3
+/gamerule mobGriefing false</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 注意事項 -->
+      <div class="card">
+        <h2 style="font-size:17px;">注意事項</h2>
+        <ul style="margin-top:10px;font-size:14px;">
+          <li><code style="background:var(--panel2);padding:2px 5px;border-radius:4px;">randomTickSpeed</code> を極端に大きくするとサーバーが高負荷になります。通常は 3〜10 の範囲で使用してください。</li>
+          <li>gameruleの設定はワールドデータに保存されるため、ワールドを削除するとリセットされます。</li>
+          <li>OP権限（レベル2以上）がないプレイヤーはgameruleコマンドを実行できません。</li>
+          <li>PvPの有効・無効は <a href="/docs/growth/server-properties-recommended-settings/">server.properties</a> の <code style="background:var(--panel2);padding:2px 5px;border-radius:4px;">pvp</code> で設定します。</li>
+        </ul>
+      </div>
+
+      <!-- FAQ -->
+      <div class="card">
+        <h2 style="font-size:17px;">よくある質問</h2>
+        <dl class="faq-list" style="margin-top:14px;">
+          <dt>gameruleの設定はサーバー再起動後も保持されますか？</dt>
+          <dd>はい。/gamerule コマンドで設定した値はワールドデータに保存されるため、サーバーを再起動しても維持されます。</dd>
+          <dt style="margin-top:10px;">keepInventoryをtrueにするとどうなりますか？</dt>
+          <dd>プレイヤーが死亡してもアイテムをドロップせず、そのままインベントリを保持できます。友達同士のカジュアルサーバーに向いています。</dd>
+          <dt style="margin-top:10px;">gameruleはワールドごとに設定できますか？</dt>
+          <dd>Java版のgameruleはワールド（ディメンション）ごとではなく、サーバー全体に適用されます。ディメンション別に設定したい場合はデータパックを使う方法があります。</dd>
+        </dl>
+      </div>
+
+      <!-- 関連記事 -->
+      <div class="card">
+        <h2 style="font-size:17px;">関連ガイド</h2>
+        <ul style="margin-top:10px;">
+          <li><a href="/docs/growth/server-properties-recommended-settings/">server.properties おすすめ設定</a></li>
+          <li><a href="/docs/growth/minecraft-server-datapack-install/">データパックの入れ方</a></li>
+          <li><a href="/docs/growth/whitelist-op-guide/">ホワイトリスト・OP権限設定ガイド</a></li>
+          <li><a href="/docs/growth/minecraft-server-lag-fix/">サーバーラグ改善ガイド</a></li>
+        </ul>
+      </div>
+
+      <!-- CTA -->
+      <div class="card cta" style="text-align:center;">
+        <div style="font-weight:700;font-size:16px;">MaiPilotでコンソールをGUIから操作</div>
+        <p class="muted" style="margin:8px 0 12px;font-size:14px;">gameruleコマンドもMaiPilotのコンソールタブから手軽に実行。完全無料・日本語対応。</p>
+        <a href="/#download" style="display:inline-block;background:var(--accent);color:#0b0f17;font-weight:700;border-radius:10px;padding:10px 28px;font-size:15px;">無料ダウンロード</a>
+      </div>
+
+    </div>
+  </body>
+</html>
