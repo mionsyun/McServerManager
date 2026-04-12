@@ -44,3 +44,18 @@ output "azure_portal_link" {
   description = "Azure portal link to the Static Web App"
   value       = "https://portal.azure.com/#@/resource${azurerm_static_web_app.lp.id}/overview"
 }
+
+output "trusted_signing_account_name" {
+  description = "Trusted Signing account name (set as TRUSTED_SIGNING_ACCOUNT GitHub var)"
+  value       = azurerm_trusted_signing_account.main.name
+}
+
+output "trusted_signing_endpoint" {
+  description = "Trusted Signing regional endpoint (set as TRUSTED_SIGNING_ENDPOINT GitHub var)"
+  value       = "https://${lower(replace(azurerm_trusted_signing_account.main.location, " ", ""))}.codesigning.azure.net/"
+}
+
+output "trusted_signing_certificate_profile_name" {
+  description = "Certificate profile name (set as TRUSTED_SIGNING_PROFILE GitHub var)"
+  value       = azurerm_trusted_signing_certificate_profile.main.name
+}
