@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>マイクラサーバーにデータパックを入れる方法【2026年版】 | MaiPilot</title>
+    <meta name="description" content="マイクラJava版サーバーへのデータパック導入手順を画像付きで解説。配布ワールド付属のdatapacksフォルダの扱いや複数パックの競合解消まで網羅。" />
+    <style>
+      :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
+      * { box-sizing:border-box; }
+      body { margin:0; padding:32px 16px; font-family:"Noto Sans JP","Segoe UI",sans-serif; color:var(--text); background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%); }
+      .wrap { max-width:980px; margin:0 auto; display:grid; gap:16px; }
+      .card { background:var(--panel); border:1px solid rgba(126,157,201,.25); border-radius:16px; padding:22px; }
+      .hero { background:linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)), var(--panel); }
+      .muted { color:var(--muted); }
+      .notice { background:rgba(255,209,102,.12); color:#ffd166; border-radius:10px; padding:10px 14px; font-weight:700; font-size:13px; margin-top:12px; }
+      .tip { background:rgba(51,168,255,.1); color:#33a8ff; border-radius:10px; padding:10px 14px; font-size:13px; margin-top:12px; }
+      .cta { border:1px solid rgba(102,255,136,.45); background:rgba(102,255,136,.08); }
+      a { color:var(--accent2); text-decoration:none; }
+      h1,h2,h3 { margin:0 0 10px; }
+      ul,ol { margin:8px 0 0 18px; color:var(--muted); }
+      li { margin-bottom:6px; }
+      .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+      .chip { font-size:12px; padding:5px 10px; border:1px solid rgba(126,157,201,.35); border-radius:999px; color:var(--muted); }
+      .step { counter-increment:step; display:flex; gap:14px; align-items:flex-start; margin-bottom:14px; }
+      .step-num { flex-shrink:0; width:32px; height:32px; border-radius:50%; background:rgba(102,255,136,.15); color:var(--accent); font-weight:700; font-size:15px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(102,255,136,.35); }
+      .step-body { flex:1; }
+      .code { background:var(--panel2); border:1px solid rgba(126,157,201,.25); border-radius:8px; padding:10px 14px; font-family:monospace; font-size:13px; color:var(--accent); margin-top:8px; word-break:break-all; }
+      .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+      .mini { background:var(--panel2); border:1px solid rgba(126,157,201,.25); border-radius:12px; padding:12px; }
+      .faq-list { margin:0; display:grid; gap:10px; }
+      .faq-list dt { font-weight:700; color:var(--text); }
+      .faq-list dd { margin:0; color:var(--muted); }
+      .site-nav { position:sticky; top:0; z-index:100; background:rgba(11,15,23,.95); backdrop-filter:blur(8px); border-bottom:1px solid rgba(126,157,201,.15); padding:0 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; margin:-32px -16px 24px; height:52px; }
+      .nav-brand { font-weight:700; font-size:15px; color:var(--accent); text-decoration:none; letter-spacing:.02em; }
+      .nav-links { display:flex; gap:12px; align-items:center; }
+      .nav-links a { color:var(--muted); font-size:13px; text-decoration:none; }
+      .nav-links a:hover { color:var(--text); }
+      .nav-cta { background:rgba(102,255,136,.12); color:var(--accent)!important; border:1px solid rgba(102,255,136,.35); border-radius:8px; padding:5px 12px; font-weight:700; }
+    </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MM106D2B2Z');
+    </script>
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://www.maipilot.jp/docs/growth/minecraft-server-datapack-install/" />
+    <meta property="og:title" content="マイクラサーバーにデータパックを入れる方法【2026年版】 | MaiPilot" />
+    <meta property="og:description" content="マイクラJava版サーバーへのデータパック導入手順を画像付きで解説。配布ワールド付属のdatapacksフォルダの扱いや複数パックの競合解消まで網羅。" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://www.maipilot.jp/docs/growth/minecraft-server-datapack-install/" />
+    <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:image:alt" content="MaiPilot icon" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="マイクラサーバーにデータパックを入れる方法【2026年版】 | MaiPilot" />
+    <meta name="twitter:description" content="マイクラJava版サーバーへのデータパック導入手順を画像付きで解説。配布ワールド付属のdatapacksフォルダの扱いや複数パックの競合解消まで網羅。" />
+    <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
+    <meta property="og:site_name" content="MaiPilot" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="article:published_time" content="2026-04-12T00:00:00+09:00" />
+    <meta property="article:modified_time" content="2026-04-12T00:00:00+09:00" />
+    <script type="application/ld+json" data-seo="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.maipilot.jp/" },
+    { "@type": "ListItem", "position": 2, "name": "ガイド一覧", "item": "https://www.maipilot.jp/docs/growth/" },
+    { "@type": "ListItem", "position": 3, "name": "データパックの入れ方", "item": "https://www.maipilot.jp/docs/growth/minecraft-server-datapack-install/" }
+  ]
+}
+</script>
+    <script type="application/ld+json" data-seo="article">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "マイクラサーバーにデータパックを入れる方法【2026年版】",
+  "description": "マイクラJava版サーバーへのデータパック導入手順を画像付きで解説。配布ワールド付属のdatapacksフォルダの扱いや複数パックの競合解消まで網羅。",
+  "datePublished": "2026-04-12T00:00:00+09:00",
+  "dateModified": "2026-04-12T00:00:00+09:00",
+  "author": { "@type": "Organization", "name": "MaiPilot" },
+  "publisher": { "@type": "Organization", "name": "MaiPilot", "url": "https://www.maipilot.jp" },
+  "url": "https://www.maipilot.jp/docs/growth/minecraft-server-datapack-install/",
+  "image": "https://www.maipilot.jp/icon.png"
+}
+</script>
+    <script type="application/ld+json" data-seo="faq">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "データパックはModと何が違いますか？",
+      "acceptedAnswer": { "@type": "Answer", "text": "データパックはゲーム本体の機能を拡張するバニラ互換の仕組みで、クライアント側の変更が不要です。Modはゲームバイナリを改変するためサーバー・クライアント両方への導入が必要です。" }
+    },
+    {
+      "@type": "Question",
+      "name": "データパックを入れたのに反映されません。",
+      "acceptedAnswer": { "@type": "Answer", "text": "サーバーを再起動するか、コンソールで /reload コマンドを実行してください。また、フォルダ構造が正しいか（datapacksフォルダ内に zip か フォルダ形式で配置）を確認してください。" }
+    },
+    {
+      "@type": "Question",
+      "name": "複数のデータパックを同時に使えますか？",
+      "acceptedAnswer": { "@type": "Answer", "text": "可能です。ただし同じアドバンスメントやレシピを上書きするパック同士は競合します。/datapack list で有効なパックを確認し、優先度を調整してください。" }
+    },
+    {
+      "@type": "Question",
+      "name": "配布ワールドのdatapacksフォルダはどこに置きますか？",
+      "acceptedAnswer": { "@type": "Answer", "text": "サーバーのワールドフォルダ（例: world/）直下にある datapacks フォルダに配置します。配布ワールドに付属している場合はそのまま同じ構造でコピーしてください。" }
+    }
+  ]
+}
+</script>
+  </head>
+  <body>
+    <nav class="site-nav">
+      <a class="nav-brand" href="/">MaiPilot</a>
+      <div class="nav-links">
+        <a href="/docs/growth/">ガイド一覧</a>
+        <a href="/#download" class="nav-cta">無料ダウンロード</a>
+      </div>
+    </nav>
+    <div class="wrap">
+
+      <!-- Hero -->
+      <div class="card hero">
+        <nav style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+          <a href="/">MaiPilot</a> &rsaquo; <a href="/docs/growth/">ガイド一覧</a> &rsaquo; データパックの入れ方
+        </nav>
+        <h1 style="font-size:clamp(18px,4vw,26px);line-height:1.4;">マイクラサーバーにデータパックを入れる方法【2026年版】</h1>
+        <p class="muted" style="margin:8px 0 0;">対象: Java版 1.13以降 / Vanilla・Paper・Purpurサーバー</p>
+        <div class="chips">
+          <span class="chip">データパック</span>
+          <span class="chip">Java版</span>
+          <span class="chip">サーバー管理</span>
+          <span class="chip">MaiPilot</span>
+        </div>
+        <div class="notice">サーバーを止めてからファイルを配置し、起動後に /reload するのが基本の手順です。</div>
+      </div>
+
+      <!-- データパックとは -->
+      <div class="card">
+        <h2 style="font-size:17px;">データパックとは？</h2>
+        <p class="muted" style="margin:8px 0 0;">データパックはJava版マイクラに標準搭載されているカスタマイズ機能です。<br>
+        レシピ変更・カスタムアドバンスメント・カスタムディメンション追加など、Modなしでゲームを拡張できます。</p>
+        <div class="grid" style="margin-top:14px;">
+          <div class="mini">
+            <div style="color:var(--accent);font-weight:700;font-size:13px;margin-bottom:6px;">クライアント不要</div>
+            <div class="muted" style="font-size:13px;">プレイヤー側の操作なしでサーバーに導入できます。</div>
+          </div>
+          <div class="mini">
+            <div style="color:var(--accent);font-weight:700;font-size:13px;margin-bottom:6px;">バニラ互換</div>
+            <div class="muted" style="font-size:13px;">Vanilla / Paper / Purpur どのサーバーにも対応します。</div>
+          </div>
+          <div class="mini">
+            <div style="color:var(--accent);font-weight:700;font-size:13px;margin-bottom:6px;">zip形式で配布</div>
+            <div class="muted" style="font-size:13px;">PlanetMinecraftやMCDFなど各サイトから入手できます。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 導入手順 -->
+      <div class="card">
+        <h2 style="font-size:17px;">導入手順（4ステップ）</h2>
+        <div style="margin-top:16px;">
+
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div style="font-weight:700;margin-bottom:6px;">データパックを入手する</div>
+              <p class="muted" style="margin:0;font-size:14px;">信頼できるサイト（PlanetMinecraft・Modrinth・MCDF等）からダウンロードします。拡張子が <code style="background:var(--panel2);padding:2px 6px;border-radius:4px;">.zip</code> のままでOKです。</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div style="font-weight:700;margin-bottom:6px;">サーバーを停止する</div>
+              <p class="muted" style="margin:0;font-size:14px;">MaiPilotの「停止」ボタン、またはコンソールで <code style="background:var(--panel2);padding:2px 6px;border-radius:4px;">stop</code> コマンドを実行します。ファイルを書き込むまえにサーバーを止めることで破損を防ぎます。</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div style="font-weight:700;margin-bottom:6px;">datapacks フォルダに配置する</div>
+              <p class="muted" style="margin:0;font-size:14px;">サーバーのワールドフォルダ内の <strong>datapacks</strong> フォルダに zip ファイルをそのままコピーします。</p>
+              <div class="code">（サーバーフォルダ）/world/datapacks/my-datapack.zip</div>
+              <div class="tip">MaiPilotの「ワールド」タブ → 「フォルダを開く」でエクスプローラーから直接配置できます。</div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div style="font-weight:700;margin-bottom:6px;">サーバーを起動して /reload する</div>
+              <p class="muted" style="margin:0;font-size:14px;">サーバーを起動後、コンソールまたはゲーム内チャットで以下を実行します。</p>
+              <div class="code">/reload</div>
+              <p class="muted" style="margin:8px 0 0;font-size:14px;">反映を確認するには <code style="background:var(--panel2);padding:2px 6px;border-radius:4px;">/datapack list</code> を実行してください。有効なパック名が緑色で表示されます。</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 配布ワールド付属の場合 -->
+      <div class="card">
+        <h2 style="font-size:17px;">配布ワールドに付属している場合</h2>
+        <p class="muted" style="margin:8px 0 0;font-size:14px;">配布ワールドをダウンロードすると、解凍したフォルダ内に <code style="background:var(--panel2);padding:2px 6px;border-radius:4px;">datapacks/</code> フォルダが含まれていることがあります。</p>
+        <ol style="margin-top:12px;color:var(--muted);font-size:14px;">
+          <li>配布ワールドのフォルダをサーバーのワールドフォルダ（world/）として配置する</li>
+          <li>datapacks フォルダもワールドフォルダの直下に含まれているか確認する</li>
+          <li>サーバーを起動すると自動的に読み込まれます</li>
+        </ol>
+        <div class="notice">ワールドフォルダ名をサーバーの level-name 設定と一致させることを忘れずに。</div>
+      </div>
+
+      <!-- よくあるトラブル -->
+      <div class="card">
+        <h2 style="font-size:17px;">よくあるトラブルと解決策</h2>
+        <div class="grid" style="margin-top:12px;">
+          <div class="mini">
+            <div style="font-weight:700;font-size:13px;margin-bottom:4px;">/datapack list に表示されない</div>
+            <div class="muted" style="font-size:13px;">datapacks フォルダの場所が間違っている可能性があります。world/ の直下に配置されているか確認してください。</div>
+          </div>
+          <div class="mini">
+            <div style="font-weight:700;font-size:13px;margin-bottom:4px;">エラーメッセージが出る</div>
+            <div class="muted" style="font-size:13px;">データパックがサーバーのバージョンに対応していない可能性があります。配布ページで動作バージョンを確認してください。</div>
+          </div>
+          <div class="mini">
+            <div style="font-weight:700;font-size:13px;margin-bottom:4px;">複数パックが競合する</div>
+            <div class="muted" style="font-size:13px;">/datapack disable &lt;名前&gt; で不要なパックを無効化してください。優先度は /datapack enable &lt;名前&gt; first/last で調整できます。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="card">
+        <h2 style="font-size:17px;">よくある質問</h2>
+        <dl class="faq-list" style="margin-top:14px;">
+          <dt>データパックはModと何が違いますか？</dt>
+          <dd>データパックはゲーム本体の機能を拡張するバニラ互換の仕組みで、クライアント側の変更が不要です。Modはゲームバイナリを改変するためサーバー・クライアント両方への導入が必要です。</dd>
+          <dt style="margin-top:10px;">配布ワールドのdatapacksフォルダはどこに置きますか？</dt>
+          <dd>サーバーのワールドフォルダ（例: world/）直下にある datapacks フォルダに配置します。配布ワールドに付属している場合はそのまま同じ構造でコピーしてください。</dd>
+          <dt style="margin-top:10px;">複数のデータパックを同時に使えますか？</dt>
+          <dd>可能です。ただし同じアドバンスメントやレシピを上書きするパック同士は競合します。/datapack list で有効なパックを確認し、優先度を調整してください。</dd>
+        </dl>
+      </div>
+
+      <!-- 関連記事 -->
+      <div class="card">
+        <h2 style="font-size:17px;">関連ガイド</h2>
+        <ul style="margin-top:10px;">
+          <li><a href="/docs/growth/haichi-map-installation/">配布マップの入れ方・遊び方</a></li>
+          <li><a href="/docs/growth/forge-fabric-mod-installation/">MODの入れ方（Forge / Fabric）</a></li>
+          <li><a href="/docs/growth/server-properties-recommended-settings/">server.properties おすすめ設定</a></li>
+          <li><a href="/docs/growth/backup-restore-guide/">バックアップ・リストアガイド</a></li>
+        </ul>
+      </div>
+
+      <!-- CTA -->
+      <div class="card cta" style="text-align:center;">
+        <div style="font-weight:700;font-size:16px;">MaiPilotでサーバー管理をもっと楽に</div>
+        <p class="muted" style="margin:8px 0 12px;font-size:14px;">ワールドフォルダへのアクセスもGUIから即座に開ける。完全無料・日本語対応。</p>
+        <a href="/#download" style="display:inline-block;background:var(--accent);color:#0b0f17;font-weight:700;border-radius:10px;padding:10px 28px;font-size:15px;">無料ダウンロード</a>
+      </div>
+
+    </div>
+  </body>
+</html>

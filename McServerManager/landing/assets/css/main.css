@@ -969,8 +969,8 @@ a {
 
 .guide-card {
   display: block;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--panel);
+  border: 1px solid var(--stroke);
   border-radius: 12px;
   padding: 14px 18px;
   color: var(--text);
