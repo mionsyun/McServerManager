@@ -23,14 +23,10 @@ concurrency:
   group: deploy-installer-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build_installer:
     runs-on: windows-latest
     permissions:
-      id-token: write   # OIDC for Azure Trusted Signing
       contents: read
     outputs:
       app_version: ${{ steps.version.outputs.app_version }}
@@ -56,32 +52,6 @@ jobs:
           -Configuration Release
           -Runtime win-x64
 
-      # ── Azure login (OIDC) for Trusted Signing ──────────────────────────
-      - name: Azure login
-        if: vars.TRUSTED_SIGNING_ACCOUNT != ''
-        uses: azure/login@v2
-        with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-
-      # ── Sign app binary before packaging ────────────────────────────────
-      - name: Sign app binary (Trusted Signing)
-        if: vars.TRUSTED_SIGNING_ACCOUNT != ''
-        uses: azure/trusted-signing-action@v0.5.1
-        with:
-          azure-tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          azure-client-id: ${{ vars.AZURE_CLIENT_ID }}
-          azure-subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-          endpoint: ${{ vars.TRUSTED_SIGNING_ENDPOINT }}
-          trusted-signing-account-name: ${{ vars.TRUSTED_SIGNING_ACCOUNT }}
-          certificate-profile-name: ${{ vars.TRUSTED_SIGNING_PROFILE }}
-          files-folder: McServerManager\bin\Release\net8.0-windows\win-x64\publish
-          files-folder-filter: exe
-          file-digest: SHA256
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
-          timestamp-digest: SHA256
-
       # ── Phase 2: Package (ISCC + versioned copy, no manifest) ──────────
       - name: Package installer
         shell: pwsh
@@ -102,24 +72,7 @@ jobs:
           }
           "app_version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
-      # ── Sign installer (both MaiPilotSetup.exe and versioned copy) ─────
-      - name: Sign installer (Trusted Signing)
-        if: vars.TRUSTED_SIGNING_ACCOUNT != ''
-        uses: azure/trusted-signing-action@v0.5.1
-        with:
-          azure-tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          azure-client-id: ${{ vars.AZURE_CLIENT_ID }}
-          azure-subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-          endpoint: ${{ vars.TRUSTED_SIGNING_ENDPOINT }}
-          trusted-signing-account-name: ${{ vars.TRUSTED_SIGNING_ACCOUNT }}
-          certificate-profile-name: ${{ vars.TRUSTED_SIGNING_PROFILE }}
-          files-folder: McServerManager\installer\dist
-          files-folder-filter: exe
-          file-digest: SHA256
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
-          timestamp-digest: SHA256
-
-      # ── Generate update manifest (hash of signed installer) ────────────
+      # ── Generate update manifest ──────────────────────────────────────
       - name: Generate update manifest
         shell: pwsh
         env:
