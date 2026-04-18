@@ -109,7 +109,7 @@ const translations = {
       },
       {
         title: "Resource pack hosting",
-        body: "Serve your resource pack over HTTPS with a built-in HTTP server and Cloudflare Quick Tunnel — no account needed. SHA-1 and server.properties applied automatically.",
+        body: "Serve your resource pack over HTTPS with a built-in HTTP server and Cloudflare Quick Tunnel — no account needed, free. SHA-1 and server.properties applied automatically.",
       },
     ],
     featuresAffiliateLabel: "Always-on hosting is an option if your PC cannot stay on.",
@@ -951,7 +951,7 @@ useHead(() => ({
           softwareVersion: version,
           url: siteUrl.value ? `${siteUrl.value}/` : undefined,
           downloadUrl: siteUrl.value ? `${siteUrl.value}/` : undefined,
-          inLanguage: "ja",
+          inLanguage: currentLang.value,
           featureList: [
             "完全日本語対応",
             "サーバーの起動・停止をGUIで操作",
