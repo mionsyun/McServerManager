@@ -127,10 +127,10 @@ jobs:
           INSTALLER_BASE_URL: "https://stmailpilotje.blob.core.windows.net/public/downloads"
           RELEASE_NOTES_URL: "https://www.maipilot.jp/docs/"
         run: |
-          $versionedExe = "McServerManager\installer\dist\MaiPilotSetup-$env:APP_VERSION.exe"
-          if (-not (Test-Path $versionedExe)) { throw "Versioned installer not found: $versionedExe" }
+          $mainExe = "McServerManager\installer\dist\MaiPilotSetup.exe"
+          if (-not (Test-Path $mainExe)) { throw "Installer not found: $mainExe" }
 
-          $sha256 = (Get-FileHash $versionedExe -Algorithm SHA256).Hash.ToLowerInvariant()
+          $sha256 = (Get-FileHash $mainExe -Algorithm SHA256).Hash.ToLowerInvariant()
           $publishedAt = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
           $manifest = [ordered]@{
             version         = $env:APP_VERSION
