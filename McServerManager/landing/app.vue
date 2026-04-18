@@ -15,7 +15,6 @@ const docsTroubleUrl = "/docs/troubleshooting";
 const docsPrivacyUrl = "/docs/privacy-and-network";
 const docsJavaUrl = "/docs/java-setup/";
 const boothUrl = "https://maipilot.booth.pm";
-const version = "1.0.6";
 
 const downloadOptionEvents: Record<string, string> = {
   local: "download_click",
@@ -641,6 +640,7 @@ type Locale = keyof typeof translations;
 const currentLang = ref<Locale>("en");
 const t = computed(() => translations[currentLang.value]);
 const runtimeConfig = useRuntimeConfig();
+const version = (runtimeConfig.public.appVersion as string | undefined) || "1.0.6";
 
 type PrItem = {
   kind: "banner" | "link";
@@ -1242,7 +1242,7 @@ useHead(() => ({
           </div>
           <div class="callout-actions">
             <a
-              href="https://booth.pm/ja/items/8118402"
+              :href="boothUrl"
               class="btn ghost"
               target="_blank"
               rel="noopener noreferrer"
