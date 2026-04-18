@@ -8,6 +8,7 @@ public interface IWorldService
     string GetBackupsDirectory(string serverDirectory);
     IReadOnlyList<WorldBackupEntry> GetWorldBackups(string serverDirectory);
     WorldBackupEntry CreateWorldBackup(string serverDirectory, string worldName);
+    WorldBackupEntry CreateAutomaticWorldBackup(string serverDirectory, string worldName, int maxRetention);
     string RestoreWorldBackup(string serverDirectory, string backupZipPath, string targetWorldName, bool overwriteExisting, bool createBackupBeforeRestore);
     void DeleteWorldBackup(string backupZipPath);
     void CreateWorldFolder(string serverDirectory, string worldName);

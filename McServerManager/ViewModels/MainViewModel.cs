@@ -15,13 +15,15 @@ public sealed class MainViewModel : ObservableObject
 {
     private static readonly TimeSpan UpdateSnoozeDuration = TimeSpan.FromHours(24);
     private readonly AppServices _services;
+    private readonly IBackupSchedulerService _backupScheduler;
     private readonly AppSettings _settings;
     private ServerViewModel? _selectedServer;
     private bool _tutorialOpenedCreate;
 
-    public MainViewModel(AppServices services)
+    public MainViewModel(AppServices services, IBackupSchedulerService backupScheduler)
     {
         _services = services;
+        _backupScheduler = backupScheduler;
         _settings = _services.Settings.Load();
 
         Servers = new ObservableCollection<ServerViewModel>();
@@ -316,7 +318,7 @@ public sealed class MainViewModel : ObservableObject
         var configs = _services.Configs.LoadAll(_settings.ServerDirectories);
         foreach (var config in configs.OrderBy(c => c.Name))
         {
-            Servers.Add(new ServerViewModel(_services, config));
+            Servers.Add(new ServerViewModel(_services, _backupScheduler, config));
         }
 
         SelectedServer = Servers.FirstOrDefault();
@@ -343,7 +345,7 @@ public sealed class MainViewModel : ObservableObject
         vm.ServerCreated += config =>
         {
             TrackServerDirectory(config.DirectoryPath);
-            var serverVm = new ServerViewModel(_services, config);
+            var serverVm = new ServerViewModel(_services, _backupScheduler, config);
             WpfApplication.Current.Dispatcher.Invoke(() =>
             {
                 Servers.Add(serverVm);
@@ -715,7 +717,7 @@ public sealed class MainViewModel : ObservableObject
         _services.Configs.SaveToDirectory(config, targetDir);
 
         TrackServerDirectory(targetDir);
-        var serverVm = new ServerViewModel(_services, config);
+        var serverVm = new ServerViewModel(_services, _backupScheduler, config);
         Servers.Add(serverVm);
         SelectedServer = serverVm;
     }

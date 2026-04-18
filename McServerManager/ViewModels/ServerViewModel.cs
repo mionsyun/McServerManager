@@ -59,10 +59,13 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     private bool _isVersionsLoading;
     private string _permissionsStatusMessage = string.Empty;
 
-    public ServerViewModel(AppServices services, ServerConfig config)
+    private readonly IBackupSchedulerService _backupScheduler;
+
+    public ServerViewModel(AppServices services, IBackupSchedulerService backupScheduler, ServerConfig config)
     {
         _isInitializing = true;
         _services = services;
+        _backupScheduler = backupScheduler;
         _config = config;
         _runtime = _services.Runtime.GetOrCreate(config);
         _runtime.StatusChanged += OnStatusChanged;
@@ -91,7 +94,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         InitializeVersionFilters();
 
         // サブViewModel の初期化
-        World = new ServerWorldViewModel(_services, _config, _settings, () => Status);
+        World = new ServerWorldViewModel(_services, _backupScheduler, _config, _settings, () => Status);
         Addon = new ServerAddonViewModel(_services, _config);
         Network = new ServerNetworkViewModel(_services, _config, _appSettings);
         ResourcePack = new ServerResourcePackViewModel(_services, _config);

@@ -91,6 +91,21 @@ public sealed class WorldService : IWorldService
 
     public WorldBackupEntry CreateWorldBackup(string serverDirectory, string worldName)
     {
+        return CreateWorldBackupInternal(serverDirectory, worldName, isAutomatic: false);
+    }
+
+    public WorldBackupEntry CreateAutomaticWorldBackup(string serverDirectory, string worldName, int maxRetention)
+    {
+        var entry = CreateWorldBackupInternal(serverDirectory, worldName, isAutomatic: true);
+        if (maxRetention > 0)
+        {
+            PruneAutomaticBackups(serverDirectory, worldName, maxRetention);
+        }
+        return entry;
+    }
+
+    private WorldBackupEntry CreateWorldBackupInternal(string serverDirectory, string worldName, bool isAutomatic)
+    {
         if (string.IsNullOrWhiteSpace(serverDirectory) || !Directory.Exists(serverDirectory))
         {
             throw new DirectoryNotFoundException("サーバーディレクトリが見つかりません。");
@@ -108,12 +123,13 @@ public sealed class WorldService : IWorldService
         Directory.CreateDirectory(backupsDirectory);
 
         var createdAtUtc = DateTime.UtcNow;
-        var baseName = BuildBackupBaseName(backupsDirectory, trimmedWorldName, createdAtUtc);
+        var baseName = BuildBackupBaseName(backupsDirectory, trimmedWorldName, createdAtUtc, isAutomatic);
         var zipPath = Path.Combine(backupsDirectory, $"{baseName}.zip");
         var metadata = new BackupMetadata
         {
             WorldName = trimmedWorldName,
             CreatedAtUtc = createdAtUtc,
+            IsAutomatic = isAutomatic,
         };
 
         using (var archive = ZipFile.Open(zipPath, ZipArchiveMode.Create))
@@ -135,6 +151,49 @@ public sealed class WorldService : IWorldService
             CreatedAt = metadata.CreatedAtUtc.ToLocalTime(),
             FileSizeBytes = fileInfo.Length,
         };
+    }
+
+    private void PruneAutomaticBackups(string serverDirectory, string worldName, int maxRetention)
+    {
+        var backupsDirectory = GetBackupsDirectory(serverDirectory);
+        if (!Directory.Exists(backupsDirectory))
+        {
+            return;
+        }
+
+        var trimmedWorldName = worldName.Trim();
+        var automaticBackups = new List<(string ZipPath, DateTime CreatedAtUtc)>();
+
+        foreach (var zipPath in Directory.EnumerateFiles(backupsDirectory, "*.zip", SearchOption.TopDirectoryOnly))
+        {
+            var metadata = LoadBackupMetadata(zipPath);
+            if (metadata is null || !metadata.IsAutomatic)
+            {
+                continue;
+            }
+            if (!string.Equals(metadata.WorldName, trimmedWorldName, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+            automaticBackups.Add((zipPath, metadata.CreatedAtUtc));
+        }
+
+        var excess = automaticBackups
+            .OrderByDescending(entry => entry.CreatedAtUtc)
+            .Skip(maxRetention)
+            .ToList();
+
+        foreach (var (zipPath, _) in excess)
+        {
+            try
+            {
+                DeleteWorldBackup(zipPath);
+            }
+            catch
+            {
+                // 個別失敗は無視し、次のファイル削除に進む。
+            }
+        }
     }
 
     public string RestoreWorldBackup(
@@ -532,7 +591,7 @@ public sealed class WorldService : IWorldService
         writer.Write(content);
     }
 
-    private static string BuildBackupBaseName(string backupsDirectory, string worldName, DateTime createdAtUtc)
+    private static string BuildBackupBaseName(string backupsDirectory, string worldName, DateTime createdAtUtc, bool isAutomatic)
     {
         var safeWorldName = SanitizeFileName(worldName);
         if (string.IsNullOrWhiteSpace(safeWorldName))
@@ -541,7 +600,8 @@ public sealed class WorldService : IWorldService
         }
 
         var timestamp = createdAtUtc.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture);
-        var baseName = $"{timestamp}-{safeWorldName}";
+        var prefix = isAutomatic ? "auto-" : string.Empty;
+        var baseName = $"{prefix}{timestamp}-{safeWorldName}";
         var candidate = baseName;
         var index = 2;
         while (
@@ -709,5 +769,6 @@ public sealed class WorldService : IWorldService
     {
         public string WorldName { get; set; } = "world";
         public DateTime CreatedAtUtc { get; set; }
+        public bool IsAutomatic { get; set; }
     }
 }
