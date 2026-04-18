@@ -15,7 +15,6 @@ const docsTroubleUrl = "/docs/troubleshooting";
 const docsPrivacyUrl = "/docs/privacy-and-network";
 const docsJavaUrl = "/docs/java-setup/";
 const boothUrl = "https://maipilot.booth.pm";
-const version = "1.0.6";
 
 const downloadOptionEvents: Record<string, string> = {
   local: "download_click",
@@ -110,7 +109,7 @@ const translations = {
       },
       {
         title: "Resource pack hosting",
-        body: "Serve your resource pack over HTTPS with a built-in HTTP server and Cloudflare Quick Tunnel — no account needed. SHA-1 and server.properties applied automatically.",
+        body: "Serve your resource pack over HTTPS with a built-in HTTP server and Cloudflare Quick Tunnel — no account needed, free. SHA-1 and server.properties applied automatically.",
       },
     ],
     featuresAffiliateLabel: "Always-on hosting is an option if your PC cannot stay on.",
@@ -641,6 +640,7 @@ type Locale = keyof typeof translations;
 const currentLang = ref<Locale>("en");
 const t = computed(() => translations[currentLang.value]);
 const runtimeConfig = useRuntimeConfig();
+const version = (runtimeConfig.public.appVersion as string | undefined) || "1.0.6";
 
 type PrItem = {
   kind: "banner" | "link";
@@ -919,14 +919,6 @@ useHead(() => ({
           name: t.value.siteName,
           url: siteUrl.value ? `${siteUrl.value}/` : undefined,
           inLanguage: currentLang.value,
-          potentialAction: {
-            "@type": "SearchAction",
-            target: {
-              "@type": "EntryPoint",
-              urlTemplate: siteUrl.value ? `${siteUrl.value}/docs/growth/?q={search_term_string}` : undefined,
-            },
-            "query-input": "required name=search_term_string",
-          },
         },
         {
           "@context": "https://schema.org",
@@ -951,7 +943,7 @@ useHead(() => ({
           softwareVersion: version,
           url: siteUrl.value ? `${siteUrl.value}/` : undefined,
           downloadUrl: siteUrl.value ? `${siteUrl.value}/` : undefined,
-          inLanguage: "ja",
+          inLanguage: currentLang.value,
           featureList: [
             "完全日本語対応",
             "サーバーの起動・停止をGUIで操作",
@@ -1242,7 +1234,7 @@ useHead(() => ({
           </div>
           <div class="callout-actions">
             <a
-              href="https://booth.pm/ja/items/8118402"
+              :href="boothUrl"
               class="btn ghost"
               target="_blank"
               rel="noopener noreferrer"
