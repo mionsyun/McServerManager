@@ -919,14 +919,6 @@ useHead(() => ({
           name: t.value.siteName,
           url: siteUrl.value ? `${siteUrl.value}/` : undefined,
           inLanguage: currentLang.value,
-          potentialAction: {
-            "@type": "SearchAction",
-            target: {
-              "@type": "EntryPoint",
-              urlTemplate: siteUrl.value ? `${siteUrl.value}/docs/growth/?q={search_term_string}` : undefined,
-            },
-            "query-input": "required name=search_term_string",
-          },
         },
         {
           "@context": "https://schema.org",
