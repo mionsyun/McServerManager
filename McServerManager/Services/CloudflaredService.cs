@@ -27,41 +27,56 @@ public sealed class CloudflaredService : ICloudflaredService
 
     private Process? _process;
 
+    // 複数インスタンス(サーバーごとの ResourcePack VM)が同時に同じ実行ファイルへ
+    // ダウンロードして競合するのを防ぐため、インストールはプロセス全体で直列化する。
+    private static readonly SemaphoreSlim InstallGate = new(1, 1);
+
     public bool IsRunning => _process is { HasExited: false };
     public string? TunnelUrl { get; private set; }
 
     public async Task EnsureInstalledAsync(IProgress<string> progress)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(ExePath)!);
-        progress.Report("HTTPS トンネル用 cloudflared のリリース情報を確認中...");
 
-        using var client = CreateHttpClient();
-        var latestAsset = await GetLatestWindowsAssetAsync(client).ConfigureAwait(false);
-
-        if (File.Exists(ExePath) && await IsExistingBinaryTrustedAsync(ExePath, latestAsset.Sha256).ConfigureAwait(false))
-        {
-            return;
-        }
-
-        progress.Report($"cloudflared {latestAsset.Version} を検証付きでダウンロード中...");
-        var tmp = ExePath + ".tmp";
+        await InstallGate.WaitAsync().ConfigureAwait(false);
         try
         {
-            using var response = await client.GetAsync(latestAsset.DownloadUrl, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
+            progress.Report("HTTPS トンネル用 cloudflared のリリース情報を確認中...");
 
-            await using (var fs = File.Create(tmp))
-                await response.Content.CopyToAsync(fs).ConfigureAwait(false);
+            using var client = CreateHttpClient();
+            var latestAsset = await GetLatestWindowsAssetAsync(client).ConfigureAwait(false);
 
-            await ValidateDownloadedBinaryAsync(tmp, latestAsset.Sha256).ConfigureAwait(false);
-            File.Move(tmp, ExePath, overwrite: true);
+            // ゲート取得後に再確認(先行スレッドが導入済みなら即返却)。
+            if (File.Exists(ExePath) && await IsExistingBinaryTrustedAsync(ExePath, latestAsset.Sha256).ConfigureAwait(false))
+            {
+                return;
+            }
+
+            progress.Report($"cloudflared {latestAsset.Version} を検証付きでダウンロード中...");
+            // 一時ファイルは一意にして万一の競合を避ける。
+            var tmp = $"{ExePath}.{Guid.NewGuid():N}.tmp";
+            try
+            {
+                using var response = await client.GetAsync(latestAsset.DownloadUrl, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
+
+                await using (var fs = File.Create(tmp))
+                    await response.Content.CopyToAsync(fs).ConfigureAwait(false);
+
+                await ValidateDownloadedBinaryAsync(tmp, latestAsset.Sha256).ConfigureAwait(false);
+                File.Move(tmp, ExePath, overwrite: true);
+            }
+            finally
+            {
+                if (File.Exists(tmp))
+                {
+                    try { File.Delete(tmp); } catch { }
+                }
+            }
         }
         finally
         {
-            if (File.Exists(tmp))
-            {
-                try { File.Delete(tmp); } catch { }
-            }
+            InstallGate.Release();
         }
     }
 
@@ -217,22 +232,16 @@ public sealed class CloudflaredService : ICloudflaredService
             return false;
         }
 
-        if (signerSubject.Contains(TrustedSignerSubject, StringComparison.OrdinalIgnoreCase))
-        {
-            return true;
-        }
+        // X509Certificate2.Subject はカンマを含む値を引用符で囲む
+        // (例: CN="Cloudflare, Inc.", O="Cloudflare, Inc.", ...)。
+        // 引用符と空白を除去して正規化し、CN 部分を照合する。
+        static string Normalize(string value) =>
+            value.Replace("\"", string.Empty).Replace(" ", string.Empty);
 
-        var compactSubject = signerSubject.Replace(" ", string.Empty);
-        var compactExpected = TrustedSignerSubject.Replace(" ", string.Empty);
-        if (compactSubject.Contains(compactExpected, StringComparison.OrdinalIgnoreCase))
-        {
-            return true;
-        }
+        var normalizedSubject = Normalize(signerSubject);
+        var normalizedExpected = Normalize(TrustedSignerSubject);
 
-        return signerSubject
-            .Split(',')
-            .Select(part => part.Trim())
-            .Any(part => string.Equals(part, TrustedSignerSubject, StringComparison.OrdinalIgnoreCase));
+        return normalizedSubject.Contains(normalizedExpected, StringComparison.OrdinalIgnoreCase);
     }
 
     public async Task<string> StartTunnelAsync(int localPort, IProgress<string> progress)
@@ -240,8 +249,33 @@ public sealed class CloudflaredService : ICloudflaredService
         if (IsRunning)
             await StopAsync();
 
+        if (!File.Exists(ExePath))
+        {
+            throw new InvalidOperationException(
+                "cloudflared がインストールされていません。ネットワーク接続を確認し、しばらく待ってから再度お試しください。");
+        }
+
         TunnelUrl = null;
         var tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        // cloudflared の最近の出力を保持し、失敗時に原因として提示する。
+        var recentOutput = new System.Collections.Generic.Queue<string>();
+        var outputLock = new object();
+        void Capture(string line)
+        {
+            lock (outputLock)
+            {
+                recentOutput.Enqueue(line);
+                while (recentOutput.Count > 25) recentOutput.Dequeue();
+            }
+        }
+        string OutputTail()
+        {
+            lock (outputLock)
+            {
+                return recentOutput.Count == 0 ? "(出力なし)" : string.Join("\n", recentOutput);
+            }
+        }
 
         _process = new Process
         {
@@ -261,7 +295,9 @@ public sealed class CloudflaredService : ICloudflaredService
 
         void OnData(object _, DataReceivedEventArgs e)
         {
-            if (e.Data is null || tcs.Task.IsCompleted) return;
+            if (e.Data is null) return;
+            Capture(e.Data);
+            if (tcs.Task.IsCompleted) return;
             var m = TunnelUrlRegex.Match(e.Data);
             if (m.Success) tcs.TrySetResult(m.Value);
         }
@@ -271,17 +307,18 @@ public sealed class CloudflaredService : ICloudflaredService
         _process.Exited += (_, _) =>
         {
             if (!tcs.Task.IsCompleted)
-                tcs.TrySetException(new Exception("cloudflared が予期せず終了しました"));
+                tcs.TrySetException(new Exception(
+                    $"cloudflared が URL を出力せずに終了しました。\n\ncloudflared の出力:\n{OutputTail()}"));
         };
 
         _process.Start();
         _process.BeginOutputReadLine();
         _process.BeginErrorReadLine();
 
-        progress.Report("HTTPS トンネルを確立中（最大40秒）...");
+        progress.Report("HTTPS トンネルを確立中（最大60秒）...");
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(40));
-        cts.Token.Register(() => tcs.TrySetCanceled());
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+        await using var reg = cts.Token.Register(() => tcs.TrySetCanceled());
 
         TunnelUrl = await tcs.Task;
         return TunnelUrl;

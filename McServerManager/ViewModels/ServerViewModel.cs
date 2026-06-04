@@ -58,6 +58,8 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     private string _settingsSavedMessage = string.Empty;
     private bool _isVersionsLoading;
     private string _permissionsStatusMessage = string.Empty;
+    private string _currentView = "overview";
+    private string _javaWarning = string.Empty;
 
     private readonly IBackupSchedulerService _backupScheduler;
 
@@ -83,6 +85,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         Whitelist = [];
         LaunchModes = [];
         StartupPresets = [];
+        CrashHistory = [];
 
         _autoRestartOnCrash = _config.AutoRestartOnCrash;
         _autoRestartDelaySeconds = _config.AutoRestartDelaySeconds;
@@ -97,6 +100,15 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         World = new ServerWorldViewModel(_services, _backupScheduler, _config, _settings, () => Status);
         Addon = new ServerAddonViewModel(_services, _config);
         Network = new ServerNetworkViewModel(_services, _config, _appSettings);
+        Network.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is nameof(ServerNetworkViewModel.IsFirewallConfigured)
+                or nameof(ServerNetworkViewModel.IsUpnpOpen))
+            {
+                OnPropertyChanged(nameof(LanReady));
+                OnPropertyChanged(nameof(PublicReady));
+            }
+        };
         ResourcePack = new ServerResourcePackViewModel(_services, _config);
 
         StartCommand = new AsyncRelayCommand(StartAsync, () => Status == ServerStatus.Stopped);
@@ -135,9 +147,15 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             _ => SelectedStartupPreset is not null
         );
         RunHealthCheckCommand = new RelayCommand(_ => RunHealthCheck(showEvenIfCompleted: true));
+        SelectViewCommand = new RelayCommand(param => SelectView(param as string));
+        SaveAllCommand = new RelayCommand(_ => SaveAllWorld(), _ => Status == ServerStatus.Running);
+        CopyLanAddressCommand = new RelayCommand(_ => CopyLanAddress());
+        RefreshCrashHistoryCommand = new RelayCommand(_ => LoadCrashHistory());
 
         LoadSettings();
         LoadPermissions();
+        LoadCrashHistory();
+        UpdateJavaWarning();
         _ = LoadVersionsAsync();
 
         _statsTimer = new DispatcherTimer(
@@ -176,6 +194,84 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     public ObservableCollection<WhitelistEntry> Whitelist { get; }
     public ObservableCollection<LaunchModeOption> LaunchModes { get; }
     public ObservableCollection<StartupPresetOption> StartupPresets { get; }
+    public ObservableCollection<CrashEntry> CrashHistory { get; }
+
+    // ─── ナビゲーション(サイドバーから画面切替) ─────────────────────
+    public string CurrentView
+    {
+        get => _currentView;
+        set
+        {
+            if (SetProperty(ref _currentView, value))
+            {
+                OnPropertyChanged(nameof(CurrentViewLabel));
+            }
+        }
+    }
+
+    public string CurrentViewLabel => _currentView switch
+    {
+        "overview" => "概要",
+        "console" => "コンソール",
+        "network" => "接続・公開",
+        "world" => "ワールド",
+        "backups" => "バックアップ",
+        "addons" => AddonNavLabel,
+        "respack" => "リソースパック",
+        "version" => "バージョン",
+        "crashes" => "クラッシュ復旧",
+        "settings" => "サーバー設定",
+        _ => "概要",
+    };
+
+    public bool IsRunning => Status == ServerStatus.Running;
+
+    /// <summary>稼働時間(起動時刻からの経過)。1秒ごとの統計タイマーで更新。</summary>
+    public string Uptime
+    {
+        get
+        {
+            if (!IsRunning || _config.LastStartedAt is null)
+                return "—";
+            var span = DateTime.UtcNow - _config.LastStartedAt.Value;
+            if (span < TimeSpan.Zero) span = TimeSpan.Zero;
+            return span.TotalHours >= 1
+                ? $"{(int)span.TotalHours}h {span.Minutes:00}m"
+                : $"{span.Minutes}m {span.Seconds:00}s";
+        }
+    }
+
+    /// <summary>LAN 参加可能(起動中 かつ Firewall 構成済み)。</summary>
+    public bool LanReady => IsRunning && Network.IsFirewallConfigured;
+
+    /// <summary>外部公開可能(起動中 かつ UPnP 開放済み)。</summary>
+    public bool PublicReady => IsRunning && Network.IsUpnpOpen;
+
+    public bool SupportsAddons => Addon.SupportsAddonManagement;
+    public string AddonNavLabel => SupportsAddons ? Addon.AddonCategoryName : "アドオン";
+    public bool HasPendingChanges => Settings.IsDirty;
+
+    /// <summary>LAN 参加アドレス（先頭の LAN IP:ポート）。</summary>
+    public string LanAddress
+    {
+        get
+        {
+            var ip = Network.LanIpAddresses.FirstOrDefault();
+            return string.IsNullOrWhiteSpace(ip) ? $"127.0.0.1:{Port}" : $"{ip}:{Port}";
+        }
+    }
+
+    public string JavaWarning
+    {
+        get => _javaWarning;
+        private set
+        {
+            if (SetProperty(ref _javaWarning, value))
+                OnPropertyChanged(nameof(HasJavaWarning));
+        }
+    }
+
+    public bool HasJavaWarning => !string.IsNullOrWhiteSpace(JavaWarning);
 
     public ServerSettingsViewModel Settings
     {
@@ -196,12 +292,22 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 OnPropertyChanged(nameof(StartButtonLabel));
                 OnPropertyChanged(nameof(StopButtonLabel));
                 OnPropertyChanged(nameof(RestartButtonLabel));
+                OnPropertyChanged(nameof(IsRunning));
+                OnPropertyChanged(nameof(Uptime));
+                OnPropertyChanged(nameof(LanReady));
+                OnPropertyChanged(nameof(PublicReady));
+                OnPropertyChanged(nameof(CpuUsageDisplayText));
+                OnPropertyChanged(nameof(MemoryUsageDisplayText));
+                OnPropertyChanged(nameof(GpuUsageDisplayText));
                 StartCommand.RaiseCanExecuteChanged();
                 StopCommand.RaiseCanExecuteChanged();
                 RestartCommand.RaiseCanExecuteChanged();
                 SendCommandCommand.RaiseCanExecuteChanged();
+                SaveAllCommand.RaiseCanExecuteChanged();
                 // サブViewModelに Status 変化を伝播
                 World.OnServerStatusChanged();
+                if (value == ServerStatus.Stopped)
+                    LoadCrashHistory();
             }
         }
     }
@@ -265,6 +371,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 _config.JavaPath = value;
                 if (!_isInitializing)
                     _services.Configs.Save(_config);
+                UpdateJavaWarning();
             }
         }
     }
@@ -514,12 +621,14 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     }
 
     public string PlayerCountText => $"{OnlinePlayers}/{MaxPlayers}";
-    public string CpuUsageDisplayText => $"{CpuUsagePercent:F0}%";
-    public string MemoryUsageDisplayText => $"{MemoryUsageMb:F0} MB / {MemoryXmxMb} MB";
+    public string CpuUsageDisplayText => IsRunning ? $"{CpuUsagePercent:F0}%" : "—";
+    public string MemoryUsageDisplayText =>
+        IsRunning ? $"{MemoryUsageMb:F0} MB / {MemoryXmxMb} MB" : $"— / {MemoryXmxMb} MB";
     public double MemoryUsagePercent =>
         MemoryXmxMb <= 0 ? 0 : Math.Clamp(MemoryUsageMb / MemoryXmxMb * 100, 0, 100);
     public bool IsGpuMonitoringAvailable => _gpuMonitoringAvailable;
-    public string GpuUsageDisplayText => IsGpuMonitoringAvailable ? $"{GpuUsagePercent:F0}%" : "N/A";
+    public string GpuUsageDisplayText =>
+        !IsRunning ? "—" : IsGpuMonitoringAvailable ? $"{GpuUsagePercent:F0}%" : "N/A";
     public string GpuMonitorHint =>
         IsGpuMonitoringAvailable
             ? "GPUエンジン使用率（サーバープロセス）"
@@ -547,6 +656,10 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     public RelayCommand ReloadPermissionsCommand { get; }
     public RelayCommand ApplyStartupPresetCommand { get; }
     public RelayCommand RunHealthCheckCommand { get; }
+    public RelayCommand SelectViewCommand { get; }
+    public RelayCommand SaveAllCommand { get; }
+    public RelayCommand CopyLanAddressCommand { get; }
+    public RelayCommand RefreshCrashHistoryCommand { get; }
 
     // ─── 設定ロード ────────────────────────────────────────────
     private void LoadSettings()
@@ -559,6 +672,121 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     private void UpdateRestartRequired()
     {
         RestartRequired = Settings.IsDirty;
+        OnPropertyChanged(nameof(HasPendingChanges));
+    }
+
+    // ─── ナビ・クイックアクション ─────────────────────────────────
+    private void SelectView(string? view)
+    {
+        if (string.IsNullOrWhiteSpace(view))
+            return;
+        // アドオン非対応サーバーでアドオン画面に来た場合は概要へ戻す
+        if (string.Equals(view, "addons", StringComparison.OrdinalIgnoreCase) && !SupportsAddons)
+        {
+            CurrentView = "overview";
+            return;
+        }
+        CurrentView = view;
+    }
+
+    private void SaveAllWorld()
+    {
+        if (Status != ServerStatus.Running)
+            return;
+        _services.Runtime.SendCommand(_config, "save-all");
+    }
+
+    private void CopyLanAddress()
+    {
+        try { System.Windows.Clipboard.SetText(LanAddress); }
+        catch { /* クリップボードは稀に失敗する */ }
+    }
+
+    // ─── クラッシュ履歴(crash-reports フォルダから読み取り) ──────────
+    private void LoadCrashHistory()
+    {
+        try
+        {
+            CrashHistory.Clear();
+            var dir = Path.Combine(ServerDirectory, "crash-reports");
+            if (!Directory.Exists(dir))
+                return;
+
+            var files = new DirectoryInfo(dir)
+                .EnumerateFiles("*.txt")
+                .OrderByDescending(f => f.LastWriteTimeUtc)
+                .Take(30);
+
+            foreach (var file in files)
+            {
+                CrashHistory.Add(new CrashEntry
+                {
+                    FileName = file.Name,
+                    FullPath = file.FullName,
+                    When = file.LastWriteTimeUtc,
+                    Reason = ReadCrashReason(file.FullName),
+                });
+            }
+        }
+        catch
+        {
+            // クラッシュ履歴の取得失敗は致命的でないため握りつぶす
+        }
+        OnPropertyChanged(nameof(HasCrashHistory));
+        OnPropertyChanged(nameof(CrashHistorySummary));
+    }
+
+    public bool HasCrashHistory => CrashHistory.Count > 0;
+    public string CrashHistorySummary =>
+        CrashHistory.Count == 0 ? "クラッシュ履歴なし" : $"{CrashHistory.Count} 件の記録";
+
+    private static string ReadCrashReason(string path)
+    {
+        try
+        {
+            foreach (var line in File.ReadLines(path).Take(40))
+            {
+                var trimmed = line.Trim();
+                if (trimmed.StartsWith("Description:", StringComparison.OrdinalIgnoreCase))
+                    return trimmed["Description:".Length..].Trim();
+            }
+        }
+        catch
+        {
+            // 読み取り失敗時は既定メッセージ
+        }
+        return "クラッシュレポート";
+    }
+
+    private void UpdateJavaWarning()
+    {
+        try
+        {
+            var requiredMajor = _services.Java.GetRequiredJavaMajor(_config.Version);
+            if (requiredMajor is null)
+            {
+                JavaWarning = string.Empty;
+                return;
+            }
+
+            var javaExe = string.IsNullOrWhiteSpace(JavaPath)
+                ? _services.Java.FindJavaExecutable() ?? "java"
+                : JavaPath;
+
+            if (!_services.Java.TryGetJavaMajorVersion(javaExe, out var actualMajor, out var rawVersion))
+            {
+                JavaWarning = $"Minecraft {Version} は Java {requiredMajor} 以上を推奨します。Java が検出できませんでした。";
+                return;
+            }
+
+            JavaWarning = actualMajor >= requiredMajor
+                ? string.Empty
+                : $"Minecraft {Version} は Java {requiredMajor} 以上を推奨します。現在: Java {rawVersion ?? actualMajor.ToString()}";
+        }
+        catch
+        {
+            JavaWarning = string.Empty;
+        }
     }
 
     private void InitializeVersionFilters()
@@ -1141,6 +1369,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             _lastCpuTime = totalCpu;
             MemoryUsageMb = process.WorkingSet64 / (1024.0 * 1024.0);
             UpdateGpuUsage(process.Id, now);
+            OnPropertyChanged(nameof(Uptime));
         }
         catch
         {
