@@ -49,6 +49,12 @@ public sealed class ServerNetworkViewModel : ObservableObject
         private set => SetProperty(ref _publicIpStatus, value);
     }
 
+    /// <summary>Firewall 受信ルールが構成済みか(ルール名が登録されているか)。</summary>
+    public bool IsFirewallConfigured => !string.IsNullOrWhiteSpace(_config.Firewall.TcpRuleName);
+
+    /// <summary>このセッションで UPnP ポート開放を行ったか。</summary>
+    public bool IsUpnpOpen => _upnpOpened;
+
     public RelayCommand CreateFirewallRuleCommand { get; }
     public RelayCommand DeleteFirewallRuleCommand { get; }
     public RelayCommand RecreateFirewallRuleCommand { get; }
@@ -132,6 +138,7 @@ public sealed class ServerNetworkViewModel : ObservableObject
 
             _services.Firewall.CreateRules(Port, _config.Firewall);
             _services.Configs.Save(_config);
+            OnPropertyChanged(nameof(IsFirewallConfigured));
             _services.Dialog.Show(
                 "Firewall ルールを作成しました。",
                 "完了", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -149,6 +156,7 @@ public sealed class ServerNetworkViewModel : ObservableObject
         try
         {
             _services.Firewall.DeleteRules(_config.Firewall);
+            OnPropertyChanged(nameof(IsFirewallConfigured));
             _services.Dialog.Show(
                 "Firewall ルールを削除しました。",
                 "完了", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -170,6 +178,7 @@ public sealed class ServerNetworkViewModel : ObservableObject
 
             _services.Firewall.RecreateRules(Port, _config.Firewall);
             _services.Configs.Save(_config);
+            OnPropertyChanged(nameof(IsFirewallConfigured));
             _services.Dialog.Show(
                 "Firewall ルールを再作成しました。",
                 "完了", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -195,6 +204,7 @@ public sealed class ServerNetworkViewModel : ObservableObject
         }
 
         _upnpOpened = true;
+        OnPropertyChanged(nameof(IsUpnpOpen));
         _services.Dialog.Show(
             $"TCP {Port} のポート開放を実行しました。",
             "完了", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -204,6 +214,7 @@ public sealed class ServerNetworkViewModel : ObservableObject
     {
         await _services.Upnp.TryClosePortAsync(Port);
         _upnpOpened = false;
+        OnPropertyChanged(nameof(IsUpnpOpen));
         _services.Dialog.Show(
             $"TCP {Port} のポート閉鎖を実行しました。",
             "完了", MessageBoxButton.OK, MessageBoxImage.Information);

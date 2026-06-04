@@ -89,6 +89,9 @@ public sealed class MainViewModel : ObservableObject
         {
             if (SetProperty(ref _selectedServer, value))
             {
+                // サーバーを切り替えたら必ず「概要」を起点にする(導線の一貫性)
+                if (value is not null)
+                    value.CurrentView = "overview";
                 DeleteServerCommand.RaiseCanExecuteChanged();
                 DuplicateServerCommand.RaiseCanExecuteChanged();
             }

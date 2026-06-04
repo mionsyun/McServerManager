@@ -231,9 +231,10 @@ public sealed class ServerResourcePackViewModel : ObservableObject, IDisposable
         var progress = new Progress<string>(msg => StatusMessage = msg);
         try
         {
-            // プレフェッチ完了を待つ（成功済みなら即返却、失敗なら再試行）
-            if (!_prefetchTask.IsCompletedSuccessfully)
-                await _cloudflared.EnsureInstalledAsync(progress);
+            // EnsureInstalledAsync は冪等(インストール済みかつ検証OKなら即返却)。
+            // プレフェッチは失敗を握りつぶして「成功扱い」になり得るため、
+            // ここでは常に呼び、未インストールなら実ダウンロードと実エラーを表面化させる。
+            await _cloudflared.EnsureInstalledAsync(progress);
             await _cloudflared.StartTunnelAsync(_httpPort, progress);
             OnPropertyChanged(nameof(IsTunnelRunning));
             OnPropertyChanged(nameof(ResourcePackUrl));

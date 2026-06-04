@@ -1,13 +1,16 @@
-﻿<Window x:Class="McServerManager.MainWindow"
+<Window x:Class="McServerManager.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:McServerManager.ViewModels"
         xmlns:views="clr-namespace:McServerManager.Views"
+        xmlns:models="clr-namespace:McServerManager.Models"
         x:Name="MainWindowRoot"
         Title="MaiPilot"
         Icon="icon-square.png"
-        Width="1280"
-        Height="840"
+        Width="1320"
+        Height="860"
+        MinWidth="1040"
+        MinHeight="640"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <DataTemplate DataType="{x:Type vm:ServerViewModel}">
@@ -17,109 +20,113 @@
 
     <Grid Background="{DynamicResource BrushBg}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="262"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
+        <!-- ════════ サイドバー ════════ -->
         <Border Grid.Column="0"
                 Background="{DynamicResource BrushSurface}"
                 BorderBrush="{DynamicResource BrushBorder}"
                 BorderThickness="0,0,1,0">
-            <StackPanel Margin="20,24,20,20">
-                <StackPanel HorizontalAlignment="Center" Margin="0,0,0,4">
-                    <Image Source="icon.png"
-                           Width="56"
-                           Height="56"
-                           Stretch="Uniform"
-                           HorizontalAlignment="Center"/>
-                    <TextBlock Text="MaiPilot"
-                               FontSize="15"
-                               Foreground="{DynamicResource BrushAccent}"
-                               HorizontalAlignment="Center"
-                               Margin="0,12,0,0"/>
+            <DockPanel LastChildFill="True">
+
+                <!-- ブランド -->
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="18,18,18,6">
+                    <Image Source="icon.png" Width="38" Height="38" Stretch="Uniform" VerticalAlignment="Center"/>
+                    <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="MAIPILOT" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource BrushAccent}"/>
+                        <TextBlock Text="サーバー管理" Style="{StaticResource MutedText}" FontSize="10.5"/>
+                    </StackPanel>
                 </StackPanel>
 
-                <Border Height="1" Background="{DynamicResource BrushBorder}" Margin="0,20,0,0" Opacity="0.4"/>
+                <!-- フッター -->
+                <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,1,0,0" Padding="14,10">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="バージョン" Style="{StaticResource MutedText}" FontSize="10"/>
+                                <TextBlock Text="{Binding AppVersion}" FontSize="12" FontWeight="SemiBold"/>
+                            </StackPanel>
+                            <ToggleButton Grid.Column="1" Content="{Binding ThemeLabel}" IsChecked="{Binding IsDarkTheme}"
+                                          Width="78" Padding="8,4" VerticalAlignment="Center"
+                                          ToolTip="ダーク/ライト切り替え"/>
+                        </Grid>
+                        <WrapPanel Margin="0,8,0,0">
+                            <Button Content="ガイド" Command="{Binding StartTutorialCommand}" Style="{StaticResource SmallGhostButton}"/>
+                            <Button Content="更新を確認" Command="{Binding CheckAppUpdateCommand}" Style="{StaticResource SmallGhostButton}"/>
+                            <Button Content="通知" Click="OpenThirdPartyNotices" Style="{StaticResource SmallGhostButton}" ToolTip="サードパーティ通知"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
 
-                <TextBlock Text="テーマ" Style="{StaticResource MutedText}" Margin="0,20,0,8" FontSize="11" FontWeight="Medium"/>
-                <ToggleButton Content="{Binding ThemeLabel}" IsChecked="{Binding IsDarkTheme}" Width="100" HorizontalAlignment="Left"/>
+                <!-- 中央(スクロール): サーバー一覧 + ナビ -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="14,8,10,8">
+                    <StackPanel>
+                        <!-- サーバー一覧 見出し -->
+                        <TextBlock Margin="0,6,4,6"
+                                   Text="{Binding Servers.Count, StringFormat=サーバー ({0})}"
+                                   Style="{StaticResource Eyebrow}"/>
 
-                <Border Height="1" Background="{DynamicResource BrushBorder}" Margin="0,20,0,0" Opacity="0.4"/>
-
-                <TextBlock Text="情報" Style="{StaticResource MutedText}" Margin="0,20,0,8" FontSize="11" FontWeight="Medium"/>
-                <Button Content="サードパーティ通知" Click="OpenThirdPartyNotices" FontSize="11.5" HorizontalAlignment="Stretch"/>
-                <Button Content="アプリ更新を確認" Command="{Binding CheckAppUpdateCommand}" Margin="0,8,0,0" FontSize="11.5" HorizontalAlignment="Stretch"/>
-                <TextBlock Text="Version" Style="{StaticResource MutedText}" Margin="0,10,0,0" FontSize="11"/>
-                <TextBlock Text="{Binding AppVersion}" FontSize="12" FontWeight="SemiBold"/>
-            </StackPanel>
-        </Border>
-
-        <Grid Grid.Column="1" Margin="28">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <Grid Grid.Row="0" Margin="0,0,0,24">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*" MinWidth="28"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="サーバーリスト" FontSize="22" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,18,0"/>
-                <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <Button x:Name="NewServerButton" Content="＋ サーバーを追加" Command="{Binding CreateServerCommand}"
-                            Style="{StaticResource PrimaryButton}" Height="42" Padding="20,8" FontSize="14"/>
-                    <Button Content="セットアップガイド" Command="{Binding StartTutorialCommand}" Margin="12,0,0,0" Height="42" Padding="16,8" FontSize="13"/>
-                </StackPanel>
-            </Grid>
-
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="320"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <Border Grid.Column="0" Style="{StaticResource Card}" Margin="0,0,20,0">
-                    <DockPanel>
-                        <TextBlock DockPanel.Dock="Top" Text="サーバー一覧" Style="{StaticResource MutedText}" Margin="0,0,0,14"/>
                         <ListBox x:Name="ServerListBox"
                                  ItemsSource="{Binding Servers}"
                                  SelectedItem="{Binding SelectedServer}"
-                                 ItemContainerStyle="{StaticResource ServerListItem}"
-                                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                 Background="Transparent"
+                                 BorderThickness="0">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                    <Setter Property="Margin" Value="0,2"/>
+                                    <Setter Property="Padding" Value="10,8"/>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <StackPanel Margin="0,0,6,0">
-                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14"/>
-                                            <TextBlock Text="{Binding StatusText}" Style="{StaticResource MutedText}"/>
-                                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                                <TextBlock Text="ポート:" Style="{StaticResource MutedText}" Margin="0,0,6,0"/>
-                                                <TextBlock Text="{Binding Port}"/>
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                                <TextBlock Text="バージョン:" Style="{StaticResource MutedText}" Margin="0,0,6,0"/>
-                                                <TextBlock Text="{Binding Version}"/>
-                                            </StackPanel>
-                                            <TextBlock Text="{Binding LastStartedAtText, StringFormat=最終起動: {0}}" Style="{StaticResource MutedText}" Margin="0,6,0,0"/>
+                                        <Ellipse Width="9" Height="9" VerticalAlignment="Center" Margin="0,0,9,0">
+                                            <Ellipse.Style>
+                                                <Style TargetType="Ellipse">
+                                                    <Setter Property="Fill" Value="{DynamicResource BrushTextMuted}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Running">
+                                                            <Setter Property="Fill" Value="{DynamicResource BrushSuccess}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Starting">
+                                                            <Setter Property="Fill" Value="{DynamicResource BrushAccent}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Stopping">
+                                                            <Setter Property="Fill" Value="{DynamicResource BrushWarning}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Ellipse.Style>
+                                        </Ellipse>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Style="{StaticResource MutedText}" FontSize="10.5" TextTrimming="CharacterEllipsis">
+                                                <Run Text="{Binding ServerType, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding Version, Mode=OneWay}"/>
+                                            </TextBlock>
                                         </StackPanel>
-                                        <Button Grid.Column="1"
-                                                Foreground="{DynamicResource BrushText}"
-                                                Style="{StaticResource CardMenuButton}"
-                                                Margin="8,2,0,0"
-                                                HorizontalAlignment="Right"
-                                                VerticalAlignment="Top"
+                                        <TextBlock Grid.Column="2" VerticalAlignment="Center" Margin="6,0,4,0"
+                                                   FontFamily="Cascadia Mono" FontSize="11"
+                                                   Foreground="{DynamicResource BrushTextMuted}"
+                                                   Text="{Binding PlayerCountText}"
+                                                   Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                        <Button Grid.Column="3"
+                                                Style="{StaticResource GhostButton}"
+                                                Padding="6,0" FontSize="16" FontWeight="Bold"
+                                                VerticalAlignment="Center"
                                                 Click="OpenServerItemMenu">
-                                            <TextBlock Text="︙"
-                                                       FontSize="20"
-                                                       FontWeight="Bold"
-                                                       VerticalAlignment="Center"
-                                                       HorizontalAlignment="Center"/>
+                                            <TextBlock Text="︙"/>
                                             <Button.ContextMenu>
                                                 <ContextMenu Foreground="{DynamicResource BrushText}">
                                                     <MenuItem Header="削除"
@@ -128,7 +135,7 @@
                                                     <MenuItem Header="複製"
                                                               Command="{Binding DataContext.DuplicateServerCommand, Source={x:Reference MainWindowRoot}}"
                                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                                    <MenuItem Header="更新"
+                                                    <MenuItem Header="一覧を更新"
                                                               Command="{Binding DataContext.RefreshCommand, Source={x:Reference MainWindowRoot}}"/>
                                                 </ContextMenu>
                                             </Button.ContextMenu>
@@ -137,45 +144,107 @@
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
-                    </DockPanel>
-                </Border>
 
-                <Border Grid.Column="1"
-                        Background="{DynamicResource BrushSurface}"
-                        BorderBrush="{DynamicResource BrushBorder}"
-                        BorderThickness="1"
-                        CornerRadius="12">
-                    <Grid Margin="8">
-                        <ContentControl Content="{Binding SelectedServer}">
-                            <ContentControl.Style>
-                                <Style TargetType="ContentControl">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SelectedServer}" Value="{x:Null}">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </ContentControl.Style>
-                        </ContentControl>
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <StackPanel.Style>
-                                <Style TargetType="StackPanel">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SelectedServer}" Value="{x:Null}">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </StackPanel.Style>
-                            <TextBlock Text="📋" FontSize="40" HorizontalAlignment="Center" Margin="0,0,0,12"/>
-                            <TextBlock Text="サーバーが未選択です" FontSize="17" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{DynamicResource BrushTextMuted}"/>
-                            <TextBlock Text="左の一覧からサーバーを選ぶか、新規作成してください。" Style="{StaticResource MutedText}" Margin="0,8,0,0" HorizontalAlignment="Center" FontSize="12.5"/>
+                        <Button x:Name="NewServerButton" Content="＋ 新しいサーバー"
+                                Command="{Binding CreateServerCommand}"
+                                Style="{StaticResource PrimaryButton}"
+                                HorizontalAlignment="Stretch" Margin="0,8,4,0" Height="38"/>
+
+                        <!-- 選択サーバーのナビ -->
+                        <StackPanel Margin="0,16,0,0"
+                                    Visibility="{Binding SelectedServer, Converter={StaticResource NotNullToVisibilityConverter}}">
+                            <Grid Margin="0,0,4,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding SelectedServer.Name}" Style="{StaticResource Eyebrow}" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Grid.Column="1" Text="{Binding SelectedServer.StatusText}" FontSize="11" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource BrushTextMuted}"/>
+                            </Grid>
+
+                            <!-- 状態・操作 -->
+                            <ToggleButton Style="{StaticResource SidebarNavItem}"
+                                          Command="{Binding SelectedServer.SelectViewCommand}" CommandParameter="overview"
+                                          IsChecked="{Binding SelectedServer.CurrentView, Converter={StaticResource EqualsToBooleanConverter}, ConverterParameter=overview, Mode=OneWay}"
+                                          Content="概要"/>
+                            <ToggleButton Style="{StaticResource SidebarNavItem}"
+                                          Command="{Binding SelectedServer.SelectViewCommand}" CommandParameter="console"
+                                          IsChecked="{Binding SelectedServer.CurrentView, Converter={StaticResource EqualsToBooleanConverter}, ConverterParameter=console, Mode=OneWay}"
+                                          Content="コンソール"/>
+                            <ToggleButton Style="{StaticResource SidebarNavItem}"
+                                          Command="{Binding SelectedServer.SelectViewCommand}" CommandParameter="network"
+                                          IsChecked="{Binding SelectedServer.CurrentView, Converter={StaticResource EqualsToBooleanConverter}, ConverterParameter=network, Mode=OneWay}"
+                                          Content="接続・公開"/>
+
+                            <Border Height="1" Background="{DynamicResource BrushBorder}" Opacity="0.5" Margin="10,8"/>
+
+                            <!-- コンテンツ -->
+                            <ToggleButton Style="{StaticResource SidebarNavItem}"
+                                          Command="{Binding SelectedServer.SelectViewCommand}" CommandParameter="world"
+                                          IsChecked="{Binding SelectedServer.CurrentView, Converter={StaticResource EqualsToBooleanConverter}, ConverterParameter=world, Mode=OneWay}"
+                                          Content="ワールド"/>
+                            <ToggleButton Style="{StaticResource SidebarNavItem}"
+                                          Command="{Binding SelectedServer.SelectViewCommand}" CommandParameter="backups"
+                                          IsChecked="{Binding SelectedServer.CurrentView, Converter={StaticResource EqualsToBooleanConverter}, ConverterParameter=backups, Mode=OneWay}"
+                                          Content="バックアップ"/>
+
+                            <Border Height="1" Background="{DynamicResource BrushBorder}" Opacity="0.5" Margin="10,8"/>
+
+                            <!-- 拡張 -->
+                            <ToggleButton Style="{StaticResource SidebarNavItem}"
+                                          Command="{Binding SelectedServer.SelectViewCommand}" CommandParameter="addons"
+                                          IsChecked="{Binding SelectedServer.CurrentView, Converter={StaticResource EqualsToBooleanConverter}, ConverterParameter=addons, Mode=OneWay}"
+                                          Content="{Binding SelectedServer.AddonNavLabel}"
+                                          Visibility="{Binding SelectedServer.SupportsAddons, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            <ToggleButton Style="{StaticResource SidebarNavItem}"
+                                          Command="{Binding SelectedServer.SelectViewCommand}" CommandParameter="respack"
+                                          IsChecked="{Binding SelectedServer.CurrentView, Converter={StaticResource EqualsToBooleanConverter}, ConverterParameter=respack, Mode=OneWay}"
+                                          Content="リソースパック"/>
+                            <ToggleButton Style="{StaticResource SidebarNavItem}"
+                                          Command="{Binding SelectedServer.SelectViewCommand}" CommandParameter="version"
+                                          IsChecked="{Binding SelectedServer.CurrentView, Converter={StaticResource EqualsToBooleanConverter}, ConverterParameter=version, Mode=OneWay}"
+                                          Content="バージョン"/>
+
+                            <Border Height="1" Background="{DynamicResource BrushBorder}" Opacity="0.5" Margin="10,8"/>
+
+                            <!-- 保守 -->
+                            <ToggleButton Style="{StaticResource SidebarNavItem}"
+                                          Command="{Binding SelectedServer.SelectViewCommand}" CommandParameter="crashes"
+                                          IsChecked="{Binding SelectedServer.CurrentView, Converter={StaticResource EqualsToBooleanConverter}, ConverterParameter=crashes, Mode=OneWay}"
+                                          Content="クラッシュ復旧"/>
+                            <ToggleButton Style="{StaticResource SidebarNavItem}"
+                                          Command="{Binding SelectedServer.SelectViewCommand}" CommandParameter="settings"
+                                          IsChecked="{Binding SelectedServer.CurrentView, Converter={StaticResource EqualsToBooleanConverter}, ConverterParameter=settings, Mode=OneWay}"
+                                          Content="サーバー設定"/>
                         </StackPanel>
-                    </Grid>
-                </Border>
-            </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- ════════ メインコンテンツ ════════ -->
+        <Grid Grid.Column="1">
+            <ContentControl Content="{Binding SelectedServer}"
+                            Visibility="{Binding SelectedServer, Converter={StaticResource NotNullToVisibilityConverter}}"/>
+
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedServer}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+                <TextBlock Text="◇" FontSize="44" HorizontalAlignment="Center" Foreground="{DynamicResource BrushTextMuted}"/>
+                <TextBlock Text="サーバーを選択してください" FontSize="17" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,12,0,0"/>
+                <TextBlock Text="左の一覧からサーバーを選ぶか、新規作成してください。" Style="{StaticResource MutedText}" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                <Button Content="＋ 新しいサーバーを作成" Command="{Binding CreateServerCommand}"
+                        Style="{StaticResource PrimaryButton}" Margin="0,14,0,0" HorizontalAlignment="Center" Padding="18,9"/>
+            </StackPanel>
         </Grid>
 
         <views:TutorialOverlayControl x:Name="TutorialOverlay"
