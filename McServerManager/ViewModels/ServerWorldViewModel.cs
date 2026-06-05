@@ -12,6 +12,7 @@ namespace McServerManager.ViewModels;
 public sealed class ServerWorldViewModel : ObservableObject
 {
     private readonly AppServices _services;
+    private readonly IBackupSchedulerService _backupScheduler;
     private readonly ServerConfig _config;
     private readonly ServerSettingsViewModel _settings;
     private readonly Func<ServerStatus> _getStatus;
@@ -30,11 +31,13 @@ public sealed class ServerWorldViewModel : ObservableObject
 
     public ServerWorldViewModel(
         AppServices services,
+        IBackupSchedulerService backupScheduler,
         ServerConfig config,
         ServerSettingsViewModel settings,
         Func<ServerStatus> getStatus)
     {
         _services = services;
+        _backupScheduler = backupScheduler;
         _config = config;
         _settings = settings;
         _getStatus = getStatus;
@@ -158,6 +161,64 @@ public sealed class ServerWorldViewModel : ObservableObject
     {
         get => _worldBackupStatus;
         private set => SetProperty(ref _worldBackupStatus, value);
+    }
+
+    public bool ScheduledBackupEnabled
+    {
+        get => _config.ScheduledBackupEnabled;
+        set
+        {
+            if (_config.ScheduledBackupEnabled == value) return;
+            _config.ScheduledBackupEnabled = value;
+            _services.Configs.Save(_config);
+            _backupScheduler.ApplyConfiguration(_config);
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(ScheduledBackupStatus));
+        }
+    }
+
+    public int ScheduledBackupIntervalMinutes
+    {
+        get => _config.ScheduledBackupIntervalMinutes;
+        set
+        {
+            var clamped = Math.Max(1, value);
+            if (_config.ScheduledBackupIntervalMinutes == clamped) return;
+            _config.ScheduledBackupIntervalMinutes = clamped;
+            _services.Configs.Save(_config);
+            if (_config.ScheduledBackupEnabled)
+            {
+                _backupScheduler.ApplyConfiguration(_config);
+            }
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(ScheduledBackupStatus));
+        }
+    }
+
+    public int ScheduledBackupMaxRetention
+    {
+        get => _config.ScheduledBackupMaxRetention;
+        set
+        {
+            var clamped = Math.Max(1, value);
+            if (_config.ScheduledBackupMaxRetention == clamped) return;
+            _config.ScheduledBackupMaxRetention = clamped;
+            _services.Configs.Save(_config);
+            OnPropertyChanged();
+        }
+    }
+
+    public string ScheduledBackupStatus
+    {
+        get
+        {
+            if (!_config.ScheduledBackupEnabled)
+            {
+                return "オフ";
+            }
+            var last = _config.LastScheduledBackupAt?.ToLocalTime().ToString("yyyy/MM/dd HH:mm") ?? "未実行";
+            return $"{_config.ScheduledBackupIntervalMinutes} 分ごと / 最終: {last}";
+        }
     }
 
     public WorldBackupEntry? SelectedWorldBackup

@@ -37,6 +37,8 @@ public sealed class NewServerViewModel : ObservableObject
     private string _progressStep = string.Empty;
     private bool _hasError;
     private List<MinecraftVersionInfo> _allVersions = [];
+    private string? _route;
+    private WizardPreset? _selectedPreset;
 
     public NewServerViewModel(AppServices services, IEnumerable<string> existingNames)
     {
@@ -47,6 +49,18 @@ public sealed class NewServerViewModel : ObservableObject
         ServerTypes = new ObservableCollection<ServerTypeOption>();
         DirectoryPath = _services.Paths.ServersPath;
 
+        Presets = new ObservableCollection<WizardPreset>
+        {
+            new("vanilla-friends", "★", "バニラを友達と遊ぶ", "数人で楽しむシンプルな Survival。", "Vanilla", 2048, 8),
+            new("smp-public", "◉", "公開 SMP サーバー", "Paper・プラグインで運用しやすい構成。", "Paper", 4096, 20),
+            new("creative", "▣", "クリエイティブ建築", "Purpur・建築向け。", "Purpur", 4096, 10),
+            new("adventure", "▲", "アドベンチャー", "Paper・サバイバル重視。", "Paper", 4096, 8),
+            new("mod-fabric", "◆", "MODで遊ぶ (Fabric)", "軽量で最新版に追従しやすい。", "Fabric", 6144, 6),
+            new("mod-forge", "◇", "MODで遊ぶ (Forge)", "大型MOD/古いバージョン向け。", "Forge", 6144, 6),
+        };
+
+        SelectRouteCommand = new RelayCommand(param => Route = param as string);
+        ResetRouteCommand = new RelayCommand(_ => Route = null);
         BrowseDirectoryCommand = new RelayCommand(_ => BrowseDirectory(), _ => !IsBusy);
         BrowseJavaCommand = new RelayCommand(_ => BrowseJava(), _ => !IsBusy);
         CreateCommand = new AsyncRelayCommand(CreateAsync);
@@ -132,6 +146,37 @@ public sealed class NewServerViewModel : ObservableObject
     public ObservableCollection<MinecraftVersionInfo> Versions { get; }
     public ObservableCollection<VersionFilterOption> VersionFilters { get; }
     public ObservableCollection<ServerTypeOption> ServerTypes { get; }
+    public ObservableCollection<WizardPreset> Presets { get; }
+
+    /// <summary>null = 入口選択。"easy" | "advanced" | "import"。</summary>
+    public string? Route
+    {
+        get => _route;
+        set
+        {
+            if (SetProperty(ref _route, value))
+            {
+                OnPropertyChanged(nameof(IsRouteSelected));
+                StatusMessage = string.Empty;
+                HasError = false;
+            }
+        }
+    }
+
+    public bool IsRouteSelected => _route is not null;
+
+    public WizardPreset? SelectedPreset
+    {
+        get => _selectedPreset;
+        set
+        {
+            if (SetProperty(ref _selectedPreset, value) && value is not null)
+                ApplyPreset(value);
+        }
+    }
+
+    public RelayCommand SelectRouteCommand { get; }
+    public RelayCommand ResetRouteCommand { get; }
 
     public MinecraftVersionInfo? SelectedVersion
     {
@@ -523,4 +568,16 @@ public sealed class NewServerViewModel : ObservableObject
         return string.Equals(serverType, "Forge", StringComparison.OrdinalIgnoreCase)
             || string.Equals(serverType, "Fabric", StringComparison.OrdinalIgnoreCase);
     }
+
+    private void ApplyPreset(WizardPreset preset)
+    {
+        SelectedServerType = ServerTypes.FirstOrDefault(t =>
+            string.Equals(t.Id, preset.TypeId, StringComparison.OrdinalIgnoreCase)) ?? SelectedServerType;
+        MemoryXmx = preset.Ram;
+        MemoryXms = Math.Max(1024, preset.Ram / 2);
+        MaxPlayers = preset.MaxPlayers;
+    }
 }
+
+/// <summary>おまかせ作成のプリセット。</summary>
+public sealed record WizardPreset(string Id, string Glyph, string Title, string Subtitle, string TypeId, int Ram, int MaxPlayers);

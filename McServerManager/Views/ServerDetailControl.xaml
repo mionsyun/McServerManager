@@ -1,593 +1,781 @@
-﻿<UserControl x:Class="McServerManager.Views.ServerDetailControl"
+<UserControl x:Class="McServerManager.Views.ServerDetailControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Grid>
+    <Grid Background="{DynamicResource BrushBg}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+        <!-- ════════ トップバー ════════ -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource BrushSurface}"
+                BorderBrush="{DynamicResource BrushBorder}"
+                BorderThickness="0,0,0,1"
+                Padding="24,12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel>
-                    <TextBlock Text="{Binding Name}" FontSize="22" FontWeight="Bold"/>
-                    <WrapPanel Margin="0,10,0,0">
-                        <Border Background="{DynamicResource BrushAccentSoft}"
-                                BorderBrush="{DynamicResource BrushAccent}"
-                                BorderThickness="1"
-                                CornerRadius="10"
-                                Padding="10,3"
-                                Margin="0,0,6,4">
-                            <TextBlock FontSize="12">
-                                <Run Text="●" Foreground="{DynamicResource BrushAccent}"/>
-                                <Run Text=" "/>
-                                <Run Text="{Binding StatusText, Mode=OneWay}" Foreground="{DynamicResource BrushAccent}"/>
-                            </TextBlock>
-                        </Border>
-                        <Border Style="{StaticResource StatusBadge}" Margin="0,0,6,4">
-                            <TextBlock Text="{Binding ServerType, StringFormat=🛠️ {0}}" FontSize="12"/>
-                        </Border>
-                        <Border Style="{StaticResource StatusBadge}" Margin="0,0,6,4">
-                            <TextBlock Text="{Binding Port, StringFormat=🔌 {0}}" FontSize="12"/>
-                        </Border>
-                        <Border Style="{StaticResource StatusBadge}" Margin="0,0,0,4">
-                            <TextBlock Text="{Binding Version, StringFormat=🏷️ {0}}" FontSize="12"/>
-                        </Border>
-                    </WrapPanel>
-                    <WrapPanel Margin="0,4,0,0">
-                        <Border Style="{StaticResource StatusBadge}" Margin="0,0,6,4">
-                            <TextBlock Text="{Binding CpuUsagePercent, StringFormat=💻 CPU {0:F0}%}" FontSize="12"/>
-                        </Border>
-                        <Border Style="{StaticResource StatusBadge}" Margin="0,0,6,4">
-                            <TextBlock Text="{Binding MemoryUsageMb, StringFormat=🧠 RAM {0:F0}MB}" FontSize="12"/>
-                        </Border>
-                        <Border Style="{StaticResource StatusBadge}" Margin="0,0,6,4">
-                            <TextBlock Text="{Binding GpuUsageDisplayText, StringFormat=🎮 GPU {0}}" FontSize="12"/>
-                        </Border>
-                        <Border Style="{StaticResource StatusBadge}" Margin="0,0,0,4">
-                            <TextBlock Text="{Binding PlayerCountText, StringFormat=👤 {0}}" FontSize="12"/>
-                        </Border>
-                    </WrapPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                        <TextBlock Text="⏰ 最終起動" Style="{StaticResource MutedText}" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding LastStartedAtText}" VerticalAlignment="Center"/>
+                <!-- サーバー識別ストリップ -->
+                <StackPanel VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Name}" FontSize="17" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <TextBlock VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{DynamicResource BrushTextMuted}" FontFamily="Cascadia Mono" FontSize="11">
+                            <Run Text="{Binding ServerType, Mode=OneWay}"/><Run Text=" "/><Run Text="{Binding Version, Mode=OneWay}"/>
+                        </TextBlock>
                     </StackPanel>
-                    <Grid Margin="0,6,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="📂 保存先" Style="{StaticResource MutedText}" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="1"
-                                   Text="{Binding ServerDirectory}"
-                                   TextTrimming="CharacterEllipsis"
-                                   VerticalAlignment="Center"
-                                   Margin="6,0,0,0"/>
-                        <Button Grid.Column="2" Content="開く" Command="{Binding OpenServerDirectoryCommand}" Margin="8,0,0,0" Width="80"/>
-                    </Grid>
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <TextBlock FontSize="12">
+                            <Run Text="●" Foreground="{DynamicResource BrushAccent}"/><Run Text=" "/><Run Text="{Binding StatusText, Mode=OneWay}"/>
+                        </TextBlock>
+                        <TextBlock Text="·" Foreground="{DynamicResource BrushTextMuted}" Margin="8,0"/>
+                        <TextBlock FontSize="12" Foreground="{DynamicResource BrushTextMuted}">
+                            <Run Text="参加者"/><Run Text=" "/><Run Text="{Binding PlayerCountText, Mode=OneWay}"/>
+                        </TextBlock>
+                        <StackPanel Orientation="Horizontal" Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock Text="·" Foreground="{DynamicResource BrushTextMuted}" Margin="8,0"/>
+                            <TextBlock FontSize="12" Foreground="{DynamicResource BrushTextMuted}">
+                                <Run Text="稼働時間"/><Run Text=" "/><Run Text="{Binding Uptime, Mode=OneWay}"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button x:Name="StartServerButton" Content="{Binding StartButtonLabel}" Command="{Binding StartCommand}" Style="{StaticResource PrimaryButton}" Width="96" Margin="0,0,8,0" Height="36"/>
-                    <Button Content="{Binding StopButtonLabel}" Command="{Binding StopCommand}" Width="96" Margin="0,0,8,0" Height="36"/>
-                    <Button Content="{Binding RestartButtonLabel}" Command="{Binding RestartCommand}" Width="96" Height="36"/>
-                </StackPanel>
+                <Button Grid.Column="1" Content="⚠ 保留中の変更" Style="{StaticResource SmallButton}" VerticalAlignment="Center"
+                        Command="{Binding SelectViewCommand}" CommandParameter="settings"
+                        Foreground="{DynamicResource BrushWarning}"
+                        Visibility="{Binding HasPendingChanges, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             </Grid>
         </Border>
 
-        <TabControl x:Name="ServerTabs" Grid.Row="1">
-            <TabItem Header="コンソール">
-                <Grid Margin="12">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+        <!-- ════════ コンテンツ(CurrentView で切替) ════════ -->
+        <Grid Grid.Row="1">
 
-                    <Border Background="{DynamicResource BrushTerminalBg}"
-                            BorderBrush="{DynamicResource BrushBorder}"
-                            BorderThickness="1"
-                            CornerRadius="10"
-                            Padding="10">
-                        <ListBox x:Name="LogListBox"
-                                 ItemsSource="{Binding Logs}"
-                                 FontFamily="Cascadia Mono"
-                                 FontSize="12"
-                                 Background="Transparent"
-                                 BorderThickness="0"
-                                 Foreground="{DynamicResource BrushTerminalFg}"
-                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                                 ScrollViewer.CanContentScroll="False"
-                                 HorizontalContentAlignment="Left"
-                                 VirtualizingStackPanel.IsVirtualizing="False"
-                                 PreviewMouseWheel="LogListBox_OnPreviewMouseWheel"/>
-                    </Border>
-
-                    <Grid Grid.Row="1" Margin="0,10,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Text="{Binding CommandText, UpdateSourceTrigger=PropertyChanged}">
-                            <TextBox.InputBindings>
-                                <KeyBinding Key="Enter" Command="{Binding SendCommandCommand}"/>
-                            </TextBox.InputBindings>
-                        </TextBox>
-                        <Button Grid.Column="1" Content="送信" Command="{Binding SendCommandCommand}" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Width="90"/>
-                    </Grid>
-                    <WrapPanel Grid.Row="2" Margin="0,8,0,0">
-                        <Button Content="📄 ログ出力" Command="{Binding ExportLogsCommand}" Margin="0,0,8,0"
-                                ToolTip="コンソールログをファイルに保存します"/>
-                        <Button Content="📁 ログフォルダ" Command="{Binding OpenLogsDirectoryCommand}" Margin="0,0,8,0"
-                                ToolTip="logs フォルダをエクスプローラーで開きます"/>
-                        <Button Content="⚠ クラッシュレポート" Command="{Binding OpenCrashReportsCommand}"
-                                ToolTip="crash-reports フォルダをエクスプローラーで開きます"/>
-                    </WrapPanel>
-                </Grid>
-            </TabItem>
-
-            <TabItem Header="監視">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="12">
-                        <Border Style="{StaticResource SurfacePanel}">
-                            <StackPanel>
-                                <TextBlock Text="📊 稼働モニター" FontWeight="SemiBold" FontSize="14"/>
-                                <TextBlock Text="サーバープロセスの使用率を定期更新しています。"
-                                           Style="{StaticResource MutedText}"
-                                           Margin="0,4,0,0"/>
-
-                                <Grid Margin="0,12,0,0">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="72"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="CPU" VerticalAlignment="Center"/>
-                                    <ProgressBar Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding CpuUsagePercent, Mode=OneWay}" Height="8" Margin="8,0,8,0"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding CpuUsageDisplayText}" VerticalAlignment="Center"/>
-
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="RAM" VerticalAlignment="Center" Margin="0,10,0,0"/>
-                                    <ProgressBar Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding MemoryUsagePercent, Mode=OneWay}" Height="8" Margin="8,10,8,0"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding MemoryUsageDisplayText}" VerticalAlignment="Center" Margin="0,10,0,0"/>
-
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="GPU" VerticalAlignment="Center" Margin="0,10,0,0"/>
-                                    <ProgressBar Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding GpuUsagePercent, Mode=OneWay}" Height="8" Margin="8,10,8,0"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding GpuUsageDisplayText}" VerticalAlignment="Center" Margin="0,10,0,0"/>
-                                </Grid>
-
-                                <TextBlock Text="{Binding GpuMonitorHint}"
-                                           Style="{StaticResource MutedText}"
-                                           Margin="0,10,0,0"
-                                           TextWrapping="Wrap"/>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-
-            <TabItem x:Name="SettingsTab" Header="設定">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <ScrollViewer x:Name="SettingsScrollViewer"
-                                  Grid.Row="0"
-                                  VerticalScrollBarVisibility="Auto"
-                                  PreviewMouseWheel="SettingsScrollViewer_OnPreviewMouseWheel">
-                        <StackPanel Margin="12,12,12,8">
-                        <Border Style="{StaticResource SurfacePanel}">
-                            <StackPanel>
-                                <TextBlock Text="⚙️ サーバー設定" FontWeight="SemiBold" FontSize="14"/>
-                                <TextBlock Text="稼働中の変更は保存できますが反映は再起動後です。" Style="{StaticResource MutedText}" Margin="0,4,0,0"/>
-                                <TextBlock Text="⚠ 再起動が必要" Foreground="{DynamicResource BrushError}" FontWeight="SemiBold" Margin="0,8,0,0"
-                                           Visibility="{Binding RestartRequired, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"/>
-
-                                <Grid DataContext="{Binding Settings}" Margin="0,12,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="170"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="サーバーポート"/>
-                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ServerPort}" Width="120"/>
-
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="最大人数" Margin="0,8,0,0"/>
-                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding MaxPlayers}" Width="120" Margin="0,8,0,0"/>
-
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="MOTD" Margin="0,8,0,0"/>
-                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Motd}" Margin="0,8,0,0"/>
-
-                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="オンラインモード" Margin="0,8,0,0"/>
-                                    <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding OnlineMode}" Margin="0,8,0,0"/>
-
-                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="コマンドブロック" Margin="0,8,0,0"/>
-                                    <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,8,0,0">
-                                        <CheckBox IsChecked="{Binding EnableCommandBlock}" Content="enable-command-block を有効化"/>
-                                        <TextBlock Text="配布マップ・コマンド演出を使うワールドは有効化推奨です。"
-                                                   Style="{StaticResource MutedText}"
-                                                   Margin="0,3,0,0"/>
-                                    </StackPanel>
-
-                                    <TextBlock Grid.Row="5" Grid.Column="0" Text="難易度" Margin="0,8,0,0"/>
-                                    <ComboBox Grid.Row="5" Grid.Column="1" SelectedValue="{Binding Difficulty}" SelectedValuePath="Content" Width="160" Margin="0,8,0,0">
-                                        <ComboBoxItem Content="peaceful"/>
-                                        <ComboBoxItem Content="easy"/>
-                                        <ComboBoxItem Content="normal"/>
-                                        <ComboBoxItem Content="hard"/>
-                                    </ComboBox>
-
-                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="ゲームモード" Margin="0,8,0,0"/>
-                                    <ComboBox Grid.Row="6" Grid.Column="1" SelectedValue="{Binding GameMode}" SelectedValuePath="Content" Width="160" Margin="0,8,0,0">
-                                        <ComboBoxItem Content="survival"/>
-                                        <ComboBoxItem Content="creative"/>
-                                        <ComboBoxItem Content="adventure"/>
-                                        <ComboBoxItem Content="spectator"/>
-                                    </ComboBox>
-
-                                    <TextBlock Grid.Row="7" Grid.Column="0" Text="PvP" Margin="0,8,0,0"/>
-                                    <CheckBox Grid.Row="7" Grid.Column="1" IsChecked="{Binding Pvp}" Margin="0,8,0,0"/>
-
-                                    <TextBlock Grid.Row="8" Grid.Column="0" Text="描画距離" Margin="0,8,0,0"/>
-                                    <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding ViewDistance}" Width="120" Margin="0,8,0,0"/>
-
-                                    <TextBlock Grid.Row="9" Grid.Column="0" Text="スポーン保護" Margin="0,8,0,0"/>
-                                    <TextBox Grid.Row="9" Grid.Column="1" Text="{Binding SpawnProtection}" Width="120" Margin="0,8,0,0"/>
-
-                                    <TextBlock Grid.Row="10" Grid.Column="0" Text="ワールド名" Margin="0,8,0,0"/>
-                                    <TextBox Grid.Row="10" Grid.Column="1" Text="{Binding LevelName}" Width="220" Margin="0,8,0,0"/>
-
-                                    <TextBlock Grid.Row="11" Grid.Column="0" Text="シード" Margin="0,8,0,0"/>
-                                    <TextBox Grid.Row="11" Grid.Column="1" Text="{Binding Seed}" Width="220" Margin="0,8,0,0"/>
-
-                                    <TextBlock Grid.Row="12" Grid.Column="0" Text="Java パス" Margin="0,8,0,0"/>
-                                    <StackPanel Grid.Row="12" Grid.Column="1" Margin="0,8,0,0">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBox x:Name="JavaPathTextBox" Text="{Binding DataContext.JavaPath, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-                                            <Button Grid.Column="1" Content="参照" Command="{Binding DataContext.BrowseJavaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="8,0,0,0"/>
-                                            <Button Grid.Column="2" Content="自動検出" Command="{Binding DataContext.DetectJavaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="8,0,0,0"/>
-                                        </Grid>
-                                        <Border Background="{DynamicResource BrushAccentSoft}"
-                                                CornerRadius="6"
-                                                Padding="10,6"
-                                                Margin="0,6,0,0">
-                                            <TextBlock TextWrapping="Wrap" FontSize="11.5" Foreground="{DynamicResource BrushTextMuted}">
-                                                <Run Text="💡 Javaが未導入の場合は"/><LineBreak/>
-                                                <Run Text="  1. https://adoptium.net から Temurin (LTS) をダウンロード"/><LineBreak/>
-                                                <Run Text="  2. インストーラーで「PATH に追加」にチェック"/><LineBreak/>
-                                                <Run Text="  3. 「自動検出」ボタンで自動設定されます"/>
-                                            </TextBlock>
-                                        </Border>
-                                    </StackPanel>
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-
-                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
-                            <StackPanel>
-                                <TextBlock Text="🔄 クラッシュ復帰" FontWeight="SemiBold" FontSize="14"/>
-                                <CheckBox Content="クラッシュ時に自動再起動" IsChecked="{Binding AutoRestartOnCrash}" Margin="0,8,0,0"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                    <TextBlock Text="再起動までの秒数" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                    <TextBox Text="{Binding AutoRestartDelaySeconds}" Width="80"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
-
-                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
-                            <StackPanel>
-                                <TextBlock Text="🚀 起動安定化" FontWeight="SemiBold" FontSize="14"/>
-                                <TextBlock Text="起動方式を手動指定したり、プリセットでメモリ/GC引数を適用できます。" Style="{StaticResource MutedText}" Margin="0,4,0,0"/>
-
-                                <Grid Margin="0,10,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="120"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="起動方式" VerticalAlignment="Center"/>
-                                    <ComboBox Grid.Column="1" ItemsSource="{Binding LaunchModes}"
-                                              SelectedItem="{Binding SelectedLaunchMode}"
-                                              DisplayMemberPath="Label"/>
-                                </Grid>
-                                <TextBlock Text="{Binding LaunchModeDescription}" Style="{StaticResource MutedText}" Margin="120,4,0,0"/>
-
-                                <Grid Margin="0,10,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="120"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="プリセット" VerticalAlignment="Center"/>
-                                    <ComboBox Grid.Column="1" ItemsSource="{Binding StartupPresets}"
-                                              SelectedItem="{Binding SelectedStartupPreset}"
-                                              DisplayMemberPath="Label"/>
-                                    <Button Grid.Column="2" Content="適用" Command="{Binding ApplyStartupPresetCommand}" Margin="8,0,0,0"/>
-                                </Grid>
-
-                                <Grid Margin="0,10,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="120"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Xms (MB)" VerticalAlignment="Center"/>
-                                    <TextBox Grid.Column="1" Text="{Binding MemoryXmsMb}" Width="120"/>
-                                    <TextBlock Grid.Column="2" Text="Xmx (MB)" VerticalAlignment="Center" Margin="16,0,8,0"/>
-                                    <TextBox Grid.Column="3" Text="{Binding MemoryXmxMb}" Width="120"/>
-                                </Grid>
-                                <TextBlock Text="256〜131072 MB の範囲で入力してください。Xms ≤ Xmx。"
-                                           Style="{StaticResource MutedText}"
-                                           FontSize="11"
-                                           Margin="0,4,0,0"/>
-
-                                <Grid Margin="0,10,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="120"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="追加Java引数" VerticalAlignment="Center"/>
-                                    <TextBox Grid.Column="1" Text="{Binding JavaExtraArguments}"/>
-                                </Grid>
-
-                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                                    <Button Content="ヘルスチェック実行" Command="{Binding RunHealthCheckCommand}"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
-
-                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="👑 OP 管理" FontWeight="SemiBold" FontSize="14"/>
-                                    <ListBox ItemsSource="{Binding Ops}" SelectedItem="{Binding SelectedOp}" Margin="0,8,0,0" Height="160">
-                                        <ListBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <StackPanel>
-                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
-                                                    <TextBlock Text="{Binding Level, StringFormat=Level {0}}" Style="{StaticResource MutedText}"/>
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ListBox.ItemTemplate>
-                                    </ListBox>
-                                    <Grid Margin="0,8,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox Text="{Binding NewOpName}"/>
-                                        <Button Grid.Column="1" Content="追加" Command="{Binding AddOpCommand}" Margin="8,0,0,0"/>
-                                        <Button Grid.Column="2" Content="削除" Command="{Binding RemoveOpCommand}" Margin="8,0,0,0"/>
-                                    </Grid>
-                                    <Button Content="再読込" Command="{Binding ReloadPermissionsCommand}" Margin="0,8,0,0" Width="100"/>
-                                    <TextBlock Text="{Binding PermissionsStatusMessage}"
-                                               Foreground="{DynamicResource BrushAccent}"
-                                               FontSize="12"
-                                               Margin="0,6,0,0"
-                                               Visibility="{Binding PermissionsStatusMessage, Converter={StaticResource NullOrEmptyToCollapsedConverter}, FallbackValue=Collapsed}"/>
-                                </StackPanel>
-
-                                <StackPanel Grid.Column="1" Margin="16,0,0,0">
-                                    <TextBlock Text="📝 ホワイトリスト" FontWeight="SemiBold" FontSize="14"/>
-                                    <ListBox ItemsSource="{Binding Whitelist}" SelectedItem="{Binding SelectedWhitelist}" Margin="0,8,0,0" Height="160">
-                                        <ListBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
-                                            </DataTemplate>
-                                        </ListBox.ItemTemplate>
-                                    </ListBox>
-                                    <Grid Margin="0,8,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox Text="{Binding NewWhitelistName}"/>
-                                        <Button Grid.Column="1" Content="追加" Command="{Binding AddWhitelistCommand}" Margin="8,0,0,0"/>
-                                        <Button Grid.Column="2" Content="削除" Command="{Binding RemoveWhitelistCommand}" Margin="8,0,0,0"/>
-                                    </Grid>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-
-                        </StackPanel>
-                    </ScrollViewer>
-
-                    <Border Grid.Row="1"
-                            Background="{DynamicResource BrushCard}"
-                            BorderBrush="{DynamicResource BrushBorder}"
-                            BorderThickness="0,1,0,0"
-                            Padding="12">
+            <!-- ─────────── 概要 ─────────── -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20"
+                          Visibility="{Binding CurrentView, Converter={StaticResource EqualsToVisibilityConverter}, ConverterParameter=overview}">
+                <StackPanel>
+                    <!-- Java 警告 -->
+                    <Border Style="{StaticResource WarnBanner}" Margin="0,0,0,16"
+                            Visibility="{Binding HasJavaWarning, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="変更後は「設定を保存」を押してください。"
-                                           Style="{StaticResource MutedText}"/>
-                                <TextBlock Text="{Binding SettingsSavedMessage}"
-                                           Foreground="{DynamicResource BrushAccent}"
-                                           FontWeight="SemiBold"
-                                           FontSize="12"
-                                           Margin="0,3,0,0"
-                                           Visibility="{Binding SettingsSavedMessage, Converter={StaticResource NullOrEmptyToCollapsedConverter}, FallbackValue=Collapsed}"/>
-                            </StackPanel>
-                            <Button Grid.Column="1"
-                                    Content="設定を保存"
-                                    Command="{Binding SaveSettingsCommand}"
-                                    Style="{StaticResource PrimaryButton}"
-                                    Width="140"/>
+                            <TextBlock Text="{Binding JavaWarning}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                            <Button Grid.Column="1" Content="設定で確認 →" Style="{StaticResource SmallButton}" Margin="12,0,0,0"
+                                    Command="{Binding SelectViewCommand}" CommandParameter="settings"/>
                         </Grid>
                     </Border>
-                </Grid>
-            </TabItem>
 
-            <TabItem x:Name="WorldTab" Header="ワールド">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <Grid Margin="12" DataContext="{Binding World}">
+                    <!-- ヒーロー: ステータス + 接続カード -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="340"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- ステータスヒーロー -->
+                        <Border Grid.Column="0" Style="{StaticResource Card}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- 大きな起動/状態ボタン -->
+                                <Button Grid.Column="0" Width="92" Height="92" VerticalAlignment="Top"
+                                        Command="{Binding StartCommand}" Cursor="Hand">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+                                            <Setter Property="FontSize" Value="34"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                    <Setter Property="Background" Value="{DynamicResource BrushSuccessSoft}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource BrushSuccess}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <TextBlock>
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="▶"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                        <Setter Property="Text" Value="●"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Button>
+
+                                <StackPanel Grid.Column="1" Margin="18,0,0,0">
+                                    <TextBlock Text="{Binding Name}" FontSize="28" FontWeight="Bold"/>
+                                    <WrapPanel Margin="0,8,0,0">
+                                        <Border Style="{StaticResource Pill}" Margin="0,0,6,6">
+                                            <TextBlock FontSize="12">
+                                                <Run Text="●" Foreground="{DynamicResource BrushAccent}"/><Run Text=" "/><Run Text="{Binding StatusText, Mode=OneWay}"/>
+                                            </TextBlock>
+                                        </Border>
+                                        <Border Style="{StaticResource Pill}" Margin="0,0,6,6">
+                                            <TextBlock FontSize="12"><Run Text="{Binding ServerType, Mode=OneWay}"/><Run Text=" "/><Run Text="{Binding Version, Mode=OneWay}" FontWeight="SemiBold"/></TextBlock>
+                                        </Border>
+                                        <Border Style="{StaticResource Pill}" Margin="0,0,6,6">
+                                            <TextBlock FontSize="12"><Run Text="ポート "/><Run Text="{Binding Port, Mode=OneWay}" FontWeight="SemiBold"/></TextBlock>
+                                        </Border>
+                                        <Border Style="{StaticResource Pill}" Margin="0,0,6,6">
+                                            <TextBlock FontSize="12"><Run Text="プレイヤー "/><Run Text="{Binding PlayerCountText, Mode=OneWay}" FontWeight="SemiBold"/></TextBlock>
+                                        </Border>
+                                        <Border Style="{StaticResource Pill}" Margin="0,0,6,6"
+                                                Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <TextBlock FontSize="12"><Run Text="最終起動 "/><Run Text="{Binding LastStartedAtText, Mode=OneWay}" FontWeight="SemiBold"/></TextBlock>
+                                        </Border>
+                                    </WrapPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                        <!-- 停止中: 起動 / 稼働中: 停止+再起動 -->
+                                        <Button Content="▶ 起動" Command="{Binding StartCommand}" Style="{StaticResource PrimaryButton}" Width="110"
+                                                Visibility="{Binding IsRunning, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                        <Button Content="■ 停止" Command="{Binding StopCommand}" Style="{StaticResource DangerButton}" Width="96"
+                                                Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                        <Button Content="↻ 再起動" Command="{Binding RestartCommand}" Width="96" Margin="8,0,0,0"
+                                                Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- 接続カード -->
+                        <Border Grid.Column="2" Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="参加アドレス (LAN)" Style="{StaticResource MutedText}"/>
+                                <Grid Margin="0,6,0,0">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding LanAddress}" FontFamily="Cascadia Mono" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                    <Button Grid.Column="1" Content="コピー" Command="{Binding CopyLanAddressCommand}" Style="{StaticResource SmallButton}" ToolTip="参加アドレスをコピー"/>
+                                </Grid>
+                                <WrapPanel Margin="0,12,0,0">
+                                    <Border Style="{StaticResource Pill}" Margin="0,0,6,6">
+                                        <TextBlock FontSize="11">
+                                            <Run Text="●" Foreground="{DynamicResource BrushSuccess}"/><Run Text=" "/><Run Text="{Binding StatusText, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </Border>
+                                    <Border Style="{StaticResource Pill}" Margin="0,0,6,6">
+                                        <TextBlock Text="LAN" FontSize="11"/>
+                                    </Border>
+                                </WrapPanel>
+                                <Button Content="接続設定を開く →" Command="{Binding SelectViewCommand}" CommandParameter="network"
+                                        HorizontalAlignment="Stretch" Margin="0,12,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- ガイド付きセットアップ(停止中のみ) -->
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,16"
+                            Visibility="{Binding IsRunning, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Style="{StaticResource Pill}" Background="{DynamicResource BrushAccentSoft}" BorderBrush="{DynamicResource BrushAccent}">
+                                    <TextBlock Text="① 作成" FontSize="12" Foreground="{DynamicResource BrushAccent}"/>
+                                </Border>
+                                <TextBlock Text="→" Margin="8,0" VerticalAlignment="Center" Foreground="{DynamicResource BrushTextMuted}"/>
+                                <Border Style="{StaticResource Pill}">
+                                    <TextBlock Text="② 起動" FontSize="12"/>
+                                </Border>
+                                <TextBlock Text="→" Margin="8,0" VerticalAlignment="Center" Foreground="{DynamicResource BrushTextMuted}"/>
+                                <Border Style="{StaticResource Pill}">
+                                    <TextBlock Text="③ 公開" FontSize="12"/>
+                                </Border>
+                            </StackPanel>
+
+                            <TextBlock Text="上の「起動」を押すとワールドが読み込まれ、参加できる状態になります。起動後は「接続・公開」で友達を招待できます。"
+                                       Style="{StaticResource MutedText}" Margin="0,10,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- メトリクスタイル -->
+                    <UniformGrid Columns="5" Margin="0,0,0,16">
+                        <Border Style="{StaticResource MetricTile}" Margin="0,0,8,0">
+                            <StackPanel>
+                                <TextBlock Text="CPU" Style="{StaticResource MutedText}"/>
+                                <TextBlock Text="{Binding CpuUsageDisplayText}" FontSize="22" FontWeight="Bold" Margin="0,4,0,6"/>
+                                <ProgressBar Minimum="0" Maximum="100" Value="{Binding CpuUsagePercent, Mode=OneWay}" Height="6"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource MetricTile}" Margin="0,0,8,0">
+                            <StackPanel>
+                                <TextBlock Text="RAM" Style="{StaticResource MutedText}"/>
+                                <TextBlock Text="{Binding MemoryUsageDisplayText}" FontSize="15" FontWeight="Bold" Margin="0,4,0,6" TextTrimming="CharacterEllipsis"/>
+                                <ProgressBar Minimum="0" Maximum="100" Value="{Binding MemoryUsagePercent, Mode=OneWay}" Height="6"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource MetricTile}" Margin="0,0,8,0">
+                            <StackPanel>
+                                <TextBlock Text="GPU" Style="{StaticResource MutedText}"/>
+                                <TextBlock Text="{Binding GpuUsageDisplayText}" FontSize="22" FontWeight="Bold" Margin="0,4,0,6"/>
+                                <ProgressBar Minimum="0" Maximum="100" Value="{Binding GpuUsagePercent, Mode=OneWay}" Height="6"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource MetricTile}" Margin="0,0,8,0">
+                            <StackPanel>
+                                <TextBlock Text="プレイヤー" Style="{StaticResource MutedText}"/>
+                                <TextBlock Text="{Binding PlayerCountText}" FontSize="22" FontWeight="Bold" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource MetricTile}">
+                            <StackPanel>
+                                <TextBlock Text="ポート" Style="{StaticResource MutedText}"/>
+                                <TextBlock Text="{Binding Port}" FontSize="22" FontWeight="Bold" Margin="0,4,0,0" FontFamily="Cascadia Mono"/>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+
+                    <!-- クイックアクション -->
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="クイックアクション" Style="{StaticResource SectionHeading}"/>
+                            <UniformGrid Columns="4" Margin="0,10,0,0">
+                                <Button Style="{StaticResource ChoiceButton}" Margin="0,0,8,0" Command="{Binding World.CreateWorldBackupCommand}">
+                                    <StackPanel>
+                                        <TextBlock Text="今すぐバックアップ" FontWeight="SemiBold"/>
+                                        <TextBlock Text="停止中のワールドを保存" Style="{StaticResource MutedText}" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Style="{StaticResource ChoiceButton}" Margin="0,0,8,0" Command="{Binding SaveAllCommand}">
+                                    <StackPanel>
+                                        <TextBlock Text="/save-all 実行" FontWeight="SemiBold"/>
+                                        <TextBlock Text="稼働中にワールド書き出し" Style="{StaticResource MutedText}" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Style="{StaticResource ChoiceButton}" Margin="0,0,8,0" Command="{Binding RestartCommand}">
+                                    <StackPanel>
+                                        <TextBlock Text="再起動" FontWeight="SemiBold"/>
+                                        <TextBlock Text="安全に停止して起動" Style="{StaticResource MutedText}" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Style="{StaticResource ChoiceButton}" Command="{Binding OpenServerDirectoryCommand}">
+                                    <StackPanel>
+                                        <TextBlock Text="フォルダを開く" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding ServerDirectory}" Style="{StaticResource MutedText}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" MaxWidth="150"/>
+                                    </StackPanel>
+                                </Button>
+                            </UniformGrid>
+                        </StackPanel>
+                    </Border>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="380"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- 最近のログ -->
+                        <Border Grid.Column="0" Style="{StaticResource Card}">
+                            <DockPanel>
+                                <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
+                                    <TextBlock Text="最近のログ" Style="{StaticResource SectionHeading}"/>
+                                    <Button Content="全て見る →" Style="{StaticResource GhostButton}" HorizontalAlignment="Right"
+                                            Command="{Binding SelectViewCommand}" CommandParameter="console"/>
+                                </Grid>
+                                <Border Background="{DynamicResource BrushTerminalBg}" CornerRadius="8" Padding="8" MaxHeight="220">
+                                    <ListBox ItemsSource="{Binding Logs}"
+                                             FontFamily="Cascadia Mono" FontSize="11"
+                                             Background="Transparent" BorderThickness="0"
+                                             Foreground="{DynamicResource BrushTerminalFg}"
+                                             ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                </Border>
+                            </DockPanel>
+                        </Border>
+
+                        <!-- サーバー情報 -->
+                        <Border Grid.Column="2" Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="サーバー情報" Style="{StaticResource Eyebrow}" Margin="0,0,0,10"/>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="種別" Style="{StaticResource MutedText}" Width="72"/>
+                                    <TextBlock Grid.Column="1" TextTrimming="CharacterEllipsis">
+                                        <Run Text="{Binding ServerType, Mode=OneWay}"/><Run Text=" "/><Run Text="{Binding Version, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="MOTD" Style="{StaticResource MutedText}" Width="72"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Settings.Motd}" TextTrimming="CharacterEllipsis"/>
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="難易度" Style="{StaticResource MutedText}" Width="72"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Settings.Difficulty}"/>
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="最終起動" Style="{StaticResource MutedText}" Width="72"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding LastStartedAtText}"/>
+                                </Grid>
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                    <Button Content="設定を編集" Style="{StaticResource SmallButton}" Command="{Binding SelectViewCommand}" CommandParameter="settings"/>
+                                    <Button Content="接続を確認" Style="{StaticResource SmallButton}" Margin="8,0,0,0" Command="{Binding SelectViewCommand}" CommandParameter="network"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ─────────── コンソール ─────────── -->
+            <Grid Margin="24,20"
+                  Visibility="{Binding CurrentView, Converter={StaticResource EqualsToVisibilityConverter}, ConverterParameter=console}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="0,0,0,10">
+                    <TextBlock Style="{StaticResource MutedText}" VerticalAlignment="Center">
+                        <Run Text="ライブログ ·"/><Run Text="{Binding Logs.Count, Mode=OneWay}"/><Run Text="行"/>
+                    </TextBlock>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="コピー" Style="{StaticResource SmallButton}" Click="CopyConsole_OnClick"/>
+                        <Button Content="📄 ログ出力" Style="{StaticResource SmallButton}" Margin="8,0,0,0" Command="{Binding ExportLogsCommand}"/>
+                        <Button Content="📁 ログフォルダ" Style="{StaticResource SmallButton}" Margin="8,0,0,0" Command="{Binding OpenLogsDirectoryCommand}"/>
+                        <Button Content="⚠ クラッシュ" Style="{StaticResource SmallButton}" Margin="8,0,0,0" Command="{Binding OpenCrashReportsCommand}"/>
+                    </StackPanel>
+                </Grid>
+
+                <Border Grid.Row="1" Background="{DynamicResource BrushTerminalBg}"
+                        BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="10" Padding="10">
+                    <ListBox x:Name="LogListBox"
+                             ItemsSource="{Binding Logs}"
+                             FontFamily="Cascadia Mono" FontSize="12"
+                             Background="Transparent" BorderThickness="0"
+                             Foreground="{DynamicResource BrushTerminalFg}"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                             ScrollViewer.CanContentScroll="False"
+                             HorizontalContentAlignment="Left"
+                             VirtualizingStackPanel.IsVirtualizing="False"
+                             PreviewMouseWheel="LogListBox_OnPreviewMouseWheel"/>
+                </Border>
+
+                <Grid Grid.Row="2" Margin="0,10,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="360"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" Text="{Binding CommandText, UpdateSourceTrigger=PropertyChanged}">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding SendCommandCommand}"/>
+                        </TextBox.InputBindings>
+                    </TextBox>
+                    <Button Grid.Column="1" Content="送信" Command="{Binding SendCommandCommand}" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Width="90"/>
+                </Grid>
+            </Grid>
 
-                    <Border Grid.Column="0" Style="{StaticResource SurfacePanel}">
+            <!-- ─────────── 接続・公開(チェックリスト型) ─────────── -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20"
+                          Visibility="{Binding CurrentView, Converter={StaticResource EqualsToVisibilityConverter}, ConverterParameter=network}">
+                <StackPanel>
+                    <TextBlock Text="接続・公開" Style="{StaticResource Eyebrow}"/>
+                    <TextBlock Style="{StaticResource ScreenTitle}" Margin="0,2,0,2">
+                        <Run Text="{Binding Name, Mode=OneWay}"/><Run Text=" の接続状況"/>
+                    </TextBlock>
+                    <TextBlock Text="LAN(同じ Wi-Fi 内)からは起動すれば参加できます。インターネット公開には UPnP の設定が必要です。" Style="{StaticResource MutedText}" Margin="0,0,0,16" TextWrapping="Wrap"/>
+
+                    <!-- 状態ヒーロー -->
+                    <Border Style="{StaticResource PendingBanner}" Margin="0,0,0,16">
                         <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-
-                            <TextBlock Text="🌍 運用中ワールド" FontWeight="SemiBold" FontSize="14"/>
-
-                            <Grid Grid.Row="1" Margin="0,8,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="現在:" Style="{StaticResource MutedText}" VerticalAlignment="Center"/>
-                                <Border Grid.Column="1"
-                                        Background="{DynamicResource BrushCard}"
-                                        BorderBrush="{DynamicResource BrushBorder}"
-                                        BorderThickness="1"
-                                        CornerRadius="8"
-                                        Padding="10,6"
-                                        Margin="8,0,0,0">
-                                    <TextBlock Text="{Binding CurrentWorldName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                                </Border>
-                            </Grid>
-
-                            <Grid Grid.Row="2" Margin="0,10,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <ComboBox ItemsSource="{Binding Worlds}"
-                                          SelectedItem="{Binding SelectedWorld}"
-                                          Margin="0,0,8,0"/>
-                                <Button Grid.Column="1"
-                                        Content="切り替え"
-                                        Command="{Binding SwitchWorldCommand}"
-                                        Style="{StaticResource PrimaryButton}"
-                                        Width="100"/>
-                            </Grid>
-
-                            <TextBlock Grid.Row="3" Text="{Binding WorldSwitchHint}" Style="{StaticResource MutedText}" Margin="0,6,0,0" TextWrapping="Wrap"/>
-
-                            <WrapPanel Grid.Row="4" Margin="0,10,0,0">
-                                <Button Content="🗺️ マップ表示" Command="{Binding OpenWorldMapCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8"/>
-                                <Button Content="フォルダを開く" Command="{Binding OpenSelectedWorldDirectoryCommand}" Margin="0,0,8,8"/>
-                                <Button Content="一覧更新" Command="{Binding RefreshWorldsCommand}" Margin="0,0,8,8"/>
-                                <Button Content="選択中を削除" Command="{Binding DeleteWorldCommand}" Margin="0,0,0,8"/>
-                            </WrapPanel>
-
-                            <ListBox Grid.Row="5"
-                                     ItemsSource="{Binding Worlds}"
-                                     SelectedItem="{Binding SelectedWorld}"
-                                     Margin="0,4,0,0"/>
-
-                            <Grid Grid.Row="6" Margin="0,10,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBox Text="{Binding NewWorldName}"/>
-                                <Button Grid.Column="1" Content="新規作成" Command="{Binding CreateWorldCommand}" Margin="8,0,0,0" Width="100"/>
-                            </Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="今の参加可否" FontWeight="SemiBold" FontSize="14"/>
+                                <TextBlock Style="{StaticResource MutedText}" Margin="0,2,0,0" TextWrapping="Wrap"
+                                           Text="下のチェックリストを上から順に進めると、友達が参加できる状態になります。"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Center" Margin="16,0">
+                                <TextBlock HorizontalAlignment="Center" FontSize="20">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="—"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource BrushTextMuted}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding LanReady}" Value="True">
+                                                    <Setter Property="Text" Value="✓"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource BrushSuccess}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock Text="LAN 準備" Style="{StaticResource MutedText}" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" HorizontalAlignment="Center" Margin="16,0,0,0">
+                                <TextBlock HorizontalAlignment="Center" FontSize="20">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="—"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource BrushTextMuted}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding PublicReady}" Value="True">
+                                                    <Setter Property="Text" Value="✓"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource BrushSuccess}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock Text="公開 準備" Style="{StaticResource MutedText}" HorizontalAlignment="Center"/>
+                            </StackPanel>
                         </Grid>
                     </Border>
 
-                    <Border Grid.Column="2" Style="{StaticResource SurfacePanel}">
+                    <!-- LAN セクション -->
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,14">
                         <StackPanel>
-                            <TextBlock Text="💾 ワールドバックアップ" FontWeight="SemiBold" FontSize="14"/>
-                            <TextBlock Text="停止中にローカルワールドのバックアップ作成・復元ができます。"
-                                       Style="{StaticResource MutedText}"
-                                       Margin="0,4,0,0"
-                                       TextWrapping="Wrap"/>
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="LAN(同じ Wi-Fi 内)" Style="{StaticResource Eyebrow}"/>
+                                    <TextBlock Text="友達と同じ家・教室で遊ぶ" Style="{StaticResource SectionHeading}" Margin="0,2,0,0"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <TextBlock Text="参加アドレス" Style="{StaticResource MutedText}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <Border Style="{StaticResource Pill}">
+                                        <TextBlock Text="{Binding LanAddress}" FontFamily="Cascadia Mono" FontWeight="SemiBold"/>
+                                    </Border>
+                                    <Button Content="コピー" Command="{Binding CopyLanAddressCommand}" Style="{StaticResource SmallButton}" Margin="8,0,0,0"/>
+                                </StackPanel>
+                            </Grid>
 
-                            <WrapPanel Margin="0,10,0,0">
-                                <Button Content="バックアップ作成"
-                                        Command="{Binding CreateWorldBackupCommand}"
-                                        Style="{StaticResource PrimaryButton}"
-                                        Margin="0,0,8,8"/>
-                                <Button Content="一覧更新"
-                                        Command="{Binding RefreshWorldBackupsCommand}"
-                                        Margin="0,0,8,8"/>
-                                <Button Content="フォルダを開く"
-                                        Command="{Binding OpenBackupsDirectoryCommand}"
-                                        Margin="0,0,0,8"/>
-                            </WrapPanel>
+                            <!-- チェック行: 起動 -->
+                            <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Margin="0,0,12,0" FontSize="18">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="■"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource BrushTextMuted}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                        <Setter Property="Text" Value="▶"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource BrushSuccess}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="サーバーが起動している" FontWeight="SemiBold"/>
+                                        <TextBlock Text="起動していないと誰も接続できません。" Style="{StaticResource MutedText}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
+                                        <Button Content="コンソール" Style="{StaticResource SmallButton}" Command="{Binding SelectViewCommand}" CommandParameter="console"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
 
-                            <TextBlock Text="復元先ワールド名" Margin="0,4,0,4"/>
-                            <TextBox Text="{Binding RestoreBackupWorldName}"/>
+                            <!-- チェック行: Firewall -->
+                            <Border Style="{StaticResource SurfacePanel}" Margin="0,10,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="◫" VerticalAlignment="Center" Margin="0,0,12,0" FontSize="18">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{DynamicResource BrushTextMuted}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Network.IsFirewallConfigured}" Value="True">
+                                                        <Setter Property="Foreground" Value="{DynamicResource BrushSuccess}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="Windows Firewall を許可する" FontWeight="SemiBold"/>
+                                        <TextBlock Text="ポートの受信を許可しないと同じ Wi-Fi 内からも参加できません。" Style="{StaticResource MutedText}" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Button Content="許可する" Command="{Binding Network.CreateFirewallRuleCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,6,0"/>
+                                        <Button Content="削除" Command="{Binding Network.DeleteFirewallRuleCommand}" Style="{StaticResource SmallButton}" Margin="0,0,6,0"/>
+                                        <Button Content="再作成" Command="{Binding Network.RecreateFirewallRuleCommand}" Style="{StaticResource SmallButton}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
 
-                            <CheckBox Content="復元前に現在ワールドを自動バックアップ"
-                                      IsChecked="{Binding CreateBackupBeforeRestore}"
-                                      Margin="0,8,0,0"/>
+                            <TextBlock Text="LAN IP" Style="{StaticResource MutedText}" Margin="0,12,0,4"/>
+                            <ItemsControl ItemsSource="{Binding Network.LanIpAddresses}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate><TextBlock Text="{Binding}" FontFamily="Cascadia Mono" FontSize="12"/></DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
 
-                            <WrapPanel Margin="0,10,0,0">
-                                <Button Content="選択バックアップを復元"
-                                        Command="{Binding RestoreWorldBackupCommand}"
-                                        Style="{StaticResource PrimaryButton}"
-                                        Margin="0,0,8,8"/>
-                                <Button Content="選択バックアップ削除"
-                                        Command="{Binding DeleteWorldBackupCommand}"
-                                        Margin="0,0,0,8"/>
-                            </WrapPanel>
+                    <!-- 公開セクション -->
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                        <StackPanel>
+                            <TextBlock Text="公開(インターネット経由)" Style="{StaticResource Eyebrow}"/>
+                            <TextBlock Text="家の外の人を呼びたい" Style="{StaticResource SectionHeading}" Margin="0,2,0,0"/>
 
-                            <ListBox ItemsSource="{Binding WorldBackups}"
-                                     SelectedItem="{Binding SelectedWorldBackup}"
-                                     Margin="0,4,0,0"
-                                     MaxHeight="170">
+                            <!-- チェック行: UPnP -->
+                            <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="◎" VerticalAlignment="Center" Margin="0,0,12,0" FontSize="18">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{DynamicResource BrushTextMuted}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Network.IsUpnpOpen}" Value="True">
+                                                        <Setter Property="Foreground" Value="{DynamicResource BrushSuccess}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="UPnP でポートを開放する" FontWeight="SemiBold"/>
+                                        <TextBlock Text="対応ルーターなら自動で外部公開。グローバル IP が必要です。" Style="{StaticResource MutedText}" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Button Content="開放" Command="{Binding Network.OpenPortCommand}" Style="{StaticResource PrimaryButton}" Width="80"/>
+                                        <Button Content="閉鎖" Command="{Binding Network.ClosePortCommand}" Style="{StaticResource SmallButton}" Margin="6,0,0,0" Width="80"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Grid Margin="0,12,0,0">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="グローバル IP" Style="{StaticResource MutedText}"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                        <Button Content="取得" Command="{Binding Network.RefreshPublicIpCommand}" Style="{StaticResource SmallButton}" Width="70"/>
+                                        <TextBlock Text="{Binding Network.PublicIp}" Margin="8,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Network.PublicIpStatus}" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource MutedText}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="共有アドレス" Style="{StaticResource MutedText}"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                        <Border Style="{StaticResource Pill}">
+                                            <TextBlock Text="{Binding Network.PublicIp}" FontWeight="SemiBold" FontFamily="Cascadia Mono"/>
+                                        </Border>
+                                        <Button Content="コピー" Command="{Binding Network.CopyShareAddressCommand}" Style="{StaticResource SmallButton}" Margin="8,0,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 関連設定(読み取り専用) -->
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <Grid>
+                                <TextBlock Text="関連する設定" Style="{StaticResource SectionHeading}"/>
+                                <Button Content="設定を開く →" Style="{StaticResource GhostButton}" HorizontalAlignment="Right"
+                                        Command="{Binding SelectViewCommand}" CommandParameter="settings"/>
+                            </Grid>
+                            <UniformGrid Columns="2" Margin="0,8,0,0">
+                                <StackPanel Margin="0,0,0,8"><TextBlock Text="ポート" Style="{StaticResource MutedText}"/><TextBlock Text="{Binding Port}" FontFamily="Cascadia Mono"/></StackPanel>
+                                <StackPanel Margin="0,0,0,8"><TextBlock Text="最大人数" Style="{StaticResource MutedText}"/><TextBlock Text="{Binding MaxPlayers}"/></StackPanel>
+                                <StackPanel><TextBlock Text="MOTD" Style="{StaticResource MutedText}"/><TextBlock Text="{Binding Settings.Motd}" TextTrimming="CharacterEllipsis"/></StackPanel>
+                                <StackPanel><TextBlock Text="オンラインモード" Style="{StaticResource MutedText}"/><TextBlock Text="{Binding Settings.OnlineMode}"/></StackPanel>
+                            </UniformGrid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ─────────── ワールド ─────────── -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20"
+                          Visibility="{Binding CurrentView, Converter={StaticResource EqualsToVisibilityConverter}, ConverterParameter=world}">
+                <StackPanel DataContext="{Binding World}">
+                    <!-- ヘッダー -->
+                    <Grid Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="ワールド" Style="{StaticResource Eyebrow}"/>
+                            <TextBlock Text="世界の管理" Style="{StaticResource ScreenTitle}" Margin="0,2,0,2"/>
+                            <TextBlock Text="使用するワールドの切り替え、マップアーカイブの取り込み、新規作成ができます。" Style="{StaticResource MutedText}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Button Content="◰ バックアップ管理 →" Style="{StaticResource GhostButton}"
+                                    Command="{Binding DataContext.SelectViewCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="backups"/>
+                            <Button Content="一覧更新" Command="{Binding RefreshWorldsCommand}" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- 稼働中警告 -->
+                    <Border Style="{StaticResource WarnBanner}" Margin="0,0,0,12"
+                            Visibility="{Binding DataContext.IsRunning, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="⚠ サーバー稼働中はワールドの切り替え・削除はできません。停止してから操作してください。" TextWrapping="Wrap"/>
+                    </Border>
+
+                    <!-- ワールドカードグリッド -->
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,8">
+                                <TextBlock Style="{StaticResource SectionHeading}">
+                                    <Run Text="ワールド一覧 ("/><Run Text="{Binding Worlds.Count, Mode=OneWay}"/><Run Text="件)"/>
+                                </TextBlock>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Border Style="{StaticResource Pill}">
+                                        <TextBlock>
+                                            <Run Text="使用中: " Foreground="{DynamicResource BrushTextMuted}"/><Run Text="{Binding CurrentWorldName, Mode=OneWay}" FontWeight="SemiBold"/>
+                                        </TextBlock>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+
+                            <ListBox ItemsSource="{Binding Worlds}" SelectedItem="{Binding SelectedWorld}"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource ServerListItem}">
+                                        <Setter Property="Width" Value="190"/>
+                                        <Setter Property="Margin" Value="0,0,10,10"/>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <StackPanel Margin="0,2,0,2">
+                                        <StackPanel>
+                                            <Border Height="56" CornerRadius="6" Background="{DynamicResource BrushAccentSoft}">
+                                                <TextBlock Text="◱" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource BrushAccent}"/>
+                                            </Border>
+                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" Margin="0,8,0,0" TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <TextBlock Text="{Binding WorldSwitchHint}" Style="{StaticResource MutedText}" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                            <WrapPanel Margin="0,10,0,0">
+                                <Button Content="このワールドに切り替え" Command="{Binding SwitchWorldCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8"/>
+                                <Button Content="🗺️ マップ表示" Command="{Binding OpenWorldMapCommand}" Margin="0,0,8,8"/>
+                                <Button Content="フォルダを開く" Command="{Binding OpenSelectedWorldDirectoryCommand}" Margin="0,0,8,8"/>
+                                <Button Content="選択中を削除" Command="{Binding DeleteWorldCommand}" Style="{StaticResource DangerButton}" Margin="0,0,0,8"/>
+                            </WrapPanel>
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding NewWorldName}"/>
+                                <Button Grid.Column="1" Content="＋ 新規作成" Command="{Binding CreateWorldCommand}" Margin="8,0,0,0" Width="110"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 配布マップ導入 -->
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="🗺️ 配布マップ導入 (.zip)" Style="{StaticResource SectionHeading}"/>
+                            <TextBlock Text="ZIPを選択し、導入先ワールド名を指定して取り込みます。" Style="{StaticResource MutedText}" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                            <Border Style="{StaticResource WarnBanner}" Margin="0,8,0,0">
+                                <TextBlock Style="{StaticResource MutedText}" TextWrapping="Wrap">
+                                    <Run Text="導入時にコマンドブロック有効化の確認を表示します。"/><LineBreak/>
+                                    <Run Text="有効化しない場合、ギミックが動作しない可能性があります。"/>
+                                </TextBlock>
+                            </Border>
+
+                            <TextBlock Text="ZIPファイル" Margin="0,10,0,4"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding MapArchivePath, Mode=OneWay}" IsReadOnly="True"/>
+                                <Button Grid.Column="1" Content="選択" Command="{Binding BrowseMapArchiveCommand}" Margin="8,0,0,0" Width="80"/>
+                            </Grid>
+
+                            <TextBlock Text="導入元フォルダ" Margin="0,10,0,4"/>
+                            <ComboBox ItemsSource="{Binding MapArchiveCandidates}" SelectedItem="{Binding SelectedMapArchiveCandidate}" DisplayMemberPath="DisplayName"/>
+                            <TextBlock Text="{Binding MapArchiveSourceHint}" Style="{StaticResource MutedText}" Margin="0,6,0,0" TextWrapping="Wrap"/>
+
+                            <TextBlock Text="導入先ワールド名" Margin="0,10,0,4"/>
+                            <TextBox Text="{Binding MapImportWorldName}"/>
+                            <CheckBox Content="同名ワールドは上書きして導入" IsChecked="{Binding ReplaceWorldOnMapImport}" Margin="0,10,0,0"/>
+                            <Button Content="配布マップを導入" Command="{Binding ImportMapArchiveCommand}" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Width="170" Margin="0,10,0,0"/>
+                            <Border Style="{StaticResource SurfacePanel}" Margin="0,10,0,0">
+                                <TextBlock Text="{Binding MapImportStatus}" Style="{StaticResource MutedText}" TextWrapping="Wrap"/>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ─────────── バックアップ ─────────── -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20"
+                          Visibility="{Binding CurrentView, Converter={StaticResource EqualsToVisibilityConverter}, ConverterParameter=backups}">
+                <StackPanel DataContext="{Binding World}">
+                    <Grid Margin="0,0,0,14">
+                        <StackPanel>
+                            <TextBlock Text="バックアップ" Style="{StaticResource Eyebrow}"/>
+                            <TextBlock Text="世代管理と復元" Style="{StaticResource ScreenTitle}" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Button Content="一覧更新" Command="{Binding RefreshWorldBackupsCommand}"/>
+                            <Button Content="フォルダを開く" Command="{Binding OpenBackupsDirectoryCommand}" Margin="8,0,0,0"/>
+                            <Button Content="＋ 今すぐバックアップ" Command="{Binding CreateWorldBackupCommand}" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- 自動バックアップ(定期) -->
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                        <StackPanel>
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="自動バックアップ" Style="{StaticResource SectionHeading}"/>
+                                    <TextBlock Text="{Binding ScheduledBackupStatus}" Style="{StaticResource MutedText}" Margin="0,2,0,0"/>
+                                </StackPanel>
+                                <ToggleButton Style="{StaticResource ToggleSwitch}" IsChecked="{Binding ScheduledBackupEnabled}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            </Grid>
+                            <WrapPanel Margin="0,12,0,0">
+                                <StackPanel Margin="0,0,24,0">
+                                    <TextBlock Text="間隔(分)" Style="{StaticResource MutedText}"/>
+                                    <TextBox Text="{Binding ScheduledBackupIntervalMinutes}" Width="100" Margin="0,4,0,0"/>
+                                </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="保持世代数" Style="{StaticResource MutedText}"/>
+                                    <TextBox Text="{Binding ScheduledBackupMaxRetention}" Width="100" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 復元オプション -->
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                        <StackPanel>
+                            <TextBlock Text="復元オプション" Style="{StaticResource SectionHeading}"/>
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <TextBlock Text="復元先ワールド名" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <TextBox Grid.Column="1" Text="{Binding RestoreBackupWorldName}"/>
+                            </Grid>
+                            <CheckBox Content="復元前に現在ワールドを自動バックアップ" IsChecked="{Binding CreateBackupBeforeRestore}" Margin="0,10,0,0"/>
+                            <WrapPanel Margin="0,10,0,0">
+                                <Button Content="選択バックアップを復元" Command="{Binding RestoreWorldBackupCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>
+                                <Button Content="選択バックアップ削除" Command="{Binding DeleteWorldBackupCommand}" Style="{StaticResource DangerButton}"/>
+                            </WrapPanel>
+                            <TextBlock Text="{Binding WorldBackupStatus}" Style="{StaticResource MutedText}" Margin="0,8,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- バックアップ一覧 -->
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="バックアップ一覧" Style="{StaticResource SectionHeading}"/>
+                            <ListBox ItemsSource="{Binding WorldBackups}" SelectedItem="{Binding SelectedWorldBackup}" MaxHeight="320" Margin="0,8,0,0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,2">
                                             <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
                                             <WrapPanel Margin="0,2,0,0">
                                                 <TextBlock Text="{Binding WorldName, StringFormat=ワールド: {0}}" Style="{StaticResource MutedText}" Margin="0,0,10,0"/>
@@ -598,193 +786,83 @@
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
-
-                            <Border Background="{DynamicResource BrushCard}"
-                                    BorderBrush="{DynamicResource BrushBorder}"
-                                    BorderThickness="1"
-                                    CornerRadius="8"
-                                    Padding="10,8"
-                                    Margin="0,10,0,0">
-                                <TextBlock Text="{Binding WorldBackupStatus}"
-                                           Style="{StaticResource MutedText}"
-                                           TextWrapping="Wrap"/>
-                            </Border>
-
-                            <Separator Margin="0,14,0,14"/>
-
-                            <TextBlock Text="🗺️ 配布マップ導入 (.zip)" FontWeight="SemiBold" FontSize="14"/>
-                            <TextBlock Text="ZIPを選択し、導入先ワールド名を指定して取り込みます。"
-                                       Style="{StaticResource MutedText}"
-                                       Margin="0,4,0,0"
-                                       TextWrapping="Wrap"/>
-                            <Border Background="{DynamicResource BrushWarningSoft}"
-                                    BorderBrush="{DynamicResource BrushWarning}"
-                                    BorderThickness="1"
-                                    CornerRadius="8"
-                                    Padding="10,8"
-                                    Margin="0,8,0,0">
-                                <TextBlock Style="{StaticResource MutedText}" TextWrapping="Wrap">
-                                    <Run Text="配布マップ導入時にコマンドブロック有効化の確認を表示します。"/><LineBreak/>
-                                    <Run Text="有効化しない場合、ギミックが動作しない可能性があります。"/>
-                                </TextBlock>
-                            </Border>
-
-                            <TextBlock Text="ZIPファイル" Margin="0,10,0,4"/>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBox Text="{Binding MapArchivePath, Mode=OneWay}" IsReadOnly="True"/>
-                                <Button Grid.Column="1" Content="選択" Command="{Binding BrowseMapArchiveCommand}" Margin="8,0,0,0" Width="100"/>
-                            </Grid>
-
-                            <TextBlock Text="導入元フォルダ" Margin="0,10,0,4"/>
-                            <ComboBox ItemsSource="{Binding MapArchiveCandidates}"
-                                      SelectedItem="{Binding SelectedMapArchiveCandidate}"
-                                      DisplayMemberPath="DisplayName"/>
-                            <TextBlock Text="{Binding MapArchiveSourceHint}"
-                                       Style="{StaticResource MutedText}"
-                                       Margin="0,6,0,0"
-                                       TextWrapping="Wrap"/>
-
-                            <TextBlock Text="導入先ワールド名" Margin="0,10,0,4"/>
-                            <TextBox Text="{Binding MapImportWorldName}"/>
-
-                            <StackPanel Margin="0,10,0,0">
-                                <CheckBox Content="同名ワールドは上書きして導入"
-                                          IsChecked="{Binding ReplaceWorldOnMapImport}"/>
-
-                                <Button Content="配布マップを導入"
-                                        Command="{Binding ImportMapArchiveCommand}"
-                                        Style="{StaticResource PrimaryButton}"
-                                        Width="170"
-                                        Margin="0,10,0,0"/>
-
-                                <Border Background="{DynamicResource BrushCard}"
-                                        BorderBrush="{DynamicResource BrushBorder}"
-                                        BorderThickness="1"
-                                        CornerRadius="8"
-                                        Padding="10,8"
-                                        Margin="0,10,0,0">
-                                    <TextBlock Text="{Binding MapImportStatus}"
-                                               Style="{StaticResource MutedText}"
-                                               TextWrapping="Wrap"/>
-                                </Border>
-                            </StackPanel>
                         </StackPanel>
                     </Border>
-                </Grid>
-                </ScrollViewer>
-            </TabItem>
+                </StackPanel>
+            </ScrollViewer>
 
-            <TabItem x:Name="AddonTab" Header="MOD/プラグイン">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="12" DataContext="{Binding Addon}">
+            <!-- ─────────── アドオン(MOD/プラグイン) ─────────── -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20"
+                          Visibility="{Binding CurrentView, Converter={StaticResource EqualsToVisibilityConverter}, ConverterParameter=addons}">
+                <StackPanel DataContext="{Binding Addon}">
+                    <TextBlock Text="{Binding AddonCategoryName}" Style="{StaticResource Eyebrow}"/>
+                    <TextBlock Text="{Binding AddonCategoryName, StringFormat={}{0} の管理}" Style="{StaticResource ScreenTitle}" Margin="0,2,0,12"/>
 
-                    <Border Style="{StaticResource SurfacePanel}">
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,12">
                         <StackPanel>
-                            <TextBlock Text="🧰 管理対象" FontWeight="SemiBold" FontSize="14"/>
+                            <TextBlock Text="🧰 管理対象" Style="{StaticResource SectionHeading}"/>
                             <TextBlock Text="{Binding AddonStatus}" Style="{StaticResource MutedText}" Margin="0,4,0,0"/>
-                            <TextBlock Text="{Binding AddonImportReview, StringFormat=追加前チェック: {0}}" Style="{StaticResource MutedText}" Margin="0,4,0,0"/>
-                            <ProgressBar Height="6"
-                                         Margin="0,8,0,0"
-                                         IsIndeterminate="True"
+                            <TextBlock Text="{Binding AddonGuideText}" Style="{StaticResource MutedText}" Margin="0,6,0,0" TextWrapping="Wrap"/>
+                            <ProgressBar Height="6" Margin="0,8,0,0" IsIndeterminate="True"
                                          Visibility="{Binding IsAddonBusy, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                            <TextBlock Text="{Binding AddonProgressMessage}"
-                                       Style="{StaticResource MutedText}"
-                                       Margin="0,6,0,0"
+                            <TextBlock Text="{Binding AddonProgressMessage}" Style="{StaticResource MutedText}" Margin="0,6,0,0"
                                        Visibility="{Binding IsAddonBusy, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                            <TextBlock Text="{Binding AddonCategoryName, StringFormat=種別: {0}}" Style="{StaticResource MutedText}" Margin="0,6,0,0"/>
-                            <TextBlock Text="{Binding AddonActiveDirectory, StringFormat=有効: {0}}" Style="{StaticResource MutedText}" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
-                            <TextBlock Text="{Binding AddonDisabledDirectory, StringFormat=無効: {0}}" Style="{StaticResource MutedText}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
-                            <TextBlock Text="{Binding AddonGuideText}" Style="{StaticResource MutedText}" Margin="0,8,0,0" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
 
-                    <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,12">
                         <StackPanel>
-                            <TextBlock Text="🔍 Modrinth 検索" FontWeight="SemiBold" FontSize="14"/>
-
-                            <!-- 検索バー -->
+                            <TextBlock Text="🔍 Modrinth 検索" Style="{StaticResource SectionHeading}"/>
                             <Grid Margin="0,8,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                 <TextBox Grid.Column="0" Text="{Binding AddonSearchQuery, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center">
-                                    <TextBox.InputBindings>
-                                        <KeyBinding Key="Enter" Command="{Binding SearchAddonCatalogCommand}"/>
-                                    </TextBox.InputBindings>
+                                    <TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding SearchAddonCatalogCommand}"/></TextBox.InputBindings>
                                 </TextBox>
-                                <Button Grid.Column="1" Content="🔍 検索" Command="{Binding SearchAddonCatalogCommand}" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Padding="16,7"/>
-                                <Button Grid.Column="2" Content="🌐 ページを開く" Command="{Binding OpenAddonCatalogPageCommand}" Margin="8,0,0,0" Padding="12,7"/>
+                                <Button Grid.Column="1" Content="🔍 検索" Command="{Binding SearchAddonCatalogCommand}" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0"/>
+                                <Button Grid.Column="2" Content="🌐 ページ" Command="{Binding OpenAddonCatalogPageCommand}" Margin="8,0,0,0"/>
                             </Grid>
-
                             <TextBlock Text="{Binding AddonCatalogStatus}" Style="{StaticResource MutedText}" Margin="0,6,0,0"/>
-
-                            <!-- 検索結果リスト -->
-                            <ListBox ItemsSource="{Binding AddonSearchResults}" SelectedItem="{Binding SelectedAddonSearchResult}"
-                                     MaxHeight="320" Margin="0,8,0,0"
+                            <ListBox ItemsSource="{Binding AddonSearchResults}" SelectedItem="{Binding SelectedAddonSearchResult}" MaxHeight="280" Margin="0,8,0,0"
                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Padding="10,8" Margin="0,1">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
-                                                <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis"/>
-                                                    <TextBlock Text="{Binding Description}" Style="{StaticResource MutedText}" FontSize="11.5"
-                                                               TextWrapping="Wrap" MaxHeight="36" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
-                                                </StackPanel>
-                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" MinWidth="80">
-                                                    <TextBlock Text="{Binding DownloadCount, StringFormat={}{0:N0}}" FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Right"/>
-                                                    <TextBlock Text="downloads" Style="{StaticResource MutedText}" FontSize="10" HorizontalAlignment="Right"/>
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
+                                        <Grid Margin="0,2">
+                                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                            <StackPanel Margin="0,0,12,0">
+                                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding Description}" Style="{StaticResource MutedText}" FontSize="11.5" TextWrapping="Wrap" MaxHeight="34" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                                <TextBlock Text="{Binding DownloadCount, StringFormat={}{0:N0}}" FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Right"/>
+                                                <TextBlock Text="downloads" Style="{StaticResource MutedText}" FontSize="10" HorizontalAlignment="Right"/>
+                                            </StackPanel>
+                                        </Grid>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
                         </StackPanel>
                     </Border>
 
-                    <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,12">
                         <StackPanel>
                             <WrapPanel>
                                 <Button Content="追加" Command="{Binding AddAddonsCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8"/>
                                 <Button Content="有効化" Command="{Binding EnableAddonCommand}" Margin="0,0,8,8"/>
                                 <Button Content="無効化" Command="{Binding DisableAddonCommand}" Margin="0,0,8,8"/>
-                                <Button Content="削除" Command="{Binding DeleteAddonCommand}" Margin="0,0,8,8"/>
+                                <Button Content="削除" Command="{Binding DeleteAddonCommand}" Style="{StaticResource DangerButton}" Margin="0,0,8,8"/>
                                 <Button Content="フォルダを開く" Command="{Binding OpenAddonsDirectoryCommand}" Margin="0,0,8,8"/>
                                 <Button Content="一覧更新" Command="{Binding RefreshAddonsCommand}" Margin="0,0,0,8"/>
                             </WrapPanel>
-
-                            <ListBox ItemsSource="{Binding Addons}" SelectedItem="{Binding SelectedAddon}" Margin="0,8,0,0">
+                            <ListBox ItemsSource="{Binding Addons}" SelectedItem="{Binding SelectedAddon}" MaxHeight="260" Margin="0,8,0,0">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="0,2,0,2">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
+                                        <Grid Margin="0,2">
+                                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                             <StackPanel>
                                                 <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Text="{Binding FileSizeBytes, StringFormat=サイズ: {0:N0} bytes}" Style="{StaticResource MutedText}"/>
                                                 <TextBlock Text="{Binding LastUpdatedAt, StringFormat=更新: {0:yyyy/MM/dd HH:mm}}" Style="{StaticResource MutedText}"/>
                                             </StackPanel>
-                                            <Border Grid.Column="1"
-                                                    Background="{DynamicResource BrushSurface}"
-                                                    BorderBrush="{DynamicResource BrushBorder}"
-                                                    BorderThickness="1"
-                                                    CornerRadius="10"
-                                                    Padding="8,2"
-                                                    Margin="8,0,0,0"
-                                                    VerticalAlignment="Center">
+                                            <Border Grid.Column="1" Style="{StaticResource Pill}" VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding EnabledText}" FontSize="12"/>
                                             </Border>
                                         </Grid>
@@ -794,310 +872,453 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Background="{DynamicResource BrushSurface}"
-                            BorderBrush="{DynamicResource BrushBorder}"
-                            BorderThickness="2"
-                            CornerRadius="10"
-                            Padding="14"
-                            Margin="0,12,0,0"
-                            AllowDrop="True"
-                            DragOver="AddonDropZone_OnDragOver"
-                            Drop="AddonDropZone_OnDrop">
+                    <Border Style="{StaticResource DropZone}" AllowDrop="True"
+                            DragOver="AddonDropZone_OnDragOver" Drop="AddonDropZone_OnDrop">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                             <TextBlock Text="📥" FontSize="24" HorizontalAlignment="Center" Margin="0,0,0,6"/>
-                            <TextBlock Text="ここに .jar ファイル（またはフォルダ）をドラッグ＆ドロップして追加"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       Style="{StaticResource MutedText}"/>
+                            <TextBlock Text="ここに .jar ファイル（またはフォルダ）をドラッグ＆ドロップして追加" HorizontalAlignment="Center" Style="{StaticResource MutedText}"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
-                </ScrollViewer>
-            </TabItem>
+            </ScrollViewer>
 
-            <TabItem Header="バージョン">
-                <StackPanel Margin="12">
-                    <Border Style="{StaticResource SurfacePanel}">
+            <!-- ─────────── リソースパック ─────────── -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20"
+                          Visibility="{Binding CurrentView, Converter={StaticResource EqualsToVisibilityConverter}, ConverterParameter=respack}">
+                <StackPanel DataContext="{Binding ResourcePack}">
+                    <TextBlock Text="リソースパック" Style="{StaticResource Eyebrow}"/>
+                    <TextBlock Text="パックを配信する" Style="{StaticResource ScreenTitle}" Margin="0,2,0,2"/>
+                    <TextBlock Text="テクスチャやサウンドのパックを、参加者へ自動で適用します。下の 3 ステップを上から順に進めてください。" Style="{StaticResource MutedText}" Margin="0,0,0,16" TextWrapping="Wrap"/>
+
+                    <!-- STEP 1 -->
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,12">
                         <StackPanel>
-                            <TextBlock Text="📦 バージョン管理" FontWeight="SemiBold" FontSize="14"/>
-                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                <Button Content="一覧更新" Command="{Binding LoadVersionsCommand}" Width="120"
-                                        ToolTip="Mojang からバージョン一覧を再取得します"/>
-                                <TextBlock Text="現在:" Margin="12,0,0,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="{Binding Version}" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                <TextBlock Text="取得中..." Margin="12,0,0,0" VerticalAlignment="Center"
-                                           Style="{StaticResource MutedText}" FontSize="12"
-                                           Visibility="{Binding IsVersionsLoading, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="26" Height="26" CornerRadius="13" Background="{DynamicResource BrushAccent}" VerticalAlignment="Center">
+                                    <TextBlock Text="1" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="パックファイル(.zip)を選ぶ" Style="{StaticResource SectionHeading}" Margin="10,0,0,0" VerticalAlignment="Center"/>
                             </StackPanel>
-                            <ProgressBar Height="3"
-                                         Margin="0,6,0,0"
-                                         IsIndeterminate="True"
-                                         Visibility="{Binding IsVersionsLoading, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"/>
+                            <StackPanel Orientation="Horizontal" Margin="36,10,0,0">
+                                <Border Style="{StaticResource Pill}" MinWidth="280">
+                                    <TextBlock Text="{Binding ResourcePackFileName}" VerticalAlignment="Center"/>
+                                </Border>
+                                <Button Content="参照..." Command="{Binding BrowseFileCommand}" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Width="90"/>
+                            </StackPanel>
+                            <StackPanel Margin="36,10,0,0" Visibility="{Binding Sha1Hash, Converter={StaticResource NullOrEmptyToCollapsedConverter}}">
+                                <TextBlock Text="SHA-1(自動計算・改ざん検知に使用)" Style="{StaticResource MutedText}" Margin="0,0,0,4"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Style="{StaticResource Pill}">
+                                        <TextBlock Text="{Binding Sha1Hash}" FontFamily="Cascadia Mono" FontSize="12"/>
+                                    </Border>
+                                    <Button Content="コピー" Command="{Binding CopySha1Command}" Style="{StaticResource SmallButton}" Margin="8,0,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
 
+                    <!-- STEP 2 -->
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="26" Height="26" CornerRadius="13" Background="{DynamicResource BrushAccent}" VerticalAlignment="Center">
+                                    <TextBlock Text="2" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="配信方法を選んで開始する" Style="{StaticResource SectionHeading}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Text="どちらか一方を開始してください。Minecraft の新しいバージョンは HTTPS を要求するため、外部公開では「インターネットに配る」を推奨します。"
+                                       Style="{StaticResource MutedText}" Margin="36,6,0,0" TextWrapping="Wrap"/>
+
+                            <!-- 選択肢: インターネット配信(HTTPS) -->
+                            <Button Style="{StaticResource ChoiceButton}" Margin="36,10,0,0" Command="{Binding StartHttpsDistributionCommand}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="インターネットの人に配る（HTTPS・推奨）" FontWeight="SemiBold"/>
+                                        <TextBlock Text="Cloudflare トンネルで暗号化配信。離れた友達にも届き、MC の HTTPS 要件も満たします。" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1" Text="開始 →" Foreground="{DynamicResource BrushAccent}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                </Grid>
+                            </Button>
+
+                            <!-- 選択肢: ローカル配信(HTTP) -->
+                            <Button Style="{StaticResource ChoiceButton}" Margin="36,8,0,0" Command="{Binding StartServerCommand}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="同じ Wi-Fi の人に配る（HTTP）" FontWeight="SemiBold"/>
+                                        <TextBlock Text="同じネットワーク内の参加者向け。外部の人には届きません。" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1" Text="開始 →" Foreground="{DynamicResource BrushAccent}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                </Grid>
+                            </Button>
+
+                            <!-- 現在の状態 + 停止 -->
+                            <Border Style="{StaticResource SurfacePanel}" Margin="36,12,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Ellipse Width="8" Height="8" VerticalAlignment="Center" Margin="0,0,6,0">
+                                                <Ellipse.Style>
+                                                    <Style TargetType="Ellipse">
+                                                        <Setter Property="Fill" Value="{DynamicResource BrushTextMuted}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsServerRunning}" Value="True">
+                                                                <Setter Property="Fill" Value="{DynamicResource BrushSuccess}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Ellipse.Style>
+                                            </Ellipse>
+                                            <TextBlock VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="未配信"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource BrushTextMuted}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsTunnelRunning}" Value="True">
+                                                                <Setter Property="Text" Value="HTTPS トンネルで配信中"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource BrushSuccess}"/>
+                                                            </DataTrigger>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding IsServerRunning}" Value="True"/>
+                                                                    <Condition Binding="{Binding IsTunnelRunning}" Value="False"/>
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="Text" Value="ローカル(HTTP)で配信中"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource BrushSuccess}"/>
+                                                            </MultiDataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding StatusMessage}" Style="{StaticResource MutedText}" Margin="0,2,0,0"
+                                                   Visibility="{Binding StatusMessage, Converter={StaticResource NullOrEmptyToCollapsedConverter}}"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="■ 配信を停止" Command="{Binding StopServerCommand}" Style="{StaticResource DangerButton}" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+
+                            <Expander Header="詳細設定(配信ポート・UPnP)" Margin="36,12,0,0">
+                                <StackPanel Margin="0,8,0,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="配信ポート:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <TextBox Text="{Binding HttpPort, UpdateSourceTrigger=PropertyChanged}" Width="100"/>
+                                    </StackPanel>
+                                    <TextBlock Text="HTTP 直接接続を使う場合、ルーターのポートを UPnP で開放できます。" Style="{StaticResource MutedText}" Margin="0,8,0,6" TextWrapping="Wrap"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="開放" Command="{Binding OpenPortCommand}" Width="100"/>
+                                        <Button Content="閉鎖" Command="{Binding ClosePortCommand}" Margin="8,0,0,0" Width="100"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Expander>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- STEP 3 -->
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="26" Height="26" CornerRadius="13" Background="{DynamicResource BrushAccent}" VerticalAlignment="Center">
+                                    <TextBlock Text="3" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="サーバーに反映する" Style="{StaticResource SectionHeading}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Text="配信を開始すると URL が決まります。下のボタンで server.properties に書き込むと、サーバー再起動後に参加者へ自動配布されます。"
+                                       Style="{StaticResource MutedText}" Margin="36,6,0,0" TextWrapping="Wrap"/>
+
+                            <StackPanel Margin="36,10,0,0">
+                                <TextBlock Text="配信 URL" Style="{StaticResource MutedText}" Margin="0,0,0,4"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Style="{StaticResource Pill}" MinWidth="280">
+                                        <TextBlock Text="{Binding ResourcePackUrl}" FontFamily="Cascadia Mono" FontSize="12" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <Button Content="コピー" Command="{Binding CopyUrlCommand}" Style="{StaticResource SmallButton}" Margin="8,0,0,0"/>
+                                    <Button Content="グローバルIP取得" Command="{Binding RefreshPublicIpCommand}" Style="{StaticResource SmallButton}" Margin="8,0,0,0"/>
+                                </StackPanel>
+                                <Button Content="server.properties に適用" Command="{Binding ApplyToPropertiesCommand}" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Width="200" Margin="0,12,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ─────────── バージョン ─────────── -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20"
+                          Visibility="{Binding CurrentView, Converter={StaticResource EqualsToVisibilityConverter}, ConverterParameter=version}">
+                <StackPanel>
+                    <TextBlock Text="バージョン" Style="{StaticResource Eyebrow}"/>
+                    <TextBlock Text="バージョン管理" Style="{StaticResource ScreenTitle}" Margin="0,2,0,12"/>
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="一覧更新" Command="{Binding LoadVersionsCommand}" Width="120"/>
+                                <TextBlock Text="現在:" Margin="12,0,0,0" VerticalAlignment="Center" Style="{StaticResource MutedText}"/>
+                                <TextBlock Text="{Binding Version}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                                <TextBlock Text="取得中..." Margin="12,0,0,0" VerticalAlignment="Center" Style="{StaticResource MutedText}"
+                                           Visibility="{Binding IsVersionsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            </StackPanel>
+                            <ProgressBar Height="3" Margin="0,6,0,0" IsIndeterminate="True"
+                                         Visibility="{Binding IsVersionsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                             <Grid Margin="0,12,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="180"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <ComboBox Grid.Column="0"
-                                          ItemsSource="{Binding VersionFilters}"
-                                          SelectedItem="{Binding SelectedVersionFilter}"
-                                          DisplayMemberPath="Label"/>
-                                <ComboBox Grid.Column="1"
-                                          Margin="8,0,0,0"
-                                          ItemsSource="{Binding FilteredAvailableVersions}"
-                                          SelectedItem="{Binding SelectedVersion}"
-                                          DisplayMemberPath="Id"/>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="180"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <ComboBox Grid.Column="0" ItemsSource="{Binding VersionFilters}" SelectedItem="{Binding SelectedVersionFilter}" DisplayMemberPath="Label"/>
+                                <ComboBox Grid.Column="1" Margin="8,0,0,0" ItemsSource="{Binding FilteredAvailableVersions}" SelectedItem="{Binding SelectedVersion}" DisplayMemberPath="Id"/>
                             </Grid>
                             <TextBlock Text="{Binding VersionFilterSummary}" Style="{StaticResource MutedText}" Margin="0,6,0,0"/>
                             <TextBlock Text="{Binding SelectedVersionInfo}" Style="{StaticResource MutedText}" Margin="0,2,0,0"/>
-
-                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                <Button Content="変更" Command="{Binding ChangeVersionCommand}" Width="100"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                <Button Content="変更" Command="{Binding ChangeVersionCommand}" Style="{StaticResource PrimaryButton}" Width="100"/>
                                 <Button Content="再ダウンロード" Command="{Binding RedownloadJarCommand}" Margin="8,0,0,0"/>
                             </StackPanel>
-                            <TextBlock Text="変更前にバックアップを作成します。Forge/Fabric は正規版を推奨します。"
-                                       Style="{StaticResource MutedText}"
-                                       Margin="0,8,0,0"
-                                       TextWrapping="Wrap"/>
+                            <TextBlock Text="変更前にバックアップを作成します。Forge/Fabric は正規版を推奨します。" Style="{StaticResource MutedText}" Margin="0,8,0,0" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
-            </TabItem>
+            </ScrollViewer>
 
-            <TabItem x:Name="NetworkTab" Header="ネットワーク">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="12" DataContext="{Binding Network}">
-                        <Border x:Name="FirewallSection" Style="{StaticResource SurfacePanel}">
-                            <StackPanel>
-                                <TextBlock Text="🛡️ Firewall 受信ルール" FontWeight="SemiBold" FontSize="14"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                    <Button Content="作成" Command="{Binding CreateFirewallRuleCommand}" Width="90"/>
-                                    <Button Content="削除" Command="{Binding DeleteFirewallRuleCommand}" Margin="8,0,0,0" Width="90"/>
-                                    <Button Content="再作成" Command="{Binding RecreateFirewallRuleCommand}" Margin="8,0,0,0" Width="90"/>
-                                </StackPanel>
+            <!-- ─────────── クラッシュ復旧 ─────────── -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20"
+                          Visibility="{Binding CurrentView, Converter={StaticResource EqualsToVisibilityConverter}, ConverterParameter=crashes}">
+                <StackPanel>
+                    <Grid Margin="0,0,0,14">
+                        <StackPanel>
+                            <TextBlock Text="クラッシュ復旧" Style="{StaticResource Eyebrow}"/>
+                            <TextBlock Text="クラッシュ履歴と自動復旧" Style="{StaticResource ScreenTitle}" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBlock Text="自動再起動" VerticalAlignment="Center" Margin="0,0,8,0" Style="{StaticResource MutedText}"/>
+                            <ToggleButton Style="{StaticResource ToggleSwitch}" IsChecked="{Binding AutoRestartOnCrash}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                        <StackPanel>
+                            <TextBlock Text="自動復旧設定" Style="{StaticResource SectionHeading}"/>
+                            <CheckBox Content="クラッシュ時に自動再起動する" IsChecked="{Binding AutoRestartOnCrash}" Margin="0,8,0,0"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                <TextBlock Text="再起動までの秒数" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBox Text="{Binding AutoRestartDelaySeconds}" Width="80"/>
                             </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                <Button Content="一覧更新" Command="{Binding RefreshCrashHistoryCommand}"/>
+                                <Button Content="クラッシュレポートを開く" Command="{Binding OpenCrashReportsCommand}" Margin="8,0,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <Grid>
+                                <TextBlock Text="クラッシュ履歴" Style="{StaticResource SectionHeading}"/>
+                                <TextBlock Text="{Binding CrashHistorySummary}" Style="{StaticResource MutedText}" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Border Margin="0,10,0,0"
+                                    Visibility="{Binding HasCrashHistory, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                <StackPanel HorizontalAlignment="Center" Margin="0,24">
+                                    <TextBlock Text="✓" FontSize="32" HorizontalAlignment="Center" Foreground="{DynamicResource BrushSuccess}"/>
+                                    <TextBlock Text="クラッシュ履歴はありません" HorizontalAlignment="Center" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                                    <TextBlock Text="サーバーが異常終了するとここに記録が並びます。" Style="{StaticResource MutedText}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <ListBox ItemsSource="{Binding CrashHistory}" MaxHeight="320" Margin="0,8,0,0"
+                                     Visibility="{Binding HasCrashHistory, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,2">
+                                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Reason}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding WhenText}" Style="{StaticResource MutedText}" FontFamily="Cascadia Mono" FontSize="11"/>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="{Binding FileName}" Style="{StaticResource MutedText}" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="200"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ─────────── サーバー設定 ─────────── -->
+            <Grid Visibility="{Binding CurrentView, Converter={StaticResource EqualsToVisibilityConverter}, ConverterParameter=settings}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <ScrollViewer x:Name="SettingsScrollViewer" Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="24,20"
+                              PreviewMouseWheel="SettingsScrollViewer_OnPreviewMouseWheel">
+                    <StackPanel>
+                        <!-- 保留中バナー -->
+                        <Border Style="{StaticResource PendingBanner}" Margin="0,0,0,14"
+                                Visibility="{Binding RestartRequired, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock TextWrapping="Wrap">
+                                <Run Text="● 未保存/再起動が必要な変更があります。"/>
+                                <Run Text="「設定を保存」後、再起動で反映されます。" Foreground="{DynamicResource BrushTextMuted}"/>
+                            </TextBlock>
                         </Border>
 
-                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
-                            <StackPanel>
-                                <TextBlock Text="🔗 UPnP ポート操作" FontWeight="SemiBold" FontSize="14"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                    <Button Content="開放" Command="{Binding OpenPortCommand}" Width="110"/>
-                                    <Button Content="閉鎖" Command="{Binding ClosePortCommand}" Margin="8,0,0,0" Width="110"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
-
-                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
-                            <StackPanel>
-                                <TextBlock Text="🌐 アドレス" FontWeight="SemiBold" FontSize="14"/>
-                                <TextBlock Text="LAN IP" Style="{StaticResource MutedText}" Margin="0,8,0,4"/>
-                                <ItemsControl ItemsSource="{Binding LanIpAddresses}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding}"/>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-
-                                <TextBlock Text="グローバル IP" Style="{StaticResource MutedText}" Margin="0,12,0,4"/>
-                                <StackPanel Orientation="Horizontal">
-                                    <Button Content="取得" Command="{Binding RefreshPublicIpCommand}" Width="90"/>
-                                    <TextBlock Text="{Binding PublicIp}" Margin="8,0,0,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding PublicIpStatus}" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource MutedText}"/>
-                                </StackPanel>
-
-                                <TextBlock Text="共有アドレス" Style="{StaticResource MutedText}" Margin="0,12,0,4"/>
-                                <StackPanel Orientation="Horizontal">
-                                    <Border Background="{DynamicResource BrushCard}"
-                                            BorderBrush="{DynamicResource BrushBorder}"
-                                            BorderThickness="1"
-                                            CornerRadius="8"
-                                            Padding="10,6">
-                                        <TextBlock x:Name="ShareAddressText" FontWeight="SemiBold" FontSize="14"
-                                                   Text="{Binding PublicIp}"/>
-                                    </Border>
-                                    <Button Content="コピー" Command="{Binding CopyShareAddressCommand}" Margin="8,0,0,0" Width="80"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
-
-                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
-                            <StackPanel>
-                                <TextBlock Text="✅ 外部公開チェックリスト" FontWeight="SemiBold" FontSize="14"/>
-                                <ItemsControl ItemsSource="{Binding ExternalChecklist}" Margin="0,8,0,0">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="-  {Binding}"/>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-            <TabItem x:Name="ResourcePackTab" Header="リソースパック">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="12" DataContext="{Binding ResourcePack}">
-
-                        <!-- 概要カード -->
-                        <Border Style="{StaticResource SurfacePanel}">
-                            <StackPanel>
-                                <TextBlock Text="📦 リソースパック自動配布" FontWeight="Bold" FontSize="16"/>
-                                <TextBlock Margin="0,6,0,0" TextWrapping="Wrap"
-                                           Style="{StaticResource MutedText}">
-                                    リソースパック（テクスチャ・サウンドのカスタマイズZIP）をプレイヤーに自動ダウンロードさせる機能です。
-                                    URLを server.properties に書き込むことで、サーバー参加時にプレイヤーへ自動配布されます。
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- ファイル選択 -->
-                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
-                            <StackPanel>
-                                <TextBlock Text="📦 リソースパック選択" FontWeight="SemiBold" FontSize="14"/>
-                                <TextBlock Text="配布したいリソースパック（ZIP形式）を選択してください。"
-                                           Style="{StaticResource MutedText}" Margin="0,4,0,0"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                                    <Border Background="{DynamicResource BrushCard}"
-                                            BorderBrush="{DynamicResource BrushBorder}"
-                                            BorderThickness="1"
-                                            CornerRadius="8"
-                                            Padding="10,6"
-                                            MinWidth="260">
-                                        <TextBlock Text="{Binding ResourcePackFileName}"
-                                                   VerticalAlignment="Center"/>
-                                    </Border>
-                                    <Button Content="参照..." Command="{Binding BrowseFileCommand}" Margin="8,0,0,0" Width="90"/>
-                                </StackPanel>
-                                <StackPanel Margin="0,10,0,0"
-                                            Visibility="{Binding Sha1Hash, Converter={StaticResource NullOrEmptyToCollapsedConverter}, FallbackValue=Collapsed}">
-                                    <TextBlock Text="SHA-1 ハッシュ" Style="{StaticResource MutedText}" Margin="0,0,0,4"/>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Border Background="{DynamicResource BrushCard}"
-                                                BorderBrush="{DynamicResource BrushBorder}"
-                                                BorderThickness="1"
-                                                CornerRadius="8"
-                                                Padding="10,6">
-                                            <TextBlock Text="{Binding Sha1Hash}"
-                                                       FontFamily="Cascadia Mono"
-                                                       FontSize="12"/>
-                                        </Border>
-                                        <Button Content="コピー" Command="{Binding CopySha1Command}" Margin="8,0,0,0" Width="80"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- 配信設定 -->
-                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="🔒 配信設定" FontWeight="SemiBold" FontSize="14"/>
-                                    <Border Background="{DynamicResource BrushAccentSoft}"
-                                            BorderBrush="{DynamicResource BrushAccent}"
-                                            BorderThickness="1"
-                                            CornerRadius="8"
-                                            Padding="6,2"
-                                            Margin="8,0,0,0"
-                                            VerticalAlignment="Center">
-                                        <TextBlock Text="HTTPS推奨" FontSize="11" Foreground="{DynamicResource BrushAccent}"/>
-                                    </Border>
-                                </StackPanel>
+                        <!-- 基本設定 -->
+                        <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                            <StackPanel DataContext="{Binding Settings}">
+                                <TextBlock Text="基本設定 (server.properties)" Style="{StaticResource SectionHeading}"/>
                                 <Grid Margin="0,10,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="100"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="配信ポート:" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                    <TextBox Grid.Column="1"
-                                             Text="{Binding HttpPort, UpdateSourceTrigger=PropertyChanged}"
-                                             VerticalAlignment="Center"/>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="170"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Text="ポート" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ServerPort}" Width="120" HorizontalAlignment="Left"/>
+                                    <TextBlock Grid.Row="1" Text="最大人数" Margin="0,8,0,0" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding MaxPlayers}" Width="120" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+                                    <TextBlock Grid.Row="2" Text="MOTD" Margin="0,8,0,0" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Motd}" Margin="0,8,0,0"/>
+                                    <TextBlock Grid.Row="3" Text="難易度" Margin="0,8,0,0" VerticalAlignment="Center"/>
+                                    <ComboBox Grid.Row="3" Grid.Column="1" SelectedValue="{Binding Difficulty}" SelectedValuePath="Content" Width="160" HorizontalAlignment="Left" Margin="0,8,0,0">
+                                        <ComboBoxItem Content="peaceful"/><ComboBoxItem Content="easy"/><ComboBoxItem Content="normal"/><ComboBoxItem Content="hard"/>
+                                    </ComboBox>
+                                    <TextBlock Grid.Row="4" Text="ゲームモード" Margin="0,8,0,0" VerticalAlignment="Center"/>
+                                    <ComboBox Grid.Row="4" Grid.Column="1" SelectedValue="{Binding GameMode}" SelectedValuePath="Content" Width="160" HorizontalAlignment="Left" Margin="0,8,0,0">
+                                        <ComboBoxItem Content="survival"/><ComboBoxItem Content="creative"/><ComboBoxItem Content="adventure"/><ComboBoxItem Content="spectator"/>
+                                    </ComboBox>
+                                    <TextBlock Grid.Row="5" Text="描画距離" Margin="0,8,0,0" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding ViewDistance}" Width="120" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+                                    <TextBlock Grid.Row="6" Text="スポーン保護" Margin="0,8,0,0" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding SpawnProtection}" Width="120" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+                                    <TextBlock Grid.Row="7" Text="ワールド名" Margin="0,8,0,0" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding LevelName}" Width="220" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+                                    <TextBlock Grid.Row="8" Text="シード" Margin="0,8,0,0" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding Seed}" Width="220" HorizontalAlignment="Left" Margin="0,8,0,0"/>
                                 </Grid>
-                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                                    <Button Content="🔒 HTTPS配信を開始" Command="{Binding StartHttpsDistributionCommand}"
-                                            Style="{StaticResource PrimaryButton}" Width="160"/>
-                                    <Button Content="HTTP のみ" Command="{Binding StartServerCommand}"
-                                            Margin="8,0,0,0" Width="100"
-                                            ToolTip="ポート開放が必要。Minecraftの新しいバージョンではブロックされる場合があります。"/>
-                                    <Button Content="■ 停止" Command="{Binding StopServerCommand}" Margin="8,0,0,0" Width="80"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0"
-                                            Visibility="{Binding IsTunnelRunning, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
-                                    <Ellipse Width="8" Height="8" Fill="{DynamicResource BrushAccent}" VerticalAlignment="Center"/>
-                                    <TextBlock Text="HTTPS トンネル接続中" Margin="6,0,0,0" VerticalAlignment="Center"
-                                               Foreground="{DynamicResource BrushAccent}" FontWeight="SemiBold"/>
-                                </StackPanel>
-                                <TextBlock Text="{Binding StatusMessage}"
-                                           Foreground="{DynamicResource BrushAccent}"
-                                           FontSize="12"
-                                           FontWeight="SemiBold"
-                                           Margin="0,8,0,0"
-                                           Visibility="{Binding StatusMessage, Converter={StaticResource NullOrEmptyToCollapsedConverter}, FallbackValue=Collapsed}"/>
-                                <Expander Header="UPnP ポート操作（HTTP直接接続用）" Margin="0,12,0,0">
-                                    <StackPanel Margin="0,8,0,0">
-                                        <TextBlock Text="HTTPS不使用でHTTP直接接続を使う場合、ルーターのポートをUPnPで開放します。"
-                                                   Style="{StaticResource MutedText}" Margin="0,0,0,8" TextWrapping="Wrap"/>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Button Content="開放" Command="{Binding OpenPortCommand}" Width="110"/>
-                                            <Button Content="閉鎖" Command="{Binding ClosePortCommand}" Margin="8,0,0,0" Width="110"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Expander>
                             </StackPanel>
                         </Border>
 
-                        <!-- グローバルIP / URL -->
-                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
+                        <!-- ルール -->
+                        <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                            <StackPanel DataContext="{Binding Settings}">
+                                <TextBlock Text="ルール" Style="{StaticResource SectionHeading}"/>
+                                <CheckBox Content="PvP を許可" IsChecked="{Binding Pvp}" Margin="0,10,0,0"/>
+                                <CheckBox Content="コマンドブロックを有効化" IsChecked="{Binding EnableCommandBlock}" Margin="0,8,0,0"/>
+                                <CheckBox Content="オンラインモード (Mojang 認証)" IsChecked="{Binding OnlineMode}" Margin="0,8,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Java ランタイム -->
+                        <Border Style="{StaticResource Card}" Margin="0,0,0,14">
                             <StackPanel>
-                                <TextBlock Text="🔗 配信URL" FontWeight="SemiBold" FontSize="14"/>
-                                <TextBlock Text="グローバルIPを取得してリソースパックURLを確認します。ルーターのポート開放が必要です。"
-                                           Style="{StaticResource MutedText}" Margin="0,4,0,0" TextWrapping="Wrap"/>
-
-                                <TextBlock Text="グローバル IP" Style="{StaticResource MutedText}" Margin="0,10,0,4"/>
-                                <StackPanel Orientation="Horizontal">
-                                    <Button Content="取得" Command="{Binding RefreshPublicIpCommand}" Width="90"/>
-                                    <TextBlock Text="{Binding PublicIp}" Margin="8,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/>
-                                </StackPanel>
-
-                                <TextBlock Text="リソースパック URL" Style="{StaticResource MutedText}" Margin="0,12,0,4"/>
-                                <StackPanel Orientation="Horizontal">
-                                    <Border Background="{DynamicResource BrushCard}"
-                                            BorderBrush="{DynamicResource BrushBorder}"
-                                            BorderThickness="1"
-                                            CornerRadius="8"
-                                            Padding="10,6"
-                                            MinWidth="260">
-                                        <TextBlock Text="{Binding ResourcePackUrl}"
-                                                   FontFamily="Cascadia Mono"
-                                                   FontSize="12"
-                                                   VerticalAlignment="Center"/>
-                                    </Border>
-                                    <Button Content="コピー" Command="{Binding CopyUrlCommand}" Margin="8,0,0,0" Width="80"/>
-                                </StackPanel>
+                                <TextBlock Text="Java ランタイム" Style="{StaticResource SectionHeading}"/>
+                                <Border Style="{StaticResource WarnBanner}" Margin="0,8,0,8"
+                                        Visibility="{Binding HasJavaWarning, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="{Binding JavaWarning}" TextWrapping="Wrap"/>
+                                </Border>
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <TextBox Text="{Binding JavaPath}"/>
+                                    <Button Grid.Column="1" Content="参照" Command="{Binding BrowseJavaCommand}" Margin="8,0,0,0"/>
+                                    <Button Grid.Column="2" Content="自動検出" Command="{Binding DetectJavaCommand}" Margin="8,0,0,0"/>
+                                </Grid>
+                                <Border Background="{DynamicResource BrushAccentSoft}" CornerRadius="6" Padding="10,6" Margin="0,8,0,0">
+                                    <TextBlock TextWrapping="Wrap" FontSize="11.5" Foreground="{DynamicResource BrushTextMuted}"
+                                               Text="💡 Java 未導入の場合は https://adoptium.net から Temurin (LTS) を導入し「自動検出」を押してください。"/>
+                                </Border>
                             </StackPanel>
                         </Border>
 
-                        <!-- server.properties 適用 -->
-                        <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
+                        <!-- 起動安定化 / パフォーマンス -->
+                        <Border Style="{StaticResource Card}" Margin="0,0,0,14">
                             <StackPanel>
-                                <TextBlock Text="⚙️ server.properties 連携" FontWeight="SemiBold" FontSize="14"/>
-                                <TextBlock Text="URL と SHA-1 を server.properties に書き込みます。サーバー再起動後に反映されます。"
-                                           Style="{StaticResource MutedText}" Margin="0,4,0,0" TextWrapping="Wrap"/>
-                                <Button Content="server.properties に適用" Command="{Binding ApplyToPropertiesCommand}"
-                                        Style="{StaticResource PrimaryButton}" Width="200" Margin="0,10,0,0"
-                                        HorizontalAlignment="Left"/>
+                                <TextBlock Text="起動安定化・パフォーマンス" Style="{StaticResource SectionHeading}"/>
+                                <Grid Margin="0,10,0,0">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="120"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="起動方式" VerticalAlignment="Center"/>
+                                    <ComboBox Grid.Column="1" ItemsSource="{Binding LaunchModes}" SelectedItem="{Binding SelectedLaunchMode}" DisplayMemberPath="Label"/>
+                                </Grid>
+                                <TextBlock Text="{Binding LaunchModeDescription}" Style="{StaticResource MutedText}" Margin="120,4,0,0"/>
+                                <Grid Margin="0,10,0,0">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="120"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="プリセット" VerticalAlignment="Center"/>
+                                    <ComboBox Grid.Column="1" ItemsSource="{Binding StartupPresets}" SelectedItem="{Binding SelectedStartupPreset}" DisplayMemberPath="Label"/>
+                                    <Button Grid.Column="2" Content="適用" Command="{Binding ApplyStartupPresetCommand}" Margin="8,0,0,0"/>
+                                </Grid>
+                                <Grid Margin="0,10,0,0">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="120"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="Xms (MB)" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Column="1" Text="{Binding MemoryXmsMb}" Width="120"/>
+                                    <TextBlock Grid.Column="2" Text="Xmx (MB)" VerticalAlignment="Center" Margin="16,0,8,0"/>
+                                    <TextBox Grid.Column="3" Text="{Binding MemoryXmxMb}" Width="120"/>
+                                </Grid>
+                                <Grid Margin="0,10,0,0">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="120"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="追加Java引数" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Column="1" Text="{Binding JavaExtraArguments}"/>
+                                </Grid>
+                                <Button Content="ヘルスチェック実行" Command="{Binding RunHealthCheckCommand}" HorizontalAlignment="Left" Margin="0,12,0,0"/>
                             </StackPanel>
                         </Border>
 
-
+                        <!-- 権限管理 -->
+                        <Border Style="{StaticResource Card}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="16"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="👑 OP 管理" Style="{StaticResource SectionHeading}"/>
+                                    <ListBox ItemsSource="{Binding Ops}" SelectedItem="{Binding SelectedOp}" Margin="0,8,0,0" Height="150">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="{Binding Level, StringFormat=Level {0}}" Style="{StaticResource MutedText}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                        <TextBox Text="{Binding NewOpName}"/>
+                                        <Button Grid.Column="1" Content="追加" Command="{Binding AddOpCommand}" Margin="8,0,0,0"/>
+                                        <Button Grid.Column="2" Content="削除" Command="{Binding RemoveOpCommand}" Margin="8,0,0,0"/>
+                                    </Grid>
+                                    <Button Content="再読込" Command="{Binding ReloadPermissionsCommand}" Margin="0,8,0,0" Width="100" HorizontalAlignment="Left"/>
+                                    <TextBlock Text="{Binding PermissionsStatusMessage}" Foreground="{DynamicResource BrushAccent}" FontSize="12" Margin="0,6,0,0"
+                                               Visibility="{Binding PermissionsStatusMessage, Converter={StaticResource NullOrEmptyToCollapsedConverter}}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="📝 ホワイトリスト" Style="{StaticResource SectionHeading}"/>
+                                    <ListBox ItemsSource="{Binding Whitelist}" SelectedItem="{Binding SelectedWhitelist}" Margin="0,8,0,0" Height="150">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate><TextBlock Text="{Binding Name}" FontWeight="SemiBold"/></DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                        <TextBox Text="{Binding NewWhitelistName}"/>
+                                        <Button Grid.Column="1" Content="追加" Command="{Binding AddWhitelistCommand}" Margin="8,0,0,0"/>
+                                        <Button Grid.Column="2" Content="削除" Command="{Binding RemoveWhitelistCommand}" Margin="8,0,0,0"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
                     </StackPanel>
                 </ScrollViewer>
-            </TabItem>
 
-        </TabControl>
+                <Border Grid.Row="1" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,1,0,0" Padding="24,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="変更後は「設定を保存」を押してください。" Style="{StaticResource MutedText}"/>
+                            <TextBlock Text="{Binding SettingsSavedMessage}" Foreground="{DynamicResource BrushAccent}" FontWeight="SemiBold" FontSize="12" Margin="0,3,0,0"
+                                       Visibility="{Binding SettingsSavedMessage, Converter={StaticResource NullOrEmptyToCollapsedConverter}}"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="設定を保存" Command="{Binding SaveSettingsCommand}" Style="{StaticResource PrimaryButton}" Width="140"/>
+                    </Grid>
+                </Border>
+            </Grid>
+
+        </Grid>
     </Grid>
 </UserControl>

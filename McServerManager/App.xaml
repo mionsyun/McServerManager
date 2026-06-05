@@ -7,6 +7,10 @@
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <utilities:TutorialDimGeometryConverter x:Key="TutorialDimGeometryConverter"/>
             <utilities:NullOrEmptyToCollapsedConverter x:Key="NullOrEmptyToCollapsedConverter"/>
+            <utilities:EqualsToBooleanConverter x:Key="EqualsToBooleanConverter"/>
+            <utilities:EqualsToVisibilityConverter x:Key="EqualsToVisibilityConverter"/>
+            <utilities:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
+            <utilities:NotNullToVisibilityConverter x:Key="NotNullToVisibilityConverter"/>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Themes/Dark.xaml"/>
                 <ResourceDictionary Source="Resources/BaseStyles.xaml"/>

@@ -12,6 +12,7 @@ namespace McServerManager;
 public partial class App : System.Windows.Application
 {
     private static int _isHandlingDispatcherException;
+    private ServiceProvider? _serviceProvider;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -23,11 +24,14 @@ public partial class App : System.Windows.Application
         try
         {
             var provider = ConfigureServices();
+            _serviceProvider = provider;
 
             var settingsService = provider.GetRequiredService<IAppSettingsService>();
             var themeService = provider.GetRequiredService<IThemeService>();
             var appSettings = settingsService.Load();
             themeService.Apply(appSettings.Theme);
+
+            RestoreScheduledBackups(provider);
 
             var mainWindow = new MainWindow
             {
@@ -62,6 +66,39 @@ public partial class App : System.Windows.Application
         }
     }
 
+    protected override void OnExit(ExitEventArgs e)
+    {
+        try
+        {
+            _serviceProvider?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            LogException("OnExit.DisposeServices", ex);
+        }
+        base.OnExit(e);
+    }
+
+    private static void RestoreScheduledBackups(ServiceProvider provider)
+    {
+        try
+        {
+            var configService = provider.GetRequiredService<IServerConfigService>();
+            var scheduler = provider.GetRequiredService<IBackupSchedulerService>();
+            foreach (var config in configService.LoadAll())
+            {
+                if (config.ScheduledBackupEnabled)
+                {
+                    scheduler.ApplyConfiguration(config);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            LogException("RestoreScheduledBackups", ex);
+        }
+    }
+
     private static ServiceProvider ConfigureServices()
     {
         var services = new ServiceCollection();
@@ -74,6 +111,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IMinecraftVersionService, MinecraftVersionService>();
         services.AddSingleton<IServerRuntimeManager, ServerRuntimeManager>();
         services.AddSingleton<IWorldService, WorldService>();
+        services.AddSingleton<IBackupSchedulerService, BackupSchedulerService>();
         services.AddSingleton<IWorldMapService, WorldMapService>();
         services.AddSingleton<IPermissionsService, PermissionsService>();
         services.AddSingleton<IFirewallService, FirewallService>();

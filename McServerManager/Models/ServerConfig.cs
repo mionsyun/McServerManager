@@ -27,6 +27,10 @@ public sealed class ServerConfig
     public int SpawnProtection { get; set; } = 16;
     public bool AutoRestartOnCrash { get; set; } = true;
     public int AutoRestartDelaySeconds { get; set; } = 10;
+    public bool ScheduledBackupEnabled { get; set; }
+    public int ScheduledBackupIntervalMinutes { get; set; } = 60;
+    public int ScheduledBackupMaxRetention { get; set; } = 10;
+    public DateTime? LastScheduledBackupAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? LastStartedAt { get; set; }
     public bool HasCompletedInitialHealthCheck { get; set; }

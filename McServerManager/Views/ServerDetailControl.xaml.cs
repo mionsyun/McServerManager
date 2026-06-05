@@ -33,6 +33,20 @@ public partial class ServerDetailControl : System.Windows.Controls.UserControl
         }
     }
 
+    private void CopyConsole_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not ServerViewModel vm)
+            return;
+        try
+        {
+            System.Windows.Clipboard.SetText(string.Join(Environment.NewLine, vm.Logs));
+        }
+        catch
+        {
+            // クリップボードは稀に失敗する
+        }
+    }
+
     private void LogListBox_OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
     {
         if (!Keyboard.IsKeyDown(Key.LeftShift) && !Keyboard.IsKeyDown(Key.RightShift)
