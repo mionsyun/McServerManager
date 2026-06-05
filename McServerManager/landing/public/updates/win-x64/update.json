@@ -1,7 +1,7 @@
 {
-  "version": "2.0",
-  "installerUrl": "https://stmailpilotje.blob.core.windows.net/public/downloads/MaiPilotSetup-2.0.exe",
-  "sha256": "3618b6bf575125cd03301d07de2c0e861686808aaf6cc3ba1612b7ad6237ddb5",
-  "publishedAt": "2026-06-04T13:21:07Z",
+  "version": "2.0.1",
+  "installerUrl": "https://stmailpilotje.blob.core.windows.net/public/downloads/MaiPilotSetup-2.0.1.exe",
+  "sha256": "ae97cbb0f905345334aba1ecf0dc31903a083496e19be7e3ef0f36f76ddda118",
+  "publishedAt": "2026-06-05T02:53:15Z",
   "releaseNotesUrl": "https://www.maipilot.jp/docs/"
 }
