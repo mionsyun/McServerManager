@@ -21,7 +21,8 @@ public sealed class PortForwardViewModel : ObservableObject
     private bool _useUpnp = true;
     private bool _useFirewall = true;
     private bool _isBusy;
-    private string _statusMessage = "ポート番号とプロトコルを指定して「開放する」を押してください。";
+    private bool _isCurrentPortOpen;
+    private string _statusMessage = "ポート番号とプロトコルを決めて「ポートを開放する」を押してください。";
 
     public PortForwardViewModel(
         IPortControlService control,
@@ -36,19 +37,20 @@ public sealed class PortForwardViewModel : ObservableObject
 
         ProtocolOptions =
         [
-            new ProtocolOption(PortProtocol.Udp, "UDP のみ"),
-            new ProtocolOption(PortProtocol.Tcp, "TCP のみ"),
-            new ProtocolOption(PortProtocol.Both, "TCP と UDP の両方")
+            new ProtocolOption(PortProtocol.Udp, "UDP"),
+            new ProtocolOption(PortProtocol.Tcp, "TCP"),
+            new ProtocolOption(PortProtocol.Both, "UDP + TCP")
         ];
         _selectedProtocol = ProtocolOptions[0];
-
         OpenCommand = new AsyncRelayCommand(OpenAsync, () => !IsBusy);
         CloseCommand = new AsyncRelayCommand(CloseCurrentAsync, () => !IsBusy);
         CheckUsageCommand = new RelayCommand(CheckUsage, () => !IsBusy);
-        ApplyPalworldPresetCommand = new RelayCommand(ApplyPalworldPreset);
+        ApplyPresetCommand = new RelayCommand(ApplyPreset);
     }
 
     public IReadOnlyList<ProtocolOption> ProtocolOptions { get; }
+
+    public IReadOnlyList<PortPreset> Presets { get; } = PresetCatalog.Presets;
 
     public ObservableCollection<PortRuleViewModel> Rules { get; } = [];
 
@@ -57,19 +59,30 @@ public sealed class PortForwardViewModel : ObservableObject
     public AsyncRelayCommand CloseCommand { get; }
 
     public RelayCommand CheckUsageCommand { get; }
-
-    public RelayCommand ApplyPalworldPresetCommand { get; }
+    public RelayCommand ApplyPresetCommand { get; }
 
     public string PortText
     {
         get => _portText;
-        set => SetProperty(ref _portText, value);
+        set
+        {
+            if (SetProperty(ref _portText, value))
+            {
+                UpdateCurrentState();
+            }
+        }
     }
 
     public ProtocolOption SelectedProtocol
     {
         get => _selectedProtocol;
-        set => SetProperty(ref _selectedProtocol, value);
+        set
+        {
+            if (SetProperty(ref _selectedProtocol, value))
+            {
+                UpdateCurrentState();
+            }
+        }
     }
 
     public string Description
@@ -104,6 +117,24 @@ public sealed class PortForwardViewModel : ObservableObject
         }
     }
 
+    public bool IsCurrentPortOpen
+    {
+        get => _isCurrentPortOpen;
+        private set
+        {
+            if (SetProperty(ref _isCurrentPortOpen, value))
+            {
+                OnPropertyChanged(nameof(CurrentStateText));
+            }
+        }
+    }
+
+    public string CurrentPortLabel => $"{PortRuleViewModel.DescribeProtocol(SelectedProtocol.Value)} {PortText}";
+
+    public bool IsPortValid => int.TryParse(PortText?.Trim(), out var port) && port is >= 1 and <= 65535;
+
+    public string CurrentStateText => IsCurrentPortOpen ? "開放中" : "未開放";
+
     public string StatusMessage
     {
         get => _statusMessage;
@@ -116,12 +147,17 @@ public sealed class PortForwardViewModel : ObservableObject
         _log.Append($"保存済みの開放記録を {Rules.Count} 件読み込みました。");
     }
 
-    private void ApplyPalworldPreset()
+    private void ApplyPreset(object? parameter)
     {
-        PortText = "8211";
-        SelectedProtocol = ProtocolOptions.First(option => option.Value == PortProtocol.Udp);
-        Description = "Palworld";
-        _log.Append("プリセットを適用しました: Palworld (UDP 8211)");
+        if (parameter is not PortPreset preset)
+        {
+            return;
+        }
+
+        PortText = preset.Port.ToString();
+        SelectedProtocol = ProtocolOptions.First(option => option.Value == preset.Protocol);
+        Description = preset.Description;
+        StatusMessage = $"{preset.Name} の設定を入力しました。内容を確認して「ポートを開放する」を押してください。";
     }
 
     private async Task OpenAsync()
@@ -133,7 +169,7 @@ public sealed class PortForwardViewModel : ObservableObject
 
         if (!UseUpnp && !UseFirewall)
         {
-            _dialog.ShowError("UPnP とファイアウォールの少なくとも一方を選択してください。");
+            _dialog.ShowError("「ルーター」と「Windowsファイアウォール」の少なくとも一方にチェックを入れてください。");
             return;
         }
 
@@ -149,8 +185,8 @@ public sealed class PortForwardViewModel : ObservableObject
             _log.Append(outcome.Messages);
             await RefreshRulesAsync();
             StatusMessage = outcome.Success
-                ? $"{label} の開放処理が完了しました。"
-                : $"{label} を開放できませんでした。ログを確認してください。";
+                ? $"{label} を開放しました。"
+                : $"{label} を開放できませんでした。下のログを確認してください。";
         }
         catch (Exception ex)
         {
@@ -212,13 +248,15 @@ public sealed class PortForwardViewModel : ObservableObject
         if (listeners.Count == 0)
         {
             _log.Append($"{PortRuleViewModel.DescribeProtocol(protocol)} {port} を使用中のプロセスはありません（ゲームやサーバーを起動してから確認してください）。");
+            StatusMessage = "使用中のプロセスは見つかりませんでした。";
             return;
         }
-
         foreach (var listener in listeners)
         {
             _log.Append($"{listener.Protocol.ToString().ToUpperInvariant()} {listener.LocalEndPoint} を {listener.ProcessName} (PID {listener.ProcessId}) が使用中です。");
         }
+
+        StatusMessage = $"{listeners.Count} 件のプロセスが使用中です。詳しくは下のログを確認してください。";
     }
 
     private async Task RefreshRulesAsync(CancellationToken ct = default)
@@ -229,6 +267,16 @@ public sealed class PortForwardViewModel : ObservableObject
         {
             Rules.Add(new PortRuleViewModel(rule, CloseRuleAsync));
         }
+
+        UpdateCurrentState();
+    }
+
+    private void UpdateCurrentState()
+    {
+        OnPropertyChanged(nameof(CurrentPortLabel));
+        OnPropertyChanged(nameof(IsPortValid));
+        IsCurrentPortOpen = int.TryParse(PortText?.Trim(), out var port)
+                            && Rules.Any(item => item.Rule.Port == port && item.Rule.Protocol == SelectedProtocol.Value);
     }
 
     private bool TryGetPort(out int port)
@@ -247,6 +295,6 @@ public sealed class PortForwardViewModel : ObservableObject
     {
         _log.Append($"エラー: {ex.Message}");
         _dialog.ShowError($"{operationName}中に予期しないエラーが発生しました。{Environment.NewLine}{ex.Message}");
-        StatusMessage = "エラーが発生しました。";
+        StatusMessage = "エラーが発生しました。ログを確認してください。";
     }
 }

@@ -40,7 +40,7 @@
   <ItemGroup>
     <Compile Include="$(RepoRoot)MaiPort/Models/**/*.cs" LinkBase="Models" />
     <Compile Include="$(RepoRoot)MaiPort/Services/**/*.cs"
-             Exclude="$(RepoRoot)MaiPort/Services/DialogService.cs"
+             Exclude="$(RepoRoot)MaiPort/Services/DialogService.cs;$(RepoRoot)MaiPort/Services/ClipboardService.cs"
              LinkBase="Services" />
     <Compile Include="$(RepoRoot)MaiPort/ViewModels/**/*.cs" LinkBase="ViewModels" />
     <Compile Include="$(RepoRoot)MaiPort/Utilities/ObservableObject.cs" LinkBase="Utilities" />

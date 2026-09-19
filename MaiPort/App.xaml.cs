@@ -16,12 +16,13 @@ public partial class App : Application
         var firewall = new FirewallService();
         var store = new PortRuleStore();
         var dialog = new DialogService();
+        var clipboard = new ClipboardService();
         var control = new PortControlService(upnp, firewall, store);
 
         var log = new OperationLogViewModel();
         var forward = new PortForwardViewModel(control, network, dialog, log);
         var status = new NetworkStatusViewModel(network, upnp, firewall);
-        var mainViewModel = new MainViewModel(forward, status, log);
+        var mainViewModel = new MainViewModel(forward, status, log, clipboard);
 
         var window = new MainWindow(mainViewModel);
         MainWindow = window;
