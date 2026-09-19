@@ -19,6 +19,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!--
+      WPF (Microsoft.NET.Sdk.WindowsDesktop) の暗黙 using は System.Windows.Shapes.Path 等との
+      衝突を避けるため System.IO / System.Net.Http を含まない。検証側でも同じ条件にして、
+      using 漏れをこの環境で検出できるようにする。
+    -->
+    <Using Remove="System.IO" />
+    <Using Remove="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Open.NAT" Version="2.1.0" />
   </ItemGroup>
 
