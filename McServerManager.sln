@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McServerManager", "McServer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McServerManager.Tests", "McServerManager.Tests\McServerManager.Tests.csproj", "{948C4323-52A9-4312-B938-3D7BBB45660B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaiPort", "MaiPort\MaiPort.csproj", "{828C47C3-5978-4B93-B28F-13E40983C109}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaiPort.Tests", "MaiPort.Tests\MaiPort.Tests.csproj", "{98512881-257A-412F-8430-FA26D39CC05A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +28,13 @@ Global
 		{948C4323-52A9-4312-B938-3D7BBB45660B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{948C4323-52A9-4312-B938-3D7BBB45660B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{948C4323-52A9-4312-B938-3D7BBB45660B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{828C47C3-5978-4B93-B28F-13E40983C109}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{828C47C3-5978-4B93-B28F-13E40983C109}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{828C47C3-5978-4B93-B28F-13E40983C109}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{828C47C3-5978-4B93-B28F-13E40983C109}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98512881-257A-412F-8430-FA26D39CC05A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98512881-257A-412F-8430-FA26D39CC05A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98512881-257A-412F-8430-FA26D39CC05A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98512881-257A-412F-8430-FA26D39CC05A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
