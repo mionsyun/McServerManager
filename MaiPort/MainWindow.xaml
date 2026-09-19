@@ -39,7 +39,19 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel>
-                    <TextBlock Text="MaiPort" Style="{StaticResource AppTitle}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="MaiPort" Style="{StaticResource AppTitle}"/>
+                        <Border Background="{DynamicResource BrushAccentSoft}"
+                                CornerRadius="10"
+                                Padding="8,2"
+                                Margin="10,0,0,0"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="{Binding VersionText}"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource BrushAccent}"/>
+                        </Border>
+                    </StackPanel>
                     <TextBlock Text="ルーターと Windows ファイアウォールをまとめて設定して、ポートを開放します。"
                                Style="{StaticResource MutedText}"
                                Margin="0,2,0,0"/>

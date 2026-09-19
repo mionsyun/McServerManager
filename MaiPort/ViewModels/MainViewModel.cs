@@ -1,3 +1,4 @@
+using System.Reflection;
 using MaiPort.Services;
 using MaiPort.Utilities;
 
@@ -32,6 +33,8 @@ public sealed class MainViewModel : ObservableObject
     public RelayCommand CopyAddressCommand { get; }
 
     public string Title => "MaiPort - ポート開放ツール";
+
+    public string VersionText => $"v{Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0"}";
 
     public async Task InitializeAsync(CancellationToken ct = default)
     {
