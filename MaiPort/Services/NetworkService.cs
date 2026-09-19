@@ -104,7 +104,7 @@ public sealed class NetworkService : INetworkService
             var output = process.StandardOutput.ReadToEnd();
             process.WaitForExit((int)NetstatTimeout.TotalMilliseconds);
 
-            foreach (var line in output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
+            foreach (var line in output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 var parts = line.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
                 if (parts.Length < 4 || !parts[0].Equals(protocolArgument, StringComparison.OrdinalIgnoreCase))

@@ -225,6 +225,25 @@ if (!fullPath.StartsWith(allowedRoot, StringComparison.OrdinalIgnoreCase))
 
 ---
 
+## MaiPort（ポート開放ツール）
+
+`MaiPort/` は MaiPilot のネットワーク層を流用した別アプリ（WPF / .NET 8）。
+UPnP と Windows ファイアウォールをまとめて操作してポートを開放する。
+本体（`McServerManager/`）とはコードを共有せず、コピーして独立させている。
+
+| 目的 | コマンド |
+|---|---|
+| ビルド + テスト + exe 生成（Windows） | `pwsh -File scripts/build-maiport.ps1` |
+| 型チェック + テスト（Linux / web） | `bash scripts/verify-maiport-linux.sh` |
+| CI | `.github/workflows/build-maiport.yml`（windows-latest で exe を Artifacts 添付） |
+
+**Linux 環境での注意:** WPF は Windows でしかビルドできない（`Microsoft.NET.Sdk.WindowsDesktop`
+が Ubuntu 版 SDK に含まれない）。`scripts/linux-verify/` は WPF 非依存部分だけを
+net8.0 としてコンパイルする検証用プロジェクトで、`MaiPort/` の実ソースを直接参照している。
+`MaiPort/` 側にファイルを追加したら、この検証プロジェクトでも拾われるか確認すること。
+
+---
+
 ## コードレビューチェックリスト
 
 PRを出す前に確認:

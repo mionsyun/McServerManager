@@ -26,26 +26,47 @@ MaiPilot (McServerManager) のネットワーク層（UPnP / ファイアウォ�
 > UPnP が失敗する場合は、ルーター側で UPnP が無効、二重ルーター構成、または
 > 共有回線 / CGNAT の可能性があります。ログに表示される案内を確認してください。
 
-## ビルド
+## ビルド（Windows）
+
+WPF アプリのため、**exe の生成とアプリの実行は Windows でのみ可能**です。
+
+```powershell
+# ビルド + テスト + 単一ファイル exe の生成（dist/maiport-selfcontained/MaiPort.exe）
+pwsh -File scripts/build-maiport.ps1
+
+# .NET 8 Desktop Runtime がある環境向けの軽量 exe
+pwsh -File scripts/build-maiport.ps1 -SelfContained:$false
+```
+
+個別に実行する場合:
+
+```powershell
+dotnet build MaiPort/MaiPort.csproj -c Release
+dotnet test MaiPort.Tests/MaiPort.Tests.csproj
+dotnet run --project MaiPort/MaiPort.csproj
+```
+
+## ビルド（GitHub Actions）
+
+`.github/workflows/build-maiport.yml` が windows-latest で
+ビルド → テスト → exe 生成まで行い、成果物を Artifacts として添付します。
+
+| Artifact | 内容 |
+|---|---|
+| `MaiPort-win-x64-selfcontained` | .NET 不要の単一 exe（サイズ大） |
+| `MaiPort-win-x64-framework-dependent` | .NET 8 Desktop Runtime が必要な軽量 exe |
+
+## 検証（Linux / Claude Code on the web）
+
+Linux では WPF（`Microsoft.NET.Sdk.WindowsDesktop`）をビルドできないため、
+WPF 非依存部分（Models / Services / ViewModels）の型チェックとユニットテストのみを行います。
 
 ```bash
-# ビルド（Releaseモード）
-dotnet build MaiPort/MaiPort.csproj --configuration Release
-
-# 実行（開発用 / Windows のみ）
-dotnet run --project MaiPort/MaiPort.csproj
-
-# 発行（自己完結型 win-x64・単一ファイル）
-dotnet publish MaiPort/MaiPort.csproj \
-  --configuration Release \
-  --runtime win-x64 \
-  --self-contained true \
-  -p:PublishSingleFile=true \
-  --output ./dist/maiport/
-
-# テスト
-dotnet test MaiPort.Tests/MaiPort.Tests.csproj
+sudo apt-get update && sudo apt-get install -y --no-install-recommends dotnet-sdk-8.0
+bash scripts/verify-maiport-linux.sh
 ```
+
+XAML・コードビハインド・exe は Windows 側（上記のスクリプトまたは GitHub Actions）で確認してください。
 
 ## 構成
 

@@ -1,0 +1,40 @@
+<!--
+  Linux / Claude Code on the web 用の検証プロジェクト。
+  WPF (Microsoft.NET.Sdk.WindowsDesktop) は Windows でしかビルドできないため、
+  MaiPort のうち WPF に依存しない部分（Models / Services / ViewModels）だけを
+  net8.0 としてコンパイルし、型チェックとユニットテストを行う。
+  WPF 依存クラス（DialogService / RelayCommand など）は Shims で差し替える。
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>MaiPort</RootNamespace>
+    <AssemblyName>MaiPort</AssemblyName>
+    <NoWarn>$(NoWarn);CA1416;NU1701</NoWarn>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <RepoRoot>$(MSBuildThisFileDirectory)../../../</RepoRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Open.NAT" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- MaiPort/AssemblyInfo.cs は WPF 依存のため、ここで同じ内容を再指定する。 -->
+    <InternalsVisibleTo Include="MaiPort.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(RepoRoot)MaiPort/Models/**/*.cs" LinkBase="Models" />
+    <Compile Include="$(RepoRoot)MaiPort/Services/**/*.cs"
+             Exclude="$(RepoRoot)MaiPort/Services/DialogService.cs"
+             LinkBase="Services" />
+    <Compile Include="$(RepoRoot)MaiPort/ViewModels/**/*.cs" LinkBase="ViewModels" />
+    <Compile Include="$(RepoRoot)MaiPort/Utilities/ObservableObject.cs" LinkBase="Utilities" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shims.cs" />
+  </ItemGroup>
+
+</Project>
