@@ -11,5 +11,5 @@ public interface IPortControlService
 
     Task<PortControlOutcome> OpenAsync(PortOpenRequest request, CancellationToken ct = default);
 
-    Task<PortControlOutcome> CloseAsync(int port, PortProtocol protocol, CancellationToken ct = default);
+    Task<PortControlOutcome> CloseAsync(PortRange range, PortProtocol protocol, CancellationToken ct = default);
 }

@@ -9,9 +9,9 @@ public interface IFirewallService
 {
     bool IsAdministrator();
 
-    string BuildRuleName(int port, PortProtocol protocol);
+    string BuildRuleName(PortRange range, PortProtocol protocol);
 
-    Task<PortOperationResult> AllowAsync(int port, PortProtocol protocol, string description, CancellationToken ct = default);
+    Task<PortOperationResult> AllowAsync(PortRange range, PortProtocol protocol, string description, CancellationToken ct = default);
 
-    Task<PortOperationResult> RemoveAsync(int port, PortProtocol protocol, CancellationToken ct = default);
+    Task<PortOperationResult> RemoveAsync(PortRange range, PortProtocol protocol, CancellationToken ct = default);
 }

@@ -22,6 +22,7 @@ public sealed class PortRuleStoreTests : IDisposable
         var rule = new PortRule
         {
             Port = 8211,
+            EndPort = 8211,
             Protocol = PortProtocol.Udp,
             Description = "Palworld",
             UpnpOpened = true,

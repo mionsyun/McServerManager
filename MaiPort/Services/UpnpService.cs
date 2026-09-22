@@ -1,4 +1,5 @@
 using MaiPort.Models;
+using MaiPort.Utilities;
 using Open.Nat;
 
 namespace MaiPort.Services;
@@ -8,6 +9,7 @@ namespace MaiPort.Services;
 /// </summary>
 public sealed class UpnpService : IUpnpService
 {
+    private const int MaxMappingCount = 64;
     private static readonly TimeSpan DiscoveryTimeout = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(2);
 
@@ -15,32 +17,42 @@ public sealed class UpnpService : IUpnpService
     private NatDevice? _device;
     private DateTime _lastDiscoveryUtc = DateTime.MinValue;
 
-    public async Task<PortOperationResult> OpenAsync(int port, PortProtocol protocol, string description, CancellationToken ct = default)
+    public async Task<PortOperationResult> OpenAsync(PortRange range, PortProtocol protocol, string description, CancellationToken ct = default)
     {
+        if (PortRangeParser.Count(range) > MaxMappingCount)
+        {
+            return PortOperationResult.Failed(
+                $"UPnP で一度に開放できるのは {MaxMappingCount} ポートまでです（指定: {PortRangeParser.Count(range)} ポート）。" +
+                $"{Environment.NewLine}server.properties の server-udp-ports などで範囲を狭めてください。");
+        }
+
         var device = await GetDeviceAsync(ct).ConfigureAwait(false);
         if (device is null)
         {
-            return PortOperationResult.Failed(BuildDeviceNotFoundMessage(port, protocol));
+            return PortOperationResult.Failed(BuildDeviceNotFoundMessage(range, protocol));
         }
 
         var label = string.IsNullOrWhiteSpace(description) ? "MaiPort" : description.Trim();
         foreach (var natProtocol in ResolveProtocols(protocol))
         {
-            try
+            foreach (var port in PortRangeParser.EnumeratePorts(range))
             {
-                var mapping = new Mapping(natProtocol, port, port, $"MaiPort - {label}");
-                await device.CreatePortMapAsync(mapping).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                return PortOperationResult.Failed(BuildOpenFailureMessage(port, natProtocol, ex));
+                try
+                {
+                    var mapping = new Mapping(natProtocol, port, port, $"MaiPort - {label}");
+                    await device.CreatePortMapAsync(mapping).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    return PortOperationResult.Failed(BuildOpenFailureMessage(port, natProtocol, ex));
+                }
             }
         }
 
-        return PortOperationResult.Ok($"UPnP: {DescribeProtocol(protocol)} {port} を開放しました。");
+        return PortOperationResult.Ok($"UPnP: {DescribeProtocol(protocol)} {PortRangeParser.Format(range)} を開放しました。");
     }
 
-    public async Task<PortOperationResult> CloseAsync(int port, PortProtocol protocol, CancellationToken ct = default)
+    public async Task<PortOperationResult> CloseAsync(PortRange range, PortProtocol protocol, CancellationToken ct = default)
     {
         var device = await GetDeviceAsync(ct).ConfigureAwait(false);
         if (device is null)
@@ -48,24 +60,27 @@ public sealed class UpnpService : IUpnpService
             return PortOperationResult.Failed("UPnP対応ルーターが見つからないため、マッピングを削除できませんでした。");
         }
 
-        var failures = new List<string>();
+        var failureCount = 0;
         foreach (var natProtocol in ResolveProtocols(protocol))
         {
-            try
+            foreach (var port in PortRangeParser.EnumeratePorts(range))
             {
-                var mapping = new Mapping(natProtocol, port, port);
-                await device.DeletePortMapAsync(mapping).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                // 既に存在しないマッピングの削除は失敗しうるため、まとめて報告する。
-                failures.Add($"{natProtocol.ToString().ToUpperInvariant()}: {ex.Message}");
+                try
+                {
+                    var mapping = new Mapping(natProtocol, port, port);
+                    await device.DeletePortMapAsync(mapping).ConfigureAwait(false);
+                }
+                catch
+                {
+                    // 既に存在しないマッピングの削除は失敗しうるため、件数だけ数える。
+                    failureCount++;
+                }
             }
         }
 
-        return failures.Count == 0
-            ? PortOperationResult.Ok($"UPnP: {DescribeProtocol(protocol)} {port} のマッピングを削除しました。")
-            : PortOperationResult.Failed($"UPnPマッピングの削除に失敗しました。{Environment.NewLine}{string.Join(Environment.NewLine, failures)}");
+        return failureCount == 0
+            ? PortOperationResult.Ok($"UPnP: {DescribeProtocol(protocol)} {PortRangeParser.Format(range)} のマッピングを削除しました。")
+            : PortOperationResult.Ok($"UPnP: {DescribeProtocol(protocol)} {PortRangeParser.Format(range)} のマッピングを削除しました（{failureCount} 件は元から存在しませんでした）。");
     }
 
     public async Task<bool> IsDeviceAvailableAsync(CancellationToken ct = default)
@@ -135,13 +150,13 @@ public sealed class UpnpService : IUpnpService
         };
     }
 
-    private static string BuildDeviceNotFoundMessage(int port, PortProtocol protocol)
+    private static string BuildDeviceNotFoundMessage(PortRange range, PortProtocol protocol)
     {
         var lines = new List<string>
         {
             "UPnP対応ルーターが見つかりませんでした。",
             "共有回線（J:COMなど）やCGNAT環境では、ポート開放そのものができない場合があります。",
-            $"ルーターの設定画面で {DescribeProtocol(protocol)} {port} のポート転送を手動設定するか、",
+            $"ルーターの設定画面で {DescribeProtocol(protocol)} {PortRangeParser.Format(range)} のポート転送を手動設定するか、",
             "固定IPオプション / VPN中継（Tailscale, playit.gg など）を検討してください。"
         };
 

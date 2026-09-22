@@ -5,6 +5,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
 using MaiPort.Models;
+using MaiPort.Utilities;
 
 namespace MaiPort.Services;
 
@@ -32,27 +33,27 @@ public sealed partial class FirewallService : IFirewallService
         return principal.IsInRole(WindowsBuiltInRole.Administrator);
     }
 
-    public string BuildRuleName(int port, PortProtocol protocol)
+    public string BuildRuleName(PortRange range, PortProtocol protocol)
     {
-        ValidatePort(port);
-        return $"{RuleNamePrefix}_{ToNetshProtocol(protocol)}_{port}";
+        ValidateRange(range);
+        return $"{RuleNamePrefix}_{ToNetshProtocol(protocol)}_{PortRangeParser.Format(range)}";
     }
 
-    public async Task<PortOperationResult> AllowAsync(int port, PortProtocol protocol, string description, CancellationToken ct = default)
+    public async Task<PortOperationResult> AllowAsync(PortRange range, PortProtocol protocol, string description, CancellationToken ct = default)
     {
-        ValidatePort(port);
+        ValidateRange(range);
         var label = NormalizeRuleToken(description, "Port");
         var commands = new List<string>();
         var ruleNames = new List<string>();
 
         foreach (var single in ExpandProtocols(protocol))
         {
-            var ruleName = BuildRuleName(port, single);
+            var ruleName = BuildRuleName(range, single);
             ruleNames.Add(ruleName);
             // 同名規則が残っていると重複登録になるため、作り直す。
             commands.Add($"advfirewall firewall delete rule name={ruleName}");
             commands.Add($"advfirewall firewall add rule name={ruleName} dir=in action=allow " +
-                         $"protocol={ToNetshProtocol(single)} localport={port} profile=any description={RuleNamePrefix}_{label}");
+                         $"protocol={ToNetshProtocol(single)} localport={PortRangeParser.Format(range)} profile=any description={RuleNamePrefix}_{label}");
         }
 
         var exitCode = await RunNetshScriptAsync(commands, ct).ConfigureAwait(false);
@@ -64,22 +65,22 @@ public sealed partial class FirewallService : IFirewallService
         var state = await GetRuleStateAsync(ruleNames, ct).ConfigureAwait(false);
         return state switch
         {
-            RuleState.Present => PortOperationResult.Ok($"ファイアウォール: {DescribeProtocol(protocol)} {port} の受信を許可しました。"),
+            RuleState.Present => PortOperationResult.Ok($"ファイアウォール: {DescribeProtocol(protocol)} {PortRangeParser.Format(range)} の受信を許可しました。"),
             RuleState.Missing => PortOperationResult.Failed(
                 $"ファイアウォール受信規則を作成できませんでした (netsh ExitCode={exitCode})。管理者権限を許可したか確認してください。"),
-            _ => PortOperationResult.Ok($"ファイアウォール: {DescribeProtocol(protocol)} {port} の受信許可を実行しました（規則の確認はできませんでした）。")
+            _ => PortOperationResult.Ok($"ファイアウォール: {DescribeProtocol(protocol)} {PortRangeParser.Format(range)} の受信許可を実行しました（規則の確認はできませんでした）。")
         };
     }
 
-    public async Task<PortOperationResult> RemoveAsync(int port, PortProtocol protocol, CancellationToken ct = default)
+    public async Task<PortOperationResult> RemoveAsync(PortRange range, PortProtocol protocol, CancellationToken ct = default)
     {
-        ValidatePort(port);
+        ValidateRange(range);
         var commands = new List<string>();
         var ruleNames = new List<string>();
 
         foreach (var single in ExpandProtocols(protocol))
         {
-            var ruleName = BuildRuleName(port, single);
+            var ruleName = BuildRuleName(range, single);
             ruleNames.Add(ruleName);
             commands.Add($"advfirewall firewall delete rule name={ruleName}");
         }
@@ -93,7 +94,7 @@ public sealed partial class FirewallService : IFirewallService
         var state = await GetRuleStateAsync(ruleNames, ct).ConfigureAwait(false);
         return state == RuleState.Present
             ? PortOperationResult.Failed($"ファイアウォール受信規則を削除できませんでした (netsh ExitCode={exitCode})。")
-            : PortOperationResult.Ok($"ファイアウォール: {DescribeProtocol(protocol)} {port} の受信規則を削除しました。");
+            : PortOperationResult.Ok($"ファイアウォール: {DescribeProtocol(protocol)} {PortRangeParser.Format(range)} の受信規則を削除しました。");
     }
 
     /// <summary>
@@ -239,11 +240,11 @@ public sealed partial class FirewallService : IFirewallService
         return protocol == PortProtocol.Both ? "TCP/UDP" : ToNetshProtocol(protocol);
     }
 
-    private static void ValidatePort(int port)
+    private static void ValidateRange(PortRange range)
     {
-        if (port is < 1 or > 65535)
+        if (!PortRangeParser.IsValid(range))
         {
-            throw new ArgumentOutOfRangeException(nameof(port), port, "ポート番号は 1〜65535 で指定してください。");
+            throw new ArgumentOutOfRangeException(nameof(range), range, "ポート番号は 1〜65535 で指定してください。");
         }
     }
 

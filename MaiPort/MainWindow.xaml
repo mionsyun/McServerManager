@@ -165,18 +165,18 @@
 
                         <Grid Margin="0,0,0,14">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="170"/>
+                                <ColumnDefinition Width="210"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0" Margin="0,0,20,0">
-                                <TextBlock Text="ポート番号" Style="{StaticResource FieldLabel}"/>
+                                <TextBlock Text="ポート番号（範囲は 49152-49200）" Style="{StaticResource FieldLabel}"/>
                                 <TextBox x:Name="PortTextBox"
                                          Text="{Binding Forward.PortText, UpdateSourceTrigger=PropertyChanged}"
-                                         MaxLength="5"
+                                         MaxLength="11"
                                          FontSize="18"
                                          TabIndex="0"
-                                         ToolTip="1〜65535 の数字。Enter キーで開放を実行します。"
+                                         ToolTip="1〜65535 の数字。「49152-49200」のように範囲も指定できます。Enter キーで開放を実行します。"
                                          PreviewTextInput="OnPortPreviewTextInput"
                                          PreviewKeyDown="OnPortPreviewKeyDown"
                                          DataObject.Pasting="OnPortPasting">
@@ -190,7 +190,7 @@
                                         </Style>
                                     </TextBox.Style>
                                 </TextBox>
-                                <TextBlock Text="1〜65535 で入力してください" Margin="2,6,0,0" FontSize="12">
+                                <TextBlock Text="1〜65535、または 49152-49200 の形式" Margin="2,6,0,0" FontSize="12">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Foreground" Value="{DynamicResource BrushWarning}"/>
@@ -273,6 +273,51 @@
                                         Command="{Binding Forward.CheckUsageCommand}"/>
                             </StackPanel>
                         </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Minecraft 統合版サーバー -->
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="Minecraft 統合版サーバー (Bedrock)" Style="{StaticResource SectionTitle}"/>
+                        <TextBlock Text="server.properties を読み込むと、transport の設定（NetherNet / RakNet）を見て、開放すべきポートを自動で判定します。"
+                                   Style="{StaticResource MutedText}"
+                                   Margin="0,0,0,14"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                            <Button Style="{StaticResource SecondaryButton}"
+                                    Content="server.properties を読み込む"
+                                    MinWidth="220"
+                                    Margin="0,0,8,0"
+                                    Command="{Binding Bedrock.LoadCommand}"/>
+                            <Button Style="{StaticResource PrimaryButton}"
+                                    Content="この内容で開放する"
+                                    MinWidth="180"
+                                    Padding="20,10"
+                                    Command="{Binding Bedrock.OpenAllCommand}"/>
+                        </StackPanel>
+
+                        <ItemsControl ItemsSource="{Binding Bedrock.Items}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource BrushAccentSoft}"
+                                            CornerRadius="8"
+                                            Padding="14,10"
+                                            Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Label}" FontWeight="SemiBold" MinWidth="150"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Purpose}" Style="{StaticResource MutedText}"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <TextBlock Text="{Binding Bedrock.Summary}" Style="{StaticResource MutedText}"/>
                     </StackPanel>
                 </Border>
 

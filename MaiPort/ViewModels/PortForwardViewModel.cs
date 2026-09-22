@@ -7,6 +7,7 @@ namespace MaiPort.ViewModels;
 
 /// <summary>
 /// ポート開放・解除の入力と、開放中ポート一覧の表示を担当する。
+/// ポート番号は "8211" のほか "49152-49200" の範囲指定も受け付ける。
 /// </summary>
 public sealed class PortForwardViewModel : ObservableObject
 {
@@ -34,7 +35,6 @@ public sealed class PortForwardViewModel : ObservableObject
         _network = network;
         _dialog = dialog;
         _log = log;
-
         ProtocolOptions =
         [
             new ProtocolOption(PortProtocol.Udp, "UDP"),
@@ -129,9 +129,9 @@ public sealed class PortForwardViewModel : ObservableObject
         }
     }
 
-    public string CurrentPortLabel => $"{PortRuleViewModel.DescribeProtocol(SelectedProtocol.Value)} {PortText}";
+    public bool IsPortValid => PortRangeParser.TryParse(PortText, out _);
 
-    public bool IsPortValid => int.TryParse(PortText?.Trim(), out var port) && port is >= 1 and <= 65535;
+    public string CurrentPortLabel => $"{PortRuleViewModel.DescribeProtocol(SelectedProtocol.Value)} {PortText}";
 
     public string CurrentStateText => IsCurrentPortOpen ? "開放中" : "未開放";
 
@@ -147,6 +147,18 @@ public sealed class PortForwardViewModel : ObservableObject
         _log.Append($"保存済みの開放記録を {Rules.Count} 件読み込みました。");
     }
 
+    public async Task RefreshRulesAsync(CancellationToken ct = default)
+    {
+        var rules = await _control.GetRulesAsync(ct);
+        Rules.Clear();
+        foreach (var rule in rules)
+        {
+            Rules.Add(new PortRuleViewModel(rule, CloseRuleAsync));
+        }
+
+        UpdateCurrentState();
+    }
+
     private void ApplyPreset(object? parameter)
     {
         if (parameter is not PortPreset preset)
@@ -154,7 +166,7 @@ public sealed class PortForwardViewModel : ObservableObject
             return;
         }
 
-        PortText = preset.Port.ToString();
+        PortText = PortRangeParser.Format(preset.Range);
         SelectedProtocol = ProtocolOptions.First(option => option.Value == preset.Protocol);
         Description = preset.Description;
         StatusMessage = $"{preset.Name} の設定を入力しました。内容を確認して「ポートを開放する」を押してください。";
@@ -162,7 +174,7 @@ public sealed class PortForwardViewModel : ObservableObject
 
     private async Task OpenAsync()
     {
-        if (!TryGetPort(out var port))
+        if (!TryGetRange(out var range))
         {
             return;
         }
@@ -174,14 +186,13 @@ public sealed class PortForwardViewModel : ObservableObject
         }
 
         var protocol = SelectedProtocol.Value;
-        var label = $"{PortRuleViewModel.DescribeProtocol(protocol)} {port}";
+        var label = $"{PortRuleViewModel.DescribeProtocol(protocol)} {PortRangeParser.Format(range)}";
         IsBusy = true;
         StatusMessage = $"{label} を開放しています…";
 
         try
         {
-            var request = new PortOpenRequest(port, protocol, Description, UseUpnp, UseFirewall);
-            var outcome = await _control.OpenAsync(request);
+            var outcome = await _control.OpenAsync(new PortOpenRequest(range, protocol, Description, UseUpnp, UseFirewall));
             _log.Append(outcome.Messages);
             await RefreshRulesAsync();
             StatusMessage = outcome.Success
@@ -200,17 +211,17 @@ public sealed class PortForwardViewModel : ObservableObject
 
     private Task CloseCurrentAsync()
     {
-        return TryGetPort(out var port) ? CloseAsync(port, SelectedProtocol.Value) : Task.CompletedTask;
+        return TryGetRange(out var range) ? CloseAsync(range, SelectedProtocol.Value) : Task.CompletedTask;
     }
 
     private Task CloseRuleAsync(PortRuleViewModel ruleViewModel)
     {
-        return CloseAsync(ruleViewModel.Rule.Port, ruleViewModel.Rule.Protocol);
+        return CloseAsync(ruleViewModel.Range, ruleViewModel.Rule.Protocol);
     }
 
-    private async Task CloseAsync(int port, PortProtocol protocol)
+    private async Task CloseAsync(PortRange range, PortProtocol protocol)
     {
-        var label = $"{PortRuleViewModel.DescribeProtocol(protocol)} {port}";
+        var label = $"{PortRuleViewModel.DescribeProtocol(protocol)} {PortRangeParser.Format(range)}";
         if (!_dialog.Confirm($"{label} の開放を解除します。よろしいですか？"))
         {
             return;
@@ -221,7 +232,7 @@ public sealed class PortForwardViewModel : ObservableObject
 
         try
         {
-            var outcome = await _control.CloseAsync(port, protocol);
+            var outcome = await _control.CloseAsync(range, protocol);
             _log.Append(outcome.Messages);
             await RefreshRulesAsync();
             StatusMessage = $"{label} の開放を解除しました。";
@@ -238,16 +249,16 @@ public sealed class PortForwardViewModel : ObservableObject
 
     private void CheckUsage()
     {
-        if (!TryGetPort(out var port))
+        if (!TryGetRange(out var range))
         {
             return;
         }
 
         var protocol = SelectedProtocol.Value;
-        var listeners = _network.GetListeners(port, protocol);
+        var listeners = _network.GetListeners(range, protocol);
         if (listeners.Count == 0)
         {
-            _log.Append($"{PortRuleViewModel.DescribeProtocol(protocol)} {port} を使用中のプロセスはありません（ゲームやサーバーを起動してから確認してください）。");
+            _log.Append($"{PortRuleViewModel.DescribeProtocol(protocol)} {PortRangeParser.Format(range)} を使用中のプロセスはありません（ゲームやサーバーを起動してから確認してください）。");
             StatusMessage = "使用中のプロセスは見つかりませんでした。";
             return;
         }
@@ -259,35 +270,22 @@ public sealed class PortForwardViewModel : ObservableObject
         StatusMessage = $"{listeners.Count} 件のプロセスが使用中です。詳しくは下のログを確認してください。";
     }
 
-    private async Task RefreshRulesAsync(CancellationToken ct = default)
-    {
-        var rules = await _control.GetRulesAsync(ct);
-        Rules.Clear();
-        foreach (var rule in rules)
-        {
-            Rules.Add(new PortRuleViewModel(rule, CloseRuleAsync));
-        }
-
-        UpdateCurrentState();
-    }
-
     private void UpdateCurrentState()
     {
         OnPropertyChanged(nameof(CurrentPortLabel));
         OnPropertyChanged(nameof(IsPortValid));
-        IsCurrentPortOpen = int.TryParse(PortText?.Trim(), out var port)
-                            && Rules.Any(item => item.Rule.Port == port && item.Rule.Protocol == SelectedProtocol.Value);
+        IsCurrentPortOpen = PortRangeParser.TryParse(PortText, out var range)
+                            && Rules.Any(item => item.Range == range && item.Rule.Protocol == SelectedProtocol.Value);
     }
 
-    private bool TryGetPort(out int port)
+    private bool TryGetRange(out PortRange range)
     {
-        if (int.TryParse(PortText?.Trim(), out port) && port is >= 1 and <= 65535)
+        if (PortRangeParser.TryParse(PortText, out range))
         {
             return true;
         }
 
-        _dialog.ShowError("ポート番号は 1〜65535 の半角数字で入力してください。");
-        port = 0;
+        _dialog.ShowError("ポート番号は 1〜65535 の半角数字で入力してください。範囲は「49152-49200」の形式です。");
         return false;
     }
 

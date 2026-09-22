@@ -1,4 +1,5 @@
 using MaiPort.Models;
+using MaiPort.Utilities;
 
 namespace MaiPort.Services;
 
@@ -37,7 +38,7 @@ public sealed class PortControlService : IPortControlService
 
     public async Task<PortControlOutcome> OpenAsync(PortOpenRequest request, CancellationToken ct = default)
     {
-        ValidatePort(request.Port);
+        ValidateRange(request.Range);
         if (!request.UseUpnp && !request.UseFirewall)
         {
             throw new ArgumentException("UPnP とファイアウォールの少なくとも一方を指定してください。", nameof(request));
@@ -49,20 +50,25 @@ public sealed class PortControlService : IPortControlService
             var rules = await EnsureLoadedAsync(ct).ConfigureAwait(false);
             var messages = new List<string>();
             var description = request.Description?.Trim() ?? string.Empty;
-            var rule = Find(rules, request.Port, request.Protocol)
-                       ?? new PortRule { Port = request.Port, Protocol = request.Protocol };
+            var rule = Find(rules, request.Range, request.Protocol)
+                       ?? new PortRule
+                       {
+                           Port = request.Range.Start,
+                           EndPort = request.Range.End,
+                           Protocol = request.Protocol
+                       };
             rule.Description = description;
 
             if (request.UseFirewall)
             {
-                var result = await _firewall.AllowAsync(request.Port, request.Protocol, description, ct).ConfigureAwait(false);
+                var result = await _firewall.AllowAsync(request.Range, request.Protocol, description, ct).ConfigureAwait(false);
                 rule.FirewallOpened = result.Success;
                 messages.Add(result.Message);
             }
 
             if (request.UseUpnp)
             {
-                var result = await _upnp.OpenAsync(request.Port, request.Protocol, description, ct).ConfigureAwait(false);
+                var result = await _upnp.OpenAsync(request.Range, request.Protocol, description, ct).ConfigureAwait(false);
                 rule.UpnpOpened = result.Success;
                 messages.Add(result.Message);
             }
@@ -87,9 +93,9 @@ public sealed class PortControlService : IPortControlService
         }
     }
 
-    public async Task<PortControlOutcome> CloseAsync(int port, PortProtocol protocol, CancellationToken ct = default)
+    public async Task<PortControlOutcome> CloseAsync(PortRange range, PortProtocol protocol, CancellationToken ct = default)
     {
-        ValidatePort(port);
+        ValidateRange(range);
 
         await _gate.WaitAsync(ct).ConfigureAwait(false);
         try
@@ -97,13 +103,13 @@ public sealed class PortControlService : IPortControlService
             var rules = await EnsureLoadedAsync(ct).ConfigureAwait(false);
             var messages = new List<string>();
 
-            var firewallResult = await _firewall.RemoveAsync(port, protocol, ct).ConfigureAwait(false);
+            var firewallResult = await _firewall.RemoveAsync(range, protocol, ct).ConfigureAwait(false);
             messages.Add(firewallResult.Message);
 
-            var upnpResult = await _upnp.CloseAsync(port, protocol, ct).ConfigureAwait(false);
+            var upnpResult = await _upnp.CloseAsync(range, protocol, ct).ConfigureAwait(false);
             messages.Add(upnpResult.Message);
 
-            var existing = Find(rules, port, protocol);
+            var existing = Find(rules, range, protocol);
             if (existing is not null)
             {
                 rules.Remove(existing);
@@ -123,16 +129,23 @@ public sealed class PortControlService : IPortControlService
         return _rules ??= (await _store.LoadAsync(ct).ConfigureAwait(false)).ToList();
     }
 
-    private static PortRule? Find(IEnumerable<PortRule> rules, int port, PortProtocol protocol)
+    private static PortRule? Find(IEnumerable<PortRule> rules, PortRange range, PortProtocol protocol)
     {
-        return rules.FirstOrDefault(rule => rule.Port == port && rule.Protocol == protocol);
+        return rules.FirstOrDefault(rule =>
+            rule.Protocol == protocol && ToRange(rule) == range);
     }
 
-    private static void ValidatePort(int port)
+    /// <summary>EndPort が未設定（v1.1 以前の記録）なら単一ポートとして扱う。</summary>
+    public static PortRange ToRange(PortRule rule)
     {
-        if (port is < 1 or > 65535)
+        return new PortRange(rule.Port, rule.EndPort <= 0 ? rule.Port : rule.EndPort);
+    }
+
+    private static void ValidateRange(PortRange range)
+    {
+        if (!PortRangeParser.IsValid(range))
         {
-            throw new ArgumentOutOfRangeException(nameof(port), port, "ポート番号は 1〜65535 で指定してください。");
+            throw new ArgumentOutOfRangeException(nameof(range), range, "ポート番号は 1〜65535 で指定してください。");
         }
     }
 }

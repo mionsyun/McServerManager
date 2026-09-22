@@ -11,5 +11,5 @@ public interface INetworkService
 
     Task<string?> GetPublicIpAsync(CancellationToken ct = default);
 
-    IReadOnlyList<PortListener> GetListeners(int port, PortProtocol protocol);
+    IReadOnlyList<PortListener> GetListeners(PortRange range, PortProtocol protocol);
 }

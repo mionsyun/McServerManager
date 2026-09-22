@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using MaiPort.Models;
+using MaiPort.Utilities;
 
 namespace MaiPort.Services;
 
@@ -55,12 +56,12 @@ public sealed class NetworkService : INetworkService
         }
     }
 
-    public IReadOnlyList<PortListener> GetListeners(int port, PortProtocol protocol)
+    public IReadOnlyList<PortListener> GetListeners(PortRange range, PortProtocol protocol)
     {
         var listeners = new List<PortListener>();
         foreach (var single in ExpandProtocols(protocol))
         {
-            listeners.AddRange(GetListenersCore(port, single));
+            listeners.AddRange(GetListenersCore(range, single));
         }
 
         return listeners;
@@ -76,7 +77,7 @@ public sealed class NetworkService : INetworkService
         };
     }
 
-    private static IReadOnlyList<PortListener> GetListenersCore(int port, PortProtocol protocol)
+    private static IReadOnlyList<PortListener> GetListenersCore(PortRange range, PortProtocol protocol)
     {
         var results = new List<PortListener>();
         var protocolArgument = protocol == PortProtocol.Tcp ? "tcp" : "udp";
@@ -113,7 +114,8 @@ public sealed class NetworkService : INetworkService
                 }
 
                 var localEndPoint = parts[1];
-                if (GetPortFromEndPoint(localEndPoint) != port)
+                var localPort = GetPortFromEndPoint(localEndPoint);
+                if (localPort < range.Start || localPort > range.End)
                 {
                     continue;
                 }

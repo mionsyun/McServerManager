@@ -1,4 +1,5 @@
 using MaiPort.Models;
+using MaiPort.Utilities;
 using MaiPort.Services;
 
 namespace MaiPort.Tests;
@@ -7,15 +8,15 @@ internal sealed class FakeUpnpService : IUpnpService
 {
     public bool NextResultSucceeds { get; set; } = true;
 
-    public List<(int Port, PortProtocol Protocol)> Opened { get; } = [];
+    public List<(PortRange Range, PortProtocol Protocol)> Opened { get; } = [];
 
-    public List<(int Port, PortProtocol Protocol)> Closed { get; } = [];
+    public List<(PortRange Range, PortProtocol Protocol)> Closed { get; } = [];
 
-    public Task<PortOperationResult> OpenAsync(int port, PortProtocol protocol, string description, CancellationToken ct = default)
+    public Task<PortOperationResult> OpenAsync(PortRange range, PortProtocol protocol, string description, CancellationToken ct = default)
     {
         if (NextResultSucceeds)
         {
-            Opened.Add((port, protocol));
+            Opened.Add((range, protocol));
         }
 
         return Task.FromResult(NextResultSucceeds
@@ -23,9 +24,9 @@ internal sealed class FakeUpnpService : IUpnpService
             : PortOperationResult.Failed("upnp ng"));
     }
 
-    public Task<PortOperationResult> CloseAsync(int port, PortProtocol protocol, CancellationToken ct = default)
+    public Task<PortOperationResult> CloseAsync(PortRange range, PortProtocol protocol, CancellationToken ct = default)
     {
-        Closed.Add((port, protocol));
+        Closed.Add((range, protocol));
         return Task.FromResult(PortOperationResult.Ok("upnp closed"));
     }
 
@@ -38,19 +39,19 @@ internal sealed class FakeFirewallService : IFirewallService
 {
     public bool NextResultSucceeds { get; set; } = true;
 
-    public List<(int Port, PortProtocol Protocol)> Allowed { get; } = [];
+    public List<(PortRange Range, PortProtocol Protocol)> Allowed { get; } = [];
 
-    public List<(int Port, PortProtocol Protocol)> Removed { get; } = [];
+    public List<(PortRange Range, PortProtocol Protocol)> Removed { get; } = [];
 
     public bool IsAdministrator() => true;
 
-    public string BuildRuleName(int port, PortProtocol protocol) => $"MaiPort_{protocol}_{port}";
+    public string BuildRuleName(PortRange range, PortProtocol protocol) => $"MaiPort_{protocol}_{PortRangeParser.Format(range)}";
 
-    public Task<PortOperationResult> AllowAsync(int port, PortProtocol protocol, string description, CancellationToken ct = default)
+    public Task<PortOperationResult> AllowAsync(PortRange range, PortProtocol protocol, string description, CancellationToken ct = default)
     {
         if (NextResultSucceeds)
         {
-            Allowed.Add((port, protocol));
+            Allowed.Add((range, protocol));
         }
 
         return Task.FromResult(NextResultSucceeds
@@ -58,9 +59,9 @@ internal sealed class FakeFirewallService : IFirewallService
             : PortOperationResult.Failed("firewall ng"));
     }
 
-    public Task<PortOperationResult> RemoveAsync(int port, PortProtocol protocol, CancellationToken ct = default)
+    public Task<PortOperationResult> RemoveAsync(PortRange range, PortProtocol protocol, CancellationToken ct = default)
     {
-        Removed.Add((port, protocol));
+        Removed.Add((range, protocol));
         return Task.FromResult(PortOperationResult.Ok("firewall removed"));
     }
 }

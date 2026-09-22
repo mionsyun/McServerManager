@@ -10,7 +10,33 @@ MaiPilot (McServerManager) のネットワーク層（UPnP / ファイアウォ�
 - **状態表示**：管理者権限の有無 / LAN IP / グローバル IP / UPnP ルーター検出状況
 - **使用状況の確認**：指定ポートを使用中のプロセス（TCP は LISTENING、UDP はバインド中）を表示
 - **開放中ポートの記録**：`%LOCALAPPDATA%\MaiPort\rules.json` に保存し、あとから解除できる
-- **Palworld プリセット**：UDP 8211 をワンクリックで入力欄にセット
+- **ポート範囲の開放**：`49152-49200` のような範囲指定に対応（ファイアウォールは範囲を1規則、UPnP はポートごとに最大64個まで）
+- **プリセット**：Palworld / Minecraft Java / 統合版 NetherNet / 統合版 RakNet / ARK / Valheim / Terraria
+
+## Minecraft 統合版サーバー (Bedrock) への対応
+
+Bedrock Dedicated Server は `transport` の既定が **NetherNet** になり、
+必要なポートが「TCP のシグナリング + 動的な UDP」という構成に変わっている。
+MaiPort は `server.properties` を読んで、開けるべきポートを判定する。
+
+| transport | 開放するポート |
+|---|---|
+| `nethernet`（既定） | **TCP** `server-port`（既定 19132） + `server-udp-ports` で指定した **UDP** 範囲 |
+| `raknet` | **UDP** `server-port`（19132） + **UDP** `server-portv6`（19133） |
+
+`server-udp-ports` が未設定だとゲーム通信の UDP ポートが毎回変わるため、
+`server.properties` に次のように範囲を固定してから開放することを推奨する
+（画面のログにも同じ案内を出す）。
+
+```
+server-udp-ports=49152-49200
+```
+
+`server-udp-ports` は `内部ポート` / `開始-終了` / `[ip:]外部:内部` の
+いずれの書式でも解析し、開放対象として**内部ポート側**を採用する。
+
+画面の「Minecraft 統合版サーバー (Bedrock)」から `server.properties` を選ぶと、
+判定結果が一覧表示され、「この内容で開放する」でまとめて開放できる。
 
 ## UDP 8211（Palworld）を開放する手順
 

@@ -40,10 +40,13 @@
   <ItemGroup>
     <Compile Include="$(RepoRoot)MaiPort/Models/**/*.cs" LinkBase="Models" />
     <Compile Include="$(RepoRoot)MaiPort/Services/**/*.cs"
-             Exclude="$(RepoRoot)MaiPort/Services/DialogService.cs;$(RepoRoot)MaiPort/Services/ClipboardService.cs"
+             Exclude="$(RepoRoot)MaiPort/Services/DialogService.cs;$(RepoRoot)MaiPort/Services/ClipboardService.cs;$(RepoRoot)MaiPort/Services/FileDialogService.cs"
              LinkBase="Services" />
     <Compile Include="$(RepoRoot)MaiPort/ViewModels/**/*.cs" LinkBase="ViewModels" />
-    <Compile Include="$(RepoRoot)MaiPort/Utilities/ObservableObject.cs" LinkBase="Utilities" />
+    <!-- WPF に依存する RelayCommand / AsyncRelayCommand だけ Shims.cs で置き換える -->
+    <Compile Include="$(RepoRoot)MaiPort/Utilities/**/*.cs"
+             Exclude="$(RepoRoot)MaiPort/Utilities/RelayCommand.cs;$(RepoRoot)MaiPort/Utilities/AsyncRelayCommand.cs"
+             LinkBase="Utilities" />
     <Compile Include="$(MSBuildThisFileDirectory)Shims.cs" />
   </ItemGroup>
 

@@ -15,11 +15,13 @@ public sealed class MainViewModel : ObservableObject
         PortForwardViewModel forward,
         NetworkStatusViewModel status,
         OperationLogViewModel log,
+        BedrockSetupViewModel bedrock,
         IClipboardService clipboard)
     {
         Forward = forward;
         Status = status;
         Log = log;
+        Bedrock = bedrock;
         _clipboard = clipboard;
         CopyAddressCommand = new RelayCommand(CopyAddress);
     }
@@ -29,6 +31,8 @@ public sealed class MainViewModel : ObservableObject
     public NetworkStatusViewModel Status { get; }
 
     public OperationLogViewModel Log { get; }
+
+    public BedrockSetupViewModel Bedrock { get; }
 
     public RelayCommand CopyAddressCommand { get; }
 

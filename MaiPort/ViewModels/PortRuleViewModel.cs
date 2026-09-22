@@ -1,4 +1,5 @@
 using MaiPort.Models;
+using MaiPort.Services;
 using MaiPort.Utilities;
 
 namespace MaiPort.ViewModels;
@@ -18,7 +19,9 @@ public sealed class PortRuleViewModel : ObservableObject
 
     public AsyncRelayCommand CloseCommand { get; }
 
-    public string Title => $"{DescribeProtocol(Rule.Protocol)} {Rule.Port}";
+    public PortRange Range => PortControlService.ToRange(Rule);
+
+    public string Title => $"{DescribeProtocol(Rule.Protocol)} {PortRangeParser.Format(Range)}";
 
     public string Detail
     {
