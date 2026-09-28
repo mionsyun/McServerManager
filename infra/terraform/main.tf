@@ -32,7 +32,7 @@ resource "azurerm_resource_group" "lp" {
 resource "azurerm_static_web_app" "lp" {
   name                = local.resolved_static_web_app
   resource_group_name = azurerm_resource_group.lp.name
-  location            = azurerm_resource_group.lp.location
+  location            = var.static_web_app_location
   sku_tier            = var.static_web_app_sku_tier
   sku_size            = var.static_web_app_sku_size
   tags                = local.common_tags

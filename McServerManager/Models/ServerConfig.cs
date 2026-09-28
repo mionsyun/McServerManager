@@ -14,6 +14,8 @@ public sealed class ServerConfig
     public int MemoryXmsMb { get; set; } = 1024;
     public int MemoryXmxMb { get; set; } = 2048;
     public int Port { get; set; } = 25565;
+    /// <summary>統合版 (BDS) の IPv6 ポート (server-portv6)。Java 版では未使用。</summary>
+    public int PortV6 { get; set; } = 19133;
     public int MaxPlayers { get; set; } = 20;
     public bool OnlineMode { get; set; } = true;
     public bool EnableCommandBlock { get; set; }

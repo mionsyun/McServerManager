@@ -85,7 +85,7 @@ public sealed class BackupSchedulerService : IBackupSchedulerService, IDisposabl
             }
 
             var worldName = string.IsNullOrWhiteSpace(config.WorldName) ? "world" : config.WorldName;
-            var worldPath = Path.Combine(serverDirectory, worldName);
+            var worldPath = Path.Combine(_worldService.GetWorldsRoot(serverDirectory), worldName);
             if (!Directory.Exists(worldPath))
             {
                 return;

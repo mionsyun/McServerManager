@@ -6,7 +6,7 @@ const closeMobileMenu = () => { mobileMenuOpen.value = false; };
 
 let revealObserver: IntersectionObserver | null = null;
 
-const defaultDownloadPath = "https://stmailpilotje.blob.core.windows.net/public/downloads/MaiPilotSetup.exe";
+const defaultDownloadPath = "https://stmaipilot.blob.core.windows.net/public/downloads/MaiPilotSetup.exe";
 const docsUrl = "/docs";
 const docsLanUrl = "/docs/lan";
 const docsHostingUrl = "/docs/24-7-hosting";

@@ -3,6 +3,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Net.Http;
 using System.Diagnostics;
+using McServerManager.Models;
 
 namespace McServerManager.Services;
 
@@ -32,11 +33,12 @@ public sealed class NetworkService : INetworkService
         return list;
     }
 
-    public IReadOnlyList<string> GetExternalChecklist()
+    public IReadOnlyList<string> GetExternalChecklist(NetworkProtocol protocol = NetworkProtocol.Tcp)
     {
+        var protocolLabel = protocol == NetworkProtocol.Udp ? "UDP" : "TCP";
         return new[]
         {
-            "ルーターでポート開放（転送）を設定する。",
+            $"ルーターで {protocolLabel} ポートの開放（転送）を設定する。",
             "グローバル IP とポート番号をフレンドに共有する。",
             "サーバーが起動中であることを確認する。",
             "Windows Firewall の受信許可を確認する。"
@@ -60,9 +62,9 @@ public sealed class NetworkService : INetworkService
         }
     }
 
-    public IReadOnlyList<Process> GetProcessesUsingPort(int port)
+    public IReadOnlyList<Process> GetProcessesUsingPort(int port, NetworkProtocol protocol = NetworkProtocol.Tcp)
     {
-        var pids = GetProcessIdsUsingPort(port);
+        var pids = GetProcessIdsUsingPort(port, protocol);
         var list = new List<Process>();
         foreach (var pid in pids)
         {
@@ -79,10 +81,10 @@ public sealed class NetworkService : INetworkService
         return list;
     }
 
-    public bool TryKillProcessesUsingPort(int port, out string? error)
+    public bool TryKillProcessesUsingPort(int port, out string? error, NetworkProtocol protocol = NetworkProtocol.Tcp)
     {
         error = null;
-        var processes = GetProcessesUsingPort(port);
+        var processes = GetProcessesUsingPort(port, protocol);
         if (processes.Count == 0)
         {
             return true;
@@ -104,15 +106,16 @@ public sealed class NetworkService : INetworkService
         return true;
     }
 
-    private static IReadOnlyList<int> GetProcessIdsUsingPort(int port)
+    private static IReadOnlyList<int> GetProcessIdsUsingPort(int port, NetworkProtocol protocol)
     {
+        var protocolName = protocol == NetworkProtocol.Udp ? "UDP" : "TCP";
         var list = new List<int>();
         try
         {
             var startInfo = new ProcessStartInfo
             {
                 FileName = "netstat",
-                Arguments = "-ano -p tcp",
+                Arguments = $"-ano -p {protocolName.ToLowerInvariant()}",
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
@@ -130,21 +133,23 @@ public sealed class NetworkService : INetworkService
             foreach (var line in output.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries))
             {
                 var trimmed = line.Trim();
-                if (!trimmed.StartsWith("TCP", StringComparison.OrdinalIgnoreCase))
+                if (!trimmed.StartsWith(protocolName, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
 
+                // TCP: "TCP  0.0.0.0:25565  0.0.0.0:0  LISTENING  1234"
+                // UDP: "UDP  0.0.0.0:19132  *:*  1234"（状態列なし。バインドしていれば使用中）
                 var parts = trimmed.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length < 5)
+                if (parts.Length < (protocol == NetworkProtocol.Udp ? 4 : 5))
                 {
                     continue;
                 }
 
                 var local = parts[1];
-                var state = parts[3];
                 var pidText = parts[^1];
-                if (!state.Equals("LISTENING", StringComparison.OrdinalIgnoreCase))
+                if (protocol == NetworkProtocol.Tcp
+                    && !parts[3].Equals("LISTENING", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }

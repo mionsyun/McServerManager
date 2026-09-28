@@ -124,6 +124,9 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IAddonCatalogService, AddonCatalogService>();
         services.AddSingleton<IAppUpdateService, AppUpdateService>();
         services.AddSingleton<IServerJarService, ServerJarService>();
+        services.AddSingleton<IBedrockServerService, BedrockServerService>();
+        services.AddSingleton<IBedrockPropertiesService, BedrockPropertiesService>();
+        services.AddSingleton<IPortForwardingService, PortForwardingService>();
         services.AddSingleton<IServerProvisioningService, ServerProvisioningService>();
 
         // 後方互換: 既存の ViewModel が AppServices を受け取る間は維持

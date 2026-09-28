@@ -15,7 +15,8 @@ public sealed class ServerFlowE2ETests
         var propertiesService = new ServerPropertiesService();
         var configService = new ServerConfigService(paths);
         var fakeJarService = new FakeServerJarService();
-        var provisioning = new ServerProvisioningService(paths, propertiesService, configService, fakeJarService);
+        var provisioning = new ServerProvisioningService(
+            paths, propertiesService, configService, fakeJarService, new StubBedrockServerService(), new BedrockPropertiesService());
         var runtimeManager = new ServerRuntimeManager();
 
         var baseDirectory = Directory.CreateDirectory(Path.Combine(appData.AppDataPath, "flow-e2e")).FullName;

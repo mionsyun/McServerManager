@@ -112,7 +112,8 @@ public sealed class ViewModelBasicsTests
             PromptUpnp = true,
             EnableUpnp = true
         };
-        var vm = new ServerNetworkViewModel(services, config, settings);
+        var vm = new ServerNetworkViewModel(
+            services, config, settings, new PortForwardingService(new StubUpnpService(), new BedrockPropertiesService()));
 
         var available = vm.EnsurePortAvailable();
         await vm.TryOpenPortAsync();

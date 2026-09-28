@@ -4,6 +4,7 @@ namespace McServerManager.Services;
 
 public interface IWorldService
 {
+    string GetWorldsRoot(string serverDirectory);
     IReadOnlyList<string> GetWorlds(string serverDirectory);
     string GetBackupsDirectory(string serverDirectory);
     IReadOnlyList<WorldBackupEntry> GetWorldBackups(string serverDirectory);

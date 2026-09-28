@@ -4,12 +4,28 @@ location            = "Japan East"
 resource_group_name = ""
 static_web_app_name = ""
 
+static_web_app_location = "East Asia" # Japan East is not supported by Static Web Apps
 static_web_app_sku_tier = "Free"
 static_web_app_sku_size = "Free"
 
-# Optional: set custom domain (e.g. lp.example.com). Leave empty to disable.
+# Optional: custom domain. Leave empty on the first apply, point DNS CNAME
+# (www -> static_web_app_default_hostname) and then set "www.maipilot.jp".
 custom_domain_name            = ""
 custom_domain_validation_type = "cname-delegation"
+
+# Trusted Signing (code signing). Billed monthly from creation (Basic: about $9.99/month).
+# Keep false until identity validation is ready (see README).
+trusted_signing_enabled = false
+
+# Installer distribution storage.
+# Storage account names are globally unique. If "stmaipilot" cannot be taken,
+# change it here AND update the hard-coded URLs (see README).
+installer_storage_account_name             = "stmaipilot"
+installer_storage_resource_group_name      = "" # empty = same RG as landing page
+installer_storage_location                 = "" # empty = RG location
+installer_storage_account_tier             = "Standard"
+installer_storage_account_replication_type = "LRS"
+installer_storage_account_kind             = "StorageV2"
 
 tags = {
   owner = "your-name"
