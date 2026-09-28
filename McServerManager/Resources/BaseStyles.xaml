@@ -878,6 +878,90 @@
         </Setter>
     </Style>
 
+    <!-- エディションバッジ(Java版=青 / 統合版=緑)。DataContext に IsBedrock を持つ要素で使う -->
+    <Style x:Key="EditionBadge" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource BrushAccentSoft}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BrushAccent}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="Padding" Value="7,1"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsBedrock}" Value="True">
+                <Setter Property="Background" Value="{DynamicResource BrushSuccessSoft}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BrushSuccess}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="EditionBadgeText" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="10.5"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{DynamicResource BrushAccent}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsBedrock}" Value="True">
+                <Setter Property="Foreground" Value="{DynamicResource BrushSuccess}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- 手順の番号(丸数字) -->
+    <Style x:Key="StepNumber" TargetType="Border">
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="24"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Background" Value="{DynamicResource BrushAccentSoft}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BrushAccent}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="VerticalAlignment" Value="Top"/>
+    </Style>
+
+    <Style x:Key="StepNumberText" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{DynamicResource BrushAccent}"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- 選択カード(ToggleButton)。新規作成のエディション選択・配布元の選択などで使う -->
+    <Style x:Key="SelectableCard" TargetType="ToggleButton">
+        <Setter Property="Foreground" Value="{DynamicResource BrushText}"/>
+        <Setter Property="Background" Value="{DynamicResource BrushSurface}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}"/>
+        <Setter Property="BorderThickness" Value="1.5"/>
+        <Setter Property="Padding" Value="16,14"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Border x:Name="B"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="12"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="B" Property="Background" Value="{DynamicResource BrushHover}"/>
+                            <Setter TargetName="B" Property="BorderBrush" Value="{DynamicResource BrushBorderHover}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="B" Property="Background" Value="{DynamicResource BrushAccentSoft}"/>
+                            <Setter TargetName="B" Property="BorderBrush" Value="{DynamicResource BrushAccent}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- ScrollBar -->
     <Style TargetType="ScrollBar">
         <Setter Property="Width" Value="8"/>

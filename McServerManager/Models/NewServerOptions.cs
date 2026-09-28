@@ -15,4 +15,14 @@ public sealed class NewServerOptions
     public bool EulaAccepted { get; set; }
     public string JavaPath { get; set; } = string.Empty;
     public string Motd { get; set; } = "A Minecraft Server";
+
+    // ─── 統合版 (Bedrock) 専用 ───
+    /// <summary>BDS の配布 zip の URL。<see cref="BedrockZipPath"/> が指定されていればそちらを優先。</summary>
+    public string BedrockDownloadUrl { get; set; } = string.Empty;
+    /// <summary>手元にダウンロード済みの BDS zip のパス。</summary>
+    public string BedrockZipPath { get; set; } = string.Empty;
+    public int PortV6 { get; set; } = 19133;
+    public string GameMode { get; set; } = "survival";
+    public string Difficulty { get; set; } = "easy";
+    public bool AllowCheats { get; set; }
 }

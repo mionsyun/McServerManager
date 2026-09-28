@@ -16,7 +16,13 @@ public sealed class ViewModelSmokeTests
         var dialog = new TestDialogService();
         var services = TestAppServicesFactory.CreateForAddonTests(paths, dialog);
 
-        var vm = new MainViewModel(services);
+        var bedrockProperties = new BedrockPropertiesService();
+        var vm = new MainViewModel(
+            services,
+            new StubBackupSchedulerService(),
+            new StubBedrockServerService(),
+            bedrockProperties,
+            new PortForwardingService(new StubUpnpService(), bedrockProperties));
 
         Assert.NotNull(vm.Servers);
         Assert.NotNull(vm.Tutorial);
@@ -43,7 +49,7 @@ public sealed class ViewModelSmokeTests
         var settings = new ServerSettingsViewModel();
         settings.Load(new ServerProperties { LevelName = "world" });
 
-        var vm = new ServerWorldViewModel(services, config, settings, () => ServerStatus.Stopped);
+        var vm = new ServerWorldViewModel(services, new StubBackupSchedulerService(), config, settings, () => ServerStatus.Stopped);
         vm.NewWorldName = "world2";
         vm.CreateWorldCommand.Execute(null);
 
@@ -98,7 +104,14 @@ public sealed class ViewModelSmokeTests
                 Version = "1.20.1"
             };
 
-            using var vm = new ServerViewModel(services, config);
+            var bedrockProperties = new BedrockPropertiesService();
+            using var vm = new ServerViewModel(
+                services,
+                new StubBackupSchedulerService(),
+                new StubBedrockServerService(),
+                bedrockProperties,
+                new PortForwardingService(new StubUpnpService(), bedrockProperties),
+                config);
             Assert.Equal("server-vm-smoke", vm.Name);
         });
     }

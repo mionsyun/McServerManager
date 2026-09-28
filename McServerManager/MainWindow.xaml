@@ -112,9 +112,15 @@
                                         </Ellipse>
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis"/>
-                                            <TextBlock Style="{StaticResource MutedText}" FontSize="10.5" TextTrimming="CharacterEllipsis">
-                                                <Run Text="{Binding ServerType, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding Version, Mode=OneWay}"/>
-                                            </TextBlock>
+                                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                <Border Style="{StaticResource EditionBadge}" Padding="5,0" Margin="0,0,6,0" VerticalAlignment="Center"
+                                                        Visibility="{Binding IsBedrock, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <TextBlock Text="BE" Style="{StaticResource EditionBadgeText}" FontSize="9.5"/>
+                                                </Border>
+                                                <TextBlock Style="{StaticResource MutedText}" FontSize="10.5" TextTrimming="CharacterEllipsis" VerticalAlignment="Center">
+                                                    <Run Text="{Binding ServerTypeDisplay, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding Version, Mode=OneWay}"/>
+                                                </TextBlock>
+                                            </StackPanel>
                                         </StackPanel>
                                         <TextBlock Grid.Column="2" VerticalAlignment="Center" Margin="6,0,4,0"
                                                    FontFamily="Cascadia Mono" FontSize="11"
@@ -200,7 +206,8 @@
                             <ToggleButton Style="{StaticResource SidebarNavItem}"
                                           Command="{Binding SelectedServer.SelectViewCommand}" CommandParameter="respack"
                                           IsChecked="{Binding SelectedServer.CurrentView, Converter={StaticResource EqualsToBooleanConverter}, ConverterParameter=respack, Mode=OneWay}"
-                                          Content="リソースパック"/>
+                                          Content="リソースパック"
+                                          Visibility="{Binding SelectedServer.SupportsResourcePack, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                             <ToggleButton Style="{StaticResource SidebarNavItem}"
                                           Command="{Binding SelectedServer.SelectViewCommand}" CommandParameter="version"
                                           IsChecked="{Binding SelectedServer.CurrentView, Converter={StaticResource EqualsToBooleanConverter}, ConverterParameter=version, Mode=OneWay}"

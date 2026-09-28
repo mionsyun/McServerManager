@@ -38,11 +38,17 @@ public sealed class NewServerViewModel : ObservableObject
     private bool _hasError;
     private List<MinecraftVersionInfo> _allVersions = [];
     private string? _route;
+    private string _edition = EditionJava;
     private WizardPreset? _selectedPreset;
 
-    public NewServerViewModel(AppServices services, IEnumerable<string> existingNames)
+    public const string EditionJava = "java";
+    public const string EditionBedrock = "bedrock";
+    public const string RouteBedrock = "bedrock";
+
+    public NewServerViewModel(AppServices services, IBedrockServerService bedrockServer, IEnumerable<string> existingNames)
     {
         _services = services;
+        Bedrock = new NewBedrockServerViewModel(bedrockServer);
         _existingNames = new HashSet<string>(existingNames, StringComparer.OrdinalIgnoreCase);
         Versions = new ObservableCollection<MinecraftVersionInfo>();
         VersionFilters = new ObservableCollection<VersionFilterOption>();
@@ -148,7 +154,27 @@ public sealed class NewServerViewModel : ObservableObject
     public ObservableCollection<ServerTypeOption> ServerTypes { get; }
     public ObservableCollection<WizardPreset> Presets { get; }
 
-    /// <summary>null = 入口選択。"easy" | "advanced" | "import"。</summary>
+    /// <summary>統合版 (BE) フォームの状態。</summary>
+    public NewBedrockServerViewModel Bedrock { get; }
+
+    /// <summary>入口で選んだエディション。"java" | "bedrock"。</summary>
+    public string Edition
+    {
+        get => _edition;
+        set
+        {
+            if (SetProperty(ref _edition, value))
+            {
+                OnPropertyChanged(nameof(IsBedrockEdition));
+                if (value == EditionBedrock)
+                    _ = Bedrock.EnsureVersionsLoadedAsync();
+            }
+        }
+    }
+
+    public bool IsBedrockEdition => _edition == EditionBedrock;
+
+    /// <summary>null = 入口選択。"easy" | "advanced" | "import" | "bedrock"。</summary>
     public string? Route
     {
         get => _route;
@@ -157,13 +183,17 @@ public sealed class NewServerViewModel : ObservableObject
             if (SetProperty(ref _route, value))
             {
                 OnPropertyChanged(nameof(IsRouteSelected));
+                OnPropertyChanged(nameof(IsBedrockRoute));
                 StatusMessage = string.Empty;
                 HasError = false;
+                if (IsBedrockRoute)
+                    _ = Bedrock.EnsureVersionsLoadedAsync();
             }
         }
     }
 
     public bool IsRouteSelected => _route is not null;
+    public bool IsBedrockRoute => _route == RouteBedrock;
 
     public WizardPreset? SelectedPreset
     {
@@ -347,7 +377,8 @@ public sealed class NewServerViewModel : ObservableObject
         try
         {
             if (
-                IsModdedServerType(SelectedServerType?.Id)
+                !IsBedrockRoute
+                && IsModdedServerType(SelectedServerType?.Id)
                 && SelectedVersion is not null
                 && !string.Equals(SelectedVersion.Type, "release", StringComparison.OrdinalIgnoreCase)
             )
@@ -385,12 +416,20 @@ public sealed class NewServerViewModel : ObservableObject
                 JavaPath = JavaPath,
                 Motd = Motd
             };
+            if (IsBedrockRoute)
+            {
+                // 統合版は「サーバー名」がそのままゲーム内のサーバー一覧に表示される
+                options.Motd = Name.Trim();
+                Bedrock.ApplyTo(options);
+            }
 
             var progress = new Progress<string>(message =>
             {
                 ProgressMessage = message;
                 // ステップに応じてパーセンテージを更新
                 if (message.Contains("フォルダを準備")) { ProgressPercent = 10; ProgressStep = "1/4"; }
+                else if (TryParsePercent(message, out var downloaded)) { ProgressPercent = Math.Max(ProgressPercent, 15 + downloaded * 0.6); ProgressStep = "2/4"; }
+                else if (message.Contains("展開")) { ProgressPercent = Math.Max(ProgressPercent, 75); ProgressStep = "2/4"; }
                 else if (message.Contains("取得中") || message.Contains("ダウンロード") || message.Contains("ビルド")) { ProgressPercent = Math.Max(ProgressPercent, 30); ProgressStep = "2/4"; }
                 else if (message.Contains("設定ファイル")) { ProgressPercent = 80; ProgressStep = "3/4"; }
                 else if (message.Contains("完了")) { ProgressPercent = 100; ProgressStep = "4/4"; }
@@ -524,6 +563,11 @@ public sealed class NewServerViewModel : ObservableObject
             return false;
         }
 
+        if (IsBedrockRoute)
+        {
+            return ValidateBedrockInput();
+        }
+
         if (SelectedServerType is null)
         {
             StatusMessage = "サーバー種別を選択してください。";
@@ -561,6 +605,49 @@ public sealed class NewServerViewModel : ObservableObject
         }
 
         return true;
+    }
+
+    private bool ValidateBedrockInput()
+    {
+        if (_existingNames.Contains(Name.Trim()))
+        {
+            StatusMessage = "同名のサーバーが既に存在します。";
+            return false;
+        }
+
+        if (Name.Contains(';'))
+        {
+            StatusMessage = "統合版のサーバー名にセミコロン (;) は使えません。";
+            return false;
+        }
+
+        var error = Bedrock.Validate();
+        if (error is not null)
+        {
+            StatusMessage = error;
+            return false;
+        }
+
+        if (!EulaAccepted)
+        {
+            StatusMessage = "Minecraft EULA とプライバシーポリシーへの同意が必要です。";
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>"... 45% (..." のような進捗メッセージから割合を取り出す。</summary>
+    private static bool TryParsePercent(string message, out double percent)
+    {
+        percent = 0;
+        var index = message.IndexOf('%');
+        if (index <= 0)
+            return false;
+        var start = index;
+        while (start > 0 && char.IsDigit(message[start - 1]))
+            start--;
+        return start < index && double.TryParse(message[start..index], out percent);
     }
 
     private static bool IsModdedServerType(string? serverType)

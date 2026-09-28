@@ -11,6 +11,7 @@
             <utilities:EqualsToVisibilityConverter x:Key="EqualsToVisibilityConverter"/>
             <utilities:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
             <utilities:NotNullToVisibilityConverter x:Key="NotNullToVisibilityConverter"/>
+            <utilities:BoolToTextConverter x:Key="BoolToTextConverter"/>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Themes/Dark.xaml"/>
                 <ResourceDictionary Source="Resources/BaseStyles.xaml"/>

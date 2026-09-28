@@ -16,6 +16,7 @@ public sealed class ServerWorldViewModel : ObservableObject
     private readonly ServerConfig _config;
     private readonly ServerSettingsViewModel _settings;
     private readonly Func<ServerStatus> _getStatus;
+    private readonly IBedrockPropertiesService? _bedrockProperties;
 
     private string _newWorldName = string.Empty;
     private string _restoreBackupWorldName = string.Empty;
@@ -34,13 +35,15 @@ public sealed class ServerWorldViewModel : ObservableObject
         IBackupSchedulerService backupScheduler,
         ServerConfig config,
         ServerSettingsViewModel settings,
-        Func<ServerStatus> getStatus)
+        Func<ServerStatus> getStatus,
+        IBedrockPropertiesService? bedrockProperties = null)
     {
         _services = services;
         _backupScheduler = backupScheduler;
         _config = config;
         _settings = settings;
         _getStatus = getStatus;
+        _bedrockProperties = bedrockProperties;
 
         Worlds = [];
         WorldBackups = [];
@@ -76,7 +79,7 @@ public sealed class ServerWorldViewModel : ObservableObject
         );
         OpenWorldMapCommand = new RelayCommand(
             _ => OpenWorldMap(),
-            _ => !string.IsNullOrWhiteSpace(SelectedWorld)
+            _ => SupportsWorldMap && !string.IsNullOrWhiteSpace(SelectedWorld)
         );
         BrowseMapArchiveCommand = new RelayCommand(_ => BrowseMapArchive());
         ImportMapArchiveCommand = new AsyncRelayCommand(ImportMapArchiveAsync, CanImportMapArchive);
@@ -307,6 +310,14 @@ public sealed class ServerWorldViewModel : ObservableObject
 
     private string ServerDirectory => _config.DirectoryPath;
 
+    /// <summary>ワールドフォルダの親。統合版は worlds/ 配下。</summary>
+    private string WorldsRoot => _services.Worlds.GetWorldsRoot(ServerDirectory);
+
+    public bool IsBedrock => ServerEditions.IsBedrock(_config);
+
+    /// <summary>ワールドマップは Java 版 (Anvil 形式) のみ対応。統合版は LevelDB 形式のため非対応。</summary>
+    public bool SupportsWorldMap => !IsBedrock;
+
     /// <summary>サーバーのStatus変化時にServerViewModelから呼び出す。</summary>
     public void OnServerStatusChanged()
     {
@@ -347,7 +358,7 @@ public sealed class ServerWorldViewModel : ObservableObject
     {
         if (string.IsNullOrWhiteSpace(SelectedWorld))
             return;
-        var path = Path.Combine(ServerDirectory, SelectedWorld);
+        var path = Path.Combine(WorldsRoot, SelectedWorld);
         OpenDirectory(path, "選択したワールドフォルダが見つかりません。");
     }
 
@@ -355,7 +366,7 @@ public sealed class ServerWorldViewModel : ObservableObject
     {
         if (string.IsNullOrWhiteSpace(SelectedWorld))
             return;
-        var worldPath = Path.Combine(ServerDirectory, SelectedWorld);
+        var worldPath = Path.Combine(WorldsRoot, SelectedWorld);
         var vm = new WorldMapViewModel(_services.WorldMap, worldPath);
         var window = new Views.WorldMapWindow(vm)
         {
@@ -385,12 +396,23 @@ public sealed class ServerWorldViewModel : ObservableObject
         if (string.IsNullOrWhiteSpace(SelectedWorld))
             return;
 
-        var props = _settings.ToModel();
-        props.LevelName = SelectedWorld;
-        _services.Properties.Save(ServerDirectory, props);
-        _config.WorldName = SelectedWorld;
-        _services.Configs.Save(_config);
-        _settings.Load(props);
+        if (IsBedrock && _bedrockProperties is not null)
+        {
+            var bedrockProps = _bedrockProperties.Load(ServerDirectory);
+            bedrockProps.LevelName = SelectedWorld;
+            _bedrockProperties.Save(ServerDirectory, bedrockProps);
+            _config.WorldName = SelectedWorld;
+            _services.Configs.Save(_config);
+        }
+        else
+        {
+            var props = _settings.ToModel();
+            props.LevelName = SelectedWorld;
+            _services.Properties.Save(ServerDirectory, props);
+            _config.WorldName = SelectedWorld;
+            _services.Configs.Save(_config);
+            _settings.Load(props);
+        }
 
         OnPropertyChanged(nameof(CurrentWorldName));
         OnPropertyChanged(nameof(IsSelectedWorldCurrent));
@@ -526,7 +548,7 @@ public sealed class ServerWorldViewModel : ObservableObject
             return;
         }
 
-        var targetDirectory = Path.Combine(ServerDirectory, targetWorldName);
+        var targetDirectory = Path.Combine(WorldsRoot, targetWorldName);
         if (Directory.Exists(targetDirectory))
         {
             var result = _services.Dialog.Show(
@@ -615,7 +637,9 @@ public sealed class ServerWorldViewModel : ObservableObject
     {
         var dialog = new OpenFileDialog
         {
-            Filter = "ZIP ファイル|*.zip",
+            Filter = IsBedrock
+                ? "統合版ワールド (*.mcworld;*.zip)|*.mcworld;*.zip"
+                : "ZIP ファイル|*.zip",
             CheckFileExists = true,
             Multiselect = false,
         };
@@ -658,7 +682,8 @@ public sealed class ServerWorldViewModel : ObservableObject
             return;
         }
 
-        if (!_settings.EnableCommandBlock)
+        // 統合版はコマンドブロックの可否がワールド側の設定のため、Java 版のみ確認する
+        if (!IsBedrock && !_settings.EnableCommandBlock)
         {
             var result = _services.Dialog.Show(
                 "配布マップにはコマンドブロックが必要な場合があります。\n有効にしますか？（有効にしない場合、正常に動作しない恐れがあります）",
@@ -677,7 +702,7 @@ public sealed class ServerWorldViewModel : ObservableObject
             }
         }
 
-        var targetDirectory = Path.Combine(ServerDirectory, worldName);
+        var targetDirectory = Path.Combine(WorldsRoot, worldName);
         if (Directory.Exists(targetDirectory) && !ReplaceWorldOnMapImport)
         {
             MapImportStatus = "同名ワールドが存在します。上書き設定を有効にしてください。";

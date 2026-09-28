@@ -62,15 +62,31 @@ internal sealed class StubFirewallService : IFirewallService
     public void RecreateRules(int port, FirewallRuleInfo info)
     {
     }
+
+    public void CreateProgramRules(string programPath, FirewallRuleInfo info)
+    {
+    }
+
+    public void RecreateProgramRules(string programPath, FirewallRuleInfo info)
+    {
+    }
+
+    public void ApplyServerRules(ServerConfig config, bool recreate)
+    {
+        if (string.IsNullOrWhiteSpace(config.Firewall.TcpRuleName))
+        {
+            config.Firewall = BuildRuleInfo(config.ServerId);
+        }
+    }
 }
 
 internal sealed class StubNetworkService : INetworkService
 {
     public IReadOnlyList<string> GetLanIpAddresses() => Array.Empty<string>();
-    public IReadOnlyList<string> GetExternalChecklist() => Array.Empty<string>();
+    public IReadOnlyList<string> GetExternalChecklist(NetworkProtocol protocol = NetworkProtocol.Tcp) => Array.Empty<string>();
     public Task<string?> GetPublicIpAsync() => Task.FromResult<string?>(null);
-    public IReadOnlyList<Process> GetProcessesUsingPort(int port) => Array.Empty<Process>();
-    public bool TryKillProcessesUsingPort(int port, out string? error)
+    public IReadOnlyList<Process> GetProcessesUsingPort(int port, NetworkProtocol protocol = NetworkProtocol.Tcp) => Array.Empty<Process>();
+    public bool TryKillProcessesUsingPort(int port, out string? error, NetworkProtocol protocol = NetworkProtocol.Tcp)
     {
         error = null;
         return true;
@@ -79,10 +95,20 @@ internal sealed class StubNetworkService : INetworkService
 
 internal sealed class StubUpnpService : IUpnpService
 {
-    public Task<(bool ok, string? error)> TryOpenPortAsync(int port, string description)
-        => Task.FromResult((true, (string?)null));
+    public List<(int Port, NetworkProtocol Protocol, int? PrivatePort)> Opened { get; } = [];
+    public List<(int Port, NetworkProtocol Protocol)> Closed { get; } = [];
 
-    public Task TryClosePortAsync(int port) => Task.CompletedTask;
+    public Task<(bool ok, string? error)> TryOpenPortAsync(int port, string description, NetworkProtocol protocol = NetworkProtocol.Tcp, int? privatePort = null)
+    {
+        Opened.Add((port, protocol, privatePort));
+        return Task.FromResult((true, (string?)null));
+    }
+
+    public Task TryClosePortAsync(int port, NetworkProtocol protocol = NetworkProtocol.Tcp)
+    {
+        Closed.Add((port, protocol));
+        return Task.CompletedTask;
+    }
 }
 
 internal sealed class StubThemeService : IThemeService
@@ -179,4 +205,45 @@ internal static class TestAppServicesFactory
             catalog,
             appUpdate);
     }
+}
+
+internal sealed class StubBackupSchedulerService : IBackupSchedulerService
+{
+    public void ApplyConfiguration(ServerConfig config)
+    {
+    }
+
+    public void Unschedule(string serverId)
+    {
+    }
+
+    public DateTime? GetNextRunAt(string serverId) => null;
+
+    public void UnscheduleAll()
+    {
+    }
+}
+
+/// <summary>ネットワークに出ない統合版サーバーサービス。InstallFromZipAsync は本物の展開処理を使う。</summary>
+internal sealed class StubBedrockServerService : IBedrockServerService
+{
+    public List<BedrockVersionInfo> Versions { get; } =
+    [
+        new() { Version = "1.26.60.3", DownloadUrl = "https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-1.26.60.3.zip" }
+    ];
+
+    public Task<IReadOnlyList<BedrockVersionInfo>> GetAvailableVersionsAsync(CancellationToken cancellationToken = default)
+        => Task.FromResult<IReadOnlyList<BedrockVersionInfo>>(Versions);
+
+    public Task InstallFromUrlAsync(string downloadUrl, string serverDirectory, IProgress<string>? progress = null, CancellationToken cancellationToken = default)
+        => throw new NotSupportedException("Not used in this test.");
+
+    public Task InstallFromZipAsync(string zipPath, string serverDirectory, IProgress<string>? progress = null, CancellationToken cancellationToken = default)
+    {
+        BedrockServerService.ExtractServerZip(zipPath, serverDirectory, cancellationToken);
+        return Task.CompletedTask;
+    }
+
+    public bool IsInstalled(string serverDirectory)
+        => File.Exists(Path.Combine(serverDirectory, ServerEditions.BedrockExecutableName));
 }

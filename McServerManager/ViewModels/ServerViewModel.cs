@@ -19,6 +19,14 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         @"There are (\d+) of a max of (\d+) players online",
         RegexOptions.Compiled
     );
+    private static readonly Regex BedrockPlayerConnectedRegex = new(
+        @"Player connected: (?<name>[^,]+),",
+        RegexOptions.Compiled
+    );
+    private static readonly Regex BedrockPlayerDisconnectedRegex = new(
+        @"Player disconnected: (?<name>[^,]+),",
+        RegexOptions.Compiled
+    );
     private static readonly TimeSpan GpuSampleInterval = TimeSpan.FromSeconds(2);
 
     private readonly AppServices _services;
@@ -62,8 +70,15 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     private string _javaWarning = string.Empty;
 
     private readonly IBackupSchedulerService _backupScheduler;
+    private readonly HashSet<string> _bedrockOnlinePlayers = new(StringComparer.OrdinalIgnoreCase);
 
-    public ServerViewModel(AppServices services, IBackupSchedulerService backupScheduler, ServerConfig config)
+    public ServerViewModel(
+        AppServices services,
+        IBackupSchedulerService backupScheduler,
+        IBedrockServerService bedrockServer,
+        IBedrockPropertiesService bedrockProperties,
+        IPortForwardingService portForwarding,
+        ServerConfig config)
     {
         _isInitializing = true;
         _services = services;
@@ -97,9 +112,9 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         InitializeVersionFilters();
 
         // サブViewModel の初期化
-        World = new ServerWorldViewModel(_services, _backupScheduler, _config, _settings, () => Status);
+        World = new ServerWorldViewModel(_services, _backupScheduler, _config, _settings, () => Status, bedrockProperties);
         Addon = new ServerAddonViewModel(_services, _config);
-        Network = new ServerNetworkViewModel(_services, _config, _appSettings);
+        Network = new ServerNetworkViewModel(_services, _config, _appSettings, portForwarding);
         Network.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName is nameof(ServerNetworkViewModel.IsFirewallConfigured)
@@ -110,6 +125,15 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             }
         };
         ResourcePack = new ServerResourcePackViewModel(_services, _config);
+        if (IsBedrock)
+        {
+            Bedrock = new ServerBedrockViewModel(
+                bedrockServer, bedrockProperties, _services.Worlds, _services.Configs, _services.Dialog, _services.Network,
+                _config, () => Status, command => _services.Runtime.SendCommand(_config, command));
+            Bedrock.SettingsSaved += OnBedrockSettingsSaved;
+            Bedrock.Update.Updated += OnBedrockUpdated;
+            Bedrock.Settings.PropertyChanged += (_, _) => UpdateRestartRequired();
+        }
 
         StartCommand = new AsyncRelayCommand(StartAsync, () => Status == ServerStatus.Stopped);
         StopCommand = new AsyncRelayCommand(StopAsync, () => Status != ServerStatus.Stopped);
@@ -156,7 +180,8 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         LoadPermissions();
         LoadCrashHistory();
         UpdateJavaWarning();
-        _ = LoadVersionsAsync();
+        if (!IsBedrock)
+            _ = LoadVersionsAsync();
 
         _statsTimer = new DispatcherTimer(
             TimeSpan.FromSeconds(1),
@@ -175,6 +200,8 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     public ServerAddonViewModel Addon { get; }
     public ServerNetworkViewModel Network { get; }
     public ServerResourcePackViewModel ResourcePack { get; }
+    /// <summary>統合版サーバーのときのみ生成される（Java 版では null）。</summary>
+    public ServerBedrockViewModel? Bedrock { get; }
 
     // ─── 識別情報 ────────────────────────────────────────────────
     public string Name => _config.Name;
@@ -184,6 +211,13 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     public int Port => _config.Port;
     public int MaxPlayers => _config.MaxPlayers;
     public string ServerDirectory => _config.DirectoryPath;
+
+    // ─── エディション ────────────────────────────────────────────
+    public bool IsBedrock => ServerEditions.IsBedrock(_config);
+    public string EditionLabel => ServerEditions.GetEditionLabel(_config.Type);
+    public string ServerTypeDisplay => ServerEditions.GetTypeDisplayName(_config.Type);
+    /// <summary>リソースパックの HTTP 配信は Java 版のみ（統合版は resource_packs フォルダで配布）。</summary>
+    public bool SupportsResourcePack => !IsBedrock;
 
     // ─── コレクション ─────────────────────────────────────────────
     public ObservableCollection<string> Logs { get; }
@@ -249,17 +283,23 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
     public bool SupportsAddons => Addon.SupportsAddonManagement;
     public string AddonNavLabel => SupportsAddons ? Addon.AddonCategoryName : "アドオン";
-    public bool HasPendingChanges => Settings.IsDirty;
+    public bool HasPendingChanges => IsBedrock ? Bedrock?.Settings.IsDirty == true : Settings.IsDirty;
 
-    /// <summary>LAN 参加アドレス（先頭の LAN IP:ポート）。</summary>
-    public string LanAddress
+    /// <summary>LAN 参加アドレスのホスト部（先頭の LAN IP）。</summary>
+    public string LanHost
     {
         get
         {
             var ip = Network.LanIpAddresses.FirstOrDefault();
-            return string.IsNullOrWhiteSpace(ip) ? $"127.0.0.1:{Port}" : $"{ip}:{Port}";
+            return string.IsNullOrWhiteSpace(ip) ? "127.0.0.1" : ip;
         }
     }
+
+    /// <summary>
+    /// LAN 参加アドレス。Java 版は「IP:ポート」をそのまま入力できるが、
+    /// 統合版はアドレスとポートを別欄に入力するため IP のみ。
+    /// </summary>
+    public string LanAddress => IsBedrock ? LanHost : $"{LanHost}:{Port}";
 
     public string JavaWarning
     {
@@ -306,8 +346,14 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 SaveAllCommand.RaiseCanExecuteChanged();
                 // サブViewModelに Status 変化を伝播
                 World.OnServerStatusChanged();
+                Bedrock?.Players.RefreshOperatorCommands();
                 if (value == ServerStatus.Stopped)
+                {
+                    lock (_bedrockOnlinePlayers)
+                        _bedrockOnlinePlayers.Clear();
+                    OnlinePlayers = 0;
                     LoadCrashHistory();
+                }
             }
         }
     }
@@ -622,10 +668,15 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
     public string PlayerCountText => $"{OnlinePlayers}/{MaxPlayers}";
     public string CpuUsageDisplayText => IsRunning ? $"{CpuUsagePercent:F0}%" : "—";
+    // 統合版は Java のヒープ上限 (Xmx) がないため、使用量のみ表示し、割合は PC の総メモリ比にする
     public string MemoryUsageDisplayText =>
-        IsRunning ? $"{MemoryUsageMb:F0} MB / {MemoryXmxMb} MB" : $"— / {MemoryXmxMb} MB";
+        IsBedrock
+            ? (IsRunning ? $"{MemoryUsageMb:F0} MB" : "—")
+            : IsRunning ? $"{MemoryUsageMb:F0} MB / {MemoryXmxMb} MB" : $"— / {MemoryXmxMb} MB";
     public double MemoryUsagePercent =>
-        MemoryXmxMb <= 0 ? 0 : Math.Clamp(MemoryUsageMb / MemoryXmxMb * 100, 0, 100);
+        IsBedrock
+            ? Math.Clamp(MemoryUsageMb * 1024 * 1024 / Math.Max(1, GC.GetGCMemoryInfo().TotalAvailableMemoryBytes) * 100, 0, 100)
+            : MemoryXmxMb <= 0 ? 0 : Math.Clamp(MemoryUsageMb / MemoryXmxMb * 100, 0, 100);
     public bool IsGpuMonitoringAvailable => _gpuMonitoringAvailable;
     public string GpuUsageDisplayText =>
         !IsRunning ? "—" : IsGpuMonitoringAvailable ? $"{GpuUsagePercent:F0}%" : "N/A";
@@ -671,8 +722,28 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
     private void UpdateRestartRequired()
     {
-        RestartRequired = Settings.IsDirty;
+        RestartRequired = HasPendingChanges;
         OnPropertyChanged(nameof(HasPendingChanges));
+    }
+
+    private void OnBedrockUpdated()
+    {
+        OnPropertyChanged(nameof(Version));
+        Bedrock?.LoadSettings();
+        Network.NotifyPortChanged();
+    }
+
+    private void OnBedrockSettingsSaved()
+    {
+        UpdateRestartRequired();
+        Network.NotifyPortChanged();
+        OnPropertyChanged(nameof(Port));
+        OnPropertyChanged(nameof(MaxPlayers));
+        OnPropertyChanged(nameof(PlayerCountText));
+        OnPropertyChanged(nameof(LanAddress));
+        World.LoadWorlds();
+        LoadSettings();
+        ShowSettingsSaved();
     }
 
     // ─── ナビ・クイックアクション ─────────────────────────────────
@@ -681,7 +752,8 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         if (string.IsNullOrWhiteSpace(view))
             return;
         // アドオン非対応サーバーでアドオン画面に来た場合は概要へ戻す
-        if (string.Equals(view, "addons", StringComparison.OrdinalIgnoreCase) && !SupportsAddons)
+        if ((string.Equals(view, "addons", StringComparison.OrdinalIgnoreCase) && !SupportsAddons)
+            || (string.Equals(view, "respack", StringComparison.OrdinalIgnoreCase) && !SupportsResourcePack))
         {
             CurrentView = "overview";
             return;
@@ -760,6 +832,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
     private void UpdateJavaWarning()
     {
+        if (IsBedrock)
+        {
+            JavaWarning = string.Empty;
+            return;
+        }
+
         try
         {
             var requiredMajor = _services.Java.GetRequiredJavaMajor(_config.Version);
@@ -894,6 +972,8 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         if (!Network.EnsurePortAvailable())
             return;
 
+        Bedrock?.ResetSignalingStatus();
+
         await Network.TryOpenPortAsync();
 
         try
@@ -980,6 +1060,21 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     // ─── 設定保存 ─────────────────────────────────────────────
     private void SaveSettings()
     {
+        if (Bedrock is not null)
+        {
+            try
+            {
+                Bedrock.SaveSettings();
+            }
+            catch (Exception ex)
+            {
+                _services.Dialog.Show(
+                    $"設定保存に失敗しました: {ex.Message}",
+                    "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            return;
+        }
+
         try
         {
             var props = Settings.ToModel();
@@ -1239,6 +1334,11 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         var issues = new List<string>();
         var fixes = new List<string>();
 
+        if (IsBedrock && !File.Exists(Path.Combine(ServerDirectory, ServerEditions.BedrockExecutableName)))
+        {
+            issues.Add("bedrock_server.exe が見つかりません。「バージョン」画面の「zip から更新」で統合版サーバーを入れ直してください。");
+        }
+
         if (string.Equals(ServerType, "Paper", StringComparison.OrdinalIgnoreCase))
         {
             var pluginsDir = Path.Combine(ServerDirectory, "plugins");
@@ -1311,6 +1411,9 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
     private void WarnIfJavaVersionMismatch()
     {
+        if (IsBedrock)
+            return;
+
         var requiredMajor = _services.Java.GetRequiredJavaMajor(_config.Version);
         if (requiredMajor is null)
             return;
@@ -1455,9 +1558,38 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
 
     private void OnLogReceived(string message)
     {
+        if (IsBedrock)
+        {
+            Bedrock?.HandleLog(message);
+            TrackBedrockPlayers(message);
+            return;
+        }
+
         var match = PlayerCountRegex.Match(message);
         if (match.Success && int.TryParse(match.Groups[1].Value, out var count))
             OnlinePlayers = count;
+    }
+
+    /// <summary>統合版は参加/退出ログから人数を数える（"Player connected: 名前, xuid: ..."）。</summary>
+    private void TrackBedrockPlayers(string message)
+    {
+        var connected = BedrockPlayerConnectedRegex.Match(message);
+        var disconnected = BedrockPlayerDisconnectedRegex.Match(message);
+        if (!connected.Success && !disconnected.Success)
+            return;
+
+        // 標準出力と標準エラーは別スレッドで届くためロックする
+        int count;
+        lock (_bedrockOnlinePlayers)
+        {
+            if (connected.Success)
+                _bedrockOnlinePlayers.Add(connected.Groups["name"].Value.Trim());
+            if (disconnected.Success)
+                _bedrockOnlinePlayers.Remove(disconnected.Groups["name"].Value.Trim());
+            count = _bedrockOnlinePlayers.Count;
+        }
+
+        WpfApplication.Current?.Dispatcher.BeginInvoke(() => OnlinePlayers = count);
     }
 
     private static bool IsModdedServerType(string? serverType) =>
@@ -1472,6 +1604,11 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         _isDisposed = true;
         _runtime.StatusChanged -= OnStatusChanged;
         _runtime.LogReceived -= OnLogReceived;
+        if (Bedrock is not null)
+        {
+            Bedrock.SettingsSaved -= OnBedrockSettingsSaved;
+            Bedrock.Update.Updated -= OnBedrockUpdated;
+        }
         _statsTimer.Stop();
         ResourcePack.Dispose();
         GC.SuppressFinalize(this);

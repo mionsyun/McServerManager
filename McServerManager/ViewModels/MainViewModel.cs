@@ -16,14 +16,25 @@ public sealed class MainViewModel : ObservableObject
     private static readonly TimeSpan UpdateSnoozeDuration = TimeSpan.FromHours(24);
     private readonly AppServices _services;
     private readonly IBackupSchedulerService _backupScheduler;
+    private readonly IBedrockServerService _bedrockServer;
+    private readonly IBedrockPropertiesService _bedrockProperties;
+    private readonly IPortForwardingService _portForwarding;
     private readonly AppSettings _settings;
     private ServerViewModel? _selectedServer;
     private bool _tutorialOpenedCreate;
 
-    public MainViewModel(AppServices services, IBackupSchedulerService backupScheduler)
+    public MainViewModel(
+        AppServices services,
+        IBackupSchedulerService backupScheduler,
+        IBedrockServerService bedrockServer,
+        IBedrockPropertiesService bedrockProperties,
+        IPortForwardingService portForwarding)
     {
         _services = services;
         _backupScheduler = backupScheduler;
+        _bedrockServer = bedrockServer;
+        _bedrockProperties = bedrockProperties;
+        _portForwarding = portForwarding;
         _settings = _services.Settings.Load();
 
         Servers = new ObservableCollection<ServerViewModel>();
@@ -321,11 +332,14 @@ public sealed class MainViewModel : ObservableObject
         var configs = _services.Configs.LoadAll(_settings.ServerDirectories);
         foreach (var config in configs.OrderBy(c => c.Name))
         {
-            Servers.Add(new ServerViewModel(_services, _backupScheduler, config));
+            Servers.Add(CreateServerViewModel(config));
         }
 
         SelectedServer = Servers.FirstOrDefault();
     }
+
+    private ServerViewModel CreateServerViewModel(ServerConfig config) =>
+        new(_services, _backupScheduler, _bedrockServer, _bedrockProperties, _portForwarding, config);
 
     private void ReloadServers()
     {
@@ -339,7 +353,7 @@ public sealed class MainViewModel : ObservableObject
             Owner = WpfApplication.Current.MainWindow
         };
 
-        var vm = new NewServerViewModel(_services, Servers.Select(s => s.Name));
+        var vm = new NewServerViewModel(_services, _bedrockServer, Servers.Select(s => s.Name));
         vm.RequestClose += result =>
         {
             window.DialogResult = result;
@@ -348,7 +362,7 @@ public sealed class MainViewModel : ObservableObject
         vm.ServerCreated += config =>
         {
             TrackServerDirectory(config.DirectoryPath);
-            var serverVm = new ServerViewModel(_services, _backupScheduler, config);
+            var serverVm = CreateServerViewModel(config);
             WpfApplication.Current.Dispatcher.Invoke(() =>
             {
                 Servers.Add(serverVm);
@@ -720,7 +734,7 @@ public sealed class MainViewModel : ObservableObject
         _services.Configs.SaveToDirectory(config, targetDir);
 
         TrackServerDirectory(targetDir);
-        var serverVm = new ServerViewModel(_services, _backupScheduler, config);
+        var serverVm = CreateServerViewModel(config);
         Servers.Add(serverVm);
         SelectedServer = serverVm;
     }

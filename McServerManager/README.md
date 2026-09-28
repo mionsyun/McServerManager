@@ -31,6 +31,17 @@ Minecraft サーバーを Windows 上で管理するための WPF デスクト�
 3. EULA 同意を確認して作成
 4. 生成物: `server.jar`、`eula.txt`、`server.properties`、`config.json`、`logs/`、`backups/`
 
+## 統合版 (Bedrock Dedicated Server)
+- 作成: 新規作成ウィザードで「統合版」を選択。公式のダウンロードリンク API から最新の Windows 版 BDS を取得（`minecraft.net` の https URL のみ許可）、または手元の `bedrock-server-*.zip` から作成
+- 起動: `bedrock_server.exe` を直接起動（Java 不要）。起動完了判定は `Server started.`
+- 設定: 統合版の `server.properties`（`server-name` / `allow-cheats` / `allow-list` / `tick-distance` / `transport` / `server-udp-ports` など）を GUI で編集。BDS 同梱の説明コメントは保持
+- 更新: 停止中に公式最新版または zip で上書き。`server.properties` / `allowlist.json` / `permissions.json` / `worlds/` は保持し、更新前にワールドを自動バックアップ
+- ワールド: `worlds/<level-name>` を管理。バックアップはサーバー直下の `backups/`
+- ネットワーク:
+  - NetherNet（BDS 1.26.51 以降の既定）: `server-port` は **TCP** のシグナリング。ゲーム通信はプレイヤーごとの **UDP**。外部公開には `server-udp-ports`（`[グローバルIP:]外部-外部:内部-内部`、最大人数分以上の範囲）が必要
+  - RakNet（旧方式）: `server-port` / `server-portv6` の **UDP**
+  - UPnP は上記の必要ポートをすべて開放。Firewall は `bedrock_server.exe` のプログラム単位で許可（動的 UDP と LAN 検出の UDP 7551 を含む）
+
 ## サーバー実行仕様
 - 起動コマンド: `java -Xms{Xms}M -Xmx{Xmx}M -jar "server.jar" nogui`
 - 起動完了判定: コンソール出力の `Done (` を検知

@@ -11,8 +11,22 @@ public sealed class WorldService : IWorldService
     private const string BackupMetadataEntryName = "backup-metadata.json";
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
+    /// <summary>
+    /// ワールドフォルダの親ディレクトリ。Java 版はサーバー直下、統合版 (BDS) は "worlds" 配下。
+    /// バックアップ (backups/) は両エディションともサーバー直下に置く。
+    /// </summary>
+    public string GetWorldsRoot(string serverDirectory)
+    {
+        var isBedrock = !string.IsNullOrWhiteSpace(serverDirectory)
+            && File.Exists(Path.Combine(serverDirectory, ServerEditions.BedrockExecutableName));
+        return isBedrock
+            ? Path.Combine(serverDirectory, ServerEditions.BedrockWorldsDirectoryName)
+            : serverDirectory;
+    }
+
     public IReadOnlyList<string> GetWorlds(string serverDirectory)
     {
+        serverDirectory = GetWorldsRoot(serverDirectory);
         if (!Directory.Exists(serverDirectory))
         {
             return Array.Empty<string>();
@@ -113,7 +127,7 @@ public sealed class WorldService : IWorldService
 
         ValidateWorldName(worldName);
         var trimmedWorldName = worldName.Trim();
-        var worldDirectory = Path.Combine(serverDirectory, trimmedWorldName);
+        var worldDirectory = Path.Combine(GetWorldsRoot(serverDirectory), trimmedWorldName);
         if (!Directory.Exists(worldDirectory) || !IsWorldDirectory(worldDirectory))
         {
             throw new InvalidOperationException("バックアップ対象のワールドデータが見つかりません。");
@@ -212,7 +226,7 @@ public sealed class WorldService : IWorldService
         ValidateWorldName(targetWorldName);
 
         var normalizedTargetName = targetWorldName.Trim();
-        var destination = Path.Combine(serverDirectory, normalizedTargetName);
+        var destination = Path.Combine(GetWorldsRoot(serverDirectory), normalizedTargetName);
         var destinationExists = Directory.Exists(destination);
         if (destinationExists && !overwriteExisting)
         {
@@ -272,7 +286,7 @@ public sealed class WorldService : IWorldService
     {
         ValidateWorldName(worldName);
 
-        var path = Path.Combine(serverDirectory, worldName);
+        var path = Path.Combine(GetWorldsRoot(serverDirectory), worldName);
         if (Directory.Exists(path))
         {
             throw new InvalidOperationException("同名のワールドが既に存在します。");
@@ -283,7 +297,7 @@ public sealed class WorldService : IWorldService
 
     public void DeleteWorld(string serverDirectory, string worldName)
     {
-        var path = Path.Combine(serverDirectory, worldName);
+        var path = Path.Combine(GetWorldsRoot(serverDirectory), worldName);
         if (Directory.Exists(path))
         {
             Directory.Delete(path, true);
@@ -347,7 +361,7 @@ public sealed class WorldService : IWorldService
 
         ValidateWorldName(targetWorldName);
 
-        var destination = Path.Combine(serverDirectory, targetWorldName.Trim());
+        var destination = Path.Combine(GetWorldsRoot(serverDirectory), targetWorldName.Trim());
         if (Directory.Exists(destination))
         {
             if (!overwriteExisting)
@@ -391,9 +405,12 @@ public sealed class WorldService : IWorldService
             throw new FileNotFoundException("配布マップZIPが見つかりません。", archivePath);
         }
 
-        if (!string.Equals(Path.GetExtension(archivePath), ".zip", StringComparison.OrdinalIgnoreCase))
+        // .mcworld は統合版の配布ワールド形式（中身は zip）
+        var extension = Path.GetExtension(archivePath);
+        if (!string.Equals(extension, ".zip", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(extension, ".mcworld", StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException("配布マップは .zip 形式で指定してください。");
+            throw new InvalidOperationException("配布マップは .zip / .mcworld 形式で指定してください。");
         }
     }
 

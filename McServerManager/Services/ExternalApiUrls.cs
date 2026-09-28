@@ -10,6 +10,10 @@ internal static class ExternalApiUrls
     public const string MinecraftVersionManifest =
         "https://launchermeta.mojang.com/mc/game/version_manifest.json";
 
+    // 統合版 (Bedrock Dedicated Server) の公式ダウンロードリンク一覧
+    public const string BedrockDownloadLinks =
+        "https://net-secondary.web.minecraft-services.net/api/v1.0/download/links";
+
     // サーバーJAR
     public const string PaperApiBase = "https://api.papermc.io/v2/projects";
     public const string FabricApiBase = "https://meta.fabricmc.net/v2/versions";

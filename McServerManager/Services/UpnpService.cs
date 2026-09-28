@@ -1,3 +1,4 @@
+using McServerManager.Models;
 using Open.Nat;
 
 namespace McServerManager.Services;
@@ -9,27 +10,27 @@ public sealed class UpnpService : IUpnpService
     private DateTime _lastDiscovery = DateTime.MinValue;
     private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(2);
 
-    public async Task<(bool ok, string? error)> TryOpenPortAsync(int port, string description)
+    public async Task<(bool ok, string? error)> TryOpenPortAsync(int port, string description, NetworkProtocol protocol = NetworkProtocol.Tcp, int? privatePort = null)
     {
         var device = await GetDeviceAsync().ConfigureAwait(false);
         if (device is null)
         {
-            return (false, BuildDeviceNotFoundMessage(port));
+            return (false, BuildDeviceNotFoundMessage(port, protocol));
         }
 
         try
         {
-            var mapping = new Mapping(Protocol.Tcp, port, port, description);
+            var mapping = new Mapping(ToNatProtocol(protocol), privatePort ?? port, port, description);
             await device.CreatePortMapAsync(mapping).ConfigureAwait(false);
             return (true, null);
         }
         catch (Exception ex)
         {
-            return (false, BuildOpenPortFailureMessage(port, ex));
+            return (false, BuildOpenPortFailureMessage(port, protocol, ex));
         }
     }
 
-    public async Task TryClosePortAsync(int port)
+    public async Task TryClosePortAsync(int port, NetworkProtocol protocol = NetworkProtocol.Tcp)
     {
         var device = await GetDeviceAsync().ConfigureAwait(false);
         if (device is null)
@@ -39,7 +40,7 @@ public sealed class UpnpService : IUpnpService
 
         try
         {
-            var mapping = new Mapping(Protocol.Tcp, port, port);
+            var mapping = new Mapping(ToNatProtocol(protocol), port, port);
             await device.DeletePortMapAsync(mapping).ConfigureAwait(false);
         }
         catch
@@ -68,19 +69,25 @@ public sealed class UpnpService : IUpnpService
         }
     }
 
-    private static string BuildDeviceNotFoundMessage(int port)
+    private static Protocol ToNatProtocol(NetworkProtocol protocol) =>
+        protocol == NetworkProtocol.Udp ? Protocol.Udp : Protocol.Tcp;
+
+    private static string ToLabel(NetworkProtocol protocol) =>
+        protocol == NetworkProtocol.Udp ? "UDP" : "TCP";
+
+    private static string BuildDeviceNotFoundMessage(int port, NetworkProtocol protocol)
     {
         var lines = new List<string>
         {
             "UPnP対応ルーターが見つかりませんでした。",
             "共有回線（J:COMなど）やCGNAT環境では、ポート開放そのものができない場合があります。",
-            $"手動でルーターの TCP {port} を開放するか、固定IPオプション / VPN中継（Tailscale, playit.gg など）を検討してください。"
+            $"手動でルーターの {ToLabel(protocol)} {port} を開放するか、固定IPオプション / VPN中継（Tailscale, playit.gg など）を検討してください。"
         };
 
         return string.Join(Environment.NewLine, lines);
     }
 
-    private static string BuildOpenPortFailureMessage(int port, Exception ex)
+    private static string BuildOpenPortFailureMessage(int port, NetworkProtocol protocol, Exception ex)
     {
         var detail = string.IsNullOrWhiteSpace(ex.Message)
             ? ex.GetType().Name
@@ -88,7 +95,7 @@ public sealed class UpnpService : IUpnpService
 
         var lines = new List<string>
         {
-            $"UPnPで TCP {port} の開放に失敗しました。",
+            $"UPnPで {ToLabel(protocol)} {port} の開放に失敗しました。",
             $"詳細: {detail}"
         };
 

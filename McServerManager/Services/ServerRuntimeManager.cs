@@ -62,23 +62,12 @@ public sealed class ServerRuntimeManager : IServerRuntimeManager
             return;
         }
 
-        var javaPath = string.IsNullOrWhiteSpace(config.JavaPath) ? "java" : config.JavaPath;
-        var jarPath = Path.Combine(serverDirectory, "server.jar");
-
-        // Forge 1.17+ は run.bat / win_args.txt で起動するため server.jar が不要な場合がある
-        var isForge = string.Equals(config.Type, "Forge", StringComparison.OrdinalIgnoreCase);
-        var hasForgeAltLaunch = isForge && (
-            File.Exists(Path.Combine(serverDirectory, "run.bat")) ||
-            !string.IsNullOrWhiteSpace(FindForgeWinArgsFile(serverDirectory)));
-
-        if (!File.Exists(jarPath) && !hasForgeAltLaunch)
-        {
-            throw new FileNotFoundException("server.jar が見つかりません。", jarPath);
-        }
+        var (startInfo, strategyLabel) = ServerEditions.IsBedrock(config)
+            ? BuildBedrockStartInfo(serverDirectory)
+            : BuildJavaStartInfo(config, serverDirectory);
 
         runtime.SetStatus(ServerStatus.Starting);
         runtime.AddLog("起動中...");
-        var (startInfo, strategyLabel) = BuildStartInfo(config, serverDirectory, javaPath, jarPath);
         runtime.AddLog($"起動方式: {strategyLabel}");
 
         var process = new Process
@@ -104,6 +93,41 @@ public sealed class ServerRuntimeManager : IServerRuntimeManager
         process.BeginErrorReadLine();
 
         await Task.Delay(300).ConfigureAwait(false);
+    }
+
+    private static (ProcessStartInfo StartInfo, string StrategyLabel) BuildJavaStartInfo(
+        ServerConfig config,
+        string serverDirectory)
+    {
+        var javaPath = string.IsNullOrWhiteSpace(config.JavaPath) ? "java" : config.JavaPath;
+        var jarPath = Path.Combine(serverDirectory, "server.jar");
+
+        // Forge 1.17+ は run.bat / win_args.txt で起動するため server.jar が不要な場合がある
+        var isForge = string.Equals(config.Type, "Forge", StringComparison.OrdinalIgnoreCase);
+        var hasForgeAltLaunch = isForge && (
+            File.Exists(Path.Combine(serverDirectory, "run.bat")) ||
+            !string.IsNullOrWhiteSpace(FindForgeWinArgsFile(serverDirectory)));
+
+        if (!File.Exists(jarPath) && !hasForgeAltLaunch)
+        {
+            throw new FileNotFoundException("server.jar が見つかりません。", jarPath);
+        }
+
+        return BuildStartInfo(config, serverDirectory, javaPath, jarPath);
+    }
+
+    /// <summary>統合版は Java 不要。bedrock_server.exe を引数なしで起動する（設定は server.properties から読まれる）。</summary>
+    private static (ProcessStartInfo StartInfo, string StrategyLabel) BuildBedrockStartInfo(string serverDirectory)
+    {
+        var exePath = Path.Combine(serverDirectory, ServerEditions.BedrockExecutableName);
+        if (!File.Exists(exePath))
+        {
+            throw new FileNotFoundException(
+                "bedrock_server.exe が見つかりません。「バージョン」画面から統合版サーバーを再インストールしてください。",
+                exePath);
+        }
+
+        return (CreateBaseStartInfo(exePath, string.Empty, serverDirectory), "統合版 bedrock_server.exe");
     }
 
     private static (ProcessStartInfo StartInfo, string StrategyLabel) BuildStartInfo(
@@ -276,13 +300,19 @@ public sealed class ServerRuntimeManager : IServerRuntimeManager
             return;
         }
 
-        if (runtime.Status == ServerStatus.Starting && data.Contains("Done (", StringComparison.OrdinalIgnoreCase))
+        if (runtime.Status == ServerStatus.Starting && IsStartupCompleteLine(runtime.Config, data))
         {
             runtime.SetStatus(ServerStatus.Running);
         }
 
         runtime.AddLog(data);
     }
+
+    /// <summary>Java 版は "Done (x.xs)!"、統合版は "Server started." が起動完了の合図。</summary>
+    private static bool IsStartupCompleteLine(ServerConfig config, string line) =>
+        ServerEditions.IsBedrock(config)
+            ? line.Contains("Server started.", StringComparison.OrdinalIgnoreCase)
+            : line.Contains("Done (", StringComparison.OrdinalIgnoreCase);
 
     private void HandleProcessExited(ServerRuntime runtime, int exitCode)
     {
