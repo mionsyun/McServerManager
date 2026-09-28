@@ -36,6 +36,12 @@ resource "azurerm_static_web_app" "lp" {
   sku_tier            = var.static_web_app_sku_tier
   sku_size            = var.static_web_app_sku_size
   tags                = local.common_tags
+
+  lifecycle {
+    # GitHub Actions (Azure/static-web-apps-deploy) がデプロイ時にリポジトリ情報を書き込むため、
+    # Terraform では管理しない（差分として毎回消そうとしないように）
+    ignore_changes = [repository_url, repository_branch]
+  }
 }
 
 resource "azurerm_static_web_app_custom_domain" "lp" {

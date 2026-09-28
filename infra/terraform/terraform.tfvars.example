@@ -8,9 +8,9 @@ static_web_app_location = "East Asia" # Japan East is not supported by Static We
 static_web_app_sku_tier = "Free"
 static_web_app_sku_size = "Free"
 
-# Optional: custom domain. Leave empty on the first apply, point DNS CNAME
-# (www -> static_web_app_default_hostname) and then set "www.maipilot.jp".
-custom_domain_name            = ""
+# Custom domain. When rebuilding from scratch, set "" for the first apply, point DNS CNAME
+# (www -> static_web_app_default_hostname) and then set "www.maipilot.jp" again.
+custom_domain_name            = "www.maipilot.jp"
 custom_domain_validation_type = "cname-delegation"
 
 # Trusted Signing (code signing). Billed monthly from creation (Basic: about $9.99/month).
