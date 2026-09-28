@@ -15,7 +15,7 @@ internal static class ExternalApiUrls
         "https://net-secondary.web.minecraft-services.net/api/v1.0/download/links";
 
     // サーバーJAR
-    public const string PaperApiBase = "https://api.papermc.io/v2/projects";
+    public const string PaperApiBase = "https://fill.papermc.io/v3/projects";
     public const string FabricApiBase = "https://meta.fabricmc.net/v2/versions";
     public const string PurpurApiBase = "https://api.purpurmc.org/v2/purpur";
     public const string ForgeMavenMetadata =
