@@ -100,9 +100,9 @@ variable "tags" {
 }
 
 variable "custom_domain_name" {
-  description = "Custom domain to bind to the Static Web App (e.g. www.maipilot.jp). Leave empty to disable. When rebuilding, apply once with empty, point the DNS CNAME to the new default hostname, then set this and apply again."
+  description = "Custom domain to bind to the Static Web App (e.g. www.maipilot.jp). Leave empty to disable. When rebuilding from scratch, apply once with empty, point the DNS CNAME to the new default hostname, then set this and apply again."
   type        = string
-  default     = ""
+  default     = "www.maipilot.jp"
 }
 
 variable "custom_domain_validation_type" {

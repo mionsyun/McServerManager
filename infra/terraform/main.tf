@@ -36,6 +36,12 @@ resource "azurerm_static_web_app" "lp" {
   sku_tier            = var.static_web_app_sku_tier
   sku_size            = var.static_web_app_sku_size
   tags                = local.common_tags
+
+  lifecycle {
+    # GitHub Actions (Azure/static-web-apps-deploy) がデプロイ時にリポジトリ情報を書き込むため、
+    # Terraform では管理しない（差分として毎回消そうとしないように）
+    ignore_changes = [repository_url, repository_branch]
+  }
 }
 
 resource "azurerm_static_web_app_custom_domain" "lp" {
@@ -44,4 +50,10 @@ resource "azurerm_static_web_app_custom_domain" "lp" {
   static_web_app_id = azurerm_static_web_app.lp.id
   domain_name       = var.custom_domain_name
   validation_type   = var.custom_domain_validation_type
+
+  lifecycle {
+    # validation_type は作成時の検証方法で、API から読み戻せない（import 後に差分が出て再作成になる）。
+    # 作成後は意味を持たないため変更を無視する
+    ignore_changes = [validation_type]
+  }
 }
