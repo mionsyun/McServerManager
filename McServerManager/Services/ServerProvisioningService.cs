@@ -162,6 +162,9 @@ public sealed class ServerProvisioningService : IServerProvisioningService
         props.AllowCheats = options.AllowCheats;
         props.MaxPlayers = config.MaxPlayers;
         props.OnlineMode = config.OnlineMode;
+        // BDS 同梱の既定は allow-list=true（allowlist.json に登録した人しか入れない）。
+        // 作成直後に友達が「招待されていません」と弾かれないよう、Java 版と同じく無効で始める
+        props.AllowList = false;
         props.ServerPort = config.Port;
         props.ServerPortV6 = config.PortV6;
         props.LevelName = config.WorldName;

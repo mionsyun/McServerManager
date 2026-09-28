@@ -231,7 +231,10 @@ public sealed class BedrockServerTests
     [InlineData("19300-19319:19300-19319", true)]
     [InlineData("203.0.113.10:19300-19319:19300-19319", true)]
     [InlineData("19300:19300", true)]
-    [InlineData("19300-19319", false)]
+    [InlineData("19300-19319", true)]
+    [InlineData("19300-19309,19400-19409", true)]
+    [InlineData("[2001:db8::1]:19300-19309:19300-19309", true)]
+    [InlineData("19300-19309:", false)]
     [InlineData("19300-19319:19300-19310", false)]
     [InlineData("::1:19300:19300", false)]
     [InlineData("999.1.1.1:19300:19300", false)]
@@ -264,6 +267,16 @@ public sealed class BedrockServerTests
 
         var warning = Assert.Single(BedrockNetworkPlanner.GetWarnings(props, "1.26.60.3"));
         Assert.Contains("最大人数", warning);
+    }
+
+    [Fact]
+    public void GetRequiredPorts_SupportsRangeOnlyAndMultipleEntries()
+    {
+        var props = new BedrockServerProperties { Transport = "nethernet", ServerUdpPorts = "19300-19304, 19400-19404" };
+
+        var ports = BedrockNetworkPlanner.GetRequiredPorts(props, "1.26.52.3");
+
+        Assert.Equal(["TCP 19132", "UDP 19300-19304", "UDP 19400-19404"], ports.Select(p => p.Label));
     }
 
     [Fact]
@@ -320,7 +333,7 @@ public sealed class BedrockServerTests
             new FakeServerJarService(),
             new StubBedrockServerService(),
             bedrockProperties);
-        var zip = CreateBdsZip(appData.AppDataPath, "server-name=Dedicated Server\ntransport=nethernet\nserver-port=19132");
+        var zip = CreateBdsZip(appData.AppDataPath, "server-name=Dedicated Server\nallow-list=true\ntransport=nethernet\nserver-port=19132");
 
         var config = await provisioning.CreateAsync(new NewServerOptions
         {
@@ -346,6 +359,8 @@ public sealed class BedrockServerTests
         Assert.Equal("creative", props.GameMode);
         Assert.True(props.AllowCheats);
         Assert.Equal(19140, props.ServerPort);
+        // BDS 同梱の既定 allow-list=true のままだと登録者以外が入れないため、作成時は無効にする
+        Assert.False(props.AllowList);
         // NetherNet は接続不具合の報告が多いため、作成時の既定は RakNet
         Assert.Equal("raknet", props.Transport);
     }

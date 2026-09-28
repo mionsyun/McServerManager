@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Sockets;
 using McServerManager.Models;
 
 namespace McServerManager.Services;
@@ -47,9 +46,10 @@ public static class BedrockNetworkPlanner
         {
             new(NetworkProtocol.Tcp, properties.ServerPort, properties.ServerPort, properties.ServerPort, "接続受付 (シグナリング)")
         };
-        if (TryParseUdpPorts(properties.ServerUdpPorts, out var mapping, out _) && mapping is not null)
+        if (TryParseUdpPorts(properties.ServerUdpPorts, out var mappings, out _))
         {
-            list.Add(new(NetworkProtocol.Udp, mapping.ExternalStart, mapping.ExternalEnd, mapping.InternalStart, "ゲーム通信 (NetherNet)"));
+            foreach (var mapping in mappings)
+                list.Add(new(NetworkProtocol.Udp, mapping.ExternalStart, mapping.ExternalEnd, mapping.InternalStart, "ゲーム通信 (NetherNet)"));
         }
 
         return list;
@@ -72,54 +72,98 @@ public static class BedrockNetworkPlanner
             return warnings;
         }
 
-        if (!TryParseUdpPorts(properties.ServerUdpPorts, out var mapping, out var error) || mapping is null)
+        if (!TryParseUdpPorts(properties.ServerUdpPorts, out var mappings, out var error))
         {
             warnings.Add(error ?? "server-udp-ports の書式が正しくありません。");
             return warnings;
         }
 
-        if (mapping.Count == 1)
+        var count = mappings.Sum(m => m.Count);
+        if (count == 1)
             warnings.Add("UDP ポートが 1 つだけだと、同時に 1 人しか接続できません。最大人数分以上の範囲を指定してください。");
-        else if (mapping.Count < properties.MaxPlayers)
-            warnings.Add($"UDP ポートの範囲 ({mapping.Count} 個) が最大人数 ({properties.MaxPlayers} 人) より少ないため、全員が同時に接続できない可能性があります。");
+        else if (count < properties.MaxPlayers)
+            warnings.Add($"UDP ポートの範囲 ({count} 個) が最大人数 ({properties.MaxPlayers} 人) より少ないため、全員が同時に接続できない可能性があります。");
 
-        if (string.IsNullOrWhiteSpace(mapping.AdvertisedIp))
-            warnings.Add("ルーターの内側から外部公開する場合は、先頭にグローバル IP を付けてください（付けないと外部から届く接続先が相手に伝わらない可能性があります）。");
+        if (mappings.All(m => string.IsNullOrWhiteSpace(m.AdvertisedIp)))
+            warnings.Add("ルーターの内側から外部公開する場合は、先頭にグローバル IP を付けてください（付けないとこの PC の LAN 内アドレスが相手に伝わり、外部から届かない可能性があります）。");
 
         return warnings;
     }
 
-    /// <summary>"[ip:]external[-external]:internal[-internal]" を解析する。空文字は「未設定」として false・error なし。</summary>
-    public static bool TryParseUdpPorts(string? value, out UdpPortMapping? mapping, out string? error)
+    /// <summary>
+    /// server-udp-ports を解析する（BDS 同梱の bedrock_server_how_to.html の書式）。
+    /// 各エントリは「start[-end]」（ローカルで使うポート範囲の固定）か
+    /// 「[ip:]external[-external]:internal[-internal]」（NAT / ポート転送の対応を広告）。
+    /// カンマ区切りで複数指定でき、IPv6 は [ ] で囲む。空文字は「未設定」として false・error なし。
+    /// </summary>
+    public static bool TryParseUdpPorts(string? value, out IReadOnlyList<UdpPortMapping> mappings, out string? error)
     {
-        mapping = null;
+        mappings = Array.Empty<UdpPortMapping>();
         error = null;
         if (string.IsNullOrWhiteSpace(value))
             return false;
 
-        var parts = value.Trim().Split(':');
+        var result = new List<UdpPortMapping>();
+        foreach (var rawEntry in value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (!TryParseEntry(rawEntry, out var mapping, out error))
+                return false;
+            result.Add(mapping!);
+        }
+
+        if (result.Count == 0)
+            return false;
+
+        mappings = result;
+        return true;
+    }
+
+    private static bool TryParseEntry(string entry, out UdpPortMapping? mapping, out string? error)
+    {
+        mapping = null;
+        error = null;
         string? ip = null;
+        var rest = entry;
+
+        // IPv6 は [2001:db8::1]:ext:int の形
+        if (rest.StartsWith('['))
+        {
+            var close = rest.IndexOf("]:", StringComparison.Ordinal);
+            if (close < 0)
+            {
+                error = $"server-udp-ports の「{entry}」が正しくありません（IPv6 は [ ] で囲んでください）。";
+                return false;
+            }
+            ip = rest[1..close];
+            rest = rest[(close + 2)..];
+        }
+
+        var parts = rest.Split(':');
         string externalPart;
         string internalPart;
         switch (parts.Length)
         {
+            case 1 when ip is null:
+                // start[-end]: 使うローカルポートを固定するだけ（外部ポート = 内部ポートとして扱う）
+                externalPart = internalPart = parts[0];
+                break;
             case 2:
                 externalPart = parts[0];
                 internalPart = parts[1];
                 break;
-            case 3:
+            case 3 when ip is null:
                 ip = parts[0].Trim();
                 externalPart = parts[1];
                 internalPart = parts[2];
                 break;
             default:
-                error = "server-udp-ports は「[IPv4:]外部ポート[-外部ポート]:内部ポート[-内部ポート]」の形で入力してください。";
+                error = "server-udp-ports は「開始-終了」または「[グローバルIP:]外部ポート[-外部ポート]:内部ポート[-内部ポート]」の形で入力してください。";
                 return false;
         }
 
-        if (ip is not null && (!IPAddress.TryParse(ip, out var address) || address.AddressFamily != AddressFamily.InterNetwork))
+        if (ip is not null && !IPAddress.TryParse(ip, out _))
         {
-            error = $"server-udp-ports の IP アドレス「{ip}」が正しくありません（IPv4 で指定してください）。";
+            error = $"server-udp-ports の IP アドレス「{ip}」が正しくありません。";
             return false;
         }
 
