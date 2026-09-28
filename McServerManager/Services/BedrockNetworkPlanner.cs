@@ -62,7 +62,7 @@ public static class BedrockNetworkPlanner
         if (!UsesNetherNet(properties, installedVersion))
         {
             if (string.Equals(properties.Transport, TransportRakNet, StringComparison.OrdinalIgnoreCase))
-                warnings.Add("RakNet は旧方式です。クライアント 1.26.60 で廃止予定との情報があるため、一時的な回避策として使ってください。");
+                warnings.Add("RakNet（旧方式）で動作中です。クライアント 1.26.60 で廃止予定との情報があるため、つながらなくなったらサーバー設定で NetherNet に切り替えてください。");
             return warnings;
         }
 

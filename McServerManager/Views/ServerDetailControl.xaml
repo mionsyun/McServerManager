@@ -477,6 +477,21 @@
                                        Visibility="{Binding Network.UsesNetherNet, Converter={StaticResource BooleanToVisibilityConverter}}"
                                        Text="NetherNet では、ポート番号 (TCP) で接続を受け付けたあと、プレイヤーごとに UDP で通信します。UDP 7551 は同じ Wi-Fi 内の検出用なので、ルーターで開ける必要はありません。"/>
 
+                            <!-- NetherNet でつながらないとき -->
+                            <Border Style="{StaticResource PendingBanner}" Margin="0,10,0,0"
+                                    Visibility="{Binding Network.UsesNetherNet, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="一覧には見えるのに入れないときは" FontWeight="SemiBold"/>
+                                        <TextBlock Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,2,0,0"
+                                                   Text="NetherNet で接続できない不具合 (BDS-23108) が報告されています。旧方式の RakNet に切り替えると接続できた、という報告が多くあります。"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="RakNet に切り替える" Style="{StaticResource PrimaryButton}" VerticalAlignment="Center" Margin="12,0,0,0"
+                                            Command="{Binding Bedrock.SwitchToRakNetCommand}"/>
+                                </Grid>
+                            </Border>
+
                             <!-- 設定の注意点 -->
                             <Border Style="{StaticResource WarnBanner}" Margin="0,10,0,0"
                                     Visibility="{Binding Network.HasBedrockWarnings, Converter={StaticResource BooleanToVisibilityConverter}}">

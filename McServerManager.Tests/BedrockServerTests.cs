@@ -346,7 +346,36 @@ public sealed class BedrockServerTests
         Assert.Equal("creative", props.GameMode);
         Assert.True(props.AllowCheats);
         Assert.Equal(19140, props.ServerPort);
-        Assert.Equal("nethernet", props.Transport);
+        // NetherNet は接続不具合の報告が多いため、作成時の既定は RakNet
+        Assert.Equal("raknet", props.Transport);
+    }
+
+    [Fact]
+    public async Task Provisioning_DoesNotAddTransportToOldBedrockServer()
+    {
+        using var appData = new TemporaryAppDataScope();
+        var paths = new AppPathsService();
+        var bedrockProperties = new BedrockPropertiesService();
+        var provisioning = new ServerProvisioningService(
+            paths,
+            new ServerPropertiesService(),
+            new ServerConfigService(paths),
+            new FakeServerJarService(),
+            new StubBedrockServerService(),
+            bedrockProperties);
+        var zip = CreateBdsZip(appData.AppDataPath, "server-name=Dedicated Server\nserver-port=19132");
+
+        var config = await provisioning.CreateAsync(new NewServerOptions
+        {
+            Name = "旧版",
+            Type = ServerEditions.BedrockType,
+            Version = "1.21.100.7",
+            BedrockZipPath = zip,
+            Motd = "旧版",
+            EulaAccepted = true
+        });
+
+        Assert.DoesNotContain("transport=", File.ReadAllText(Path.Combine(config.DirectoryPath, "server.properties")));
     }
 
     [Fact]

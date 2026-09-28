@@ -412,8 +412,25 @@
                                 </StackPanel>
                                 <CheckBox Content="オンラインモード (Xbox Live 認証)" IsChecked="{Binding Bedrock.OnlineMode}" VerticalAlignment="Bottom" Margin="0,0,0,6"/>
                             </StackPanel>
+                            <TextBlock Text="通信方式" Margin="0,14,0,0"/>
+                            <UniformGrid Columns="2" Margin="0,4,0,0">
+                                <RadioButton Style="{StaticResource SelectableCard}" Padding="12,10" Margin="0,0,6,0" GroupName="BedrockTransport"
+                                             IsChecked="{Binding Bedrock.UseRakNet}">
+                                    <StackPanel>
+                                        <TextBlock Text="RakNet（おすすめ）" FontWeight="SemiBold"/>
+                                        <TextBlock Text="旧方式。現在はこちらの方がつながりやすいという報告が多い。" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                    </StackPanel>
+                                </RadioButton>
+                                <RadioButton Style="{StaticResource SelectableCard}" Padding="12,10" Margin="6,0,0,0" GroupName="BedrockTransport"
+                                             IsChecked="{Binding Bedrock.UseNetherNet}">
+                                    <StackPanel>
+                                        <TextBlock Text="NetherNet" FontWeight="SemiBold"/>
+                                        <TextBlock Text="新方式 (BDS の既定)。一覧に見えるのに入れない不具合の報告あり。" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                    </StackPanel>
+                                </RadioButton>
+                            </UniformGrid>
                             <TextBlock Style="{StaticResource MutedText}" FontSize="11" TextWrapping="Wrap" Margin="0,6,0,0"
-                                       Text="通常はそのままで大丈夫です。家の外から参加してもらう設定（ポート開放・ゲーム通信用 UDP ポート）は、作成後に「接続・公開」画面から行えます。"/>
+                                       Text="RakNet では起動時に「NetherNet is the only supported transport type...」と警告が出ますが、そのまま接続できます。RakNet はクライアント 1.26.60 で廃止予定との情報があり、つながらなくなったら NetherNet に切り替えてください（サーバー設定から変更できます）。家の外から参加してもらう設定は、作成後に「接続・公開」画面から行えます。"/>
                             <TextBlock Text="保存先フォルダ" Margin="0,12,0,0"/>
                             <Grid Margin="0,4,0,0">
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>

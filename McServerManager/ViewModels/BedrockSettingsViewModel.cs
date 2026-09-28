@@ -48,8 +48,8 @@ public sealed class BedrockSettingsViewModel : ObservableObject
     /// <summary>空 = server.properties にキーがない（古い BDS）。その場合は選択肢を出さない。</summary>
     public static IReadOnlyList<ChoiceOption> Transports { get; } =
     [
-        new(BedrockNetworkPlanner.TransportNetherNet, "NetherNet（標準・推奨）"),
-        new(BedrockNetworkPlanner.TransportRakNet, "RakNet（旧方式・接続できないときの回避用）"),
+        new(BedrockNetworkPlanner.TransportRakNet, "RakNet（旧方式・現在つながりやすい）"),
+        new(BedrockNetworkPlanner.TransportNetherNet, "NetherNet（新方式・BDS の既定）"),
     ];
 
     public static IReadOnlyList<ChoiceOption> PermissionLevels { get; } =

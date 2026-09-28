@@ -25,4 +25,6 @@ public sealed class NewServerOptions
     public string GameMode { get; set; } = "survival";
     public string Difficulty { get; set; } = "easy";
     public bool AllowCheats { get; set; }
+    /// <summary>"raknet" | "nethernet"。transport キーを持つ BDS (1.26.51 以降) のときだけ反映する。</summary>
+    public string BedrockTransport { get; set; } = "raknet";
 }

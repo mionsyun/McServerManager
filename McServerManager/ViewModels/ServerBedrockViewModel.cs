@@ -43,6 +43,7 @@ public sealed class ServerBedrockViewModel : ObservableObject
 
         Update = new BedrockUpdateViewModel(bedrockServer, worlds, configs, dialog, config, getStatus);
         AutoConfigureUdpPortsCommand = new AsyncRelayCommand(AutoConfigureUdpPortsAsync);
+        SwitchToRakNetCommand = new RelayCommand(_ => SwitchToRakNet());
 
         LoadSettings();
         Players.Load();
@@ -56,6 +57,7 @@ public sealed class ServerBedrockViewModel : ObservableObject
     public BedrockUpdateViewModel Update { get; }
 
     public AsyncRelayCommand AutoConfigureUdpPortsCommand { get; }
+    public RelayCommand SwitchToRakNetCommand { get; }
 
     /// <summary>編集中の設定で外部公開を妨げそうな点（保存前から表示する）。</summary>
     public IReadOnlyList<string> NetworkWarnings =>
@@ -137,6 +139,23 @@ public sealed class ServerBedrockViewModel : ObservableObject
         Settings.Load(props);
         SettingsSaved?.Invoke();
         return true;
+    }
+
+    /// <summary>NetherNet でつながらないときの回避策として transport=raknet を保存する（再起動で反映）。</summary>
+    private void SwitchToRakNet()
+    {
+        if (_dialog.Show(
+                "通信方式を RakNet（旧方式）に切り替えます。\n\n起動時に「NetherNet is the only supported transport type...」という警告が出ますが、RakNet が無効になるわけではありません。ポートは UDP で開放し直してください。\n\n切り替えますか？",
+                "RakNet に切り替え", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        Settings.Transport = BedrockNetworkPlanner.TransportRakNet;
+        if (SaveSettings())
+        {
+            _dialog.Show("RakNet に切り替えました。サーバーを再起動すると反映されます。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
     }
 
     /// <summary>

@@ -39,7 +39,7 @@ Minecraft サーバーを Windows 上で管理するための WPF デスクト�
 - ワールド: `worlds/<level-name>` を管理。バックアップはサーバー直下の `backups/`
 - ネットワーク:
   - NetherNet（BDS 1.26.51 以降の既定）: `server-port` は **TCP** のシグナリング。ゲーム通信はプレイヤーごとの **UDP**。外部公開には `server-udp-ports`（`[グローバルIP:]外部-外部:内部-内部`、最大人数分以上の範囲）が必要
-  - RakNet（旧方式）: `server-port` / `server-portv6` の **UDP**
+  - RakNet（旧方式）: `server-port` / `server-portv6` の **UDP**。NetherNet で接続できない不具合報告 (BDS-23108) があるため、新規作成時の既定は RakNet（起動時の「NetherNet is the only supported transport type」は警告のみで、接続は可能）。クライアント 1.26.60 で廃止予定との情報あり
   - UPnP は上記の必要ポートをすべて開放。Firewall は `bedrock_server.exe` のプログラム単位で許可（動的 UDP と LAN 検出の UDP 7551 を含む）
 
 ## サーバー実行仕様

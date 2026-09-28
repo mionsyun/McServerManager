@@ -165,6 +165,11 @@ public sealed class ServerProvisioningService : IServerProvisioningService
         props.ServerPort = config.Port;
         props.ServerPortV6 = config.PortV6;
         props.LevelName = config.WorldName;
+        // 1.26.51 以降の BDS だけが transport を持つ。旧版は RakNet 固定なのでキーを増やさない
+        if (!string.IsNullOrWhiteSpace(props.Transport) || BedrockNetworkPlanner.UsesNetherNet(props, config.Version))
+        {
+            props.Transport = options.BedrockTransport;
+        }
         _bedrockPropertiesService.Save(serverDirectory, props);
         _configService.SaveToDirectory(config, serverDirectory);
 

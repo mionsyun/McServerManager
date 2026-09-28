@@ -27,6 +27,7 @@ public sealed class NewBedrockServerViewModel : ObservableObject
     private int _port = ServerEditions.BedrockDefaultPort;
     private int _portV6 = ServerEditions.BedrockDefaultPortV6;
     private bool _onlineMode = true;
+    private bool _useRakNet = true;
     private bool _isLoadingVersions;
     private string _versionStatus = string.Empty;
     private Task? _loadTask;
@@ -93,6 +94,26 @@ public sealed class NewBedrockServerViewModel : ObservableObject
     public int Port { get => _port; set => SetProperty(ref _port, value); }
     public int PortV6 { get => _portV6; set => SetProperty(ref _portV6, value); }
     public bool OnlineMode { get => _onlineMode; set => SetProperty(ref _onlineMode, value); }
+
+    /// <summary>
+    /// 通信方式。NetherNet (BDS の既定) は「一覧に見えるのに入れない」不具合報告 (BDS-23108) があり、
+    /// RakNet なら接続できたという報告が多いため、作成時の既定は RakNet にする。
+    /// </summary>
+    public bool UseRakNet
+    {
+        get => _useRakNet;
+        set
+        {
+            if (SetProperty(ref _useRakNet, value))
+                OnPropertyChanged(nameof(UseNetherNet));
+        }
+    }
+
+    public bool UseNetherNet
+    {
+        get => !_useRakNet;
+        set => UseRakNet = !value;
+    }
 
     public bool IsLoadingVersions
     {
@@ -188,6 +209,7 @@ public sealed class NewBedrockServerViewModel : ObservableObject
         options.Port = Port;
         options.PortV6 = PortV6;
         options.OnlineMode = OnlineMode;
+        options.BedrockTransport = UseRakNet ? BedrockNetworkPlanner.TransportRakNet : BedrockNetworkPlanner.TransportNetherNet;
 
         if (Source == SourceZip)
         {
