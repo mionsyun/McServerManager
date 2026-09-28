@@ -114,8 +114,6 @@ terraform apply
 > - `McServerManager/landing/nuxt.config.ts`
 > - `McServerManager/installer/build.ps1`
 > - `.github/workflows/deploy-installer-to-storage.yml`（`INSTALLER_BASE_URL`）
-> - `.github/workflows/deploy-landing-static-web-apps.yml` の `NUXT_PUBLIC_DOWNLOAD_URL` 既定値
->   （GitHub Variable `NUXT_PUBLIC_DOWNLOAD_URL` を設定すれば上書きできます）
 
 ### 2. 出力から GitHub Secrets / Variables を更新
 

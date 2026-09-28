@@ -51,7 +51,9 @@ jobs:
       - name: Generate static site
         working-directory: McServerManager/landing
         env:
-          NUXT_PUBLIC_DOWNLOAD_URL: ${{ vars.NUXT_PUBLIC_DOWNLOAD_URL || 'https://stmaipilot.blob.core.windows.net/public/downloads/MaiPilotSetup.exe' }}
+          # ダウンロード URL は nuxt.config.ts の既定値だけで管理する（GitHub Variable で上書きしない）。
+          # 以前は vars.NUXT_PUBLIC_DOWNLOAD_URL で上書きしていたが、インフラ移行時に古い値が残って
+          # LP のリンクが無効なストレージを指したため、参照をやめた。
           NUXT_PUBLIC_APP_VERSION: ${{ steps.read_version.outputs.version }}
         run: npm run generate
 
