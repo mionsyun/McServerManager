@@ -4,26 +4,24 @@ location            = "Japan East"
 resource_group_name = ""
 static_web_app_name = ""
 
+static_web_app_location = "East Asia" # Japan East is not supported by Static Web Apps
 static_web_app_sku_tier = "Free"
 static_web_app_sku_size = "Free"
 
-# Optional: set custom domain (e.g. lp.example.com). Leave empty to disable.
+# Optional: custom domain. Leave empty on the first apply, point DNS CNAME
+# (www -> static_web_app_default_hostname) and then set "www.maipilot.jp".
 custom_domain_name            = ""
 custom_domain_validation_type = "cname-delegation"
 
-# Installer distribution storage (existing account is imported).
-# NOTE: this subscription differs from the LP / Trusted Signing subscription_id default.
-# Check actual values first:
-#   az storage account show --name stmailpilotje --subscription 1456e0ca-79d5-4b67-a5e0-5e98062498fc \
-#     --query "{rg:resourceGroup,location:location,sku:sku.name,kind:kind}"
-installer_storage_subscription_id          = "1456e0ca-79d5-4b67-a5e0-5e98062498fc"
+# Installer distribution storage.
+# Storage account names are globally unique. If "stmailpilotje" cannot be taken,
+# change it here AND update the hard-coded URLs (see README).
 installer_storage_account_name             = "stmailpilotje"
-installer_storage_resource_group_name      = "<existing-rg-name>" # required
-installer_storage_location                 = "Japan East"
+installer_storage_resource_group_name      = "" # empty = same RG as landing page
+installer_storage_location                 = "" # empty = RG location
 installer_storage_account_tier             = "Standard"
 installer_storage_account_replication_type = "LRS"
 installer_storage_account_kind             = "StorageV2"
-installer_storage_import_existing          = true
 
 tags = {
   owner = "your-name"

@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.7.0"
+  required_version = ">= 1.6.0"
 
   required_providers {
     azurerm = {
@@ -19,10 +19,3 @@ provider "azurerm" {
   features {}
 }
 
-# インストーラー配布用ストレージ（storage.tf）は別サブスクリプションにあるため専用の provider を使う
-provider "azurerm" {
-  alias           = "installer_storage"
-  subscription_id = var.installer_storage_subscription_id
-  tenant_id       = var.tenant_id
-  features {}
-}

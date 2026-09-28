@@ -9,7 +9,7 @@ output "static_web_app_name" {
 }
 
 output "static_web_app_default_hostname" {
-  description = "Default Static Web App hostname"
+  description = "Default Static Web App hostname (CNAME target for the custom domain)"
   value       = azurerm_static_web_app.lp.default_host_name
 }
 
@@ -19,7 +19,7 @@ output "static_web_app_url" {
 }
 
 output "static_web_app_api_key" {
-  description = "Deployment token for CI/CD"
+  description = "Deployment token for CI/CD (set as AZURE_STATIC_WEB_APPS_API_TOKEN_LP GitHub secret)"
   value       = azurerm_static_web_app.lp.api_key
   sensitive   = true
 }
@@ -56,8 +56,23 @@ output "trusted_signing_endpoint" {
 }
 
 output "trusted_signing_certificate_profile_name" {
-  description = "Certificate profile name (set as TRUSTED_SIGNING_PROFILE GitHub var)"
-  value       = azurerm_trusted_signing_certificate_profile.main.name
+  description = "Certificate profile name to create manually in the portal (set as TRUSTED_SIGNING_PROFILE GitHub var)"
+  value       = var.trusted_signing_certificate_profile_name
+}
+
+output "trusted_signing_account_id" {
+  description = "Trusted Signing account resource ID (scope for role assignments)"
+  value       = azurerm_trusted_signing_account.main.id
+}
+
+output "subscription_id" {
+  description = "Azure subscription ID (set as AZURE_SUBSCRIPTION_ID GitHub var)"
+  value       = var.subscription_id
+}
+
+output "tenant_id" {
+  description = "Azure AD tenant ID (set as AZURE_TENANT_ID GitHub var)"
+  value       = var.tenant_id
 }
 
 output "installer_storage_account_name" {

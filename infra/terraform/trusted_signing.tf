@@ -11,9 +11,8 @@ resource "azurerm_trusted_signing_account" "main" {
   tags                = local.common_tags
 }
 
-resource "azurerm_trusted_signing_certificate_profile" "main" {
-  name                       = var.trusted_signing_certificate_profile_name
-  trusted_signing_account_id = azurerm_trusted_signing_account.main.id
-  profile_type               = "PublicTrust"
-  include_street_address     = false
-}
+# 証明書プロファイル（PublicTrust）は Terraform では作成しない。
+# - azurerm 4.x には証明書プロファイルのリソースが存在しない
+# - プロファイル作成には Azure ポータルでの本人確認（Identity validation）の完了が前提で、
+#   その ID を Terraform から事前に知る手段がない
+# プロファイルはポータルで手動作成し、名前は var.trusted_signing_certificate_profile_name に合わせる（README 参照）。

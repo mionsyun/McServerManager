@@ -1,7 +1,7 @@
 variable "subscription_id" {
   description = "Azure subscription ID to deploy resources into"
   type        = string
-  default     = "c5a6db5e-a2c1-4e3c-8a67-f7e7e4d166a2"
+  default     = "1456e0ca-79d5-4b67-a5e0-5e98062498fc"
 }
 
 variable "tenant_id" {
@@ -40,6 +40,12 @@ variable "static_web_app_name" {
   default     = ""
 }
 
+variable "static_web_app_location" {
+  description = "Azure region for the Static Web App control plane. Must be a supported region (West US 2, Central US, East US 2, West Europe, East Asia). Japan East is not supported. Content is served globally regardless."
+  type        = string
+  default     = "East Asia"
+}
+
 variable "static_web_app_sku_tier" {
   description = "Static Web App SKU tier"
   type        = string
@@ -65,7 +71,7 @@ variable "trusted_signing_account_name" {
 }
 
 variable "trusted_signing_certificate_profile_name" {
-  description = "Certificate profile name for Trusted Signing (used in CI signing commands)"
+  description = "Certificate profile name for Trusted Signing. The profile itself is created manually in the Azure portal after identity validation; use this same name there (used in CI signing commands)."
   type        = string
   default     = "MaiPilot"
 }
@@ -88,7 +94,7 @@ variable "tags" {
 }
 
 variable "custom_domain_name" {
-  description = "Custom domain to bind to the Static Web App (e.g. lp.example.com). Leave empty to disable."
+  description = "Custom domain to bind to the Static Web App (e.g. www.maipilot.jp). Leave empty to disable. When rebuilding, apply once with empty, point the DNS CNAME to the new default hostname, then set this and apply again."
   type        = string
   default     = ""
 }
@@ -105,7 +111,7 @@ variable "custom_domain_validation_type" {
 }
 
 variable "installer_storage_account_name" {
-  description = "Storage account name for installer distribution (existing account is imported). Must be 3-24 lowercase letters and digits."
+  description = "Storage account name for installer distribution (globally unique, 3-24 lowercase letters and digits). URLs in landing / installer / workflows assume stmailpilotje."
   type        = string
   default     = "stmailpilotje"
 
@@ -115,35 +121,20 @@ variable "installer_storage_account_name" {
   }
 }
 
-variable "installer_storage_subscription_id" {
-  description = "Azure subscription ID that contains the installer storage account. Differs from subscription_id (LP / Trusted Signing); verify which one is current before apply."
-  type        = string
-  default     = "1456e0ca-79d5-4b67-a5e0-5e98062498fc"
-
-  validation {
-    condition     = can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.installer_storage_subscription_id))
-    error_message = "installer_storage_subscription_id must be a subscription GUID."
-  }
-}
-
 variable "installer_storage_resource_group_name" {
-  description = "Resource group that contains the existing installer storage account (in installer_storage_subscription_id). Required: check with `az storage account show --name <account> --subscription <id> --query resourceGroup`."
+  description = "Resource group for the installer storage account. Leave empty to use the landing page resource group."
   type        = string
-
-  validation {
-    condition     = length(trimspace(var.installer_storage_resource_group_name)) > 0
-    error_message = "installer_storage_resource_group_name must not be empty."
-  }
+  default     = ""
 }
 
 variable "installer_storage_location" {
-  description = "Azure region of the installer storage account. Must match the existing account (changing it forces replacement)."
+  description = "Azure region for the installer storage account. Leave empty to use the resource group location."
   type        = string
-  default     = "Japan East"
+  default     = ""
 }
 
 variable "installer_storage_account_tier" {
-  description = "Installer storage account tier: Standard or Premium. Must match the existing account (changing it forces replacement)."
+  description = "Installer storage account tier: Standard or Premium"
   type        = string
   default     = "Standard"
 
@@ -154,7 +145,7 @@ variable "installer_storage_account_tier" {
 }
 
 variable "installer_storage_account_replication_type" {
-  description = "Installer storage account replication type: LRS, GRS, RAGRS, ZRS, GZRS or RAGZRS. Must match the existing account."
+  description = "Installer storage account replication type: LRS, GRS, RAGRS, ZRS, GZRS or RAGZRS"
   type        = string
   default     = "LRS"
 
@@ -165,7 +156,7 @@ variable "installer_storage_account_replication_type" {
 }
 
 variable "installer_storage_account_kind" {
-  description = "Installer storage account kind: StorageV2, BlobStorage, BlockBlobStorage, FileStorage or Storage. Must match the existing account."
+  description = "Installer storage account kind: StorageV2, BlobStorage, BlockBlobStorage, FileStorage or Storage"
   type        = string
   default     = "StorageV2"
 
@@ -173,10 +164,4 @@ variable "installer_storage_account_kind" {
     condition     = contains(["StorageV2", "BlobStorage", "BlockBlobStorage", "FileStorage", "Storage"], var.installer_storage_account_kind)
     error_message = "installer_storage_account_kind must be one of StorageV2, BlobStorage, BlockBlobStorage, FileStorage, Storage."
   }
-}
-
-variable "installer_storage_import_existing" {
-  description = "Import the existing installer storage account and public container via import blocks. Set false only when creating them from scratch (e.g. new subscription)."
-  type        = bool
-  default     = true
 }
