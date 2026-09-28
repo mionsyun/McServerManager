@@ -17,6 +17,7 @@
 **Terraform では作成しないもの**（手動作業）:
 - Trusted Signing の本人確認（Identity validation）と証明書プロファイル（→「Trusted Signing セットアップ」）
 - DNS レコード（`maipilot.jp` の DNS はこのディレクトリの管理外）
+- Terraform state 用のストレージ（`bootstrap-state.ps1` で作成。→「State の保存先」）
 - GitHub Secrets / Variables、OIDC 用アプリ登録
 
 すべてのリソースは 1 つのサブスクリプション（`subscription_id` 既定値 `1456e0ca-79d5-4b67-a5e0-5e98062498fc`、
@@ -37,16 +38,57 @@
    az provider register --namespace Microsoft.Web
    az provider register --namespace Microsoft.Storage
    ```
+4. **初回のみ** state 用のストレージを作成する（PowerShell 7 推奨。何度実行しても同じ結果）
+   ```powershell
+   cd infra/terraform
+   ./bootstrap-state.ps1
+   ```
 
 ## 使い方
 ```powershell
 cd infra/terraform
 copy terraform.tfvars.example terraform.tfvars
-terraform init
+terraform init          # backend.tf の Azure Storage に state を置く
 terraform validate
-terraform plan
-terraform apply
+terraform plan -out tfplan
+terraform apply tfplan
 ```
+
+## State の保存先（remote backend）
+
+state は `backend.tf` で指定した Azure Blob Storage に保存します。state には SWA のデプロイトークンや
+ストレージの接続文字列が平文で入るため、**リポジトリにもローカルにも置きません**。
+
+| 項目 | 値 |
+|---|---|
+| リソースグループ | `mcsm-tfstate-rg`（Japan East） |
+| ストレージアカウント | `stmaipilottfstate` |
+| コンテナ / キー | `tfstate` / `prod.terraform.tfstate` |
+| 認証 | Entra ID（`use_azuread_auth = true`）。アカウントキー認証は無効 |
+
+- **ロック**: apply 中は blob のリースでロックされるので、2 か所から同時に apply しても state は壊れません。
+  異常終了でロックが残った場合は `terraform force-unlock <LOCK_ID>` で解除します。
+- **復旧**: blob のバージョン管理と 30 日間の論理削除を有効にしているので、state を壊したり消したりしても
+  ポータルの「バージョン」から戻せます。
+- **権限**: plan / apply を実行するユーザーやサービスプリンシパルには、サブスクリプション（または対象 RG）の
+  **共同作成者** に加えて、state 用ストレージの **Storage Blob Data Contributor** が必要です。
+  `bootstrap-state.ps1` は実行ユーザーにだけ付与します。ほかの人やサービスプリンシパルは
+  `-AssigneeObjectId` を指定して再実行してください。
+- **名前を変える場合**: ストレージアカウント名は Azure 全体で一意です。`stmaipilottfstate` が取れなければ、
+  `bootstrap-state.ps1 -StorageAccountName <別名>` で作成し、`backend.tf` の `storage_account_name` も同じ名前に変えてください。
+- state 用ストレージは Terraform の管理対象に**含めません**（`terraform destroy` などで自分の state を消さないため）。
+
+### Claude Code のクラウド環境や CI から実行する場合
+
+一時的なコンテナから実行しても state は Azure に残るので安全です。ただし、次の準備が必要です。
+
+1. 環境のネットワーク設定で、次のホストへの通信を許可する
+   - `management.azure.com`、`login.microsoftonline.com`（Azure API と認証）
+   - `stmaipilottfstate.blob.core.windows.net`（state）
+   - `registry.terraform.io`、`releases.hashicorp.com`（Terraform 本体・プロバイダーの取得）
+2. サービスプリンシパルを作り、上の「権限」の 2 つのロールを付与する
+3. 環境変数に認証情報を設定する（シークレットはチャットに貼らず、環境の設定画面で登録する）
+   - `ARM_TENANT_ID` / `ARM_SUBSCRIPTION_ID` / `ARM_CLIENT_ID` / `ARM_CLIENT_SECRET`
 
 ## ゼロから再構築する手順
 
@@ -54,6 +96,7 @@ terraform apply
 
 ### 1. `terraform apply`（1 回目：カスタムドメインは付けない）
 
+先に「事前準備」の 4（`bootstrap-state.ps1`）で state 用ストレージを作っておきます。
 `terraform.tfvars` では `custom_domain_name = ""` のまま apply します。
 DNS がまだ旧 SWA を向いているため、この時点でドメインを付けると検証が通らず apply が止まります。
 
