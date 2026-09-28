@@ -51,7 +51,7 @@ jobs:
       - name: Generate static site
         working-directory: McServerManager/landing
         env:
-          NUXT_PUBLIC_DOWNLOAD_URL: ${{ vars.NUXT_PUBLIC_DOWNLOAD_URL || 'https://stmailpilotje.blob.core.windows.net/public/downloads/MaiPilotSetup.exe' }}
+          NUXT_PUBLIC_DOWNLOAD_URL: ${{ vars.NUXT_PUBLIC_DOWNLOAD_URL || 'https://stmaipilot.blob.core.windows.net/public/downloads/MaiPilotSetup.exe' }}
           NUXT_PUBLIC_APP_VERSION: ${{ steps.read_version.outputs.version }}
         run: npm run generate
 

@@ -11,7 +11,7 @@
 - `azurerm_static_web_app`
 - `azurerm_static_web_app_custom_domain`（`custom_domain_name` を指定した場合のみ）
 - `azurerm_trusted_signing_account`
-- `azurerm_storage_account`（インストーラー配布用。既定名 `stmailpilotje`、既定で LP と同じ RG）
+- `azurerm_storage_account`（インストーラー配布用。既定名 `stmaipilot`、既定で LP と同じ RG）
 - `azurerm_storage_container`（`public`、匿名 blob 読み取り）
 
 **Terraform では作成しないもの**（手動作業）:
@@ -106,10 +106,10 @@ terraform plan
 terraform apply
 ```
 
-> **ストレージアカウント名について**: ストレージアカウント名は Azure 全体で一意です。旧アカウント `stmailpilotje` の
-> 削除直後は、同じ名前がすぐに取れない場合があります（他者に取られた場合も同様です）。
-> `StorageAccountAlreadyTaken` などで失敗したら、`installer_storage_account_name` を別名に変えてください。
-> その場合は、次のファイルにハードコードされている `https://stmailpilotje.blob.core.windows.net/...` の URL も更新が必要です。
+> **ストレージアカウント名について**: ストレージアカウント名は Azure 全体で一意です。旧アカウント `stmailpilotje` は
+> 無効化された旧サブスクリプションに残っていて名前が予約されているため、`stmaipilot` に変更しました。
+> 名前を変える場合は `installer_storage_account_name` に加えて、次のファイルにハードコードされている
+> `https://stmaipilot.blob.core.windows.net/...` の URL も更新が必要です。
 > - `McServerManager/landing/app.vue`
 > - `McServerManager/landing/nuxt.config.ts`
 > - `McServerManager/installer/build.ps1`
@@ -301,7 +301,7 @@ RG とは別のリージョンを指定しています。コンテンツはグ�
 - `trusted_signing_endpoint`: Trusted Signing エンドポイント URL（Variable `TRUSTED_SIGNING_ENDPOINT` に設定）
 - `trusted_signing_certificate_profile_name`: 証明書プロファイル名（手動作成。Variable `TRUSTED_SIGNING_PROFILE` に設定）
 - `installer_storage_account_name`: インストーラー配布用ストレージアカウント名
-- `installer_storage_primary_blob_endpoint`: Blob エンドポイント（例: `https://stmailpilotje.blob.core.windows.net/`）
+- `installer_storage_primary_blob_endpoint`: Blob エンドポイント（例: `https://stmaipilot.blob.core.windows.net/`）
 - `installer_download_base_url`: インストーラー配布 URL ベース（ワークフローの `INSTALLER_BASE_URL` と同じ値）
 - `installer_latest_download_url`: 最新インストーラーの URL（LP の `NUXT_PUBLIC_DOWNLOAD_URL` と同じ値）
 - `installer_storage_primary_connection_string`: 接続文字列（sensitive、Secret `AZURE_STORAGE_CONNECTION_STRING` に設定）

@@ -14,9 +14,9 @@ custom_domain_name            = ""
 custom_domain_validation_type = "cname-delegation"
 
 # Installer distribution storage.
-# Storage account names are globally unique. If "stmailpilotje" cannot be taken,
+# Storage account names are globally unique. If "stmaipilot" cannot be taken,
 # change it here AND update the hard-coded URLs (see README).
-installer_storage_account_name             = "stmailpilotje"
+installer_storage_account_name             = "stmaipilot"
 installer_storage_resource_group_name      = "" # empty = same RG as landing page
 installer_storage_location                 = "" # empty = RG location
 installer_storage_account_tier             = "Standard"

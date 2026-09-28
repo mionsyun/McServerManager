@@ -1,7 +1,7 @@
 param(
     [string]$Configuration = "Release",
     [string]$Runtime = "win-x64",
-    [string]$PublicDownloadBaseUrl = "https://stmailpilotje.blob.core.windows.net/public/downloads",
+    [string]$PublicDownloadBaseUrl = "https://stmaipilot.blob.core.windows.net/public/downloads",
     [string]$ReleaseNotesUrl = "https://www.maipilot.jp/docs/",
     # All   : publish + optional PFX sign + ISCC + optional PFX sign + copy versioned + manifest
     # Publish : dotnet publish only (used in CI before Trusted Signing signs the binary)

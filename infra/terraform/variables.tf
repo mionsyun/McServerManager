@@ -111,9 +111,9 @@ variable "custom_domain_validation_type" {
 }
 
 variable "installer_storage_account_name" {
-  description = "Storage account name for installer distribution (globally unique, 3-24 lowercase letters and digits). URLs in landing / installer / workflows assume stmailpilotje."
+  description = "Storage account name for installer distribution (globally unique, 3-24 lowercase letters and digits). URLs in landing / installer / workflows assume stmaipilot."
   type        = string
-  default     = "stmailpilotje"
+  default     = "stmaipilot"
 
   validation {
     condition     = can(regex("^[a-z0-9]{3,24}$", var.installer_storage_account_name))

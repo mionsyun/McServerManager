@@ -77,7 +77,7 @@ jobs:
         shell: pwsh
         env:
           APP_VERSION: ${{ steps.version.outputs.app_version }}
-          INSTALLER_BASE_URL: "https://stmailpilotje.blob.core.windows.net/public/downloads"
+          INSTALLER_BASE_URL: "https://stmaipilot.blob.core.windows.net/public/downloads"
           RELEASE_NOTES_URL: "https://www.maipilot.jp/docs/"
         run: |
           $mainExe = "McServerManager\installer\dist\MaiPilotSetup.exe"
