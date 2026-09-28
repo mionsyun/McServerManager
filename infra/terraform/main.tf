@@ -50,4 +50,10 @@ resource "azurerm_static_web_app_custom_domain" "lp" {
   static_web_app_id = azurerm_static_web_app.lp.id
   domain_name       = var.custom_domain_name
   validation_type   = var.custom_domain_validation_type
+
+  lifecycle {
+    # validation_type は作成時の検証方法で、API から読み戻せない（import 後に差分が出て再作成になる）。
+    # 作成後は意味を持たないため変更を無視する
+    ignore_changes = [validation_type]
+  }
 }
