@@ -59,3 +59,29 @@ output "trusted_signing_certificate_profile_name" {
   description = "Certificate profile name (set as TRUSTED_SIGNING_PROFILE GitHub var)"
   value       = azurerm_trusted_signing_certificate_profile.main.name
 }
+
+output "installer_storage_account_name" {
+  description = "Installer distribution storage account name"
+  value       = azurerm_storage_account.installer.name
+}
+
+output "installer_storage_primary_blob_endpoint" {
+  description = "Primary blob endpoint of the installer storage account"
+  value       = azurerm_storage_account.installer.primary_blob_endpoint
+}
+
+output "installer_download_base_url" {
+  description = "Base URL for installer downloads (INSTALLER_BASE_URL in deploy-installer-to-storage.yml)"
+  value       = "${azurerm_storage_account.installer.primary_blob_endpoint}${azurerm_storage_container.public.name}/${local.installer_storage_blob_prefix}"
+}
+
+output "installer_latest_download_url" {
+  description = "Download URL of the latest installer (NUXT_PUBLIC_DOWNLOAD_URL for the landing page)"
+  value       = "${azurerm_storage_account.installer.primary_blob_endpoint}${azurerm_storage_container.public.name}/${local.installer_storage_blob_prefix}/MaiPilotSetup.exe"
+}
+
+output "installer_storage_primary_connection_string" {
+  description = "Primary connection string of the installer storage account (set as AZURE_STORAGE_CONNECTION_STRING GitHub secret)"
+  value       = azurerm_storage_account.installer.primary_connection_string
+  sensitive   = true
+}
