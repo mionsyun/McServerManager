@@ -408,7 +408,8 @@ public sealed class ServerRuntime
         }
 
         var dispatcher = WpfApplication.Current?.Dispatcher;
-        if (dispatcher is null)
+        // UI スレッドが終了済み・終了処理中の Dispatcher へ Invoke すると戻ってこないため、直接追加する
+        if (dispatcher is null || dispatcher.HasShutdownStarted || !dispatcher.Thread.IsAlive)
         {
             lock (_lock)
             {
