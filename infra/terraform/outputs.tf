@@ -47,12 +47,12 @@ output "azure_portal_link" {
 
 output "trusted_signing_account_name" {
   description = "Trusted Signing account name (set as TRUSTED_SIGNING_ACCOUNT GitHub var)"
-  value       = azurerm_trusted_signing_account.main.name
+  value       = try(azurerm_trusted_signing_account.main[0].name, "")
 }
 
 output "trusted_signing_endpoint" {
   description = "Trusted Signing regional endpoint (set as TRUSTED_SIGNING_ENDPOINT GitHub var)"
-  value       = "https://${lower(replace(azurerm_trusted_signing_account.main.location, " ", ""))}.codesigning.azure.net/"
+  value       = try("https://${lower(replace(azurerm_trusted_signing_account.main[0].location, " ", ""))}.codesigning.azure.net/", "")
 }
 
 output "trusted_signing_certificate_profile_name" {
@@ -62,7 +62,7 @@ output "trusted_signing_certificate_profile_name" {
 
 output "trusted_signing_account_id" {
   description = "Trusted Signing account resource ID (scope for role assignments)"
-  value       = azurerm_trusted_signing_account.main.id
+  value       = try(azurerm_trusted_signing_account.main[0].id, "")
 }
 
 output "subscription_id" {

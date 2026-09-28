@@ -58,6 +58,12 @@ variable "static_web_app_sku_size" {
   default     = "Free"
 }
 
+variable "trusted_signing_enabled" {
+  description = "Create the Trusted Signing account. It is billed monthly from creation, so keep false until identity validation is ready."
+  type        = bool
+  default     = false
+}
+
 variable "trusted_signing_location" {
   description = "Azure region for Trusted Signing account. Must be a supported region (e.g. East Asia, East US). Japan East is not supported."
   type        = string

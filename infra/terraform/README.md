@@ -10,7 +10,7 @@
 - `azurerm_resource_group`
 - `azurerm_static_web_app`
 - `azurerm_static_web_app_custom_domain`（`custom_domain_name` を指定した場合のみ）
-- `azurerm_trusted_signing_account`
+- `azurerm_trusted_signing_account`（`trusted_signing_enabled = true` のときのみ。既定は作成しない）
 - `azurerm_storage_account`（インストーラー配布用。既定名 `stmaipilot`、既定で LP と同じ RG）
 - `azurerm_storage_container`（`public`、匿名 blob 読み取り）
 
@@ -196,8 +196,12 @@ Terraform が作るのは**署名アカウントまで**です。証明書プロ
 
 ### 1. Terraform で署名アカウントを作成
 
+署名アカウントは**作成した時点から月額課金**（Basic で約 $9.99/月）されるため、既定では作成しません。
+本人確認の準備ができたら `trusted_signing_enabled = true` にして apply します。
+
 ```hcl
 # terraform.tfvars に追記（省略時はデフォルト値が使われます）
+trusted_signing_enabled                  = true
 trusted_signing_account_name             = ""        # 空 = 自動生成（${prefix}-${environment}-tsa）
 trusted_signing_certificate_profile_name = "MaiPilot" # ポータルで作るプロファイル名と一致させる
 trusted_signing_sku_name                 = "Basic"   # または Premium

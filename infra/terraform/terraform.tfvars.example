@@ -13,6 +13,10 @@ static_web_app_sku_size = "Free"
 custom_domain_name            = ""
 custom_domain_validation_type = "cname-delegation"
 
+# Trusted Signing (code signing). Billed monthly from creation (Basic: about $9.99/month).
+# Keep false until identity validation is ready (see README).
+trusted_signing_enabled = false
+
 # Installer distribution storage.
 # Storage account names are globally unique. If "stmaipilot" cannot be taken,
 # change it here AND update the hard-coded URLs (see README).

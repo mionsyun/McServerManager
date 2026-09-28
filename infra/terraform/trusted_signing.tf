@@ -3,7 +3,11 @@ locals {
   resolved_trusted_signing_account     = var.trusted_signing_account_name != "" ? var.trusted_signing_account_name : local.default_trusted_signing_account_name
 }
 
+# 作成した時点から月額課金 (Basic で約 $9.99/月) が発生するため既定では作らない。
+# 本人確認の準備ができたら trusted_signing_enabled = true にして apply する。
 resource "azurerm_trusted_signing_account" "main" {
+  count = var.trusted_signing_enabled ? 1 : 0
+
   name                = local.resolved_trusted_signing_account
   resource_group_name = azurerm_resource_group.lp.name
   location            = var.trusted_signing_location
