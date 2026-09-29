@@ -42,6 +42,9 @@ public sealed class ServerNetworkViewModel : ObservableObject
         ClosePortCommand = new AsyncRelayCommand(ClosePortAsync);
         RefreshPublicIpCommand = new AsyncRelayCommand(RefreshPublicIpAsync);
         CopyShareAddressCommand = new RelayCommand(_ => CopyShareAddress());
+
+        // 家の外から参加するにはグローバル IP が要るため、画面を開いた時点で取得しておく
+        _ = LoadPublicIpAsync(forceRefresh: false);
     }
 
     public ObservableCollection<string> LanIpAddresses { get; }
@@ -58,8 +61,22 @@ public sealed class ServerNetworkViewModel : ObservableObject
     public string PublicIp
     {
         get => _publicIp;
-        private set => SetProperty(ref _publicIp, value);
+        private set
+        {
+            if (SetProperty(ref _publicIp, value))
+            {
+                OnPropertyChanged(nameof(HasPublicIp));
+                OnPropertyChanged(nameof(PublicAddress));
+            }
+        }
     }
+
+    public bool HasPublicIp => _publicIp != "-";
+
+    /// <summary>
+    /// 家の外の友達に伝えるアドレス。Java 版は「IP:ポート」、統合版はアドレス欄に入れる IP だけ（ポートは別欄）。
+    /// </summary>
+    public string PublicAddress => !HasPublicIp ? (_publicIpFailed ? "取得できません" : "取得中…") : IsBedrock ? _publicIp : $"{_publicIp}:{Port}";
 
     public string PublicIpStatus
     {
@@ -108,7 +125,11 @@ public sealed class ServerNetworkViewModel : ObservableObject
     }
 
     /// <summary>ポート・通信方式の設定変更後に ServerViewModel から呼ぶ。</summary>
-    public void NotifyPortChanged() => RefreshPortPlan();
+    public void NotifyPortChanged()
+    {
+        RefreshPortPlan();
+        OnPropertyChanged(nameof(PublicAddress));
+    }
 
     /// <summary>サーバー起動時にルーターのポートを UPnP で自動開放する（アプリ全体の設定）。</summary>
     public bool AutoOpenUpnpOnStart
@@ -303,19 +324,55 @@ public sealed class ServerNetworkViewModel : ObservableObject
             "完了", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
-    private async Task RefreshPublicIpAsync()
+    private Task RefreshPublicIpAsync() => LoadPublicIpAsync(forceRefresh: true);
+
+    /// <summary>
+    /// グローバル IP を取得する。サーバーごとに外部 API へ問い合わせないよう、アプリ内で 1 回の結果を共有する。
+    /// </summary>
+    private async Task LoadPublicIpAsync(bool forceRefresh)
     {
         PublicIpStatus = "取得中...";
-        var ip = await _services.Network.GetPublicIpAsync();
-        PublicIp = string.IsNullOrWhiteSpace(ip) ? "-" : ip;
-        PublicIpStatus = string.IsNullOrWhiteSpace(ip) ? "取得失敗" : string.Empty;
+        if (forceRefresh || s_publicIpLookup is null || s_publicIpLookup.IsFaulted
+            || (s_publicIpLookup.IsCompleted && string.IsNullOrWhiteSpace(s_publicIpLookup.Result)))
+        {
+            s_publicIpLookup = _services.Network.GetPublicIpAsync();
+        }
+
+        string? ip;
+        try
+        {
+            ip = await s_publicIpLookup;
+        }
+        catch (Exception)
+        {
+            ip = null;
+        }
+
+        if (string.IsNullOrWhiteSpace(ip))
+        {
+            _publicIpFailed = true;
+            PublicIp = "-";
+            PublicIpStatus = "グローバル IP を取得できませんでした（インターネット接続を確認して「再取得」）";
+            OnPropertyChanged(nameof(PublicAddress));
+            return;
+        }
+
+        _publicIpFailed = false;
+        PublicIp = ip;
+        PublicIpStatus = string.Empty;
     }
+
+    private static Task<string?>? s_publicIpLookup;
+    private bool _publicIpFailed;
 
     private void CopyShareAddress()
     {
+        if (!HasPublicIp)
+            return;
+
         try
         {
-            System.Windows.Clipboard.SetText(PublicIp);
+            System.Windows.Clipboard.SetText(PublicAddress);
         }
         catch
         {
