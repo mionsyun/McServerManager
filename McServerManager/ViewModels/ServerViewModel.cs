@@ -407,6 +407,9 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         private set => SetProperty(ref _restartRequired, value);
     }
 
+    /// <summary>Java が見つからず、サーバー設定の「Java ランタイム」を表示してほしいときに発生する（View がスクロールする）。</summary>
+    public event Action? JavaSettingsRequested;
+
     public string JavaPath
     {
         get => _javaPath;
@@ -958,6 +961,9 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         if (Status != ServerStatus.Stopped)
             return;
 
+        if (!EnsureJavaAvailable())
+            return;
+
         RunHealthCheck(showEvenIfCompleted: false);
         WarnIfJavaVersionMismatch();
 
@@ -986,12 +992,57 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 OnPropertyChanged(nameof(LastStartedAtText));
             }
         }
+        catch (JavaNotFoundException ex)
+        {
+            await Network.TryClosePortAsync();
+            OpenJavaSettings(
+                $"Java を起動できませんでした。\n{ex.JavaPath}\n\n「サーバー設定」の Java ランタイムで java.exe を選び直すか、「自動検出」を押してください。");
+        }
         catch (Exception ex)
         {
             _services.Dialog.Show(
                 $"起動に失敗しました: {ex.Message}",
                 "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+
+    /// <summary>
+    /// Java 版の起動前に java.exe を解決する。未設定なら自動検出して設定し、
+    /// 見つからなければ「サーバー設定」の Java ランタイムへ案内して false を返す。
+    /// </summary>
+    private bool EnsureJavaAvailable()
+    {
+        if (IsBedrock)
+            return true;
+
+        if (!string.IsNullOrWhiteSpace(JavaPath))
+        {
+            // "java" のようなコマンド名は PATH 解決に任せ、失敗したら起動時の例外で案内する
+            if (!Path.IsPathRooted(JavaPath) || File.Exists(JavaPath))
+                return true;
+
+            OpenJavaSettings(
+                $"設定されている Java が見つかりません。\n{JavaPath}\n\n「サーバー設定」の Java ランタイムで java.exe を選び直すか、「自動検出」を押してください。");
+            return false;
+        }
+
+        var detected = _services.Java.FindJavaExecutable();
+        if (!string.IsNullOrWhiteSpace(detected))
+        {
+            JavaPath = detected;
+            return true;
+        }
+
+        OpenJavaSettings(
+            "Java が見つからないため起動できません。\n\nhttps://adoptium.net から Eclipse Temurin (LTS) をインストールし、「サーバー設定」の Java ランタイムで「自動検出」を押してください。");
+        return false;
+    }
+
+    private void OpenJavaSettings(string message)
+    {
+        _services.Dialog.Show(message, "Java が見つかりません", MessageBoxButton.OK, MessageBoxImage.Warning);
+        SelectView("settings");
+        JavaSettingsRequested?.Invoke();
     }
 
     private async Task StopAsync()
@@ -1017,6 +1068,11 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         try
         {
             await _services.Runtime.RestartAsync(_config, ServerDirectory);
+        }
+        catch (JavaNotFoundException ex)
+        {
+            OpenJavaSettings(
+                $"Java を起動できませんでした。\n{ex.JavaPath}\n\n「サーバー設定」の Java ランタイムで java.exe を選び直すか、「自動検出」を押してください。");
         }
         catch (Exception ex)
         {

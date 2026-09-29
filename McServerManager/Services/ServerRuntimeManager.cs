@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
 using WpfApplication = System.Windows.Application;
@@ -82,8 +83,29 @@ public sealed class ServerRuntimeManager : IServerRuntimeManager
 
         runtime.AttachProcess(process);
 
-        if (!process.Start())
+        bool started;
+        try
         {
+            started = process.Start();
+        }
+        catch (Win32Exception ex)
+        {
+            // 実行ファイルが無いなど。未起動の Process を残すと HasExited 参照で例外になるため外す
+            runtime.DetachProcess();
+            process.Dispose();
+            runtime.SetStatus(ServerStatus.Stopped);
+            runtime.AddLog($"起動に失敗しました: {ex.Message}");
+            if (ServerEditions.IsBedrock(config))
+            {
+                throw;
+            }
+
+            throw new JavaNotFoundException(startInfo.FileName, ex);
+        }
+
+        if (!started)
+        {
+            runtime.DetachProcess();
             runtime.SetStatus(ServerStatus.Stopped);
             runtime.AddLog("起動に失敗しました。");
             return;
@@ -378,6 +400,14 @@ public sealed class ServerRuntime
         lock (_lock)
         {
             _process = process;
+        }
+    }
+
+    public void DetachProcess()
+    {
+        lock (_lock)
+        {
+            _process = null;
         }
     }
 

@@ -14,6 +14,27 @@ public partial class ServerDetailControl : System.Windows.Controls.UserControl
     {
         InitializeComponent();
         Loaded += OnLoaded;
+        DataContextChanged += OnDataContextChanged;
+    }
+
+    private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (e.OldValue is ServerViewModel oldVm)
+            oldVm.JavaSettingsRequested -= OnJavaSettingsRequested;
+        if (e.NewValue is ServerViewModel newVm)
+            newVm.JavaSettingsRequested += OnJavaSettingsRequested;
+    }
+
+    private void OnJavaSettingsRequested()
+    {
+        // 設定画面が表示されてレイアウトが済んでから、Java ランタイムのカードを先頭に出す
+        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, () =>
+        {
+            if (!JavaRuntimeCard.IsVisible || !SettingsScrollViewer.IsVisible)
+                return;
+            var offset = JavaRuntimeCard.TransformToAncestor(SettingsScrollViewer).Transform(new System.Windows.Point(0, 0)).Y;
+            SettingsScrollViewer.ScrollToVerticalOffset(SettingsScrollViewer.VerticalOffset + offset - 12);
+        });
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
