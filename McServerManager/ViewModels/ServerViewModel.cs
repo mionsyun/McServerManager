@@ -761,6 +761,9 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             CurrentView = "overview";
             return;
         }
+        // 初回起動でサーバーがワールドを生成するため、開くたびに一覧を読み直す
+        if (string.Equals(view, "world", StringComparison.OrdinalIgnoreCase))
+            World.LoadWorlds();
         CurrentView = view;
     }
 
