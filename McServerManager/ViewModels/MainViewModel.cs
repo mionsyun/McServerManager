@@ -728,7 +728,9 @@ public sealed class MainViewModel : ObservableObject
         var targetDir = Path.Combine(baseDir, newId);
         CopyDirectory(sourceDir, targetDir);
 
-        var config = _services.Configs.LoadAll(new[] { targetDir }).FirstOrDefault();
+        // LoadAll は既定のサーバーフォルダ全体も読むうえ、コピー直後は ServerId が複製元と同じため、
+        // 別のサーバーの設定を拾ってしまう。複製先の config.json だけを読む
+        var config = _services.Configs.LoadFromDirectory(targetDir);
         if (config is null)
         {
             _services.Dialog.Show("複製に失敗しました。", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);

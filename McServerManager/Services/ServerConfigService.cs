@@ -83,9 +83,13 @@ public sealed class ServerConfigService : IServerConfigService
             .ToList();
     }
 
-    public ServerConfig? Load(string serverId)
+    public ServerConfig? Load(string serverId) => LoadFromPath(_pathsService.GetServerConfigPath(serverId));
+
+    public ServerConfig? LoadFromDirectory(string serverDirectory) =>
+        LoadFromPath(Path.Combine(serverDirectory, "config.json"));
+
+    private static ServerConfig? LoadFromPath(string path)
     {
-        var path = _pathsService.GetServerConfigPath(serverId);
         if (!File.Exists(path))
         {
             return null;
