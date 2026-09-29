@@ -8,7 +8,7 @@ namespace McServerManager.Tests;
 public sealed class LiveVersionAvailabilityTests
 {
     private const string MinecraftVersionManifest = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
-    private const string PaperApiBase = "https://api.papermc.io/v2/projects";
+    private const string PaperApiBase = "https://fill.papermc.io/v3/projects";
     private const string PurpurApiBase = "https://api.purpurmc.org/v2/purpur";
     private const string FabricApiBase = "https://meta.fabricmc.net/v2/versions";
     private const string ForgeMavenMetadata = "https://maven.minecraftforge.net/net/minecraftforge/forge/maven-metadata.xml";
@@ -111,11 +111,11 @@ public sealed class LiveVersionAvailabilityTests
 
     private static async Task AssertPaperAsync(HttpClient http, string version)
     {
-        var url = $"{PaperApiBase}/paper/versions/{version}";
+        var url = $"{PaperApiBase}/paper/versions/{version}/builds/latest";
         var json = await http.GetStringAsync(url);
         using var doc = JsonDocument.Parse(json);
-        var builds = doc.RootElement.GetProperty("builds");
-        Assert.True(builds.GetArrayLength() > 0, $"Paper builds were not found for version {version}");
+        var jarUrl = doc.RootElement.GetProperty("downloads").GetProperty("server:default").GetProperty("url").GetString();
+        Assert.False(string.IsNullOrWhiteSpace(jarUrl), $"Paper builds were not found for version {version}");
     }
 
     private static async Task AssertPurpurAsync(HttpClient http, string version)

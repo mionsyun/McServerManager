@@ -47,23 +47,55 @@ public sealed class ServerJarService : IServerJarService
     private async Task DownloadPaperAsync(string versionId, string destinationPath, IProgress<string>? progress)
     {
         progress?.Report("Fetching Paper build information...");
-        var buildsUrl = $"{ExternalApiUrls.PaperApiBase}/{PaperProject}/versions/{versionId}";
-        using var buildsResponse = await _httpClient.GetAsync(buildsUrl).ConfigureAwait(false);
-        buildsResponse.EnsureSuccessStatusCode();
-        var buildsJson = await buildsResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-        using var buildsDoc = JsonDocument.Parse(buildsJson);
+        // 旧 v2 API (api.papermc.io/v2) は 410 Gone で廃止済み。Fill API v3 の最新ビルドから URL とハッシュを得る
+        var latestUrl = $"{ExternalApiUrls.PaperApiBase}/{PaperProject}/versions/{versionId}/builds/latest";
+        using var latestResponse = await _httpClient.GetAsync(latestUrl).ConfigureAwait(false);
+        if (latestResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            throw new InvalidOperationException($"Paper にバージョン {versionId} のビルドが見つかりません。");
+        }
 
-        if (!buildsDoc.RootElement.TryGetProperty("builds", out var buildsElement) || buildsElement.GetArrayLength() == 0)
+        latestResponse.EnsureSuccessStatusCode();
+        var latestJson = await latestResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+        var (downloadUrl, sha256) = ParsePaperLatestBuild(latestJson);
+
+        progress?.Report("Downloading Paper...");
+        await DownloadFileAsync(downloadUrl, destinationPath).ConfigureAwait(false);
+
+        if (!string.IsNullOrWhiteSpace(sha256))
+        {
+            var actualHash = await ComputeFileHashAsync(destinationPath, HashAlgorithmName.SHA256).ConfigureAwait(false);
+            if (!string.Equals(sha256, actualHash, StringComparison.OrdinalIgnoreCase))
+            {
+                File.Delete(destinationPath);
+                throw new InvalidOperationException(
+                    $"ダウンロードファイルのチェックサムが一致しません。expected={sha256}, actual={actualHash}, algorithm=SHA256");
+            }
+        }
+    }
+
+    /// <summary>Fill API v3 の builds/latest 応答から、サーバー jar の URL と SHA-256 を取り出す。</summary>
+    public static (string DownloadUrl, string? Sha256) ParsePaperLatestBuild(string json)
+    {
+        using var document = JsonDocument.Parse(json);
+        if (!document.RootElement.TryGetProperty("downloads", out var downloads)
+            || !downloads.TryGetProperty("server:default", out var server)
+            || !server.TryGetProperty("url", out var urlElement)
+            || urlElement.ValueKind != JsonValueKind.String
+            || string.IsNullOrWhiteSpace(urlElement.GetString()))
         {
             throw new InvalidOperationException("Paper build information was not found.");
         }
 
-        var latestBuild = buildsElement.EnumerateArray().Select(b => b.GetInt32()).Max();
-        var fileName = $"paper-{versionId}-{latestBuild}.jar";
-        var downloadUrl = $"{ExternalApiUrls.PaperApiBase}/{PaperProject}/versions/{versionId}/builds/{latestBuild}/downloads/{fileName}";
+        string? sha256 = null;
+        if (server.TryGetProperty("checksums", out var checksums)
+            && checksums.TryGetProperty("sha256", out var shaElement)
+            && shaElement.ValueKind == JsonValueKind.String)
+        {
+            sha256 = shaElement.GetString();
+        }
 
-        progress?.Report("Downloading Paper...");
-        await DownloadFileAsync(downloadUrl, destinationPath).ConfigureAwait(false);
+        return (urlElement.GetString()!, sha256);
     }
 
     private async Task DownloadSpigotAsync(string versionId, string destinationPath, IProgress<string>? progress)

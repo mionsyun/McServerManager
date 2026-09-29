@@ -49,4 +49,28 @@ public sealed class AppSettingsServiceTests
         Assert.Equal(ThemeService.DarkTheme, loaded.Theme);
         Assert.Empty(loaded.ServerDirectories);
     }
+
+    [Fact]
+    public void Update_KeepsValuesSavedByOtherScreens()
+    {
+        using var appData = new TemporaryAppDataScope();
+        IAppSettingsService service = new AppSettingsService(new AppPathsService());
+
+        // 画面 A が起動時に読み込んだ古い設定
+        var staleCopy = service.Load();
+        // 画面 B が UPnP の選択を保存
+        service.Update(s =>
+        {
+            s.EnableUpnp = true;
+            s.PromptUpnp = false;
+        });
+        // 画面 A がテーマだけを変更
+        staleCopy.Theme = ThemeService.LightTheme;
+        service.Update(s => s.Theme = staleCopy.Theme);
+
+        var saved = service.Load();
+        Assert.Equal(ThemeService.LightTheme, saved.Theme);
+        Assert.True(saved.EnableUpnp);
+        Assert.False(saved.PromptUpnp);
+    }
 }

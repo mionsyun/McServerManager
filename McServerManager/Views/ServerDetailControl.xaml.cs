@@ -1,4 +1,4 @@
-using System.Collections.Specialized;
+﻿using System.Collections.Specialized;
 using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Input;
@@ -13,24 +13,48 @@ public partial class ServerDetailControl : System.Windows.Controls.UserControl
     public ServerDetailControl()
     {
         InitializeComponent();
-        Loaded += OnLoaded;
+        DataContextChanged += OnDataContextChanged;
     }
 
-    private void OnLoaded(object sender, RoutedEventArgs e)
+    // DataTemplate のため、サーバーを切り替えてもこのコントロールは再利用され DataContext だけが変わる。
+    // ログの自動スクロールも表示中のサーバーのログへ購読し直す
+    private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
-        if (LogListBox.ItemsSource is INotifyCollectionChanged collection)
+        if (e.OldValue is ServerViewModel oldVm)
         {
-            collection.CollectionChanged += OnLogsCollectionChanged;
+            oldVm.JavaSettingsRequested -= OnJavaSettingsRequested;
+            oldVm.Logs.CollectionChanged -= OnLogsCollectionChanged;
+        }
+
+        if (e.NewValue is ServerViewModel newVm)
+        {
+            newVm.JavaSettingsRequested += OnJavaSettingsRequested;
+            newVm.Logs.CollectionChanged += OnLogsCollectionChanged;
+            OnLogsCollectionChanged(null, null);
         }
     }
 
-    private void OnLogsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    private void OnJavaSettingsRequested()
     {
-        if (LogListBox.Items.Count > 0)
+        // 設定画面が表示されてレイアウトが済んでから、Java ランタイムのカードを先頭に出す
+        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, () =>
         {
-            var lastItem = LogListBox.Items[^1];
-            LogListBox.ScrollIntoView(lastItem);
-        }
+            if (!JavaRuntimeCard.IsVisible || !SettingsScrollViewer.IsVisible)
+                return;
+            var offset = JavaRuntimeCard.TransformToAncestor(SettingsScrollViewer).Transform(new System.Windows.Point(0, 0)).Y;
+            SettingsScrollViewer.ScrollToVerticalOffset(SettingsScrollViewer.VerticalOffset + offset - 12);
+        });
+    }
+
+    private void OnLogsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs? e)
+    {
+        // 通知の途中でスクロール（レイアウト更新）すると、まだ追加を受け取っていない ListBox が
+        // 件数の不一致で例外を出すため、通知処理が終わってから行う
+        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, () =>
+        {
+            if (LogListBox.Items.Count > 0)
+                LogListBox.ScrollIntoView(LogListBox.Items[^1]);
+        });
     }
 
     private void CopyConsole_OnClick(object sender, RoutedEventArgs e)

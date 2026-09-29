@@ -54,4 +54,36 @@ public sealed class ServerConfigServiceTests
         Assert.NotNull(loaded);
         Assert.Equal(serverDirectory, loaded!.DirectoryPath);
     }
+
+    [Fact]
+    public void LoadFromDirectory_ReadsOnlyThatServer_EvenIfOtherServersExist()
+    {
+        using var appDataScope = new TemporaryAppDataScope();
+        var paths = new AppPathsService();
+        var service = new ServerConfigService(paths);
+
+        // 複製直後の状態: 既定フォルダに元のサーバーと、同じ ServerId を持つコピーがある
+        var first = new ServerConfig { ServerId = "srv-first", Name = "first", Type = "Vanilla" };
+        var source = new ServerConfig { ServerId = "srv-source", Name = "source", Type = ServerEditions.BedrockType };
+        var firstDir = System.IO.Path.Combine(paths.ServersPath, "a-first");
+        var sourceDir = System.IO.Path.Combine(paths.ServersPath, "b-source");
+        var copyDir = System.IO.Path.Combine(paths.ServersPath, "c-copy");
+        service.SaveToDirectory(first, firstDir);
+        service.SaveToDirectory(source, sourceDir);
+        service.SaveToDirectory(source, copyDir);
+
+        var loaded = service.LoadFromDirectory(copyDir);
+
+        Assert.NotNull(loaded);
+        Assert.Equal("source", loaded!.Name);
+        Assert.Equal(ServerEditions.BedrockType, loaded.Type);
+        Assert.Equal(copyDir, loaded.DirectoryPath);
+    }
+
+    [Fact]
+    public void LoadFromDirectory_WithoutConfig_ReturnsNull()
+    {
+        using var temp = new TemporaryDirectoryScope();
+        Assert.Null(new ServerConfigService(new AppPathsService()).LoadFromDirectory(temp.Path));
+    }
 }
