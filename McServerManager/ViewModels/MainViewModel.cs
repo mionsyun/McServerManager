@@ -387,7 +387,9 @@ public sealed class MainViewModel : ObservableObject
             return;
         }
 
-        if (_services.Dialog.Show("選択したサーバーを削除します。よろしいですか？", "確認", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
+        if (_services.Dialog.Show(
+                $"サーバー「{target.Name}」を削除します。\nワールドを含むサーバーフォルダも削除され、元に戻せません。よろしいですか？",
+                "削除の確認", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
         {
             return;
         }
