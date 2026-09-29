@@ -84,7 +84,9 @@ internal sealed class StubNetworkService : INetworkService
 {
     public IReadOnlyList<string> GetLanIpAddresses() => Array.Empty<string>();
     public IReadOnlyList<string> GetExternalChecklist(NetworkProtocol protocol = NetworkProtocol.Tcp) => Array.Empty<string>();
-    public Task<string?> GetPublicIpAsync() => Task.FromResult<string?>(null);
+    public string? PublicIp { get; set; }
+
+    public Task<string?> GetPublicIpAsync() => Task.FromResult(PublicIp);
     public IReadOnlyList<Process> GetProcessesUsingPort(int port, NetworkProtocol protocol = NetworkProtocol.Tcp) => Array.Empty<Process>();
     public bool TryKillProcessesUsingPort(int port, out string? error, NetworkProtocol protocol = NetworkProtocol.Tcp)
     {

@@ -76,6 +76,21 @@
                         </Grid>
                     </Border>
 
+                    <!-- 統合版: 参加許可リストが空で誰も入れない -->
+                    <Border Style="{StaticResource WarnBanner}" Margin="0,0,0,16"
+                            Visibility="{Binding Network.IsAllowlistBlockingEveryone, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock TextWrapping="Wrap" VerticalAlignment="Center"
+                                       Text="参加許可リストが有効ですが、1 人も登録されていないため誰も参加できません（「このサーバーでのプレイに招待されていません」になります）。"/>
+                            <Button Grid.Column="1" Content="設定で確認 →" Style="{StaticResource SmallButton}" Margin="12,0,0,0"
+                                    Command="{Binding ShowAllowlistSettingsCommand}"/>
+                        </Grid>
+                    </Border>
+
                     <!-- ヒーロー: ステータス + 接続カード -->
                     <Grid Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
@@ -158,11 +173,22 @@
                         <!-- 接続カード -->
                         <Border Grid.Column="2" Style="{StaticResource Card}">
                             <StackPanel>
-                                <TextBlock Text="参加アドレス (LAN)" Style="{StaticResource MutedText}"/>
+                                <TextBlock Text="友達に伝えるアドレス（家の外から）" Style="{StaticResource MutedText}"/>
                                 <Grid Margin="0,6,0,0">
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                    <TextBlock Text="{Binding LanAddress}" FontFamily="Cascadia Mono" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                                    <Button Grid.Column="1" Content="コピー" Command="{Binding CopyLanAddressCommand}" Style="{StaticResource SmallButton}" ToolTip="参加アドレスをコピー"/>
+                                    <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,8,0"><TextBlock Text="{Binding Network.PublicAddress}" FontFamily="Cascadia Mono" FontSize="22" FontWeight="Bold"/></Viewbox>
+                                    <Button Grid.Column="1" Content="コピー" Command="{Binding Network.CopyShareAddressCommand}" Style="{StaticResource SmallButton}" ToolTip="グローバルアドレスをコピー"/>
+                                </Grid>
+                                <TextBlock Text="{Binding Network.PublicIpStatus}" Style="{StaticResource MutedText}" FontSize="11" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                <TextBlock Style="{StaticResource MutedText}" FontSize="11" Margin="0,2,0,0" TextWrapping="Wrap">
+                                    <Run Text="家の外から入るには、"/>
+                                    <Hyperlink Command="{Binding SelectViewCommand}" CommandParameter="network"><Run Text="接続・公開"/></Hyperlink><Run Text=" 画面でポート開放と Firewall の許可をしてください。"/>
+                                </TextBlock>
+                                <Grid Margin="0,10,0,0">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="同じ Wi-Fi 内なら" Style="{StaticResource MutedText}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding LanAddress}" FontFamily="Cascadia Mono" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                    <Button Grid.Column="2" Content="コピー" Command="{Binding CopyLanAddressCommand}" Style="{StaticResource SmallButton}" ToolTip="LAN アドレスをコピー"/>
                                 </Grid>
                                 <Grid Margin="0,8,0,0" Visibility="{Binding IsBedrock, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
@@ -419,6 +445,33 @@
                         <Run Text="このサーバーは"/><Run Text="{Binding Network.PortLabel, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource BrushText}"/><Run Text="で待ち受けます。"/>
                     </TextBlock>
 
+                    <!-- Java 版: 友達に伝えるアドレス（家の外からはグローバルアドレス） -->
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,16"
+                            Visibility="{Binding IsBedrock, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                        <StackPanel>
+                            <TextBlock Text="Java 版の参加方法" Style="{StaticResource Eyebrow}"/>
+                            <TextBlock Text="友達に伝えるのはこのアドレス" Style="{StaticResource SectionHeading}" Margin="0,2,0,0"/>
+                            <Border Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="サーバーアドレス（家の外から）" Style="{StaticResource MutedText}"/>
+                                    <Grid Margin="0,6,0,0">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                        <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,8,0"><TextBlock Text="{Binding Network.PublicAddress}" FontFamily="Cascadia Mono" FontSize="22" FontWeight="Bold"/></Viewbox>
+                                        <Button Grid.Column="1" Content="コピー" Command="{Binding Network.CopyShareAddressCommand}" Style="{StaticResource SmallButton}"/>
+                                    </Grid>
+                                    <TextBlock Text="{Binding Network.PublicIpStatus}" Style="{StaticResource MutedText}" FontSize="11" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                    <TextBlock Text="マルチプレイ →「サーバーを追加」の「サーバーアドレス」にそのまま入力します。家の外から入るには、下の UPnP かルーターでのポート開放と Firewall の許可が必要です。" Style="{StaticResource MutedText}" FontSize="11" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                        <TextBlock Text="同じ Wi-Fi 内なら" Style="{StaticResource MutedText}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding LanAddress}" FontFamily="Cascadia Mono" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                        <Button Grid.Column="2" Content="コピー" Command="{Binding CopyLanAddressCommand}" Style="{StaticResource SmallButton}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
                     <!-- 統合版: 参加方法・必要なポート・切り分け -->
                     <Border Style="{StaticResource Card}" Margin="0,0,0,16"
                             Visibility="{Binding IsBedrock, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -440,13 +493,19 @@
                             <UniformGrid Columns="2" Margin="0,12,0,0">
                                 <Border Style="{StaticResource SurfacePanel}" Margin="0,0,6,0">
                                     <StackPanel>
-                                        <TextBlock Text="サーバーアドレス（LAN）" Style="{StaticResource MutedText}"/>
+                                        <TextBlock Text="サーバーアドレス（家の外から）" Style="{StaticResource MutedText}"/>
                                         <Grid Margin="0,6,0,0">
                                             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding LanHost}" FontFamily="Cascadia Mono" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                                            <Button Grid.Column="1" Content="コピー" Command="{Binding CopyLanAddressCommand}" Style="{StaticResource SmallButton}"/>
+                                            <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,8,0"><TextBlock Text="{Binding Network.PublicAddress}" FontFamily="Cascadia Mono" FontSize="22" FontWeight="Bold"/></Viewbox>
+                                            <Button Grid.Column="1" Content="コピー" Command="{Binding Network.CopyShareAddressCommand}" Style="{StaticResource SmallButton}"/>
                                         </Grid>
-                                        <TextBlock Text="家の外から参加する人には下の「グローバル IP」を伝えます。" Style="{StaticResource MutedText}" FontSize="11" Margin="0,6,0,0" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Network.PublicIpStatus}" Style="{StaticResource MutedText}" FontSize="11" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                        <Grid Margin="0,8,0,0">
+                                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                            <TextBlock Text="同じ Wi-Fi 内なら" Style="{StaticResource MutedText}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding LanHost}" FontFamily="Cascadia Mono" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                            <Button Grid.Column="2" Content="コピー" Command="{Binding CopyLanAddressCommand}" Style="{StaticResource SmallButton}"/>
+                                        </Grid>
                                     </StackPanel>
                                 </Border>
                                 <Border Style="{StaticResource SurfacePanel}" Margin="6,0,0,0">
@@ -570,6 +629,13 @@
                             </Grid>
                             <StackPanel Margin="0,10,0,0"
                                         Visibility="{Binding IsChecked, ElementName=BedrockTroubleToggle, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Border Style="{StaticResource SurfacePanel}" Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <TextBlock Text="「このサーバーでのプレイに招待されていません」と出る" FontWeight="SemiBold"/>
+                                        <TextBlock Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,2,0,0"
+                                                   Text="通信はサーバーまで届いていて、参加許可リスト (allow-list) で弾かれています。サーバー設定で「参加許可リスト (allow-list) に登録した人だけ参加できるようにする」をオフにするか、参加許可リストにその人のゲーマータグを追加して、サーバーを再起動してください。"/>
+                                    </StackPanel>
+                                </Border>
                                 <Border Style="{StaticResource SurfacePanel}" Margin="0,0,0,8">
                                     <StackPanel>
                                         <TextBlock Text="サーバー一覧には見えるのに入れない" FontWeight="SemiBold"/>
@@ -786,7 +852,7 @@
                                 <StackPanel>
                                     <TextBlock Text="グローバル IP" Style="{StaticResource MutedText}"/>
                                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                        <Button Content="取得" Command="{Binding Network.RefreshPublicIpCommand}" Style="{StaticResource SmallButton}" Width="70"/>
+                                        <Button Content="再取得" Command="{Binding Network.RefreshPublicIpCommand}" Style="{StaticResource SmallButton}" Width="70"/>
                                         <TextBlock Text="{Binding Network.PublicIp}" Margin="8,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/>
                                         <TextBlock Text="{Binding Network.PublicIpStatus}" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource MutedText}"/>
                                     </StackPanel>
@@ -795,7 +861,7 @@
                                     <TextBlock Text="共有アドレス" Style="{StaticResource MutedText}"/>
                                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                                         <Border Style="{StaticResource Pill}">
-                                            <TextBlock Text="{Binding Network.PublicIp}" FontWeight="SemiBold" FontFamily="Cascadia Mono"/>
+                                            <TextBlock Text="{Binding Network.PublicAddress}" FontWeight="SemiBold" FontFamily="Cascadia Mono"/>
                                         </Border>
                                         <Button Content="コピー" Command="{Binding Network.CopyShareAddressCommand}" Style="{StaticResource SmallButton}" Margin="8,0,0,0"/>
                                     </StackPanel>
@@ -1607,7 +1673,7 @@
 
                                     <CheckBox Content="オンラインモード (Xbox Live 認証)" IsChecked="{Binding Settings.OnlineMode}" Margin="0,12,0,0"/>
                                     <CheckBox Content="同じ Wi-Fi 内の「LAN ゲーム」に表示する" IsChecked="{Binding Settings.EnableLanVisibility}" Margin="0,8,0,0"/>
-                                    <CheckBox Content="参加許可リスト (allow-list) に登録した人だけ参加できるようにする" IsChecked="{Binding Settings.AllowList}" Margin="0,8,0,0"/>
+                                    <CheckBox x:Name="AllowListCheckBox" Content="参加許可リスト (allow-list) に登録した人だけ参加できるようにする" IsChecked="{Binding Settings.AllowList}" Margin="0,8,0,0"/>
                                 </StackPanel>
                             </Border>
 
