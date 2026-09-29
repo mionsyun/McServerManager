@@ -76,6 +76,16 @@
                         </Grid>
                     </Border>
 
+                    <!-- Java の自動セットアップ中 -->
+                    <Border Style="{StaticResource PendingBanner}" Margin="0,0,0,16"
+                            Visibility="{Binding JavaSetup.IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel>
+                            <TextBlock Text="Java を準備しています…" FontWeight="SemiBold"/>
+                            <ProgressBar IsIndeterminate="True" Height="4" Margin="0,6,0,6"/>
+                            <TextBlock Text="{Binding JavaSetup.Status}" TextWrapping="Wrap" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
                     <!-- 統合版: 参加許可リストが空で誰も入れない -->
                     <Border Style="{StaticResource WarnBanner}" Margin="0,0,0,16"
                             Visibility="{Binding Network.IsAllowlistBlockingEveryone, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -1775,14 +1785,21 @@
                                     <TextBlock Text="{Binding JavaWarning}" TextWrapping="Wrap"/>
                                 </Border>
                                 <Grid>
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <TextBox Text="{Binding JavaPath}"/>
                                     <Button Grid.Column="1" Content="参照" Command="{Binding BrowseJavaCommand}" Margin="8,0,0,0"/>
                                     <Button Grid.Column="2" Content="自動検出" Command="{Binding DetectJavaCommand}" Margin="8,0,0,0"/>
+                                    <Button Grid.Column="3" Content="自動セットアップ" Command="{Binding SetupJavaCommand}" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0"
+                                            ToolTip="このサーバーに合う Java (Eclipse Temurin) をダウンロードして設定します。管理者権限は不要です。"/>
                                 </Grid>
+                                <StackPanel Margin="0,8,0,0" Visibility="{Binding JavaSetup.Status, Converter={StaticResource NullOrEmptyToCollapsedConverter}}">
+                                    <ProgressBar IsIndeterminate="True" Height="4" Margin="0,0,0,6"
+                                                 Visibility="{Binding JavaSetup.IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                    <TextBlock Text="{Binding JavaSetup.Status}" TextWrapping="Wrap" FontSize="12"/>
+                                </StackPanel>
                                 <Border Background="{DynamicResource BrushAccentSoft}" CornerRadius="6" Padding="10,6" Margin="0,8,0,0">
                                     <TextBlock TextWrapping="Wrap" FontSize="11.5" Foreground="{DynamicResource BrushTextMuted}"
-                                               Text="💡 Java 未導入の場合は https://adoptium.net から Temurin (LTS) を導入し「自動検出」を押してください。"/>
+                                               Text="💡 Java が無い場合は「自動セットアップ」で、このサーバーに合う Java (Eclipse Temurin) を用意できます（約 50 MB・管理者権限不要）。自分で入れた Java を使う場合は「自動検出」か「参照」を使ってください。"/>
                                 </Border>
                             </StackPanel>
                         </Border>

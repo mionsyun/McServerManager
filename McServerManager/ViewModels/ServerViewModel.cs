@@ -78,10 +78,12 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         IBedrockServerService bedrockServer,
         IBedrockPropertiesService bedrockProperties,
         IPortForwardingService portForwarding,
+        IJavaRuntimeInstaller javaInstaller,
         ServerConfig config)
     {
         _isInitializing = true;
         _services = services;
+        JavaSetup = new JavaSetupViewModel(javaInstaller);
         _backupScheduler = backupScheduler;
         _config = config;
         _runtime = _services.Runtime.GetOrCreate(config);
@@ -135,7 +137,16 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             Bedrock.Settings.PropertyChanged += (_, _) => UpdateRestartRequired();
         }
 
-        StartCommand = new AsyncRelayCommand(StartAsync, () => Status == ServerStatus.Stopped);
+        StartCommand = new AsyncRelayCommand(StartAsync, () => Status == ServerStatus.Stopped && !JavaSetup.IsRunning);
+        SetupJavaCommand = new AsyncRelayCommand(SetupJavaFromSettingsAsync, () => !JavaSetup.IsRunning);
+        JavaSetup.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName != nameof(JavaSetupViewModel.IsRunning))
+                return;
+            StartCommand.RaiseCanExecuteChanged();
+            SetupJavaCommand.RaiseCanExecuteChanged();
+            DetectJavaCommand.RaiseCanExecuteChanged();
+        };
         StopCommand = new AsyncRelayCommand(StopAsync, () => Status != ServerStatus.Stopped);
         RestartCommand = new AsyncRelayCommand(RestartAsync, () => Status == ServerStatus.Running);
         SendCommandCommand = new RelayCommand(
@@ -145,7 +156,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         ExportLogsCommand = new RelayCommand(_ => ExportLogs());
         SaveSettingsCommand = new RelayCommand(_ => SaveSettings());
         BrowseJavaCommand = new RelayCommand(_ => BrowseJava());
-        DetectJavaCommand = new RelayCommand(_ => DetectJava());
+        DetectJavaCommand = new AsyncRelayCommand(DetectJavaAsync, () => !JavaSetup.IsRunning);
         OpenServerDirectoryCommand = new RelayCommand(_ => OpenServerDirectory());
         OpenLogsDirectoryCommand = new RelayCommand(_ => OpenLogsDirectory());
         OpenCrashReportsCommand = new RelayCommand(_ => OpenCrashReports());
@@ -705,7 +716,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     public RelayCommand ExportLogsCommand { get; }
     public RelayCommand SaveSettingsCommand { get; }
     public RelayCommand BrowseJavaCommand { get; }
-    public RelayCommand DetectJavaCommand { get; }
+    public AsyncRelayCommand DetectJavaCommand { get; }
     public RelayCommand OpenServerDirectoryCommand { get; }
     public RelayCommand OpenLogsDirectoryCommand { get; }
     public RelayCommand OpenCrashReportsCommand { get; }
@@ -720,6 +731,8 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     public RelayCommand ApplyStartupPresetCommand { get; }
     public RelayCommand RunHealthCheckCommand { get; }
     public RelayCommand SelectViewCommand { get; }
+    public AsyncRelayCommand SetupJavaCommand { get; }
+    public JavaSetupViewModel JavaSetup { get; }
     public RelayCommand ShowAllowlistSettingsCommand { get; }
     public RelayCommand SaveAllCommand { get; }
     public RelayCommand CopyLanAddressCommand { get; }
@@ -977,11 +990,11 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         if (Status != ServerStatus.Stopped)
             return;
 
-        if (!EnsureJavaAvailable())
+        if (!await EnsureJavaAvailableAsync())
             return;
 
         RunHealthCheck(showEvenIfCompleted: false);
-        WarnIfJavaVersionMismatch();
+        await OfferJavaUpgradeIfTooOldAsync();
 
         if (!Directory.Exists(ServerDirectory))
         {
@@ -1011,8 +1024,11 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         catch (JavaNotFoundException ex)
         {
             await Network.TryClosePortAsync();
-            OpenJavaSettings(
-                $"Java を起動できませんでした。\n{ex.JavaPath}\n\n「サーバー設定」の Java ランタイムで java.exe を選び直すか、「自動検出」を押してください。");
+            if (await OfferJavaSetupAsync($"Java を起動できませんでした。\n{ex.JavaPath}"))
+            {
+                _services.Dialog.Show("Java を用意しました。もう一度「起動」を押してください。",
+                    "Java の自動セットアップ", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
         catch (Exception ex)
         {
@@ -1023,10 +1039,10 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// Java 版の起動前に java.exe を解決する。未設定なら自動検出して設定し、
-    /// 見つからなければ「サーバー設定」の Java ランタイムへ案内して false を返す。
+    /// Java 版の起動前に java.exe を解決する。未設定なら自動検出（MaiPilot が導入した Java を含む）して設定する。
+    /// 見つからなければ自動セットアップを提案し、断られたら「サーバー設定」の Java ランタイムへ案内して false を返す。
     /// </summary>
-    private bool EnsureJavaAvailable()
+    private async Task<bool> EnsureJavaAvailableAsync()
     {
         if (IsBedrock)
             return true;
@@ -1037,26 +1053,115 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             if (!Path.IsPathRooted(JavaPath) || File.Exists(JavaPath))
                 return true;
 
-            OpenJavaSettings(
-                $"設定されている Java が見つかりません。\n{JavaPath}\n\n「サーバー設定」の Java ランタイムで java.exe を選び直すか、「自動検出」を押してください。");
-            return false;
+            return await OfferJavaSetupAsync($"設定されている Java が見つかりません。\n{JavaPath}");
         }
 
         var detected = _services.Java.FindJavaExecutable();
+        var managed = JavaSetup.FindInstalled(RequiredJavaInstallMajor);
+        // 検出した Java が古く、MaiPilot が導入した適切な版があればそちらを使う
+        if (managed is not null && (detected is null || !IsJavaNewEnough(detected)))
+        {
+            JavaPath = managed;
+            return true;
+        }
+
         if (!string.IsNullOrWhiteSpace(detected))
         {
             JavaPath = detected;
             return true;
         }
 
-        OpenJavaSettings(
-            "Java が見つからないため起動できません。\n\nhttps://adoptium.net から Eclipse Temurin (LTS) をインストールし、「サーバー設定」の Java ランタイムで「自動検出」を押してください。");
-        return false;
+        return await OfferJavaSetupAsync("Java が見つからないため起動できません。");
     }
 
-    private void OpenJavaSettings(string message)
+    /// <summary>このサーバーの Minecraft に合わせて自動セットアップする Java のメジャー版。</summary>
+    private int RequiredJavaInstallMajor => JavaSetup.GetInstallMajor(_services.Java.GetRequiredJavaMajor(_config.Version));
+
+    private bool IsJavaNewEnough(string javaExe)
     {
-        _services.Dialog.Show(message, "Java が見つかりません", MessageBoxButton.OK, MessageBoxImage.Warning);
+        var required = _services.Java.GetRequiredJavaMajor(_config.Version);
+        return required is null
+               || (_services.Java.TryGetJavaMajorVersion(javaExe, out var actual, out _) && actual >= required);
+    }
+
+    /// <summary>
+    /// Java の自動セットアップを提案する。「はい」なら導入してこのサーバーの Java に設定し true を返す。
+    /// 「いいえ」または失敗時は「サーバー設定」の Java ランタイムへ案内して false を返す。
+    /// </summary>
+    private async Task<bool> OfferJavaSetupAsync(string reason)
+    {
+        var major = RequiredJavaInstallMajor;
+        var answer = _services.Dialog.Show(
+            $"{reason}\n\nJava {major}（Eclipse Temurin）を自動でセットアップしますか？\n" +
+            "・約 50 MB をダウンロードします（管理者権限は不要です）\n" +
+            "・MaiPilot 専用のフォルダに入れ、このサーバーの Java に設定します\n\n" +
+            "「いいえ」を選ぶと、Java を自分で指定する画面を開きます。",
+            "Java のセットアップ", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (answer != MessageBoxResult.Yes)
+        {
+            ShowJavaSettings();
+            return false;
+        }
+
+        return await RunJavaSetupAsync(major);
+    }
+
+    /// <summary>Java が古いとき（例: 26.x に Java 21）、必要な版の自動セットアップを提案する。断られたらそのまま起動する。</summary>
+    private async Task OfferJavaUpgradeIfTooOldAsync()
+    {
+        if (IsBedrock)
+            return;
+
+        var requiredMajor = _services.Java.GetRequiredJavaMajor(_config.Version);
+        if (requiredMajor is null)
+            return;
+
+        var javaExe = string.IsNullOrWhiteSpace(JavaPath)
+            ? _services.Java.FindJavaExecutable() ?? "java"
+            : JavaPath;
+        if (!_services.Java.TryGetJavaMajorVersion(javaExe, out var actualMajor, out var rawVersion) || actualMajor >= requiredMajor)
+            return;
+
+        var major = RequiredJavaInstallMajor;
+        var answer = _services.Dialog.Show(
+            $"Minecraft {Version} には Java {requiredMajor} 以上が必要です。現在の Java: {rawVersion ?? actualMajor.ToString()}\n\n" +
+            $"Java {major}（Eclipse Temurin）を自動でセットアップして、このサーバーに使いますか？（約 50 MB・管理者権限不要）\n" +
+            "「いいえ」を選ぶと、今の Java のまま起動します。",
+            "Java のバージョン", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (answer == MessageBoxResult.Yes)
+            await RunJavaSetupAsync(major);
+    }
+
+    private async Task<bool> RunJavaSetupAsync(int major)
+    {
+        try
+        {
+            JavaPath = await JavaSetup.RunAsync(major);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _services.Dialog.Show(
+                $"Java のセットアップに失敗しました: {ex.Message}\n\nインターネット接続を確認してもう一度試すか、Java を自分で指定してください。",
+                "Java のセットアップ", MessageBoxButton.OK, MessageBoxImage.Error);
+            ShowJavaSettings();
+            return false;
+        }
+    }
+
+    /// <summary>「サーバー設定」の Java ランタイムの自動セットアップボタンから呼ぶ。</summary>
+    private async Task SetupJavaFromSettingsAsync()
+    {
+        var major = RequiredJavaInstallMajor;
+        if (await RunJavaSetupAsync(major))
+        {
+            _services.Dialog.Show($"Java {major} をセットアップし、このサーバーの Java に設定しました。",
+                "Java のセットアップ", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+    }
+
+    private void ShowJavaSettings()
+    {
         SelectView("settings");
         SettingsSectionRequested?.Invoke("java");
     }
@@ -1087,8 +1192,11 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         }
         catch (JavaNotFoundException ex)
         {
-            OpenJavaSettings(
-                $"Java を起動できませんでした。\n{ex.JavaPath}\n\n「サーバー設定」の Java ランタイムで java.exe を選び直すか、「自動検出」を押してください。");
+            if (await OfferJavaSetupAsync($"Java を起動できませんでした。\n{ex.JavaPath}"))
+            {
+                _services.Dialog.Show("Java を用意しました。もう一度「起動」を押してください。",
+                    "Java の自動セットアップ", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
         catch (Exception ex)
         {
@@ -1199,19 +1307,21 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             JavaPath = dialog.FileName;
     }
 
-    private void DetectJava()
+    private async Task DetectJavaAsync()
     {
-        var detected = _services.Java.FindJavaExecutable();
+        var detected = _services.Java.FindJavaExecutable() ?? JavaSetup.FindInstalled(RequiredJavaInstallMajor);
         if (!string.IsNullOrWhiteSpace(detected))
         {
             JavaPath = detected;
+            return;
         }
-        else
-        {
-            _services.Dialog.Show(
-                "Javaが見つかりませんでした。\n\nhttps://adoptium.net から Eclipse Temurin (LTS) をインストールしてから、もう一度「自動検出」を押してください。\n別の場所に入れた場合は「参照」から java.exe を選んでください。",
-                "Java 自動検出", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
+
+        var answer = _services.Dialog.Show(
+            $"Javaが見つかりませんでした。\n\nJava {RequiredJavaInstallMajor}（Eclipse Temurin）を自動でセットアップしますか？（約 50 MB・管理者権限不要）\n" +
+            "自分で入れる場合は https://adoptium.net から Eclipse Temurin (LTS) をインストールし、もう一度「自動検出」を押すか、「参照」から java.exe を選んでください。",
+            "Java 自動検出", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (answer == MessageBoxResult.Yes)
+            await SetupJavaFromSettingsAsync();
     }
 
     // ─── バージョン管理 ──────────────────────────────────────────
@@ -1479,33 +1589,6 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         var message = string.Join(Environment.NewLine + Environment.NewLine, issues.Concat(fixes));
         var image = issues.Count > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information;
         _services.Dialog.Show(message, "初回ヘルスチェック", MessageBoxButton.OK, image);
-    }
-
-    private void WarnIfJavaVersionMismatch()
-    {
-        if (IsBedrock)
-            return;
-
-        var requiredMajor = _services.Java.GetRequiredJavaMajor(_config.Version);
-        if (requiredMajor is null)
-            return;
-
-        var javaExe = string.IsNullOrWhiteSpace(JavaPath)
-            ? _services.Java.FindJavaExecutable() ?? "java"
-            : JavaPath;
-
-        if (!_services.Java.TryGetJavaMajorVersion(javaExe, out var actualMajor, out var rawVersion))
-            return;
-
-        if (actualMajor >= requiredMajor)
-            return;
-
-        var versionText = string.IsNullOrWhiteSpace(rawVersion)
-            ? actualMajor.ToString()
-            : rawVersion;
-        _services.Dialog.Show(
-            $"Minecraft {Version} は Java {requiredMajor} 以上が推奨です。現在の Java: {versionText}\n必要に応じて「サーバー設定」の Java ランタイムで java.exe を切り替えてください。",
-            "Java バージョン警告", MessageBoxButton.OK, MessageBoxImage.Warning);
     }
 
     // ─── 稼働モニター ────────────────────────────────────────────
