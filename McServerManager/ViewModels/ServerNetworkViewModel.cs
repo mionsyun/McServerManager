@@ -110,18 +110,52 @@ public sealed class ServerNetworkViewModel : ObservableObject
     /// <summary>ポート・通信方式の設定変更後に ServerViewModel から呼ぶ。</summary>
     public void NotifyPortChanged() => RefreshPortPlan();
 
-    /// <summary>サーバー起動時にServerViewModelから呼び出す。</summary>
+    /// <summary>サーバー起動時にルーターのポートを UPnP で自動開放する（アプリ全体の設定）。</summary>
+    public bool AutoOpenUpnpOnStart
+    {
+        get
+        {
+            // 別サーバーの画面で変更された場合もあるため、保存済みの値を読む
+            var settings = _services.Settings.Load();
+            return settings.EnableUpnp && !settings.PromptUpnp;
+        }
+        set
+        {
+            SaveUpnpChoice(value);
+            OnPropertyChanged();
+        }
+    }
+
+    private void SaveUpnpChoice(bool enable)
+    {
+        // 他のサーバーの画面が持つ設定も古くならないよう、ファイルの最新値を部分更新する
+        var saved = _services.Settings.Update(s =>
+        {
+            s.EnableUpnp = enable;
+            s.PromptUpnp = false;
+        });
+        _appSettings.EnableUpnp = saved.EnableUpnp;
+        _appSettings.PromptUpnp = saved.PromptUpnp;
+    }
+
+    /// <summary>サーバー起動時にServerViewModelから呼び出す。初回だけ確認し、答えを記憶する。</summary>
     public async Task TryOpenPortAsync()
     {
-        if (_appSettings.PromptUpnp)
+        var settings = _services.Settings.Load();
+        if (settings.PromptUpnp)
         {
             var result = _services.Dialog.Show(
-                "ルーターの自動ポート開放を試しますか？",
-                "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                "ルーターのポートを UPnP で自動開放しますか？\n\n" +
+                "「はい」: サーバーを起動するたびに自動で開放します\n" +
+                "「いいえ」: 開放しません（同じ Wi-Fi 内の人はそのまま参加できます）\n\n" +
+                "この選択は記憶され、「接続・公開」画面でいつでも変更できます。",
+                "ポートの自動開放", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            SaveUpnpChoice(result == MessageBoxResult.Yes);
+            OnPropertyChanged(nameof(AutoOpenUpnpOnStart));
             if (result != MessageBoxResult.Yes)
                 return;
         }
-        else if (!_appSettings.EnableUpnp)
+        else if (!settings.EnableUpnp)
         {
             return;
         }

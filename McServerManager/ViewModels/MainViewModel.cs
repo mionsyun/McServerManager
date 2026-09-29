@@ -65,7 +65,7 @@ public sealed class MainViewModel : ObservableObject
             if (!string.Equals(_settings.Theme, nextTheme, StringComparison.OrdinalIgnoreCase))
             {
                 _settings.Theme = nextTheme;
-                _services.Settings.Save(_settings);
+                _services.Settings.Update(s => s.Theme = nextTheme);
                 _services.Theme.Apply(_settings.Theme);
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(ThemeLabel));
@@ -277,7 +277,11 @@ public sealed class MainViewModel : ObservableObject
     {
         _settings.DeferredAppUpdateVersion = version;
         _settings.DeferredAppUpdateUntilUtc = DateTime.UtcNow.Add(UpdateSnoozeDuration);
-        _services.Settings.Save(_settings);
+        _services.Settings.Update(s =>
+        {
+            s.DeferredAppUpdateVersion = _settings.DeferredAppUpdateVersion;
+            s.DeferredAppUpdateUntilUtc = _settings.DeferredAppUpdateUntilUtc;
+        });
     }
 
     private void ClearDeferredUpdatePrompt()
@@ -289,7 +293,11 @@ public sealed class MainViewModel : ObservableObject
 
         _settings.DeferredAppUpdateVersion = null;
         _settings.DeferredAppUpdateUntilUtc = null;
-        _services.Settings.Save(_settings);
+        _services.Settings.Update(s =>
+        {
+            s.DeferredAppUpdateVersion = null;
+            s.DeferredAppUpdateUntilUtc = null;
+        });
     }
 
     private void OpenTutorialGuideWindow()
@@ -782,7 +790,11 @@ public sealed class MainViewModel : ObservableObject
         if (!_settings.ServerDirectories.Contains(baseDir, StringComparer.OrdinalIgnoreCase))
         {
             _settings.ServerDirectories.Add(baseDir);
-            _services.Settings.Save(_settings);
+            _services.Settings.Update(s =>
+            {
+                if (!s.ServerDirectories.Contains(baseDir, StringComparer.OrdinalIgnoreCase))
+                    s.ServerDirectories.Add(baseDir);
+            });
         }
     }
 

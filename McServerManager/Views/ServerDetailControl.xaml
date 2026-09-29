@@ -772,6 +772,7 @@
                                             </Border>
                                         </StackPanel>
                                         <TextBlock Text="対応ルーターなら自動で外部公開。グローバル IP が必要です。" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                        <CheckBox Content="サーバー起動時に自動で開放する（全サーバー共通）" IsChecked="{Binding Network.AutoOpenUpnpOnStart}" Margin="0,6,0,0"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                                         <Button Content="開放" Command="{Binding Network.OpenPortCommand}" Style="{StaticResource PrimaryButton}" Width="80"/>
