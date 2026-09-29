@@ -1491,7 +1491,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             ? actualMajor.ToString()
             : rawVersion;
         _services.Dialog.Show(
-            $"Minecraft {Version} は Java {requiredMajor} 以上が推奨です。現在の Java: {versionText}\n必要に応じて「設定」タブで java.exe を切り替えてください。",
+            $"Minecraft {Version} は Java {requiredMajor} 以上が推奨です。現在の Java: {versionText}\n必要に応じて「サーバー設定」の Java ランタイムで java.exe を切り替えてください。",
             "Java バージョン警告", MessageBoxButton.OK, MessageBoxImage.Warning);
     }
 
