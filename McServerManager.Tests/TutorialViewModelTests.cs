@@ -28,6 +28,25 @@ public sealed class TutorialViewModelTests
     }
 
     [Fact]
+    public void Finish_DoesNotRevertFirstRunFlagSavedAfterStartup()
+    {
+        using var appData = new TestInfrastructure.TemporaryAppDataScope();
+        IAppSettingsService service = new AppSettingsService(new AppPathsService());
+        // MainViewModel 生成時（初回案内の前）に読んだ設定をチュートリアルが持つ
+        var staleSettings = service.Load();
+        var vm = new TutorialViewModel(staleSettings, service);
+        // 初回案内を閉じたときに App が保存する
+        service.Update(s => s.HasShownFirstRun = true);
+
+        vm.Start(GuideType.InitialSetup);
+        vm.Finish();
+
+        var saved = service.Load();
+        Assert.True(saved.HasShownFirstRun);
+        Assert.True(saved.HasCompletedTutorial);
+    }
+
+    [Fact]
     public void BackCommand_MovesToPreviousStep()
     {
         var settings = new AppSettings();

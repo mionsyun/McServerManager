@@ -325,7 +325,8 @@ public sealed class TutorialViewModel : ObservableObject
     {
         IsActive = false;
         _settings.HasCompletedTutorial = true;
-        _settingsService.Save(_settings);
+        // _settings は起動直後に読んだもの。丸ごと保存すると初回案内の表示済みフラグなどを戻してしまう
+        _settingsService.Update(s => s.HasCompletedTutorial = true);
     }
 
     private void Next()
