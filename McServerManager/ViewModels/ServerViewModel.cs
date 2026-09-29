@@ -1196,7 +1196,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         else
         {
             _services.Dialog.Show(
-                "Javaが見つかりませんでした。\n\nhttps://adoptium.net から Eclipse Temurin (LTS) をインストールしてください。\nインストール時に「PATH に追加」にチェックを入れてから再度お試しください。",
+                "Javaが見つかりませんでした。\n\nhttps://adoptium.net から Eclipse Temurin (LTS) をインストールしてから、もう一度「自動検出」を押してください。\n別の場所に入れた場合は「参照」から java.exe を選んでください。",
                 "Java 自動検出", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
