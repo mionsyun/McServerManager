@@ -7,6 +7,9 @@ public sealed class JavaService : IJavaService
 {
     private static readonly Regex JavaVersionRegex = new(@"version\s+\""?([0-9]+(?:\.[0-9]+)*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
+    /// <summary>年ベースの版番号 (26.1 など) になった最初の年。以降は Java 25 が必要。</summary>
+    private const int FirstYearBasedMinecraftVersion = 26;
+
     public string? FindJavaExecutable()
     {
         var fromWhere = TryFindJavaFromWhere();
@@ -99,6 +102,13 @@ public sealed class JavaService : IJavaService
         if (string.IsNullOrWhiteSpace(minecraftVersion))
         {
             return null;
+        }
+
+        // 26.1 以降は「年.回」形式 (26.3, 26.1-snapshot-2 など) で、Java 25 が必要
+        var leading = minecraftVersion.Trim().Split('.', '-', ' ')[0];
+        if (int.TryParse(leading, out var year) && year >= FirstYearBasedMinecraftVersion)
+        {
+            return 25;
         }
 
         if (!TryParseMinecraftVersion(minecraftVersion, out var minor, out var patch))
