@@ -1,4 +1,4 @@
-using System.Collections.Specialized;
+﻿using System.Collections.Specialized;
 using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Input;
@@ -13,16 +13,25 @@ public partial class ServerDetailControl : System.Windows.Controls.UserControl
     public ServerDetailControl()
     {
         InitializeComponent();
-        Loaded += OnLoaded;
         DataContextChanged += OnDataContextChanged;
     }
 
+    // DataTemplate のため、サーバーを切り替えてもこのコントロールは再利用され DataContext だけが変わる。
+    // ログの自動スクロールも表示中のサーバーのログへ購読し直す
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
         if (e.OldValue is ServerViewModel oldVm)
+        {
             oldVm.JavaSettingsRequested -= OnJavaSettingsRequested;
+            oldVm.Logs.CollectionChanged -= OnLogsCollectionChanged;
+        }
+
         if (e.NewValue is ServerViewModel newVm)
+        {
             newVm.JavaSettingsRequested += OnJavaSettingsRequested;
+            newVm.Logs.CollectionChanged += OnLogsCollectionChanged;
+            OnLogsCollectionChanged(null, null);
+        }
     }
 
     private void OnJavaSettingsRequested()
@@ -37,21 +46,15 @@ public partial class ServerDetailControl : System.Windows.Controls.UserControl
         });
     }
 
-    private void OnLoaded(object sender, RoutedEventArgs e)
+    private void OnLogsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs? e)
     {
-        if (LogListBox.ItemsSource is INotifyCollectionChanged collection)
+        // 通知の途中でスクロール（レイアウト更新）すると、まだ追加を受け取っていない ListBox が
+        // 件数の不一致で例外を出すため、通知処理が終わってから行う
+        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, () =>
         {
-            collection.CollectionChanged += OnLogsCollectionChanged;
-        }
-    }
-
-    private void OnLogsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        if (LogListBox.Items.Count > 0)
-        {
-            var lastItem = LogListBox.Items[^1];
-            LogListBox.ScrollIntoView(lastItem);
-        }
+            if (LogListBox.Items.Count > 0)
+                LogListBox.ScrollIntoView(LogListBox.Items[^1]);
+        });
     }
 
     private void CopyConsole_OnClick(object sender, RoutedEventArgs e)
