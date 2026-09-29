@@ -22,27 +22,30 @@ public partial class ServerDetailControl : System.Windows.Controls.UserControl
     {
         if (e.OldValue is ServerViewModel oldVm)
         {
-            oldVm.JavaSettingsRequested -= OnJavaSettingsRequested;
+            oldVm.SettingsSectionRequested -= OnSettingsSectionRequested;
             oldVm.Logs.CollectionChanged -= OnLogsCollectionChanged;
         }
 
         if (e.NewValue is ServerViewModel newVm)
         {
-            newVm.JavaSettingsRequested += OnJavaSettingsRequested;
+            newVm.SettingsSectionRequested += OnSettingsSectionRequested;
             newVm.Logs.CollectionChanged += OnLogsCollectionChanged;
             OnLogsCollectionChanged(null, null);
         }
     }
 
-    private void OnJavaSettingsRequested()
+    private void OnSettingsSectionRequested(string section)
     {
-        // 設定画面が表示されてレイアウトが済んでから、Java ランタイムのカードを先頭に出す
+        FrameworkElement target = section == "allowlist" ? AllowListCheckBox : JavaRuntimeCard;
+        // 設定画面が表示されてレイアウトが済んでから、目的の項目を先頭付近に出す
         Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, () =>
         {
-            if (!JavaRuntimeCard.IsVisible || !SettingsScrollViewer.IsVisible)
+            if (!target.IsVisible || !SettingsScrollViewer.IsVisible)
                 return;
-            var offset = JavaRuntimeCard.TransformToAncestor(SettingsScrollViewer).Transform(new System.Windows.Point(0, 0)).Y;
-            SettingsScrollViewer.ScrollToVerticalOffset(SettingsScrollViewer.VerticalOffset + offset - 12);
+            var offset = target.TransformToAncestor(SettingsScrollViewer).Transform(new System.Windows.Point(0, 0)).Y;
+            // チェックボックスは周りの項目も見えるよう、少し上に余白を取る
+            var margin = target == JavaRuntimeCard ? 12 : 160;
+            SettingsScrollViewer.ScrollToVerticalOffset(Math.Max(0, SettingsScrollViewer.VerticalOffset + offset - margin));
         });
     }
 

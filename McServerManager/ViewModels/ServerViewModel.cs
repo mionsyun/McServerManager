@@ -172,6 +172,11 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         );
         RunHealthCheckCommand = new RelayCommand(_ => RunHealthCheck(showEvenIfCompleted: true));
         SelectViewCommand = new RelayCommand(param => SelectView(param as string));
+        ShowAllowlistSettingsCommand = new RelayCommand(_ =>
+        {
+            SelectView("settings");
+            SettingsSectionRequested?.Invoke("allowlist");
+        });
         SaveAllCommand = new RelayCommand(_ => SaveAllWorld(), _ => Status == ServerStatus.Running);
         CopyLanAddressCommand = new RelayCommand(_ => CopyLanAddress());
         RefreshCrashHistoryCommand = new RelayCommand(_ => LoadCrashHistory());
@@ -408,8 +413,11 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         private set => SetProperty(ref _restartRequired, value);
     }
 
-    /// <summary>Java が見つからず、サーバー設定の「Java ランタイム」を表示してほしいときに発生する（View がスクロールする）。</summary>
-    public event Action? JavaSettingsRequested;
+    /// <summary>
+    /// サーバー設定の特定の項目を表示してほしいときに発生する（View がその位置までスクロールする）。
+    /// 引数は "java"（Java ランタイム）または "allowlist"（参加許可リスト）。
+    /// </summary>
+    public event Action<string>? SettingsSectionRequested;
 
     public string JavaPath
     {
@@ -712,6 +720,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     public RelayCommand ApplyStartupPresetCommand { get; }
     public RelayCommand RunHealthCheckCommand { get; }
     public RelayCommand SelectViewCommand { get; }
+    public RelayCommand ShowAllowlistSettingsCommand { get; }
     public RelayCommand SaveAllCommand { get; }
     public RelayCommand CopyLanAddressCommand { get; }
     public RelayCommand RefreshCrashHistoryCommand { get; }
@@ -765,6 +774,9 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         // 初回起動でサーバーがワールドを生成するため、開くたびに一覧を読み直す
         if (string.Equals(view, "world", StringComparison.OrdinalIgnoreCase))
             World.LoadWorlds();
+        // 参加許可リストの登録など、別画面での変更を警告に反映する
+        if (view is "overview" or "network")
+            Network.NotifyPortChanged();
         CurrentView = view;
     }
 
@@ -1046,7 +1058,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     {
         _services.Dialog.Show(message, "Java が見つかりません", MessageBoxButton.OK, MessageBoxImage.Warning);
         SelectView("settings");
-        JavaSettingsRequested?.Invoke();
+        SettingsSectionRequested?.Invoke("java");
     }
 
     private async Task StopAsync()

@@ -76,6 +76,21 @@
                         </Grid>
                     </Border>
 
+                    <!-- 統合版: 参加許可リストが空で誰も入れない -->
+                    <Border Style="{StaticResource WarnBanner}" Margin="0,0,0,16"
+                            Visibility="{Binding Network.IsAllowlistBlockingEveryone, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock TextWrapping="Wrap" VerticalAlignment="Center"
+                                       Text="参加許可リストが有効ですが、1 人も登録されていないため誰も参加できません（「このサーバーでのプレイに招待されていません」になります）。"/>
+                            <Button Grid.Column="1" Content="設定で確認 →" Style="{StaticResource SmallButton}" Margin="12,0,0,0"
+                                    Command="{Binding ShowAllowlistSettingsCommand}"/>
+                        </Grid>
+                    </Border>
+
                     <!-- ヒーロー: ステータス + 接続カード -->
                     <Grid Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
@@ -614,6 +629,13 @@
                             </Grid>
                             <StackPanel Margin="0,10,0,0"
                                         Visibility="{Binding IsChecked, ElementName=BedrockTroubleToggle, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Border Style="{StaticResource SurfacePanel}" Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <TextBlock Text="「このサーバーでのプレイに招待されていません」と出る" FontWeight="SemiBold"/>
+                                        <TextBlock Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,2,0,0"
+                                                   Text="通信はサーバーまで届いていて、参加許可リスト (allow-list) で弾かれています。サーバー設定で「参加許可リスト (allow-list) に登録した人だけ参加できるようにする」をオフにするか、参加許可リストにその人のゲーマータグを追加して、サーバーを再起動してください。"/>
+                                    </StackPanel>
+                                </Border>
                                 <Border Style="{StaticResource SurfacePanel}" Margin="0,0,0,8">
                                     <StackPanel>
                                         <TextBlock Text="サーバー一覧には見えるのに入れない" FontWeight="SemiBold"/>
@@ -1651,7 +1673,7 @@
 
                                     <CheckBox Content="オンラインモード (Xbox Live 認証)" IsChecked="{Binding Settings.OnlineMode}" Margin="0,12,0,0"/>
                                     <CheckBox Content="同じ Wi-Fi 内の「LAN ゲーム」に表示する" IsChecked="{Binding Settings.EnableLanVisibility}" Margin="0,8,0,0"/>
-                                    <CheckBox Content="参加許可リスト (allow-list) に登録した人だけ参加できるようにする" IsChecked="{Binding Settings.AllowList}" Margin="0,8,0,0"/>
+                                    <CheckBox x:Name="AllowListCheckBox" Content="参加許可リスト (allow-list) に登録した人だけ参加できるようにする" IsChecked="{Binding Settings.AllowList}" Margin="0,8,0,0"/>
                                 </StackPanel>
                             </Border>
 

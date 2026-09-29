@@ -27,10 +27,37 @@ public sealed class PortForwardingService : IPortForwardingService
         }
 
         var props = LoadBedrockPropertiesOrDefault(config);
+        var warnings = BedrockNetworkPlanner.GetWarnings(props, config.Version).ToList();
+        if (props.AllowList && CountAllowlistEntries(config) == 0)
+        {
+            // 2.0.x で作成したサーバーは BDS 同梱の既定 (allow-list=true) のまま残っている
+            warnings.Insert(0, AllowlistEmptyWarning);
+        }
+
         return new PortPlan(
             BedrockNetworkPlanner.GetRequiredPorts(props, config.Version),
             BedrockNetworkPlanner.UsesNetherNet(props, config.Version),
-            BedrockNetworkPlanner.GetWarnings(props, config.Version));
+            warnings);
+    }
+
+    public const string AllowlistEmptyWarning =
+        "参加許可リスト (allow-list) が有効ですが、1 人も登録されていません。このままでは誰も参加できません" +
+        "（ゲームでは「このサーバーでのプレイに招待されていません」と表示されます）。" +
+        "サーバー設定で参加許可リストを無効にするか、参加する人を追加してください。";
+
+    private int CountAllowlistEntries(ServerConfig config)
+    {
+        if (string.IsNullOrWhiteSpace(config.DirectoryPath))
+            return 0;
+
+        try
+        {
+            return _bedrockProperties.LoadAllowlist(config.DirectoryPath).Count;
+        }
+        catch (IOException)
+        {
+            return 0;
+        }
     }
 
     public async Task<string?> OpenAsync(ServerConfig config, IReadOnlyList<PortRequirement> ports)

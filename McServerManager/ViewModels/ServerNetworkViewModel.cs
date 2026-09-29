@@ -241,7 +241,11 @@ public sealed class ServerNetworkViewModel : ObservableObject
         OnPropertyChanged(nameof(ProtocolLabel));
         OnPropertyChanged(nameof(PortLabel));
         OnPropertyChanged(nameof(HasBedrockWarnings));
+        OnPropertyChanged(nameof(IsAllowlistBlockingEveryone));
     }
+
+    /// <summary>参加許可リストが有効なのに誰も登録されておらず、誰も参加できない状態か。</summary>
+    public bool IsAllowlistBlockingEveryone => BedrockWarnings.Contains(PortForwardingService.AllowlistEmptyWarning);
 
     /// <summary>必要なポートを UPnP で開放する。失敗時はユーザー向けメッセージを返す。</summary>
     private async Task<string?> OpenRequiredPortsAsync()
