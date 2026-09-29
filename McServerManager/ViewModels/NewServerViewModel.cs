@@ -40,6 +40,14 @@ public sealed class NewServerViewModel : ObservableObject
     private string? _route;
     private string _edition = EditionJava;
     private WizardPreset? _selectedPreset;
+    private bool _showingValidationError;
+
+    /// <summary>入力チェックのエラーを出した後で利用者が入力を変えたら、古いエラー文を消す。</summary>
+    private static readonly HashSet<string> NonInputProperties = new(StringComparer.Ordinal)
+    {
+        nameof(StatusMessage), nameof(HasError), nameof(IsBusy),
+        nameof(ProgressMessage), nameof(ProgressPercent), nameof(ProgressStep)
+    };
 
     public const string EditionJava = "java";
     public const string EditionBedrock = "bedrock";
@@ -49,6 +57,8 @@ public sealed class NewServerViewModel : ObservableObject
     {
         _services = services;
         Bedrock = new NewBedrockServerViewModel(bedrockServer);
+        PropertyChanged += (_, e) => ClearValidationErrorOnInput(e.PropertyName);
+        Bedrock.PropertyChanged += (_, e) => ClearValidationErrorOnInput(e.PropertyName);
         _existingNames = new HashSet<string>(existingNames, StringComparer.OrdinalIgnoreCase);
         Versions = new ObservableCollection<MinecraftVersionInfo>();
         VersionFilters = new ObservableCollection<VersionFilterOption>();
@@ -371,6 +381,7 @@ public sealed class NewServerViewModel : ObservableObject
 
         if (!ValidateInput())
         {
+            _showingValidationError = true;
             return;
         }
 
@@ -553,6 +564,15 @@ public sealed class NewServerViewModel : ObservableObject
         ServerTypes.Add(new ServerTypeOption("Fabric", "Fabric (MOD)"));
         SelectedServerType = ServerTypes.FirstOrDefault();
         _ = LoadVersionsAsync();
+    }
+
+    private void ClearValidationErrorOnInput(string? propertyName)
+    {
+        if (!_showingValidationError || propertyName is null || NonInputProperties.Contains(propertyName))
+            return;
+
+        _showingValidationError = false;
+        StatusMessage = string.Empty;
     }
 
     private bool ValidateInput()
