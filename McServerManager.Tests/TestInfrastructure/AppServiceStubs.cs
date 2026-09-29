@@ -80,6 +80,16 @@ internal sealed class StubFirewallService : IFirewallService
     }
 }
 
+internal sealed class StubJavaRuntimeInstaller : IJavaRuntimeInstaller
+{
+    public int GetInstallMajor(int? requiredMajor) => requiredMajor ?? 21;
+
+    public string? FindInstalled(int major) => null;
+
+    public Task<string> InstallAsync(int major, IProgress<string>? progress = null, CancellationToken cancellationToken = default) =>
+        throw new InvalidOperationException("テストでは Java をダウンロードしない。");
+}
+
 internal sealed class StubNetworkService : INetworkService
 {
     public IReadOnlyList<string> GetLanIpAddresses() => Array.Empty<string>();

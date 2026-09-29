@@ -16,6 +16,9 @@ internal static class ExternalApiUrls
 
     // サーバーJAR
     public const string PaperApiBase = "https://fill.papermc.io/v3/projects";
+    // Java の自動セットアップ（Eclipse Temurin JRE の最新版。{0} はメジャー版）
+    public const string AdoptiumLatestJreTemplate =
+        "https://api.adoptium.net/v3/assets/latest/{0}/hotspot?architecture=x64&image_type=jre&os=windows&vendor=eclipse";
     public const string FabricApiBase = "https://meta.fabricmc.net/v2/versions";
     public const string PurpurApiBase = "https://api.purpurmc.org/v2/purpur";
     public const string ForgeMavenMetadata =

@@ -120,6 +120,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<IThemeService, ThemeService>();
         services.AddSingleton<IJavaService, JavaService>();
+        services.AddSingleton<IJavaRuntimeInstaller, JavaRuntimeInstaller>();
         services.AddSingleton<IAddonManagementService, AddonManagementService>();
         services.AddSingleton<IAddonCatalogService, AddonCatalogService>();
         services.AddSingleton<IAppUpdateService, AppUpdateService>();

@@ -47,7 +47,7 @@ public sealed class TutorialViewModel : ObservableObject
             null,
             TutorialPlacement.Center),
         new("Java の確認",
-            "Java 版サーバーには Java が必要です（1.20.5 以降は Java 21、26.x は Java 25 以上）。「サーバー設定」の Java ランタイムで「自動検出」を押すか、java.exe を指定してください。Java がない場合は Adoptium (Eclipse Temurin) から無料でダウンロードできます。",
+            "Java 版サーバーには Java が必要です（1.20.5 以降は Java 21、26.x は Java 25 以上）。Java が無い場合は、起動時または「サーバー設定」の Java ランタイムの「自動セットアップ」で自動的に用意できます（管理者権限不要）。",
             "JavaPathTextBox",
             TutorialPlacement.Right,
             "SettingsTab"),

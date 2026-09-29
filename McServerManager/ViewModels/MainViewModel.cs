@@ -19,6 +19,7 @@ public sealed class MainViewModel : ObservableObject
     private readonly IBedrockServerService _bedrockServer;
     private readonly IBedrockPropertiesService _bedrockProperties;
     private readonly IPortForwardingService _portForwarding;
+    private readonly IJavaRuntimeInstaller _javaInstaller;
     private readonly AppSettings _settings;
     private ServerViewModel? _selectedServer;
     private bool _tutorialOpenedCreate;
@@ -28,13 +29,15 @@ public sealed class MainViewModel : ObservableObject
         IBackupSchedulerService backupScheduler,
         IBedrockServerService bedrockServer,
         IBedrockPropertiesService bedrockProperties,
-        IPortForwardingService portForwarding)
+        IPortForwardingService portForwarding,
+        IJavaRuntimeInstaller javaInstaller)
     {
         _services = services;
         _backupScheduler = backupScheduler;
         _bedrockServer = bedrockServer;
         _bedrockProperties = bedrockProperties;
         _portForwarding = portForwarding;
+        _javaInstaller = javaInstaller;
         _settings = _services.Settings.Load();
 
         Servers = new ObservableCollection<ServerViewModel>();
@@ -347,7 +350,7 @@ public sealed class MainViewModel : ObservableObject
     }
 
     private ServerViewModel CreateServerViewModel(ServerConfig config) =>
-        new(_services, _backupScheduler, _bedrockServer, _bedrockProperties, _portForwarding, config);
+        new(_services, _backupScheduler, _bedrockServer, _bedrockProperties, _portForwarding, _javaInstaller, config);
 
     private void ReloadServers()
     {

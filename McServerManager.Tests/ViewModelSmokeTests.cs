@@ -22,7 +22,8 @@ public sealed class ViewModelSmokeTests
             new StubBackupSchedulerService(),
             new StubBedrockServerService(),
             bedrockProperties,
-            new PortForwardingService(new StubUpnpService(), bedrockProperties));
+            new PortForwardingService(new StubUpnpService(), bedrockProperties),
+            new StubJavaRuntimeInstaller());
 
         Assert.NotNull(vm.Servers);
         Assert.NotNull(vm.Tutorial);
@@ -111,6 +112,7 @@ public sealed class ViewModelSmokeTests
                 new StubBedrockServerService(),
                 bedrockProperties,
                 new PortForwardingService(new StubUpnpService(), bedrockProperties),
+                new StubJavaRuntimeInstaller(),
                 config);
             Assert.Equal("server-vm-smoke", vm.Name);
         });
