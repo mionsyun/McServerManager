@@ -733,12 +733,37 @@ public sealed class MainViewModel : ObservableObject
         config.LastStartedAt = null;
         config.DirectoryPath = targetDir;
         config.Firewall = new FirewallRuleInfo();
+        AssignFreePorts(config, targetDir);
         _services.Configs.SaveToDirectory(config, targetDir);
 
         TrackServerDirectory(targetDir);
         var serverVm = CreateServerViewModel(config);
         Servers.Add(serverVm);
         SelectedServer = serverVm;
+    }
+
+    /// <summary>複製元と同時に起動できるよう、既存サーバーと重ならないポートを割り当てて server.properties にも書く。</summary>
+    private void AssignFreePorts(ServerConfig config, string serverDirectory)
+    {
+        var used = Servers
+            .SelectMany(s => s.IsBedrock ? new[] { s.Port, s.PortV6 } : new[] { s.Port })
+            .ToHashSet();
+
+        config.Port = ServerPortAllocator.FindFreePort(config.Port + 1, used);
+        if (ServerEditions.IsBedrock(config))
+        {
+            used.Add(config.Port);
+            config.PortV6 = ServerPortAllocator.FindFreePort(config.PortV6 + 1, used);
+            var bedrockProps = _bedrockProperties.Load(serverDirectory);
+            bedrockProps.ServerPort = config.Port;
+            bedrockProps.ServerPortV6 = config.PortV6;
+            _bedrockProperties.Save(serverDirectory, bedrockProps);
+            return;
+        }
+
+        var props = _services.Properties.Load(serverDirectory, config);
+        props.ServerPort = config.Port;
+        _services.Properties.Save(serverDirectory, props);
     }
 
     private void TrackServerDirectory(string serverDirectory)

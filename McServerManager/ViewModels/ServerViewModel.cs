@@ -209,6 +209,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     public string ServerType => _config.Type;
     public string Version => _config.Version;
     public int Port => _config.Port;
+    public int PortV6 => _config.PortV6;
     public int MaxPlayers => _config.MaxPlayers;
     public string ServerDirectory => _config.DirectoryPath;
 
