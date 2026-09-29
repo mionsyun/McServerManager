@@ -743,17 +743,29 @@ public sealed class MainViewModel : ObservableObject
         config.LastStartedAt = null;
         config.DirectoryPath = targetDir;
         config.Firewall = new FirewallRuleInfo();
-        AssignFreePorts(config, targetDir);
+        var lanVisibilityDisabled = AssignFreePorts(config, targetDir);
         _services.Configs.SaveToDirectory(config, targetDir);
 
         TrackServerDirectory(targetDir);
         var serverVm = CreateServerViewModel(config);
         Servers.Add(serverVm);
         SelectedServer = serverVm;
+
+        if (lanVisibilityDisabled)
+        {
+            _services.Dialog.Show(
+                $"複製元と同時に起動できるよう、「{config.Name}」はポート {config.Port} にし、サーバー設定の「同じ Wi-Fi 内の『LAN ゲーム』に表示する」をオフにしました。\n" +
+                "（RakNet ではオンのままだと、ポートを変えても既定の 19132 を使うため同時に起動できません）\n\n" +
+                $"同じ Wi-Fi 内の人は「サーバー」タブから、この PC のアドレスとポート {config.Port} を追加して参加できます。",
+                "複製しました", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
     }
 
-    /// <summary>複製元と同時に起動できるよう、既存サーバーと重ならないポートを割り当てて server.properties にも書く。</summary>
-    private void AssignFreePorts(ServerConfig config, string serverDirectory)
+    /// <summary>
+    /// 複製元と同時に起動できるよう、既存サーバーと重ならないポートを割り当てて server.properties にも書く。
+    /// RakNet の統合版で LAN 表示をオフにした場合は true を返す。
+    /// </summary>
+    private bool AssignFreePorts(ServerConfig config, string serverDirectory)
     {
         var used = Servers
             .SelectMany(s => s.IsBedrock ? new[] { s.Port, s.PortV6 } : new[] { s.Port })
@@ -767,13 +779,19 @@ public sealed class MainViewModel : ObservableObject
             var bedrockProps = _bedrockProperties.Load(serverDirectory);
             bedrockProps.ServerPort = config.Port;
             bedrockProps.ServerPortV6 = config.PortV6;
+            // RakNet の LAN 表示 (enable-lan-visibility) は server-port に関係なく既定の 19132/19133 を使う
+            var disableLanVisibility = bedrockProps.EnableLanVisibility
+                && !BedrockNetworkPlanner.UsesNetherNet(bedrockProps, config.Version);
+            if (disableLanVisibility)
+                bedrockProps.EnableLanVisibility = false;
             _bedrockProperties.Save(serverDirectory, bedrockProps);
-            return;
+            return disableLanVisibility;
         }
 
         var props = _services.Properties.Load(serverDirectory, config);
         props.ServerPort = config.Port;
         _services.Properties.Save(serverDirectory, props);
+        return false;
     }
 
     private void TrackServerDirectory(string serverDirectory)
