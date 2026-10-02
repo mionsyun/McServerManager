@@ -670,15 +670,29 @@ const gaMeasurementId = computed(() => {
   const raw = runtimeConfig.public.gaMeasurementId as string | undefined;
   return raw?.trim() ?? "";
 });
+// localhost などローカル環境（npm run dev / preview）からのアクセスは計測しない。
+// 静的生成のため、判定はページを開いたブラウザ側で行い、計測する場合だけ gtag.js を読み込む。
 const gaInitScript = computed(() => {
   if (!gaMeasurementId.value) {
     return "";
   }
   return [
-    "window.dataLayer = window.dataLayer || [];",
-    "function gtag(){dataLayer.push(arguments);}",
-    "gtag('js', new Date());",
-    `gtag('config', ${JSON.stringify(gaMeasurementId.value)});`,
+    "(function () {",
+    `  var id = ${JSON.stringify(gaMeasurementId.value)};`,
+    "  var host = location.hostname;",
+    "  if (!host || host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host === '::1' || /\\.localhost$/.test(host)) {",
+    "    window['ga-disable-' + id] = true;",
+    "    return;",
+    "  }",
+    "  var s = document.createElement('script');",
+    "  s.async = true;",
+    "  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id);",
+    "  document.head.appendChild(s);",
+    "  window.dataLayer = window.dataLayer || [];",
+    "  window.gtag = function () { window.dataLayer.push(arguments); };",
+    "  window.gtag('js', new Date());",
+    "  window.gtag('config', id);",
+    "})();",
   ].join("\n");
 });
 
@@ -899,10 +913,6 @@ useHead(() => ({
   script: [
     ...(gaMeasurementId.value
       ? [
-          {
-            src: `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaMeasurementId.value)}`,
-            async: true,
-          },
           {
             key: "ga4-init",
             children: gaInitScript.value,
