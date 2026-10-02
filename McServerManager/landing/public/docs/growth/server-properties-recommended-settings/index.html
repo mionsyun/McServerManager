@@ -29,12 +29,24 @@
       .nav-links a:hover{color:var(--text);}
       .nav-cta{background:rgba(102,255,136,.12);color:var(--accent)!important;border:1px solid rgba(102,255,136,.35);border-radius:8px;padding:5px 12px;font-weight:700;}
     </style>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM106D2B2Z"></script>
+    <!-- Google tag (gtag.js)。localhost などローカル環境からのアクセスは計測しない -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-MM106D2B2Z');
+      (function () {
+        var id = 'G-MM106D2B2Z';
+        var host = location.hostname;
+        if (!host || host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host === '::1' || /\.localhost$/.test(host)) {
+          window['ga-disable-' + id] = true;
+          return;
+        }
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+        document.head.appendChild(s);
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function () { window.dataLayer.push(arguments); };
+        window.gtag('js', new Date());
+        window.gtag('config', id);
+      })();
     </script>
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="https://www.maipilot.jp/docs/growth/server-properties-recommended-settings/" />
