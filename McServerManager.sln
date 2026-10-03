@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McServerManager", "McServer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McServerManager.Tests", "McServerManager.Tests\McServerManager.Tests.csproj", "{948C4323-52A9-4312-B938-3D7BBB45660B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McServerManager.TemplateTests", "McServerManager.TemplateTests\McServerManager.TemplateTests.csproj", "{B5F104F7-EE68-4BCB-8DD1-1A9A5A404ECC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McServerManager.LiveChecks", "McServerManager.LiveChecks\McServerManager.LiveChecks.csproj", "{4DD9F42A-750F-4E91-AA60-E5FC52F53C78}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +28,13 @@ Global
 		{948C4323-52A9-4312-B938-3D7BBB45660B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{948C4323-52A9-4312-B938-3D7BBB45660B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{948C4323-52A9-4312-B938-3D7BBB45660B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5F104F7-EE68-4BCB-8DD1-1A9A5A404ECC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5F104F7-EE68-4BCB-8DD1-1A9A5A404ECC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5F104F7-EE68-4BCB-8DD1-1A9A5A404ECC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5F104F7-EE68-4BCB-8DD1-1A9A5A404ECC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DD9F42A-750F-4E91-AA60-E5FC52F53C78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DD9F42A-750F-4E91-AA60-E5FC52F53C78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DD9F42A-750F-4E91-AA60-E5FC52F53C78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DD9F42A-750F-4E91-AA60-E5FC52F53C78}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

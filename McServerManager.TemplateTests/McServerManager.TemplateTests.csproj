@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../McServerManager/Models/Transactions/**/*.cs" Link="Core/Models/Transactions/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Transactions/**/*.cs" Link="Core/Services/Transactions/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/Fabric/**/*.cs" Link="Core/Models/Fabric/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Fabric/**/*.cs" Link="Core/Services/Fabric/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/Modrinth/**/*.cs" Link="Core/Models/Modrinth/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Modrinth/**/*.cs" Link="Core/Services/Modrinth/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/Templates/**/*.cs" Link="Core/Models/Templates/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Templates/**/*.cs" Link="Core/Services/Templates/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/Dependencies/**/*.cs" Link="Core/Models/Dependencies/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Dependencies/**/*.cs" Link="Core/Services/Dependencies/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/ViewModels/TemplateInspectionViewModel.cs" Link="Core/ViewModels/TemplateInspectionViewModel.cs" Condition="Exists('../McServerManager/ViewModels/TemplateInspectionViewModel.cs')" />
+    <Compile Include="../McServerManager/ViewModels/ModInspectionViewModel.cs" Link="Core/ViewModels/ModInspectionViewModel.cs" />
+    <Compile Include="../McServerManager/Utilities/ObservableObject.cs" Link="Core/Utilities/ObservableObject.cs" />
+    <None Update="Fixtures/**/*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

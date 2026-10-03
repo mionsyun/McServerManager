@@ -23,7 +23,9 @@ public sealed class ViewModelSmokeTests
             new StubBedrockServerService(),
             bedrockProperties,
             new PortForwardingService(new StubUpnpService(), bedrockProperties),
-            new StubJavaRuntimeInstaller());
+            new StubJavaRuntimeInstaller(),
+            new McServerManager.Services.Templates.TemplateManifestService(),
+            new StubModInspectionService());
 
         Assert.NotNull(vm.Servers);
         Assert.NotNull(vm.Tutorial);
