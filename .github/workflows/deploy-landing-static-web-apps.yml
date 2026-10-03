@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - develop
-      # Temporary release-preview trigger; remove before merging.
-      - codex/maipilot-conversion-20261003
     paths:
       - "McServerManager/landing/**"
       - ".github/workflows/deploy-landing-static-web-apps.yml"

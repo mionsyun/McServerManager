@@ -32,7 +32,7 @@ async function setup(browser, { locale='ja-JP', width=1440, mobile=false, hostna
     Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => {
       if (clipboard === 'deny') throw new DOMException('Denied', 'NotAllowedError'); window.__copied.push(text);
     } } });
-    Object.defineProperty(navigator, 'share', { configurable: true, value: async data => {
+    Object.defineProperty(navigator, 'share', { configurable: true, writable: true, value: async data => {
       if (share === 'cancel') throw new DOMException('Cancelled', 'AbortError');
       if (share === 'fail') throw new Error('Unavailable'); window.__shares.push(data);
     } });
@@ -82,8 +82,9 @@ test('mobile CTA hands off to PC; confirmed copy/share and cancellation are dist
   expect(await events(page, 'pc_link_copy')).toHaveLength(1);
   await page.getByRole('button', { name: 'リンクを共有', exact: true }).click();
   expect(await events(page, 'pc_link_share')).toHaveLength(1);
-  await page.evaluate(() => { navigator.share = async () => { throw new DOMException('Cancelled','AbortError'); }; });
+  await page.evaluate(() => { navigator.share = async () => { window.__shareCancelled = true; throw new DOMException('Cancelled','AbortError'); }; });
   await page.getByRole('button', { name: 'リンクを共有', exact: true }).click();
+  expect(await page.evaluate(() => window.__shareCancelled)).toBe(true);
   expect(await events(page, 'pc_link_share')).toHaveLength(1);
   await assertNoOverflow(page); expect(errors).toEqual([]); expect(missing).toEqual([]);
   await page.evaluate(() => window.scrollTo(0,0)); await page.screenshot({ path: path.join(screenshotRoot,'ja-mobile.png') });

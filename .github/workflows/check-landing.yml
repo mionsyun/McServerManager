@@ -37,4 +37,4 @@ jobs:
           name: landing-browser-evidence
           path: McServerManager/landing/test-results
           if-no-files-found: ignore
-          retention-days: 7
+          retention-days: 1
