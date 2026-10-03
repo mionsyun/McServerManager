@@ -2,7 +2,8 @@
 
 Historical first-stage boundary. The later live inspection panel is documented
 in [live-mod-inspection.md](live-mod-inspection.md); template application remains
-disabled.
+disabled. The separate synthetic-only [transaction core](transaction-core-milestone.md)
+exercises staged publication and recovery without enabling production apply.
 
 ## Delivered boundary
 

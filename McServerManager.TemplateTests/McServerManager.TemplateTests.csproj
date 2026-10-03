@@ -14,6 +14,8 @@
     <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="../McServerManager/Models/Transactions/**/*.cs" Link="Core/Models/Transactions/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Transactions/**/*.cs" Link="Core/Services/Transactions/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="../McServerManager/Models/Fabric/**/*.cs" Link="Core/Models/Fabric/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="../McServerManager/Services/Fabric/**/*.cs" Link="Core/Services/Fabric/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="../McServerManager/Models/Modrinth/**/*.cs" Link="Core/Models/Modrinth/%(RecursiveDir)%(Filename)%(Extension)" />
