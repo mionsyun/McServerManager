@@ -117,25 +117,7 @@
         font-size: 12px;
       }
     </style>
-      <!-- Google tag (gtag.js)。localhost などローカル環境からのアクセスは計測しない -->
-      <script>
-        (function () {
-          var id = 'G-MM106D2B2Z';
-          var host = location.hostname;
-          if (!host || host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host === '::1' || /\.localhost$/.test(host)) {
-            window['ga-disable-' + id] = true;
-            return;
-          }
-          var s = document.createElement('script');
-          s.async = true;
-          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
-          document.head.appendChild(s);
-          window.dataLayer = window.dataLayer || [];
-          window.gtag = function () { window.dataLayer.push(arguments); };
-          window.gtag('js', new Date());
-          window.gtag('config', id);
-        })();
-      </script>
+
     <meta name="description" content="※ BuildTools は Git/SpigotMC などへ追加アクセスが発生する場合があります。" />
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="https://www.maipilot.jp/docs/privacy-and-network/" />
@@ -149,7 +131,7 @@
     <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
     <meta property="og:image:alt" content="MaiPilot icon" />
     <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
-                <script type="application/ld+json" data-seo="breadcrumb">
+                          <script type="application/ld+json" data-seo="breadcrumb">
 {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -175,6 +157,7 @@
   ]
 }
   </script>
+    <script defer src="/analytics.js" data-measurement-id="G-MM106D2B2Z"></script>
   </head>
   <body>
     <div class="wrap">
@@ -202,7 +185,7 @@
       </header>
 
       <section class="card" data-lang-block="ja">
-        <h2>外部通信先一覧</h2>
+        <h2>外部通信先の例</h2>
         <ul>
           <li>launchermeta.mojang.com: Minecraft バージョン取得</li>
           <li>api.papermc.io: Paper バージョン/ダウンロード</li>
@@ -214,10 +197,11 @@
           <li>api.ipify.org: 公開 IP 取得</li>
         </ul>
         <p class="muted">※ BuildTools は Git/SpigotMC などへ追加アクセスが発生する場合があります。</p>
+        <p class="muted">これは代表例です。利用する機能に応じて、Javaの配布元、統合版BDSやMaiPilot更新の配布先、任意のリソースパック配布用Cloudflareなどにも通信します。</p>
       </section>
 
       <section class="card" data-lang-block="en">
-        <h2>Network endpoints</h2>
+        <h2>Example network endpoints</h2>
         <ul>
           <li>launchermeta.mojang.com: Minecraft version manifest</li>
           <li>api.papermc.io: Paper versions/downloads</li>
@@ -229,24 +213,23 @@
           <li>api.ipify.org: Public IP lookup</li>
         </ul>
         <p class="muted">BuildTools may access Git/SpigotMC sources for builds.</p>
+        <p class="muted">These are examples. Depending on the features used, the app also contacts Java distributors, BDS and MaiPilot update download services, and Cloudflare for optional resource-pack distribution.</p>
       </section>
 
       <section class="card" data-lang-block="ja">
         <h2>管理者権限が必要な操作</h2>
         <ul>
           <li>Firewall 受信ルールの作成/削除/再作成</li>
-          <li>UPnP によるポート開放/閉鎖</li>
         </ul>
-        <p class="muted">実行前に説明を表示し、UACで昇格します。</p>
+        <p class="muted">Firewallルールを変更する際は、説明を確認してUACの昇格を許可する必要があります。UPnPはWindowsの管理者権限ではなく、対応ルーターの設定・許可や回線条件に依存します。</p>
       </section>
 
       <section class="card" data-lang-block="en">
         <h2>Operations requiring admin rights</h2>
         <ul>
           <li>Create/delete firewall inbound rules</li>
-          <li>UPnP port open/close</li>
         </ul>
-        <p class="muted">We show a reason before requesting UAC elevation.</p>
+        <p class="muted">Firewall-rule changes request UAC elevation with an explanation. UPnP depends on router support, settings and network conditions rather than Windows administrator elevation.</p>
       </section>
 
       <section class="card" data-lang-block="ja">
@@ -278,6 +261,7 @@
       const storageKey = "mcsm-docs-lang";
 
       const applyLang = (lang) => {
+        document.documentElement.lang = lang === "en" ? "en" : "ja";
         blocks.forEach((block) => {
           const blockLang = block.getAttribute("data-lang-block");
           const display = block.getAttribute("data-lang-display") || "block";
@@ -290,57 +274,6 @@
           localStorage.setItem(storageKey, lang);
         } catch (error) {
           // ignore
-        }
-      };
-
-      const trackEvent = ({ event_name, link_url, link_text, source }) => {
-        const win = window;
-        if (typeof win.gtag === "function") {
-          win.gtag("event", event_name, {
-            event_category: source || "cta",
-            event_label: link_text || link_url || "",
-            link_url: link_url,
-          });
-          return;
-        }
-        if (Array.isArray(win.dataLayer)) {
-          win.dataLayer.push({
-            event: event_name,
-            link_url: link_url,
-            link_text: link_text,
-            source: source || "cta",
-          });
-        }
-      };
-
-      const handleTrackedClick = (event) => {
-        const target = event.target;
-        if (!target || !target.closest) {
-          return;
-        }
-        const link = target.closest("a");
-        if (!link) {
-          return;
-        }
-        const eventName = link.getAttribute("data-event");
-        const href = link.getAttribute("href") || "";
-        const text = link.textContent ? link.textContent.trim() : "";
-        if (eventName) {
-          trackEvent({
-            event_name: eventName,
-            link_url: href,
-            link_text: text,
-            source: "cta",
-          });
-        }
-        const rel = (link.getAttribute("rel") || "").toLowerCase();
-        if (rel.includes("sponsored") && eventName !== "outbound_affiliate_click") {
-          trackEvent({
-            event_name: "outbound_affiliate_click",
-            link_url: href,
-            link_text: text,
-            source: "affiliate",
-          });
         }
       };
 
@@ -359,8 +292,6 @@
       buttons.forEach((button) => {
         button.addEventListener("click", () => applyLang(button.getAttribute("data-lang")));
       });
-
-      document.addEventListener("click", handleTrackedClick, { passive: true });
     </script>
   </body>
 </html>

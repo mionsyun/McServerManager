@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>マイクラサーバーの推奨スペック（RAM・CPU目安） | MaiPilot</title>
-    <meta name="description" content="マイクラサーバーに必要なRAM・CPU・ストレージのスペックをプレイ人数別に解説。Xms/Xmxのヒープサイズ設定目安と、スペック不足のサインまで初心者向けにまとめ。" />
+    <title>マイクラサーバーの必要スペック｜メモリは何GB？ CPU・容量の確認 | MaiPilot</title>
+    <meta name="description" content="マイクラサーバーのメモリは何GB必要？ 人数だけで決めず、Java版のXms/Xmx、Windows全体のRAM、CPU・容量を確認する手順と、MaiPilotでの設定・監視方法を解説。" />
     <meta name="keywords" content="マイクラサーバー スペック, マイクラサーバー RAM 何GB, マインクラフト サーバー 必要スペック, マイクラ サーバー メモリ, マイクラサーバー CPU" />
     <meta name="author" content="MaiPilot" />
     <style>
@@ -44,29 +44,12 @@
       .nav-links a:hover{color:var(--text);}
       .nav-cta{background:rgba(102,255,136,.12);color:var(--accent)!important;border:1px solid rgba(102,255,136,.35);border-radius:8px;padding:5px 12px;font-weight:700;}
     </style>
-    <!-- Google tag (gtag.js)。localhost などローカル環境からのアクセスは計測しない -->
-    <script>
-      (function () {
-        var id = 'G-MM106D2B2Z';
-        var host = location.hostname;
-        if (!host || host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host === '::1' || /\.localhost$/.test(host)) {
-          window['ga-disable-' + id] = true;
-          return;
-        }
-        var s = document.createElement('script');
-        s.async = true;
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
-        document.head.appendChild(s);
-        window.dataLayer = window.dataLayer || [];
-        window.gtag = function () { window.dataLayer.push(arguments); };
-        window.gtag('js', new Date());
-        window.gtag('config', id);
-      })();
-    </script>
+    <link rel="stylesheet" href="/guide-enhancements.css" />
+
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="https://www.maipilot.jp/docs/growth/minecraft-server-recommended-specs/" />
-    <meta property="og:title" content="マイクラサーバーの推奨スペック（RAM・CPU目安） | MaiPilot" />
-    <meta property="og:description" content="マイクラサーバーに必要なRAM・CPU・ストレージのスペックをプレイ人数別に解説。Xms/Xmxのヒープサイズ設定目安と、スペック不足のサインまで初心者向けにまとめ。" />
+    <meta property="og:title" content="マイクラサーバーの必要スペック｜メモリは何GB？ CPU・容量の確認 | MaiPilot" />
+    <meta property="og:description" content="マイクラサーバーのメモリは何GB必要？ 人数だけで決めず、Java版のXms/Xmx、Windows全体のRAM、CPU・容量を確認する手順と、MaiPilotでの設定・監視方法を解説。" />
     <meta property="og:type" content="article" />
     <meta property="og:url" content="https://www.maipilot.jp/docs/growth/minecraft-server-recommended-specs/" />
     <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
@@ -74,12 +57,12 @@
     <meta property="og:site_name" content="MaiPilot" />
     <meta property="og:locale" content="ja_JP" />
     <meta property="article:published_time" content="2026-03-08T00:00:00+09:00" />
-    <meta property="article:modified_time" content="2026-03-08T00:00:00+09:00" />
+    <meta property="article:modified_time" content="2026-10-03T00:00:00+09:00" />
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="マイクラサーバーの推奨スペック（RAM・CPU目安） | MaiPilot" />
-    <meta name="twitter:description" content="マイクラサーバーに必要なRAM・CPU・ストレージのスペックをプレイ人数別に解説。Xms/Xmxのヒープサイズ設定目安と、スペック不足のサインまで初心者向けにまとめ。" />
+    <meta name="twitter:title" content="マイクラサーバーの必要スペック｜メモリは何GB？ CPU・容量の確認 | MaiPilot" />
+    <meta name="twitter:description" content="マイクラサーバーのメモリは何GB必要？ 人数だけで決めず、Java版のXms/Xmx、Windows全体のRAM、CPU・容量を確認する手順と、MaiPilotでの設定・監視方法を解説。" />
     <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
-          <script type="application/ld+json" data-seo="breadcrumb">
+                              <script type="application/ld+json" data-seo="breadcrumb">
 {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -105,229 +88,148 @@
     {
       "@type": "ListItem",
       "position": 4,
-      "name": "マイクラサーバーの推奨スペック（RAM・CPU目安）",
+      "name": "マイクラサーバーの必要スペック｜メモリは何GB？ CPU・容量の確認",
       "item": "https://www.maipilot.jp/docs/growth/minecraft-server-recommended-specs/"
     }
   ]
 }
   </script>
-          <script type="application/ld+json" data-seo="faq">
+                              <script type="application/ld+json" data-seo="faq">
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "マイクラサーバーのRAMは何GB必要ですか？",
+      "name": "マイクラサーバーのメモリは何GB必要ですか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "バニラ・少人数（1〜5人）なら2〜4GBで動作します。Paperサーバーにプラグインを入れる場合や5〜10人規模なら4〜8GBを目安にしてください。20人以上の公開サーバーは8GB以上推奨です。"
+        "text": "人数だけでは決まりません。エディション、バージョン、MOD等の配布元要件と実際の使い方を確認します。Java版のXmxだけでなく、Windows、ゲーム本体、ヒープ以外のメモリにも余裕を残し、同じ条件で試して判断してください。"
       }
     },
     {
       "@type": "Question",
-      "name": "Xms（最小ヒープ）はXmxと同じ値にすべきですか？",
+      "name": "XmsとXmxは同じ値にすべきですか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Paperの推奨（Aikarフラグ）ではXms=Xmxに揃えることが多いです。こうするとJVMがヒープサイズを動的に変えないため、GCの頻度が安定します。ただしシステムRAMの合計を超えないよう注意してください。"
+        "text": "サーバー実装やJVM、運用方針に従います。一律に同じ値にすることや、搭載RAMすべてを割り当てることは勧めません。XmxはJavaプロセス全体のメモリ上限ではなく、統合版BDSにはこの設定はありません。"
       }
     },
     {
       "@type": "Question",
-      "name": "CPUコア数は何コアあれば十分ですか？",
+      "name": "MaiPilotのRAM表示はJavaヒープの使用量ですか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Minecraftサーバーはメインループがシングルスレッドのため、コア数よりもシングルコア性能が重要です。4コア以上のCPUを推奨しますが、クロック周波数（3GHz以上）を優先して選ぶと快適に動作します。"
+        "text": "稼働中のRAM表示はサーバープロセスのワーキングセットを基にしています。Javaヒープの使用量そのものや、Windows全体の空きメモリではありません。アプリの表示とWindows側の状況を分けて確認してください。"
       }
     },
     {
       "@type": "Question",
-      "name": "ストレージはSSDとHDDどちらがよいですか？",
+      "name": "CPUコア数やGHzだけで必要スペックが分かりますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "SSD（またはNVMe）を強く推奨します。マイクラサーバーはワールドデータの読み書きが頻繁なため、HDDではチャンク読み込みが遅くなりラグの原因になります。"
+        "text": "それだけでは決まりません。サーバーの構成と処理、ワールド、同時に動かすアプリ等の影響を受けます。予定する使い方で負荷とログを確認し、RAM・CPU・ディスク・回線を切り分けてください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "スマホからMaiPilotを使えますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "MaiPilotを動かすにはWindows 10/11のPCが必要です。スマホで記事を読んでいる方は、公式ページのPC用リンクをコピー・共有して、Windows PCで続きを開いてください。"
       }
     }
   ]
 }
   </script>
+    <script defer src="/analytics.js" data-measurement-id="G-MM106D2B2Z"></script>
   </head>
   <body>
-    <nav class="site-nav">
-      <a class="nav-brand" href="/">MaiPilot</a>
-      <div class="nav-links">
-        <a href="/">ホーム</a>
-        <a href="/docs/growth/">ガイド</a>
-        <a href="/?from=docs_nav_specs#download" class="nav-cta" data-event="nav_download_click" data-source="specs_article">ダウンロード</a>
-      </div>
-    </nav>
+    <nav class="site-nav" aria-label="サイトナビゲーション"><a class="nav-brand" href="/">MaiPilot</a><div class="nav-links"><a href="/">ホーム</a><a href="/docs/growth/">ガイド</a><a href="/#download" class="nav-cta" data-event="docs_to_download" data-cta-location="docs_nav">無料Windows版</a></div></nav>
     <main class="wrap">
       <section class="card hero">
         <a href="/docs/growth/">← ガイド一覧へ</a>
-        <h1>マイクラサーバーの推奨スペック（RAM・CPU目安）</h1>
-        <p class="muted">プレイ人数・サーバー種別ごとに必要なスペックを整理。スペック不足で起きるラグを事前に防ぐための目安ガイドです。</p>
-        <div class="chips">
-          <span class="chip">想定読了: 5分</span>
-          <span class="chip">対象: Windows / VPS</span>
-          <span class="chip">目的: スペック選定</span>
+        <h1>マイクラサーバーの必要スペック<br>メモリは何GB？ CPU・容量の確認手順</h1>
+        <p class="muted">Windowsでサーバーを動かす前に、Minecraftの構成とPC全体の余裕を確認。人数だけの保証値ではなく、RAMの割り当て方と実際の負荷から判断します。</p>
+        <div class="quick-answer" aria-labelledby="quick-answer-title">
+          <h2 id="quick-answer-title">先に答え：人数だけで「必要RAM」は決まりません</h2>
+          <ul><li><strong>Java版か統合版か</strong>と、サーバーのバージョン・MOD等の配布元要件を確認</li><li><strong>PC全体のRAMとJavaのXmxは別</strong>。Windows、ゲーム本体、Javaのヒープ以外にも余裕を残す</li><li>普段使うワールド・設定・参加条件で試し、<strong>CPU・RAM・ディスク・回線を切り分ける</strong></li></ul>
+          <p class="muted">MaiPilotはWindows 10/11用の管理アプリです。Java版のXms/Xmxを設定し、稼働中のCPU/RAMを確認できますが、性能不足を自動で解消したり、参加人数を保証したりするものではありません。</p>
         </div>
-        <div class="notice">※この記事には広告・PRリンクを含みます。</div>
+        <div class="guide-actions"><a class="cta-btn" href="#maipilot-memory">MaiPilotで設定・確認する</a><a class="guide-secondary" href="#memory-budget">RAMの確認手順へ</a></div>
+        <p class="guide-mobile"><a href="/#pc-handoff" data-event="docs_to_download" data-cta-location="docs_cta">スマホで見ている方：Windows PC用リンクのコピー・共有へ</a></p>
+        <p class="guide-note">この記事には既存の広告・PRリンクを含みます。</p>
       </section>
 
-      <section class="card">
-        <h2>先に結論</h2>
-        <ul>
-          <li>少人数（1〜5人）のバニラなら RAM 2〜4GB・SSD・4コアCPUで十分。</li>
-          <li>Paperにプラグインを入れる場合は RAM 4GB を最低ラインとして見ておく。</li>
-          <li>CPUはコア数より「シングルコア性能（クロック周波数）」を優先する。</li>
-          <li>ストレージは必ずSSDを使う。HDDではチャンク読み込みでラグが発生する。</li>
-        </ul>
+      <nav class="card guide-toc" aria-label="この記事の目次"><a href="#memory-budget">RAMを決める</a><a href="#xms-xmx">Xms/Xmxとは</a><a href="#maipilot-memory">アプリで設定</a><a href="#bottlenecks">不足の切り分け</a><a href="#spec-faq">FAQ</a></nav>
+
+      <section class="card" id="memory-budget">
+        <h2>必要なメモリを決める3つの確認</h2>
+        <ol><li><strong>構成を先に決めます。</strong>Java版／統合版、バージョン、MOD・プラグイン、ワールド、描画・シミュレーション距離などを整理。配布元に要件がある場合は優先します。</li><li><strong>WindowsのタスクマネージャーでPC全体を確認します。</strong>ゲーム本体や普段のアプリも使うなら、その状態でメモリの使用状況と空き容量を見ます。搭載RAMすべてをサーバーに割り当てないでください。</li><li><strong>予定する使い方で試し、足りない部分を確認します。</strong>参加者、移動や新しい地形の生成、MODの処理が変わると負荷も変わります。アイドル時の値だけでは判断できません。</li></ol>
+        <div class="table-wrap" role="region" aria-labelledby="scenario-table-title" tabindex="0">
+          <table><caption id="scenario-table-title">構成ごとに確認するポイント（人数・RAMの保証表ではありません）</caption><thead><tr><th scope="col">使い方</th><th scope="col">確認すること</th><th scope="col">避けたい判断</th></tr></thead><tbody>
+            <tr><th scope="row">同じPCでゲームも遊ぶ</th><td>Windows・クライアント・サーバーを合わせたメモリ使用量</td><td>搭載RAM＝Xmxとして割り当てる</td></tr>
+            <tr><th scope="row">MOD・プラグインを追加する</th><td>配布元の要件、実際の処理負荷、互換バージョン</td><td>追加本数だけでRAMや人数を決める</td></tr>
+            <tr><th scope="row">新しい地形を探索する</th><td>探索時のCPU・RAM・ディスク負荷とログ</td><td>起動直後だけを見て十分と判断する</td></tr>
+            <tr><th scope="row">統合版（BDS）を使う</th><td>BDSの要件とプロセスの使用量</td><td>Java用のXms/Xmxを設定しようとする</td></tr>
+          </tbody></table>
+        </div>
       </section>
 
-      <section class="card">
-        <h2>プレイ人数別 RAM 目安</h2>
-        <table>
-          <tr><th>同時接続人数</th><th>推奨RAM（ヒープ割り当て）</th><th>備考</th></tr>
-          <tr><td>1〜5人</td><td>2〜4 GB</td><td>バニラ・軽量プラグイン構成</td></tr>
-          <tr><td>5〜10人</td><td>4〜6 GB</td><td>Paperにプラグイン10本前後まで</td></tr>
-          <tr><td>10〜20人</td><td>6〜10 GB</td><td>大規模プラグイン・ワールド生成が多い場合</td></tr>
-          <tr><td>20〜50人</td><td>10〜16 GB</td><td>公開サーバー・複数ワールド運用</td></tr>
-          <tr><td>50人以上</td><td>16 GB 以上</td><td>VPS/専用サーバー推奨</td></tr>
-        </table>
-        <p class="muted" style="margin-top:10px;font-size:13px;">※上記はJavaヒープ（Xmx）の目安です。OS・JVM自体のメモリを含めると実機 RAM はヒープより 1〜2GB 多く必要です。</p>
+      <section class="card" id="xms-xmx">
+        <h2>Xms・Xmxと、PCの搭載RAMの違い</h2>
+        <p class="muted"><code>Xms</code>はJavaヒープの初期サイズ、<code>Xmx</code>は最大サイズです。Javaプロセス全体が使うメモリの上限ではなく、Windowsや他のアプリに必要なRAMも含みません。統合版BDSにはJavaヒープ設定はありません。</p>
+        <p class="muted"><a href="https://docs.papermc.io/paper/getting-started/" target="_blank" rel="noopener noreferrer">Paper公式の起動例</a>には<code>-Xms4G -Xmx4G</code>という指定があります。これは設定方法の例であり、「4GBなら何人でも遊べる」「MaiPilotの必須スペック」という意味ではありません。</p>
+        <p class="muted">XmsとXmxを同じにするかは、サーバー実装・JVM・運用環境の方針に従います。一律に揃えることやRAMの増量だけで、すべてのラグが直るわけではありません。Paperの<a href="https://docs.papermc.io/misc/tools/start-script-gen/" target="_blank" rel="noopener noreferrer">起動スクリプト案内</a>は、現代のJVMでは追加フラグなしから試す方針も示しています。</p>
+        <p class="muted">詳しい設定項目は<a href="/docs/growth/minecraft-server-memory-settings/">メモリ設定ガイド</a>、Javaの準備は<a href="/docs/java-setup/">Javaセットアップガイド</a>をご覧ください。サーバー実装・バージョンの公式要件を優先してください。</p>
       </section>
 
-      <section class="card">
-        <h2>Xms / Xmx の設定目安</h2>
-        <p class="muted">Javaの起動オプション <code>-Xms</code>（最小ヒープ）と <code>-Xmx</code>（最大ヒープ）は、サーバー専用機では同じ値に揃えると安定します。</p>
+      <section class="card" id="maipilot-memory">
+        <h2>MaiPilotでメモリを設定し、稼働中の負荷を見る</h2>
+        <ol><li><strong>対象のJavaサーバーを選び、現在の設定を控えます。</strong>ワールドのバックアップも残し、変更前後を比較できるようにします。</li><li><strong>「サーバー設定」→「起動安定化・パフォーマンス」を開きます。</strong><code>Xms (MB)</code>と<code>Xmx (MB)</code>を確認・変更します。表示単位はMBです。</li><li><strong>「設定を保存」を押し、サーバーを再起動します。</strong>起動中のJavaに新しいヒープ設定がその場で適用されるわけではありません。</li><li><strong>「概要」でCPU・RAMを見て、コンソールのログと照らします。</strong>MaiPilotのRAM表示はサーバープロセスのワーキングセットを基にした値です。Javaヒープの使用量そのものや、PC全体の空きRAMとは区別してください。</li><li><strong>同じ条件で再確認します。</strong>設定を一度にいくつも変えず、症状と使用状況を記録します。PC全体の状況はWindows側でも確認してください。</li></ol>
+        <div class="guide-actions"><a class="cta-btn" href="/#download" data-event="docs_to_download" data-cta-location="docs_cta">無料Windows版のダウンロード案内へ</a><a class="guide-secondary" href="/#pc-handoff" data-event="docs_to_download" data-cta-location="docs_cta">スマホからPCへ引き継ぐ</a></div>
+        <p class="guide-note">個人・非商用利用は無料。Java版とBDSの管理に対応しますが、Xms/XmxはJava版向けの設定です。MaiPilot自体をLinuxのVPSへインストールする手順ではありません。</p>
+      </section>
+
+      <section class="card" id="bottlenecks">
+        <h2>CPU・ストレージ・回線のどこが足りないかを分ける</h2>
         <div class="grid">
-          <div class="mini">
-            <h3>4GB マシン例</h3>
-            <p class="muted"><code>-Xms2G -Xmx2G</code></p>
-            <p class="muted">OSに2GBを残し、2GBをサーバーに割り当て。</p>
-          </div>
-          <div class="mini">
-            <h3>8GB マシン例</h3>
-            <p class="muted"><code>-Xms4G -Xmx4G</code></p>
-            <p class="muted">プラグイン10〜20本程度の中規模構成に。</p>
-          </div>
-          <div class="mini">
-            <h3>16GB マシン例</h3>
-            <p class="muted"><code>-Xms8G -Xmx10G</code></p>
-            <p class="muted">大規模プラグイン・MODサーバー向け。</p>
-          </div>
+          <div class="mini"><h3>メモリ</h3><p class="muted">メモリ不足に関するエラーやプロセス終了があれば、Javaの割り当てとPC／ホスト側の上限を確認します。使用量の数字だけで原因を確定しません。</p></div>
+          <div class="mini"><h3>CPU・サーバー処理</h3><p class="muted">負荷の高い処理や地形生成時の変化を確認。コア数やGHzの数字だけで性能・参加人数を保証できません。</p></div>
+          <div class="mini"><h3>ストレージ</h3><p class="muted">ワールド・バックアップ用の空き容量と読み書きの負荷を確認。SSDも選択肢ですが、移動時の引っ掛かりだけでディスクが原因と断定しません。</p></div>
+          <div class="mini"><h3>ネットワーク</h3><p class="muted">接続できない問題は、回線やルーター設定の確認も必要です。<a href="/docs/port-forwarding/">公開設定ガイド</a>を参照し、RAM不足と混同しないでください。</p></div>
         </div>
-        <p class="muted" style="margin-top:12px;font-size:13px;">Paperを使う場合は <a href="/docs/growth/minecraft-server-lag-fix/">Aikarフラグ</a> と組み合わせるとGCによるラグを大幅に軽減できます。</p>
+        <p class="muted"><code>Can't keep up!</code>や一時停止は調査の手掛かりです。原因や改善を保証する表示ではありません。Paperでは<a href="https://docs.papermc.io/paper/basic-troubleshooting/" target="_blank" rel="noopener noreferrer">公式トラブルシューティング</a>も確認してください。</p>
       </section>
 
       <section class="card">
-        <h2>CPU・ストレージ選びのポイント</h2>
-        <ul>
-          <li><strong>CPU</strong>: Minecraftサーバーはメインループがシングルスレッドのためシングルコア性能が最重要。3GHz以上のクロック周波数を目安に選ぶ。</li>
-          <li><strong>コア数</strong>: 4コア以上があると、GCスレッドや非同期処理が余裕をもって動く。</li>
-          <li><strong>ストレージ</strong>: SSD（SATA SSD以上）必須。NVMe SSDならさらに快適。HDDはチャンク生成・ワールド保存が遅くラグの原因になる。</li>
-          <li><strong>ネットワーク帯域</strong>: 1人あたり約100〜200Kbps。10人なら最低 2〜3Mbps の上り帯域が必要。</li>
-        </ul>
+        <h2>自宅PCかVPSかを選ぶとき</h2>
+        <p class="muted">24時間PCを起動できない場合はホスティングも候補になります。CPU・メモリ制限・ストレージ・バックアップ・料金と、自分の構成での動作条件を比較してください。「人数に対してこのプランなら必ず足りる」とは断定できません。</p>
+        <p><a href="/docs/24-7-hosting/" data-event="docs_24_7_hosting_click" data-cta-location="docs_body">既存の24時間運用・VPS比較を見る（PR）</a></p>
       </section>
 
-      <section class="card">
-        <h2>スペック不足のサイン</h2>
-        <ul>
-          <li>TPS（Ticks Per Second）が 20 を下回り、ゲーム全体がスロー再生のようになる。</li>
-          <li>新しいチャンクに移動するたびにフリーズ感がある（ストレージ不足）。</li>
-          <li>コンソールに <code>Can't keep up!</code> が頻繁に表示される。</li>
-          <li>GCログに長い停止（Stop-the-world）が繰り返される。</li>
-        </ul>
-      </section>
-
-      <section class="card">
-        <h2>VPS選びの目安</h2>
-        <p class="muted">自宅PCで運用が難しい場合や24時間稼働を想定する場合はVPSが便利です。</p>
-        <ul>
-          <li>5〜10人規模: 2vCPU / 4GB RAM プランから</li>
-          <li>10〜20人規模: 4vCPU / 8GB RAM プランを推奨</li>
-        </ul>
-        <ul style="margin-top:10px;">
-          <li><a href="/docs/24-7-hosting/" data-event="docs_24_7_hosting_click" data-source="growth_specs" data-label="vps_comparison">VPSプラン比較を見る（PR）</a></li>
-        </ul>
-      </section>
-
-      <section class="card">
-        <h2>次のアクション</h2>
-        <p class="muted">スペックが固まったら、セットアップを進めるかVPS比較を確認しましょう。</p>
-        <div class="banner-grid">
-          <article class="banner-card">
-            <span class="banner-pill">公式ホームページ</span>
-            <p class="muted">MaiPilotならサーバー種別の選択からメモリ設定まで自動化できます。</p>
-            <a class="banner-link" href="/?from=growth_specs_home_banner" data-event="growth_home_banner_click" data-source="growth_specs" data-label="home_banner">ホームページを見る →</a>
-          </article>
-          <article class="banner-card lp">
-            <span class="banner-pill pr">PR</span>
-            <p class="muted">自宅スペックが足りない場合はVPS比較から始めるのがおすすめです。</p>
-            <a class="banner-link" href="/docs/24-7-hosting/?from=growth_specs_lp_banner" data-event="growth_lp_banner_click" data-source="growth_specs" data-label="lp_banner">24時間運用VPS比較を見る（PR） →</a>
-          </article>
-        </div>
-      </section>
-
-      <section class="card">
+      <section class="card" id="spec-faq">
         <h2>よくある質問</h2>
         <dl class="faq-list">
-          <dt data-faq-question>マイクラサーバーのRAMは何GB必要ですか？</dt>
-          <dd data-faq-answer>バニラ・少人数（1〜5人）なら2〜4GBで動作します。Paperサーバーにプラグインを入れる場合や5〜10人規模なら4〜8GBを目安にしてください。20人以上の公開サーバーは8GB以上推奨です。</dd>
-          <dt data-faq-question>Xms（最小ヒープ）はXmxと同じ値にすべきですか？</dt>
-          <dd data-faq-answer>Paperの推奨（Aikarフラグ）ではXms=Xmxに揃えることが多いです。こうするとJVMがヒープサイズを動的に変えないため、GCの頻度が安定します。ただしシステムRAMの合計を超えないよう注意してください。</dd>
-          <dt data-faq-question>CPUコア数は何コアあれば十分ですか？</dt>
-          <dd data-faq-answer>Minecraftサーバーはメインループがシングルスレッドのため、コア数よりもシングルコア性能が重要です。4コア以上のCPUを推奨しますが、クロック周波数（3GHz以上）を優先して選ぶと快適に動作します。</dd>
-          <dt data-faq-question>ストレージはSSDとHDDどちらがよいですか？</dt>
-          <dd data-faq-answer>SSD（またはNVMe）を強く推奨します。マイクラサーバーはワールドデータの読み書きが頻繁なため、HDDではチャンク読み込みが遅くなりラグの原因になります。</dd>
+          <dt data-faq-question>マイクラサーバーのメモリは何GB必要ですか？</dt>
+          <dd data-faq-answer>人数だけでは決まりません。エディション、バージョン、MOD等の配布元要件と実際の使い方を確認します。Java版のXmxだけでなく、Windows、ゲーム本体、ヒープ以外のメモリにも余裕を残し、同じ条件で試して判断してください。</dd>
+          <dt data-faq-question>XmsとXmxは同じ値にすべきですか？</dt>
+          <dd data-faq-answer>サーバー実装やJVM、運用方針に従います。一律に同じ値にすることや、搭載RAMすべてを割り当てることは勧めません。XmxはJavaプロセス全体のメモリ上限ではなく、統合版BDSにはこの設定はありません。</dd>
+          <dt data-faq-question>MaiPilotのRAM表示はJavaヒープの使用量ですか？</dt>
+          <dd data-faq-answer>稼働中のRAM表示はサーバープロセスのワーキングセットを基にしています。Javaヒープの使用量そのものや、Windows全体の空きメモリではありません。アプリの表示とWindows側の状況を分けて確認してください。</dd>
+          <dt data-faq-question>CPUコア数やGHzだけで必要スペックが分かりますか？</dt>
+          <dd data-faq-answer>それだけでは決まりません。サーバーの構成と処理、ワールド、同時に動かすアプリ等の影響を受けます。予定する使い方で負荷とログを確認し、RAM・CPU・ディスク・回線を切り分けてください。</dd>
+          <dt data-faq-question>スマホからMaiPilotを使えますか？</dt>
+          <dd data-faq-answer>MaiPilotを動かすにはWindows 10/11のPCが必要です。スマホで記事を読んでいる方は、公式ページのPC用リンクをコピー・共有して、Windows PCで続きを開いてください。</dd>
         </dl>
       </section>
 
-      <section class="card cta">
-        <h2>MaiPilotならスペック管理も簡単</h2>
-        <ul>
-          <li>起動時のメモリ（Xms/Xmx）をUIから設定・変更</li>
-          <li>Java互換チェックで起動前に不一致を警告</li>
-          <li>6種のサーバー（Vanilla / Paper / Spigot / Forge / Fabric / Purpur）に対応</li>
-          <li>サーバーモニタリングでリソース使用状況を確認</li>
-        </ul>
-        <p><a href="/?from=growth_specs" data-event="growth_download_click" data-source="growth_specs" data-label="download">MaiPilotをダウンロード</a> / <a href="/docs/growth/minecraft-server-memory-settings/" data-event="growth_docs_click" data-source="growth_specs" data-label="memory_settings">メモリ設定の詳細ガイド</a></p>
-      </section>
-
-      <section class="card">
-        <h2>次に読む</h2>
-        <p class="muted">スペック確認後は立て方の手順を確認するか、ラグ対策も読んでおきましょう。</p>
-        <ul>
-          <li><a href="/docs/growth/windows-minecraft-server-2026/" data-event="growth_article_click" data-source="growth_specs" data-label="next_windows_2026">マイクラサーバーの立て方（Windows/2026年版） →</a></li>
-          <li><a href="/docs/growth/minecraft-server-lag-fix/" data-event="growth_article_click" data-source="growth_specs" data-label="next_lag_fix">サーバーが重い・ラグの対処法 →</a></li>
-        </ul>
-      </section>
+      <section class="card"><h2>次に読む・確認元</h2><ul>
+        <li><a href="/docs/growth/windows-minecraft-server-2026/">Windowsでサーバーを立てる手順</a></li><li><a href="/docs/growth/minecraft-server-memory-settings/">メモリ設定の詳細</a></li><li><a href="/docs/growth/minecraft-server-lag-fix/">重い・ラグがあるときの確認</a></li><li><a href="/docs/growth/backup-restore-guide/">バックアップと復元</a></li>
+        <li><a href="https://github.com/mionsyun/McServerManager/blob/217ca41399f584d83e411cb095b660c9aea94c24/McServerManager/Views/ServerDetailControl.xaml" target="_blank" rel="noopener noreferrer">MaiPilotの設定・監視画面の実装</a></li>
+        <li><a href="https://github.com/mionsyun/McServerManager/blob/217ca41399f584d83e411cb095b660c9aea94c24/McServerManager/ViewModels/ServerViewModel.cs" target="_blank" rel="noopener noreferrer">MaiPilotの設定保存・RAM計測の実装</a></li>
+      </ul><p class="guide-note">内容確認：2026年10月3日。この記事に独自ベンチマークや人数別の動作保証値はありません。</p></section>
     </main>
-    <script>
-      const trackEvent = ({ event_name, link_url, link_text, source }) => {
-        const win = window;
-        if (typeof win.gtag === "function") {
-          win.gtag("event", event_name, { event_category: source || "cta", event_label: link_text || link_url || "", link_url });
-          return;
-        }
-        if (Array.isArray(win.dataLayer)) {
-          win.dataLayer.push({ event: event_name, link_url, link_text, source: source || "cta" });
-        }
-      };
-      document.addEventListener("click", (event) => {
-        const link = event.target.closest?.("a");
-        if (!link) return;
-        const eventName = link.getAttribute("data-event");
-        const href = link.getAttribute("href") || "";
-        const label = link.getAttribute("data-label");
-        const text = label || (link.textContent?.trim() ?? "");
-        const source = link.getAttribute("data-source") || "cta";
-        if (eventName) trackEvent({ event_name: eventName, link_url: href, link_text: text, source });
-        const rel = (link.getAttribute("rel") || "").toLowerCase();
-        if (rel.includes("sponsored") && eventName !== "outbound_affiliate_click") {
-          trackEvent({ event_name: "outbound_affiliate_click", link_url: href, link_text: text, source: "affiliate" });
-        }
-      }, { passive: true });
-    </script>
+    <footer class="guide-footer"><a href="/">MaiPilot</a> · <a href="/docs/">Docs</a> · <a href="/docs/growth/">記事ハブ</a></footer>
   </body>
 </html>

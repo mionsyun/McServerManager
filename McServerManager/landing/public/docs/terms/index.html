@@ -125,25 +125,7 @@
         font-size: 12px;
       }
     </style>
-    <!-- Google tag (gtag.js)。localhost などローカル環境からのアクセスは計測しない -->
-    <script>
-      (function () {
-        var id = 'G-MM106D2B2Z';
-        var host = location.hostname;
-        if (!host || host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host === '::1' || /\.localhost$/.test(host)) {
-          window['ga-disable-' + id] = true;
-          return;
-        }
-        var s = document.createElement('script');
-        s.async = true;
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
-        document.head.appendChild(s);
-        window.dataLayer = window.dataLayer || [];
-        window.gtag = function () { window.dataLayer.push(arguments); };
-        window.gtag('js', new Date());
-        window.gtag('config', id);
-      })();
-    </script>
+
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="https://www.maipilot.jp/docs/terms/" />
     <meta property="og:title" content="MaiPilot | 利用規約" />
@@ -156,7 +138,7 @@
     <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
     <meta property="og:image:alt" content="MaiPilot icon" />
     <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
-                <script type="application/ld+json" data-seo="breadcrumb">
+                          <script type="application/ld+json" data-seo="breadcrumb">
 {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -182,6 +164,7 @@
   ]
 }
   </script>
+    <script defer src="/analytics.js" data-measurement-id="G-MM106D2B2Z"></script>
   </head>
   <body>
     <div class="wrap">
@@ -382,6 +365,7 @@
       const storageKey = "mcsm-docs-lang";
 
       const applyLang = (lang) => {
+        document.documentElement.lang = lang === "en" ? "en" : "ja";
         blocks.forEach((block) => {
           const blockLang = block.getAttribute("data-lang-block");
           const display = block.getAttribute("data-lang-display") || "block";

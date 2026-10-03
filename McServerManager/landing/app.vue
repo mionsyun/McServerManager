@@ -1,8 +1,18 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch, nextTick } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, nextTick } from "vue";
+
+import { screenshots } from "~/data/screenshots";
+
+const featureShots = ["addons", "backups", "worlds"] as const;
 
 const mobileMenuOpen = ref(false);
 const closeMobileMenu = () => { mobileMenuOpen.value = false; };
+const isMobileDevice = ref(false);
+const pcHandoffOpen = ref(false);
+const openPcHandoff = () => { if (isMobileDevice.value) pcHandoffOpen.value = true; };
+const closeMenuOnEscape = (event: KeyboardEvent) => {
+  if (event.key === "Escape") closeMobileMenu();
+};
 
 let revealObserver: IntersectionObserver | null = null;
 
@@ -14,7 +24,7 @@ const docsPortUrl = "/docs/port-forwarding";
 const docsTroubleUrl = "/docs/troubleshooting";
 const docsPrivacyUrl = "/docs/privacy-and-network";
 const docsJavaUrl = "/docs/java-setup/";
-const boothUrl = "https://maipilot.booth.pm";
+const boothUrl = "https://maipilot.booth.pm/items/8118402";
 
 const downloadOptionEvents: Record<string, string> = {
   local: "download_click",
@@ -31,8 +41,7 @@ const faqLinks: Record<string, string> = {
 const translations = {
   en: {
     metaTitle: "MaiPilot | All-in-one Minecraft server manager for Windows",
-    metaDescription:
-      "A Windows GUI for Vanilla, Paper, Forge, Fabric, Spigot & Purpur servers. Manage mods, backups, permissions, and network — all from one interface.",
+    metaDescription: "Manage Minecraft Java and Bedrock servers on Windows. Set up Java, manage compatible mods and plugins, and keep worlds backed up. Free for personal, non-commercial use.",
     siteName: "MaiPilot",
     nav: {
       features: "Features",
@@ -46,176 +55,177 @@ const translations = {
     langJa: "日本語",
     langEn: "English",
     eyebrow: "All-in-one Minecraft server management for Windows",
-    heroTitle: "Every server type. One interface.",
-    heroSub:
-      "Vanilla, Paper, Forge, Fabric, Spigot, Purpur — set up, mod, back up, and monitor from a single window.",
+    heroTitle: "From your first server to everyday play.",
+    heroTitleParts: ["From your first server ", "to everyday play."],
+    heroSub: "Set up and manage Minecraft Java and Bedrock servers from one Windows app.",
     heroNotes: [
-      "Create, run, and manage six server types on Windows with a full-featured GUI.",
-      "Data stays on your PC. Minimal network calls. Admin actions are clearly shown.",
+      "Choose from six Java server types or the official Bedrock Dedicated Server.",
+      "Manage local worlds and backups. Add mods and plugins on supported Java servers."
     ],
     heroAffiliateLabel: "Need always-on hosting?",
     heroAffiliateCta: "See hosting options (PR)",
-    heroCtaPrimary: "Download",
+    heroCtaPrimary: "Download free for Windows",
+    heroMobileCta: "Use on a Windows PC",
+    freeNote: "Official installer · Free for personal, non-commercial use",
+    supportNote: "Optional ¥100 support edition on BOOTH. Same features.",
     heroCtaSecondary: "Read the setup guide",
     heroBoothCta: "Support development (BOOTH)",
     heroMetaVersion: "Version",
     heroMetaWindows: "Windows 10/11",
-    heroMetaRuntime: "Self-contained runtime",
-    cardTitle: "Server Control Deck",
-    cardStatusLabel: "Status",
-    cardStatusValue: "Online",
-    cardPlayersLabel: "Players",
-    cardJavaLabel: "Java",
-    cardCpu: "CPU",
-    cardMemory: "Memory",
-    cardStart: "Start",
-    cardBackup: "Backup",
-    cardMods: "Mods",
-    cardFirewall: "Firewall",
-    featuresTitle: "Everything you need, already built in.",
-    featuresSub: "Six server types, mod management, backups, and more — out of the box.",
+    heroMetaRuntime: ".NET runtime included",
+    featuresTitle: "Build your world. Keep it running.",
+    featuresSub: "Choose the right edition, then manage the tasks that matter to your server.",
     features: [
       {
-        title: "Six server types",
-        body: "Vanilla, Paper, Purpur, Fabric, Forge, and Spigot. Pick one and go.",
+        "title": "Java + Bedrock",
+        "body": "Vanilla, Paper, Purpur, Fabric, Forge and Spigot for Java Edition, plus the official Bedrock Dedicated Server (BDS)."
       },
       {
-        title: "MOD & Plugin manager",
-        body: "Add, enable, disable mods/plugins. Search Modrinth directly in the app.",
+        "title": "Automatic Java setup",
+        "body": "Download and configure a compatible Eclipse Temurin JRE from the app. Bedrock servers do not require Java."
       },
       {
-        title: "Backup, restore & worlds",
-        body: "ZIP backups, one-click restore, world switching, and map archive import.",
+        "title": "Mods and plugins for Java",
+        "body": "Add, enable and disable compatible mods or plugins; search Modrinth in the app. Available for supported Java server types, not Vanilla or BDS."
       },
       {
-        title: "Settings GUI",
-        body: "Edit server.properties, manage OPs and whitelist — no file editing needed.",
+        "title": "Backups and worlds",
+        "body": "Create ZIP backups, restore worlds and schedule backups. Manage your worlds from the sidebar."
       },
       {
-        title: "Network all-in-one",
-        body: "Firewall rules, UPnP, public IP, port check, and a guided checklist.",
+        "title": "Server settings",
+        "body": "Edit settings through a GUI. The available settings and management tools depend on the server edition."
       },
       {
-        title: "Crash recovery & auto-restart",
-        body: "One-click access to logs and crash reports. Optional auto-restart when unattended.",
+        "title": "Connection and sharing",
+        "body": "Check connection information and manage firewall or UPnP settings. External access depends on your router, ISP and server protocol."
       },
       {
-        title: "Live monitoring",
-        body: "CPU, RAM, and player count updated every second in real time.",
+        "title": "Monitoring and recovery",
+        "body": "View server status and logs, inspect crashes, and configure automatic restart."
       },
       {
-        title: "Safe apply flow",
-        body: "Settings are saved instantly but applied after restart to prevent accidents.",
+        "title": "Changes under your control",
+        "body": "Save configuration changes, then restart the server when required to apply them."
       },
       {
-        title: "Resource pack hosting",
-        body: "Serve your resource pack over HTTPS with a built-in HTTP server and Cloudflare Quick Tunnel — no account needed, free. SHA-1 and server.properties applied automatically.",
-      },
+        "title": "Resource packs for Java",
+        "body": "Host Java resource packs using an HTTP server and Cloudflare Quick Tunnel. Starting distribution publishes the selected pack through an external service. This feature is not available for BDS."
+      }
     ],
     featuresAffiliateLabel: "Always-on hosting is an option if your PC cannot stay on.",
     featuresAffiliateCta: "Compare hosting options (PR)",
-    stepsTitle: "3 steps to your first server",
+    stepsTitle: "Your first server, in three stages",
     steps: [
       {
-        title: "Create a server profile (EULA required).",
-        body: "Choose name, location, type (Vanilla/Paper/Forge…), and version.",
+        "title": "Choose an edition and server type.",
+        "body": "Select Java or Bedrock, a version and a save location. Review and accept the applicable Minecraft terms."
       },
       {
-        title: "Configure with a GUI.",
-        body: "Memory, port, Java path, and server.properties — all with clear labels.",
+        "title": "Prepare the server.",
+        "body": "Download the server files and configure its settings. For Java, the app can set up a compatible Temurin JRE."
       },
       {
-        title: "Start with checks.",
-        body: "Java compatibility and network checks show what to fix first.",
-      },
-    ],
-    previewTitle: "Live Log",
-    previewStatus: "Running",
-    previewLines: [
-      "[12:40:01] Starting server...",
-      "[12:40:05] Preparing spawn area: 64%",
-      '[12:40:07] Done (5.8s)! For help, type "help"',
+        "title": "Check, then start.",
+        "body": "Review requirements and connection settings. Start locally, and check router and ISP conditions before sharing outside your LAN."
+      }
     ],
     helpTitle: "Guided setup that prevents surprises",
     helpSub: "Clear checks and next steps before you press Start.",
     helpItems: [
       {
-        title: "Java mismatch",
-        body: "Warns you before launch and tells you the required Java version.",
+        "title": "Java setup, guided",
+        "body": "Use the app to download and configure Java. Existing installations can also be detected; requirements vary with the server version."
       },
       {
-        title: "Port/Network confusion",
-        body: "Guided checklist, public IP lookup, and port test in one tab.",
+        "title": "Connection guidance",
+        "body": "Use Connection & Sharing to review addresses and required ports. Bedrock connection behaviour can vary by server version and protocol."
       },
       {
-        title: "Crash recovery",
-        body: "One-click access to logs and crash reports. Enable auto-restart for unattended recovery.",
-      },
+        "title": "Crash recovery",
+        "body": "Inspect logs and crash reports, and configure automatic restart for unexpected stops."
+      }
     ],
     helpCta: "Open setup notes",
-    compatTitle: "Java compatibility",
-    compatSub: "Required Java is checked before launch.",
+    compatTitle: "Java requirements, with setup built in",
+    compatSub: "MaiPilot checks the required Java version and can download a suitable Temurin JRE. The table is a guide for Java Edition; Bedrock does not need Java.",
     compat: [
-      { title: "1.20.5 and newer", badge: "Java 21+" },
-      { title: "1.18 - 1.20.4", badge: "Java 17+" },
-      { title: "1.17", badge: "Java 16+" },
-      { title: "1.16 and older", badge: "Java 8+" },
+      {
+        "title": "26.1 and later",
+        "badge": "Java 25+"
+      },
+      {
+        "title": "1.20.5 – 1.21.x",
+        "badge": "Java 21+"
+      },
+      {
+        "title": "1.18 – 1.20.4",
+        "badge": "Java 17+"
+      },
+      {
+        "title": "1.17",
+        "badge": "Java 16+"
+      },
+      {
+        "title": "1.16 and earlier",
+        "badge": "Java 8+"
+      }
     ],
     compatNotes: [
-      "We warn before launch if Java is too old for the selected version.",
-      "Recommended Java depends on the Minecraft version you choose.",
-      "If a start fails, open logs and crash reports for quick recovery.",
+      "Server implementations and mods may have additional requirements. Check the selected version before starting.",
+      "Java setup needs an internet connection and downloads from Adoptium/GitHub.",
+      ".NET is included with MaiPilot; the Java server runtime is a separate download."
     ],
     securityTitle: "Security & Privacy",
-    securitySub: "Concrete, transparent, and local-first.",
+    securitySub: "Local storage, with clear reasons for external connections.",
     securityItems: [
       {
-        title: "Local-only storage",
-        body: "Server data is stored on your PC and never auto-uploaded to the cloud.",
+        "title": "Local server data",
+        "body": "Worlds, settings and backups are stored on your PC. They are not automatically uploaded to cloud storage."
       },
       {
-        title: "Minimal network calls",
-        body: "External communication is limited to version checks and public IP lookup.",
+        "title": "Downloads and checks",
+        "body": "The app contacts external services for updates, server files, Java setup, Modrinth and public IP lookup."
       },
       {
-        title: "Published endpoints",
-        body: "We publish the network endpoints and their purposes in Docs.",
+        "title": "Optional resource pack sharing",
+        "body": "Java resource pack distribution uses Cloudflare Quick Tunnel to expose the selected pack. Start it only when you intend to distribute that file."
       },
       {
-        title: "Explicit admin prompts",
-        body: "Firewall/UPnP actions are announced and use UAC for elevation.",
+        "title": "Network changes",
+        "body": "Firewall changes may require Windows administrator permission. UPnP depends on router support; it does not guarantee external access."
       },
       {
-        title: "Local logs only",
-        body: "Logs and crash reports are stored and viewed locally.",
-      },
+        "title": "Local logs",
+        "body": "Logs and crash reports stay local. Review addresses, player names and paths before sharing them."
+      }
     ],
     securityCta: "Open privacy & network notes",
-    downloadTitle: "Download and play tonight",
-    downloadSub: "Installer for Windows. No runtime setup required.",
+    downloadTitle: "Start with the free version",
+    downloadSub: "Windows 10/11 (x64). Free for personal, non-commercial use. The .NET runtime is included; server files and Java, when needed, are downloaded separately.",
     downloadOptionsTitle: "Choose the right path",
     downloadOptionsSub: "We show options based on your situation.",
     downloadOptions: [
       {
-        id: "local",
-        title: "Run locally on this PC",
-        body: "Full server management with local worlds, mods, and fast backups.",
-        cta: "Download",
+        "id": "local",
+        "title": "Run locally on this PC",
+        "body": "Manage Java and Bedrock servers on this PC. Features depend on the edition and server type.",
+        "cta": "Get the Windows .exe installer"
       },
       {
-        id: "lan",
-        title: "LAN only on the same Wi-Fi",
-        body: "Keep it local for friends on your home network.",
-        cta: "LAN setup guide",
+        "id": "lan",
+        "title": "LAN only on the same Wi-Fi",
+        "body": "Keep it local for friends on your home network.",
+        "cta": "LAN setup guide"
       },
       {
-        id: "hosting",
-        title: "24/7 hosting or public access (PR)",
-        body: "If your PC cannot stay on, hosted servers can help.",
-        cta: "See options (PR)",
-      },
+        "id": "hosting",
+        "title": "24/7 hosting or public access (PR)",
+        "body": "If your PC cannot stay on, hosted servers can help.",
+        "cta": "See options (PR)"
+      }
     ],
-    downloadPrimary: "Download for Windows",
+    downloadPrimary: "Download free for Windows",
     downloadSecondary: "Setup notes",
     downloadBoothCta: "Support development (BOOTH)",
     prSectionTitle: "Sponsored options (PR)",
@@ -274,54 +284,58 @@ const translations = {
     faqSub: "Quick answers for a smooth start.",
     faq: [
       {
-        title: "Which server types are supported?",
-        body: "Vanilla, Paper, Purpur, Fabric, Forge, and Spigot. Choose when creating a server.",
+        title: "Can I run MaiPilot on my phone or Mac?",
+        body: "MaiPilot runs on a Windows 10/11 PC, not on phones or macOS. If you are browsing on mobile, copy this page’s link and open it on your Windows PC. Player-device compatibility depends on the Minecraft edition and server; console access is not guaranteed."
       },
       {
-        title: "Does it work with mods and plugins?",
-        body: "Yes. Select a modded server type (Forge, Fabric, Paper, etc.) and use the MOD/Plugin tab to add, manage, or search Modrinth.",
+        "title": "Which server types are supported?",
+        "body": "Vanilla, Paper, Purpur, Fabric, Forge and Spigot for Java Edition, plus the official Bedrock Dedicated Server (BDS)."
       },
       {
-        title: "I cannot keep my PC on 24/7.",
-        body: "If you need always-on hosting, see the options.",
-        linkId: "hosting",
-        linkLabel: "View hosting options (PR)",
+        "title": "Does it work with mods and plugins?",
+        "body": "Add, enable and disable compatible mods or plugins; search Modrinth in the app. Available for supported Java server types, not Vanilla or BDS."
       },
       {
-        title: "External access is not working.",
-        body: "Follow the checklist for ports and routers. On shared networks (dorm/school/apartment internet), upstream restrictions may block port forwarding.",
-        linkId: "port",
-        linkLabel: "Open port-forwarding guide",
+        "title": "I cannot keep my PC on 24/7.",
+        "body": "If you need always-on hosting, see the options.",
+        "linkId": "hosting",
+        "linkLabel": "View hosting options (PR)"
       },
       {
-        title: "It crashed and I do not know where logs are.",
-        body: "Open logs/crash reports from the Console tab. You can also enable auto-restart for unattended recovery.",
-        linkId: "trouble",
-        linkLabel: "Open troubleshooting",
+        "title": "External access is not working.",
+        "body": "Shared networks, CGNAT and double NAT can prevent external access. Bedrock also depends on the version and transport, including RakNet or NetherNet. Connectivity is not guaranteed in every environment.",
+        "linkId": "port",
+        "linkLabel": "Open port-forwarding guide"
       },
       {
-        title: "How do I install Java?",
-        body: "Download Eclipse Temurin (LTS) from adoptium.net and run the installer. MaiPilot auto-detects your Java path.",
-        linkId: "java",
-        linkLabel: "Open Java setup guide",
+        "title": "It crashed and I do not know where logs are.",
+        "body": "Inspect logs and crash reports, and configure automatic restart for unexpected stops.",
+        "linkId": "trouble",
+        "linkLabel": "Open troubleshooting"
       },
       {
-        title: "Where are server files stored?",
-        body: "By default in your AppData folder. Custom locations are supported.",
+        "title": "How do I install Java?",
+        "body": "The app can download and configure a compatible Eclipse Temurin JRE, or detect an existing Java installation. Downloading requires internet access. Bedrock does not need Java.",
+        "linkId": "java",
+        "linkLabel": "Open Java setup guide"
       },
       {
-        title: "Is it free?",
-        body: "Free for personal, non-commercial use. See license details.",
+        "title": "Where are server files stored?",
+        "body": "By default in your AppData folder. Custom locations are supported."
       },
       {
-        title: "How do I update?",
-        body: "Use \"Check for app updates\" in MaiPilot, then run the latest installer shown in the prompt.",
+        "title": "Is it free?",
+        "body": "The official download and the ¥100 BOOTH support edition have the same features. BOOTH is an optional way to support development. Try the free version first. Both editions are licensed for personal, non-commercial use; purchasing does not grant commercial-use rights."
       },
+      {
+        "title": "How do I update?",
+        "body": "Choose “Check for updates” in MaiPilot, then run the latest installer shown in the prompt."
+      }
     ],
     boothTitle: "Support MaiPilot's development",
-    boothSub: "MaiPilot is free to download from the official site. There is no difference in features.",
-    boothNote: "The BOOTH listing is for those who want to support ongoing development. Proceeds go toward server maintenance and new features. Try the free version first — support only if you find it useful.",
-    boothCta: "View on BOOTH",
+    boothSub: "The official download and the ¥100 BOOTH support edition have the same features.",
+    boothNote: "BOOTH is an optional way to support development. Try the free version first. Both editions are licensed for personal, non-commercial use; purchasing does not grant commercial-use rights.",
+    boothCta: "Support for ¥100 on BOOTH",
     footerDocs: "Docs",
     footerNotices: "Third-party notices",
     footerLicense: "License",
@@ -330,11 +344,42 @@ const translations = {
     footerX: "Official X",
     footerRight: "Built for local worlds.",
     footerDisclosure: "This page includes affiliate links (PR).",
+    galleryTitle: "A place for every everyday task",
+    gallerySub: "Create a server, organise your worlds and manage compatible add-ons from the sidebar.",
+    screenshotPending: "Screenshot in preparation",
+    screenshotSource: "MaiPilot 2.2.0 UI rendered with demo data.",
+    screenshotPendingNote: "A verified screenshot of the current app will appear here.",
+    screenshots: {
+      "overview": {
+        "title": "Your server at a glance",
+        "caption": "Status, configuration and everyday actions in one place.",
+        "alt": "MaiPilot server overview in the current Windows app"
+      },
+      "create": {
+        "title": "Choose Java or Bedrock",
+        "caption": "Start with the edition and server type you want to play.",
+        "alt": "MaiPilot new-server edition and type selection"
+      },
+      "addons": {
+        "title": "Make a Java server your own",
+        "caption": "Manage mods or plugins for a supported Java server type.",
+        "alt": "MaiPilot add-on management on a supported Java server"
+      },
+      "backups": {
+        "title": "Keep a restore point",
+        "caption": "Create, schedule and manage local world backups.",
+        "alt": "MaiPilot backup management"
+      },
+      "worlds": {
+        "title": "Look after your worlds",
+        "caption": "Manage saved worlds from a dedicated screen.",
+        "alt": "MaiPilot world management"
+      }
+    },
   },
   ja: {
     metaTitle: "MaiPilot | Windows向けマイクラサーバー統合管理",
-    metaDescription:
-      "Vanilla・Paper・Forge・Fabric・Spigot・Purpurに対応。MOD管理・バックアップ・監視を一画面で。Windows用GUI。",
+    metaDescription: "Java版・統合版のマイクラサーバーをWindowsで管理。Java自動セットアップ、対応MOD・プラグイン管理、ワールドのバックアップをひとつのアプリで。個人・非商用利用は無料。",
     siteName: "MaiPilot",
     nav: {
       features: "特長",
@@ -348,176 +393,177 @@ const translations = {
     langJa: "日本語",
     langEn: "English",
     eyebrow: "Windows向け Minecraft サーバー統合管理",
-    heroTitle: "6種のサーバーを、ひとつの画面で。",
-    heroSub:
-      "Vanilla・Paper・Forge・Fabric・Spigot・Purpur — セットアップからMOD管理・監視まで。",
+    heroTitle: "マイクラサーバーの準備も、日々の管理も。",
+    heroTitleParts: ["マイクラサーバーの", "準備も、", "日々の管理も。"],
+    heroSub: "Java版・統合版のサーバーを、Windowsのひとつの画面で。",
     heroNotes: [
-      "6種のサーバーを作成・運用・管理できるWindows用フルGUI",
-      "データはPC内。必要最小限の通信のみ。権限が必要な操作は明示します",
+      "Java版6種と、公式の統合版専用サーバー（BDS）に対応。",
+      "ワールドとバックアップを手元で管理。対応するJavaサーバーではMOD・プラグインも。"
     ],
     heroAffiliateLabel: "24時間運用の選択肢もあります",
     heroAffiliateCta: "VPSの比較を見る（PR）",
-    heroCtaPrimary: "ダウンロード",
+    heroCtaPrimary: "Windows版を無料ダウンロード",
+    heroMobileCta: "Windows PCで使う準備をする",
+    freeNote: "公式インストーラー・個人／非商用利用は無料",
+    supportNote: "BOOTHの100円支援版は任意購入です。機能は同じ。",
     heroCtaSecondary: "セットアップガイド",
     heroBoothCta: "開発を応援する（BOOTH）",
     heroMetaVersion: "バージョン",
     heroMetaWindows: "Windows 10/11 対応",
-    heroMetaRuntime: "ランタイム同梱",
-    cardTitle: "サーバー操作デッキ",
-    cardStatusLabel: "状態",
-    cardStatusValue: "稼働中",
-    cardPlayersLabel: "プレイヤー",
-    cardJavaLabel: "Java",
-    cardCpu: "CPU",
-    cardMemory: "メモリ",
-    cardStart: "開始",
-    cardBackup: "バックアップ",
-    cardMods: "MOD",
-    cardFirewall: "ファイアウォール",
-    featuresTitle: "必要な機能、すべて標準搭載。",
-    featuresSub: "6種のサーバー対応、MOD管理、バックアップ — はじめから揃っています。",
+    heroMetaRuntime: ".NETランタイム同梱",
+    featuresTitle: "遊びたい世界をつくる。その後の管理まで。",
+    featuresSub: "エディションを選んで、サーバーに合った機能を使えます。",
     features: [
       {
-        title: "6種のサーバー対応",
-        body: "Vanilla・Paper・Purpur・Fabric・Forge・Spigotから選んですぐ開始。",
+        "title": "Java版＋統合版に対応",
+        "body": "Java版はVanilla・Paper・Purpur・Fabric・Forge・Spigotの6種。統合版は公式のBedrock Dedicated Server（BDS）に対応。"
       },
       {
-        title: "MOD/プラグイン管理",
-        body: "追加・有効化・無効化をGUIで。Modrinth検索も内蔵。",
+        "title": "Javaをアプリから自動セットアップ",
+        "body": "必要なバージョンに合わせてEclipse Temurin JREをダウンロードし、設定できます。統合版にはJavaは不要です。"
       },
       {
-        title: "バックアップ/復元/ワールド管理",
-        body: "ZIPバックアップ・ワンクリック復元・ワールド切替・配布マップ導入。",
+        "title": "Java版のMOD・プラグイン管理",
+        "body": "対応するサーバー種別で追加・有効化・無効化、Modrinth検索が可能。Vanilla・BDSはこの機能の対象外です。"
       },
       {
-        title: "設定GUI",
-        body: "server.propertiesの編集、OP/ホワイトリスト管理をGUIで完結。",
+        "title": "バックアップとワールド管理",
+        "body": "ZIPバックアップ、復元、定期バックアップに対応。サイドバーからワールドを管理できます。"
       },
       {
-        title: "ネットワーク一括管理",
-        body: "Firewall・UPnP・公開IP・ポートチェック・チェックリストを一画面に。",
+        "title": "サーバー設定をGUIで",
+        "body": "設定ファイルを直接編集せず、画面から変更。利用できる設定項目や管理機能はエディションによって異なります。"
       },
       {
-        title: "クラッシュ復旧/自動再起動",
-        body: "ログ/クラッシュレポートへワンクリック。自動再起動も設定可能。",
+        "title": "接続・公開をサポート",
+        "body": "接続情報の確認、ファイアウォールやUPnPの操作を集約。外部接続の可否はルーター・回線・通信方式に左右されます。"
       },
       {
-        title: "リアルタイム監視",
-        body: "CPU・RAM・プレイヤー数を毎秒リアルタイム更新。",
+        "title": "監視とクラッシュ復旧",
+        "body": "稼働状況やログを確認し、クラッシュ時の調査へ。予期しない停止に備えた自動再起動も設定できます。"
       },
       {
-        title: "安全な反映フロー",
-        body: "変更は保存できるが反映は再起動後。事故を防ぎます。",
+        "title": "変更は確認して反映",
+        "body": "設定を保存し、反映に再起動が必要な項目はサーバーを再起動して適用します。"
       },
       {
-        title: "リソースパック配布",
-        body: "内蔵HTTPサーバーとCloudflare Quick TunnelでHTTPS配信。アカウント不要・無料。SHA-1計算とserver.properties書き込みも自動。",
-      },
+        "title": "Java版のリソースパック配布",
+        "body": "HTTPサーバーとCloudflare Quick Tunnelで配信。配信を開始すると、選んだパックを外部サービス経由で公開します。BDSは対象外です。"
+      }
     ],
     featuresAffiliateLabel: "PCをつけっぱなしにできない場合は、VPSという選択肢もあります。",
     featuresAffiliateCta: "24時間運用の比較を見る（PR）",
-    stepsTitle: "起動まで、たった 3 ステップ",
+    stepsTitle: "はじめてのサーバー、3つの段階",
     steps: [
       {
-        title: "サーバープロファイル作成（EULA同意必須）",
-        body: "名前・保存先・種別（Vanilla/Paper/Forge…）・バージョンを指定。",
+        "title": "エディションと種別を選ぶ",
+        "body": "Java版・統合版、バージョン、保存先を選択。Minecraftの適用される利用条件を確認し、同意します。"
       },
       {
-        title: "GUIで設定",
-        body: "メモリ・ポート・Javaパス・server.propertiesを分かりやすく設定。",
+        "title": "サーバーを準備する",
+        "body": "必要なファイルを取得して設定。Java版では、対応するTemurin JREをアプリから自動セットアップできます。"
       },
       {
-        title: "起動前チェック",
-        body: "Java互換・公開チェックで不安を減らす。",
-      },
-    ],
-    previewTitle: "ライブログ",
-    previewStatus: "稼働中",
-    previewLines: [
-      "[12:40:01] サーバー起動中...",
-      "[12:40:05] スポーン準備中: 64%",
-      "[12:40:07] 完了 (5.8秒)! help と入力でヘルプ表示",
+        "title": "確認して起動する",
+        "body": "動作条件と接続設定を確認してローカルで起動。家の外へ公開する前に、ルーターや回線の条件も確認します。"
+      }
     ],
     helpTitle: "ガイド付きでスムーズに起動",
     helpSub: "起動前のチェックと次の一手を見える化。",
     helpItems: [
       {
-        title: "Java のバージョン違い",
-        body: "起動前に必要バージョンを警告します。",
+        "title": "Javaの準備を案内",
+        "body": "アプリからJavaをダウンロードして設定。既存のJavaも検出でき、選んだサーバーバージョンに応じた要件を確認します。"
       },
       {
-        title: "ポート/ネットワークの迷子",
-        body: "公開チェック・IP表示・ガイドを一画面に集約。",
+        "title": "接続条件を確認",
+        "body": "「接続・公開」でアドレスと必要なポートを確認。統合版はサーバーバージョンや通信方式によって接続条件が異なります。"
       },
       {
-        title: "クラッシュ復旧",
-        body: "ログ/クラッシュレポートへ即アクセス。自動再起動も設定可能です。",
-      },
+        "title": "クラッシュからの復旧",
+        "body": "ログとクラッシュレポートを確認。予期しない停止に備えて、自動再起動も設定できます。"
+      }
     ],
     helpCta: "セットアップノートを見る",
-    compatTitle: "Java 互換表",
-    compatSub: "起動前に必要 Java を判定します。",
+    compatTitle: "Javaの要件確認から、自動セットアップまで",
+    compatSub: "必要なJavaを判定し、対応するTemurin JREを取得できます。表はJava版の目安です。統合版にはJavaは不要です。",
     compat: [
-      { title: "1.20.5 以降", badge: "Java 21+" },
-      { title: "1.18 - 1.20.4", badge: "Java 17+" },
-      { title: "1.17", badge: "Java 16+" },
-      { title: "1.16 以下", badge: "Java 8+" },
+      {
+        "title": "26.1以降",
+        "badge": "Java 25+"
+      },
+      {
+        "title": "1.20.5〜1.21.x",
+        "badge": "Java 21+"
+      },
+      {
+        "title": "1.18〜1.20.4",
+        "badge": "Java 17+"
+      },
+      {
+        "title": "1.17",
+        "badge": "Java 16+"
+      },
+      {
+        "title": "1.16以前",
+        "badge": "Java 8+"
+      }
     ],
     compatNotes: [
-      "必要Javaに足りない場合は起動前に警告します。",
-      "推奨Javaはバージョンによって異なります。",
-      "失敗時はログ/クラッシュレポートで復旧します。",
+      "サーバー実装やMODによって追加の要件があります。起動前に対象バージョンをご確認ください。",
+      "Javaの自動導入にはインターネット接続が必要です。Adoptium/GitHubからダウンロードします。",
+      "MaiPilot用の.NETは同梱。Javaサーバー用の実行環境は別途ダウンロードします。"
     ],
     securityTitle: "セキュリティ/プライバシー",
-    securitySub: "曖昧にせず、具体的に。",
+    securitySub: "手元に保存し、必要な目的で外部サービスにつなぎます。",
     securityItems: [
       {
-        title: "ローカル保存",
-        body: "サーバーデータは端末内に保存され、クラウドへ自動送信しません。",
+        "title": "サーバーデータはローカル保存",
+        "body": "ワールド・設定・バックアップはPC内に保存。クラウドストレージへ自動アップロードしません。"
       },
       {
-        title: "必要最小限の通信",
-        body: "外部通信はバージョン取得・公開IP取得など必要最小限です。",
+        "title": "取得・確認のための外部通信",
+        "body": "更新確認、サーバーファイルやJavaの取得、Modrinth、公開IPの取得などで外部サービスと通信します。"
       },
       {
-        title: "通信先一覧を公開",
-        body: "通信先一覧をDocsで公開しています。",
+        "title": "必要なときだけパックを配信",
+        "body": "Java版リソースパックの配信にはCloudflare Quick Tunnelを使用。選んだファイルを公開する場合に配信を開始してください。"
       },
       {
-        title: "権限の明示",
-        body: "Firewall/UPnPは実行前に明示し、UACで昇格します。",
+        "title": "ネットワーク設定の変更",
+        "body": "ファイアウォール変更にはWindowsの管理者権限が必要になる場合があります。UPnPはルーターの対応状況に依存し、外部接続を保証しません。"
       },
       {
-        title: "ログはローカル",
-        body: "ログ/クラッシュレポートはローカル表示・ローカル保存です。",
-      },
+        "title": "ログも手元で管理",
+        "body": "ログとクラッシュレポートはローカル保存。共有する際はIP・プレイヤー名・保存パスなどをご確認ください。"
+      }
     ],
     securityCta: "通信と権限の詳細を見る",
-    downloadTitle: "今夜からプレイ可能",
-    downloadSub: "Windows 用インストーラー。ランタイム設定不要。",
+    downloadTitle: "まずは無料版から",
+    downloadSub: "Windows 10/11（x64）向け。個人・非商用利用は無料です。.NETは同梱。サーバーファイルと、必要な場合のJavaは別途ダウンロードします。",
     downloadOptionsTitle: "状況別の選び方",
     downloadOptionsSub: "おすすめではなく、選択肢として提示します。",
     downloadOptions: [
       {
-        id: "local",
-        title: "このPCでローカル運用",
-        body: "6種のサーバーをまるごと管理。MOD・バックアップ・監視まで。",
-        cta: "ダウンロード",
+        "id": "local",
+        "title": "このPCでローカル運用",
+        "body": "Java版・統合版のサーバーをこのPCで管理。機能はエディションや種別によって異なります。",
+        "cta": "Windows用 .exe を保存"
       },
       {
-        id: "lan",
-        title: "同じWi-FiでLAN参加",
-        body: "家の中だけで遊びたい人向け。",
-        cta: "LAN手順を見る",
+        "id": "lan",
+        "title": "同じWi-FiでLAN参加",
+        "body": "家の中だけで遊びたい人向け。",
+        "cta": "LAN手順を見る"
       },
       {
-        id: "hosting",
-        title: "24時間稼働・外部公開したい（PR）",
-        body: "PCをつけっぱなしにできない場合の選択肢。",
-        cta: "比較を見る（PR）",
-      },
+        "id": "hosting",
+        "title": "24時間稼働・外部公開したい（PR）",
+        "body": "PCをつけっぱなしにできない場合の選択肢。",
+        "cta": "比較を見る（PR）"
+      }
     ],
-    downloadPrimary: "Windows 用を入手",
+    downloadPrimary: "Windows版を無料ダウンロード",
     downloadSecondary: "セットアップノート",
     downloadBoothCta: "開発を応援する（BOOTH）",
     prSectionTitle: "スポンサーリンク（PR）",
@@ -576,54 +622,58 @@ const translations = {
     faqSub: "スムーズに始めるためのヒント。",
     faq: [
       {
-        title: "対応サーバー種別は？",
-        body: "Vanilla・Paper・Purpur・Fabric・Forge・Spigotの6種です。作成時に選べます。",
+        title: "スマホやMacでも使えますか？",
+        body: "MaiPilotを動かすにはWindows 10/11のPCが必要です。スマホで見ている方は、このページのリンクをコピーしてWindows PCで開いてください。参加できる端末はMinecraftのエディションやサーバーの条件によって異なり、家庭用ゲーム機からの接続を保証するものではありません。"
       },
       {
-        title: "MOD/プラグインは使えますか？",
-        body: "はい。Forge・Fabric・Paper等を選んで、MOD/プラグインタブで追加・管理できます。Modrinth検索も内蔵しています。",
+        "title": "対応サーバー種別は？",
+        "body": "Java版はVanilla・Paper・Purpur・Fabric・Forge・Spigotの6種。統合版は公式のBedrock Dedicated Server（BDS）に対応。"
       },
       {
-        title: "PCをつけっぱなしにできません",
-        body: "常時稼働が必要な場合はVPSの選択肢があります。",
-        linkId: "hosting",
-        linkLabel: "24時間運用の選択肢を見る（PR）",
+        "title": "MOD/プラグインは使えますか？",
+        "body": "対応するサーバー種別で追加・有効化・無効化、Modrinth検索が可能。Vanilla・BDSはこの機能の対象外です。"
       },
       {
-        title: "外部公開ができません",
-        body: "ポート開放チェックリストを確認してください。共有回線（寮・学校・マンション一括回線など）は上位側の制限で失敗する場合があります。",
-        linkId: "port",
-        linkLabel: "ポート開放ガイドを見る",
+        "title": "PCをつけっぱなしにできません",
+        "body": "常時稼働が必要な場合はVPSの選択肢があります。",
+        "linkId": "hosting",
+        "linkLabel": "24時間運用の選択肢を見る（PR）"
       },
       {
-        title: "クラッシュした/ログが分からない",
-        body: "コンソールからログ/クラッシュレポートを開けます。自動再起動を有効にすると無人復旧も可能です。",
-        linkId: "trouble",
-        linkLabel: "トラブルシュートを見る",
+        "title": "外部公開ができません",
+        "body": "共有回線やCGNAT、二重ルーター等では外部公開できない場合があります。統合版はバージョンやRakNet／NetherNetなどの通信方式にも依存します。すべての環境で接続できることは保証できません。",
+        "linkId": "port",
+        "linkLabel": "ポート開放ガイドを見る"
       },
       {
-        title: "Javaの入れ方がわかりません",
-        body: "adoptium.net から Eclipse Temurin (LTS) をインストールするだけ。MaiPilotが自動検出します。",
-        linkId: "java",
-        linkLabel: "Java導入ガイドを見る",
+        "title": "クラッシュした/ログが分からない",
+        "body": "ログとクラッシュレポートを確認。予期しない停止に備えて、自動再起動も設定できます。",
+        "linkId": "trouble",
+        "linkLabel": "トラブルシュートを見る"
       },
       {
-        title: "サーバーファイルはどこ？",
-        body: "既定では AppData 配下。任意の場所にも変更できます。",
+        "title": "Javaの入れ方がわかりません",
+        "body": "アプリから対応するEclipse Temurin JREをダウンロードして設定できます。既存のJavaの検出にも対応。初回取得にはインターネットが必要で、統合版にはJavaは不要です。",
+        "linkId": "java",
+        "linkLabel": "Java導入ガイドを見る"
       },
       {
-        title: "料金は？",
-        body: "個人・非商用は無料です。詳細はライセンスをご確認ください。",
+        "title": "サーバーファイルはどこ？",
+        "body": "既定では AppData 配下。任意の場所にも変更できます。"
       },
       {
-        title: "アップデート方法は？",
-        body: "MaiPilotの「アプリ更新を確認」から確認し、表示された最新版インストーラーを実行してください。",
+        "title": "料金は？",
+        "body": "公式サイトの無料版と、BOOTHの100円支援版は同じ機能です。 BOOTHは開発を応援してくださる方向けの任意購入です。まずは無料版でお試しください。どちらも個人・非商用利用向けで、購入によって商用利用が許可されるものではありません。"
       },
+      {
+        "title": "アップデート方法は？",
+        "body": "MaiPilotの「更新を確認」から確認し、表示された最新版インストーラーを実行してください。"
+      }
     ],
     boothTitle: "MaiPilotの開発を応援する",
-    boothSub: "MaiPilotは公式サイトから無料でダウンロードできます。機能の違いはありません。",
-    boothNote: "BOOTH版は、開発を続けていくための応援をしてくださる方向けです。いただいた売上はサーバー維持費や新機能の開発に充てます。まずは無料版を試してみて、「便利だな」と感じたら応援いただけると嬉しいです。",
-    boothCta: "BOOTHで応援する",
+    boothSub: "公式サイトの無料版と、BOOTHの100円支援版は同じ機能です。",
+    boothNote: "BOOTHは開発を応援してくださる方向けの任意購入です。まずは無料版でお試しください。どちらも個人・非商用利用向けで、購入によって商用利用が許可されるものではありません。",
+    boothCta: "100円で開発を応援する",
     footerDocs: "ドキュメント",
     footerNotices: "サードパーティ通知",
     footerLicense: "ライセンス",
@@ -632,15 +682,47 @@ const translations = {
     footerX: "公式X",
     footerRight: "ローカル世界のために。",
     footerDisclosure: "本ページにはアフィリエイトリンク（PR）が含まれます。",
+    galleryTitle: "日々の操作に、専用の画面を。",
+    gallerySub: "サーバー作成、ワールドの管理、対応アドオンの整理をサイドバーから。",
+    screenshotPending: "実画面の画像を準備中",
+    screenshotSource: "デモデータで描画したMaiPilot 2.2.0の画面例。",
+    screenshotPendingNote: "確認済みの現行アプリ画像をここに掲載します。",
+    screenshots: {
+      "overview": {
+        "title": "サーバーの状態をひと目で",
+        "caption": "稼働状況、設定、よく使う操作をまとめて確認。",
+        "alt": "現行Windows版MaiPilotのサーバー概要画面"
+      },
+      "create": {
+        "title": "Java版か、統合版か。ここから選ぶ",
+        "caption": "遊びたいエディションとサーバー種別から準備を始めます。",
+        "alt": "MaiPilotの新しいサーバー作成・エディション選択画面"
+      },
+      "addons": {
+        "title": "Javaサーバーを、自分たち好みに",
+        "caption": "対応する種別のMODやプラグインを画面から管理。",
+        "alt": "対応するJavaサーバーでのMaiPilotアドオン管理画面"
+      },
+      "backups": {
+        "title": "戻せる備えを、手元に",
+        "caption": "ワールドのバックアップ作成・定期実行・一覧管理。",
+        "alt": "MaiPilotのバックアップ管理画面"
+      },
+      "worlds": {
+        "title": "ワールドを整理する",
+        "caption": "保存したワールドを専用画面から管理します。",
+        "alt": "MaiPilotのワールド管理画面"
+      }
+    },
   },
 } as const;
 
 type Locale = keyof typeof translations;
 
-const currentLang = ref<Locale>("en");
+const currentLang = ref<Locale>("ja");
 const t = computed(() => translations[currentLang.value]);
 const runtimeConfig = useRuntimeConfig();
-const version = (runtimeConfig.public.appVersion as string | undefined) || "1.0.6";
+const version = runtimeConfig.public.appVersion as string;
 
 type PrItem = {
   kind: "banner" | "link";
@@ -670,32 +752,6 @@ const gaMeasurementId = computed(() => {
   const raw = runtimeConfig.public.gaMeasurementId as string | undefined;
   return raw?.trim() ?? "";
 });
-// localhost などローカル環境（npm run dev / preview）からのアクセスは計測しない。
-// 静的生成のため、判定はページを開いたブラウザ側で行い、計測する場合だけ gtag.js を読み込む。
-const gaInitScript = computed(() => {
-  if (!gaMeasurementId.value) {
-    return "";
-  }
-  return [
-    "(function () {",
-    `  var id = ${JSON.stringify(gaMeasurementId.value)};`,
-    "  var host = location.hostname;",
-    "  if (!host || host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host === '::1' || /\\.localhost$/.test(host)) {",
-    "    window['ga-disable-' + id] = true;",
-    "    return;",
-    "  }",
-    "  var s = document.createElement('script');",
-    "  s.async = true;",
-    "  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id);",
-    "  document.head.appendChild(s);",
-    "  window.dataLayer = window.dataLayer || [];",
-    "  window.gtag = function () { window.dataLayer.push(arguments); };",
-    "  window.gtag('js', new Date());",
-    "  window.gtag('config', id);",
-    "})();",
-  ].join("\n");
-});
-
 const downloadOptionLinks = computed<Record<string, string>>(() => ({
   local: downloadUrl.value,
   lan: docsLanUrl,
@@ -747,92 +803,10 @@ const prItems = computed<PrItem[]>(() => {
 });
 const isExternalUrl = (href: string) => /^https?:\/\//i.test(href);
 
-type TrackPayload = {
-  event_name: string;
-  link_url?: string;
-  link_text?: string;
-  source?: string;
-};
-
-const trackEvent = (payload: TrackPayload) => {
-  if (!process.client) {
-    return;
-  }
-  const win = window as typeof window & {
-    gtag?: (...args: unknown[]) => void;
-    dataLayer?: unknown[];
-  };
-  if (typeof win.gtag === "function") {
-    win.gtag("event", payload.event_name, {
-      event_category: payload.source ?? "cta",
-      event_label: payload.link_text ?? payload.link_url ?? "",
-      link_url: payload.link_url,
-    });
-    return;
-  }
-  if (Array.isArray(win.dataLayer)) {
-    win.dataLayer.push({
-      event: payload.event_name,
-      link_url: payload.link_url,
-      link_text: payload.link_text,
-      source: payload.source ?? "cta",
-    });
-  }
-};
-
-const handleTrackedClick = (event: MouseEvent) => {
-  const target = event.target as HTMLElement | null;
-  if (!target) {
-    return;
-  }
-  const tracked = target.closest<HTMLElement>("[data-event]");
-  const anchor = target.closest<HTMLAnchorElement>("a");
-  const link = tracked ?? anchor;
-  if (!link) {
-    return;
-  }
-
-  const eventName = tracked?.getAttribute("data-event") ?? null;
-  const href = anchor?.getAttribute("href") ?? link.getAttribute("href") ?? undefined;
-  const text = link.textContent?.trim() ?? undefined;
-
-  if (eventName) {
-    trackEvent({
-      event_name: eventName,
-      link_url: href,
-      link_text: text,
-      source: "cta",
-    });
-  }
-
-  if (!eventName && href?.includes("/docs/24-7-hosting")) {
-    trackEvent({
-      event_name: "docs_24_7_hosting_click",
-      link_url: href,
-      link_text: text,
-      source: "cta",
-    });
-  }
-
-  if (anchor) {
-    const rel = (anchor.getAttribute("rel") ?? "").toLowerCase();
-    const isSponsored = rel.includes("sponsored");
-    const isAffiliate = isSponsored || anchor.dataset.affiliate === "true";
-    if (isAffiliate && eventName !== "outbound_affiliate_click") {
-      trackEvent({
-        event_name: "outbound_affiliate_click",
-        link_url: href,
-        link_text: text,
-        source: "affiliate",
-      });
-    }
-  }
-};
-
 const setLang = (lang: Locale) => {
   currentLang.value = lang;
   if (process.client) {
-    localStorage.setItem("mcsm-lang", lang);
+    try { localStorage.setItem("mcsm-lang", lang); } catch { /* Storage may be disabled. */ }
   }
 };
 
@@ -840,7 +814,10 @@ onMounted(() => {
   if (!process.client) {
     return;
   }
-  document.addEventListener("click", handleTrackedClick, { passive: true });
+  document.addEventListener("keydown", closeMenuOnEscape);
+  isMobileDevice.value = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  pcHandoffOpen.value = isMobileDevice.value || window.location.hash === "#pc-handoff";
 
   // Fallback for environments without IntersectionObserver.
   nextTick(() => {
@@ -867,22 +844,21 @@ onMounted(() => {
     });
   });
 
-  const saved = localStorage.getItem("mcsm-lang") as Locale | null;
+  let saved: Locale | null = null;
+  try { saved = localStorage.getItem("mcsm-lang") as Locale | null; } catch { /* Storage may be disabled. */ }
   if (saved && translations[saved]) {
     currentLang.value = saved;
     return;
   }
   const browserLang = navigator.language?.toLowerCase() ?? "";
-  if (browserLang.startsWith("ja")) {
-    currentLang.value = "ja";
-  }
+  currentLang.value = browserLang.startsWith("ja") ? "ja" : "en";
 });
 
 onBeforeUnmount(() => {
   if (!process.client) {
     return;
   }
-  document.removeEventListener("click", handleTrackedClick);
+  document.removeEventListener("keydown", closeMenuOnEscape);
   revealObserver?.disconnect();
   revealObserver = null;
 });
@@ -914,8 +890,10 @@ useHead(() => ({
     ...(gaMeasurementId.value
       ? [
           {
-            key: "ga4-init",
-            children: gaInitScript.value,
+            key: "maipilot-analytics",
+            src: "/analytics.js",
+            defer: true,
+            "data-measurement-id": gaMeasurementId.value,
           },
         ]
       : []),
@@ -954,27 +932,21 @@ useHead(() => ({
           url: siteUrl.value ? `${siteUrl.value}/` : undefined,
           downloadUrl: siteUrl.value ? `${siteUrl.value}/` : undefined,
           inLanguage: currentLang.value,
-          featureList: [
-            "完全日本語対応",
-            "サーバーの起動・停止をGUIで操作",
-            "複数サーバーの同時管理",
-            "自動バックアップ・スケジューラ",
-            "ポート開放機能",
-            "バニラ・Spigot/Paper・Forge/Fabric対応",
-          ],
+          featureList: t.value.features.map((item) => `${item.title}: ${item.body}`),
+          license: siteUrl.value ? `${siteUrl.value}/LICENSE.txt` : undefined,
           offers: [
             {
               "@type": "Offer",
               price: "0",
               priceCurrency: "JPY",
-              description: "公式サイトから無料ダウンロード",
+              description: t.value.downloadSub,
               url: siteUrl.value ? `${siteUrl.value}/` : undefined,
             },
             {
               "@type": "Offer",
-              price: "980",
+              price: "100",
               priceCurrency: "JPY",
-              description: "BOOTH 応援購入版（内容は無料版と同じ）",
+              description: t.value.boothSub,
               url: boothUrl,
             },
           ],
@@ -1014,18 +986,20 @@ useHead(() => ({
         class="hamburger"
         type="button"
         :class="{ open: mobileMenuOpen }"
-        aria-label="Menu"
+        :aria-label="currentLang === 'ja' ? 'メニュー' : 'Menu'"
+        :aria-expanded="mobileMenuOpen"
+        aria-controls="main-navigation"
         @click="mobileMenuOpen = !mobileMenuOpen"
       >
         <span /><span /><span />
       </button>
-      <nav class="nav-links" :class="{ 'mobile-open': mobileMenuOpen }">
+      <nav id="main-navigation" class="nav-links" :class="{ 'mobile-open': mobileMenuOpen }">
         <a href="#features" @click="closeMobileMenu">{{ t.nav.features }}</a>
         <a href="#help" @click="closeMobileMenu">{{ t.nav.help }}</a>
         <a href="#how" @click="closeMobileMenu">{{ t.nav.how }}</a>
         <a href="#compat" @click="closeMobileMenu">{{ t.nav.compat }}</a>
         <a href="#security" @click="closeMobileMenu">{{ t.nav.security }}</a>
-        <a href="#download" class="nav-cta" @click="closeMobileMenu">{{ t.nav.download }}</a>
+        <a href="#download" class="nav-cta" data-event="download_section_click" data-cta-location="nav" @click="closeMobileMenu">{{ t.nav.download }}</a>
         <div class="lang-toggle" aria-label="Language toggle">
           <span class="lang-label">{{ t.langLabel }}</span>
           <button
@@ -1054,64 +1028,30 @@ useHead(() => ({
         <div class="hero-bg" aria-hidden="true"></div>
         <div class="hero-content">
           <p class="eyebrow">{{ t.eyebrow }}</p>
-          <h1 class="hero-title">{{ t.heroTitle }}</h1>
+          <h1 class="hero-title"><template v-if="currentLang === 'ja'"><span v-for="part in t.heroTitleParts" :key="part">{{ part }}</span></template><template v-else>{{ t.heroTitle }}</template></h1>
           <p class="hero-sub">{{ t.heroSub }}</p>
           <ul class="hero-notes">
             <li v-for="note in t.heroNotes" :key="note">{{ note }}</li>
           </ul>
-          <div class="hero-affiliate">
-            <span>{{ t.heroAffiliateLabel }}</span>
-            <a :href="docsHostingUrl" class="hero-affiliate-link" data-event="docs_24_7_hosting_click">
-              {{ t.heroAffiliateCta }}
-            </a>
-          </div>
           <div class="hero-actions">
-            <a :href="downloadUrl" class="btn primary" data-event="download_click">{{ t.heroCtaPrimary }}</a>
-            <a :href="docsUrl" class="btn ghost">{{ t.heroCtaSecondary }}</a>
-            <a :href="boothUrl" target="_blank" rel="noopener noreferrer" class="btn booth" data-event="booth_click">{{ t.heroBoothCta }}</a>
+            <a :href="isMobileDevice ? '#pc-handoff' : downloadUrl" class="btn primary"
+              :data-event="isMobileDevice ? 'pc_handoff_open' : 'download_click'" data-cta-location="hero"
+              @click="openPcHandoff">{{ isMobileDevice ? t.heroMobileCta : t.heroCtaPrimary }}</a>
+            <a :href="docsUrl" class="btn ghost" data-event="setup_guide_click" data-cta-location="hero">{{ t.heroCtaSecondary }}</a>
           </div>
+          <p class="download-reassurance">{{ t.freeNote }}</p>
+          <p class="support-note"><a href="#support">{{ t.supportNote }}</a></p>
+          <PcHandoff id="pc-handoff" :locale="currentLang" :open="pcHandoffOpen" @toggle="pcHandoffOpen = $event" />
           <div class="hero-meta">
             <span class="chip">{{ t.heroMetaVersion }} {{ version }}</span>
             <span class="chip">{{ t.heroMetaWindows }}</span>
             <span class="chip">{{ t.heroMetaRuntime }}</span>
           </div>
         </div>
-        <div class="hero-card">
-          <div class="hero-card-header">
-            <span>{{ t.cardTitle }}</span>
-            <span class="pulse"></span>
-          </div>
-          <div class="hero-card-body">
-            <div class="stat">
-              <span class="stat-label">{{ t.cardStatusLabel }}</span>
-              <span class="stat-value">{{ t.cardStatusValue }}</span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">{{ t.cardPlayersLabel }}</span>
-              <span class="stat-value">6 / 20</span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">{{ t.cardJavaLabel }}</span>
-              <span class="stat-value">17.0.x</span>
-            </div>
-            <div class="hero-bars">
-              <div class="bar">
-                <span>{{ t.cardCpu }}</span>
-                <div class="bar-track"><div class="bar-fill" style="width: 48%"></div></div>
-              </div>
-              <div class="bar">
-                <span>{{ t.cardMemory }}</span>
-                <div class="bar-track"><div class="bar-fill alt" style="width: 64%"></div></div>
-              </div>
-            </div>
-            <div class="hero-cta">
-              <button class="btn tiny" type="button">{{ t.cardStart }}</button>
-              <button class="btn tiny ghost" type="button">{{ t.cardBackup }}</button>
-              <button class="btn tiny ghost" type="button">{{ t.cardMods }}</button>
-              <button class="btn tiny ghost" type="button">{{ t.cardFirewall }}</button>
-            </div>
-          </div>
-        </div>
+        <ProductScreenshot class="hero-screenshot" :src="screenshots.overview"
+          :title="t.screenshots.overview.title" :caption="t.screenshots.overview.caption"
+          :alt="t.screenshots.overview.alt" :pending-label="t.screenshotPending"
+          :pending-note="t.screenshotPendingNote" :source-note="t.screenshotSource" eager />
       </section>
 
       <section id="features" class="section reveal">
@@ -1127,9 +1067,22 @@ useHead(() => ({
         </div>
         <div class="features-affiliate">
           <span>{{ t.featuresAffiliateLabel }}</span>
-          <a :href="docsHostingUrl" class="features-affiliate-link" data-event="docs_24_7_hosting_click">
+          <a :href="docsHostingUrl" class="features-affiliate-link" data-event="docs_24_7_hosting_click" data-cta-location="features">
             {{ t.featuresAffiliateCta }}
           </a>
+        </div>
+      </section>
+
+      <section class="section reveal" aria-labelledby="gallery-title">
+        <div class="section-head">
+          <h2 id="gallery-title">{{ t.galleryTitle }}</h2>
+          <p>{{ t.gallerySub }}</p>
+        </div>
+        <div class="product-gallery">
+          <ProductScreenshot v-for="key in featureShots" :key="key" :src="screenshots[key]"
+            :title="t.screenshots[key].title" :caption="t.screenshots[key].caption"
+            :alt="t.screenshots[key].alt" :pending-label="t.screenshotPending"
+            :pending-note="t.screenshotPendingNote" :source-note="t.screenshotSource" />
         </div>
       </section>
 
@@ -1159,15 +1112,10 @@ useHead(() => ({
             </li>
           </ol>
         </div>
-        <div class="panel preview">
-          <div class="preview-header">
-            <span>{{ t.previewTitle }}</span>
-            <span class="pill">{{ t.previewStatus }}</span>
-          </div>
-          <div class="preview-body">
-            <p v-for="line in t.previewLines" :key="line">{{ line }}</p>
-          </div>
-        </div>
+        <ProductScreenshot :src="screenshots.create"
+          :title="t.screenshots.create.title" :caption="t.screenshots.create.caption"
+          :alt="t.screenshots.create.alt" :pending-label="t.screenshotPending"
+          :pending-note="t.screenshotPendingNote" :source-note="t.screenshotSource" />
       </section>
 
       <section id="compat" class="section reveal">
@@ -1207,11 +1155,13 @@ useHead(() => ({
           <div>
             <h2>{{ t.downloadTitle }}</h2>
             <p>{{ t.downloadSub }}</p>
+            <p class="download-reassurance">{{ t.freeNote }}</p>
           </div>
           <div class="callout-actions">
-            <a :href="downloadUrl" class="btn primary" data-event="download_click">{{ t.downloadPrimary }}</a>
-            <a :href="docsUrl" class="btn ghost">{{ t.downloadSecondary }}</a>
-            <a :href="boothUrl" target="_blank" rel="noopener noreferrer" class="btn booth" data-event="booth_click">{{ t.downloadBoothCta }}</a>
+            <a :href="isMobileDevice ? '#pc-handoff' : downloadUrl" class="btn primary"
+              :data-event="isMobileDevice ? 'pc_handoff_open' : 'download_click'" data-cta-location="download"
+              @click="openPcHandoff">{{ isMobileDevice ? t.heroMobileCta : t.downloadPrimary }}</a>
+            <a :href="docsUrl" class="btn ghost" data-event="setup_guide_click" data-cta-location="download">{{ t.downloadSecondary }}</a>
           </div>
         </div>
         <div class="download-options-block">
@@ -1224,18 +1174,20 @@ useHead(() => ({
               <h3>{{ option.title }}</h3>
               <p>{{ option.body }}</p>
               <a
-                :href="downloadOptionLinks[option.id]"
+                :href="isMobileDevice && option.id === 'local' ? '#pc-handoff' : downloadOptionLinks[option.id]"
                 class="btn ghost"
-                :data-event="downloadOptionEvents[option.id]"
+                :data-event="isMobileDevice && option.id === 'local' ? 'pc_handoff_open' : downloadOptionEvents[option.id]"
+                data-cta-location="options"
+                @click="option.id === 'local' && openPcHandoff()"
               >
-                {{ option.cta }}
+                {{ isMobileDevice && option.id === 'local' ? t.heroMobileCta : option.cta }}
               </a>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="section reveal">
+      <section id="support" class="section reveal">
         <div class="callout booth-callout">
           <div class="booth-text">
             <h2>{{ t.boothTitle }}</h2>
@@ -1249,6 +1201,7 @@ useHead(() => ({
               target="_blank"
               rel="noopener noreferrer"
               data-event="booth_click"
+              data-cta-location="booth"
             >{{ t.boothCta }}</a>
           </div>
         </div>
@@ -1271,6 +1224,7 @@ useHead(() => ({
                 :href="item.href"
                 class="pr-media-link"
                 data-affiliate="true"
+                data-cta-location="sponsors"
                 :data-event="item.eventName || 'outbound_affiliate_click'"
                 :target="isExternalUrl(item.href) ? '_blank' : null"
                 :rel="isExternalUrl(item.href) ? 'sponsored nofollow noopener noreferrer' : 'sponsored nofollow'"
@@ -1292,6 +1246,7 @@ useHead(() => ({
                 :href="item.textHref || item.href"
                 class="pr-cta"
                 data-affiliate="true"
+                data-cta-location="sponsors"
                 :data-event="item.textEventName || item.eventName || 'outbound_affiliate_click'"
                 :target="isExternalUrl(item.textHref || item.href) ? '_blank' : null"
                 :rel="isExternalUrl(item.textHref || item.href) ? 'sponsored nofollow noopener noreferrer' : 'sponsored nofollow'"
@@ -1336,7 +1291,8 @@ useHead(() => ({
               v-if="item.linkId"
               :href="faqLinks[item.linkId]"
               class="faq-link"
-              :data-event="item.linkId === 'hosting' ? 'docs_24_7_hosting_click' : null"
+              :data-event="item.linkId === 'hosting' ? 'docs_24_7_hosting_click' : 'setup_guide_click'"
+              data-cta-location="faq"
             >
               {{ item.linkLabel }}
             </a>

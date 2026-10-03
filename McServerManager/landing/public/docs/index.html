@@ -147,25 +147,7 @@
         font-weight: 700;
       }
     </style>
-      <!-- Google tag (gtag.js)。localhost などローカル環境からのアクセスは計測しない -->
-      <script>
-        (function () {
-          var id = 'G-MM106D2B2Z';
-          var host = location.hostname;
-          if (!host || host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host === '::1' || /\.localhost$/.test(host)) {
-            window['ga-disable-' + id] = true;
-            return;
-          }
-          var s = document.createElement('script');
-          s.async = true;
-          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
-          document.head.appendChild(s);
-          window.dataLayer = window.dataLayer || [];
-          window.gtag = function () { window.dataLayer.push(arguments); };
-          window.gtag('js', new Date());
-          window.gtag('config', id);
-        })();
-      </script>
+
     <meta name="description" content="マイクラサーバーの立て方、作り方、ポート開放、Java導入をWindows向けにまとめたセットアップガイド。" />
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="https://www.maipilot.jp/docs/" />
@@ -179,7 +161,7 @@
     <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
     <meta property="og:image:alt" content="MaiPilot icon" />
     <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
-                <script type="application/ld+json" data-seo="breadcrumb">
+                          <script type="application/ld+json" data-seo="breadcrumb">
 {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -199,6 +181,7 @@
   ]
 }
   </script>
+    <script defer src="/analytics.js" data-measurement-id="G-MM106D2B2Z"></script>
   </head>
   <body>
     <div class="wrap">
@@ -235,8 +218,8 @@
           <h2 class="section-title"><span>セットアップ手順</span></h2>
           <ol>
             <li>インストーラーを実行してインストールします。</li>
-            <li>アプリを起動し、サーバー種別（Vanilla / Paper / Spigot / Forge / Fabric / Purpur）を選びます。</li>
-            <li>Java パスを指定し、メモリやポートを設定します。</li>
+            <li>アプリを起動し、Java版または統合版BDSを選びます。Java版ではサーバー種別も選択します。</li>
+            <li>Java版では対応するJavaを自動セットアップするか、Javaパスを指定します。メモリやポートなど、選んだ版で使える項目を設定します。</li>
             <li>起動ボタンでサーバーを開始します。</li>
           </ol>
           <p class="muted">※ 起動前に Java バージョンを自動チェックします。MOD/プラグインは Modrinth 連携で検索・導入できます。</p>
@@ -248,8 +231,8 @@
           <h2 class="section-title"><span>Quick Setup</span></h2>
           <ol>
             <li>Run the installer and finish setup.</li>
-            <li>Open the app and choose a server type (Vanilla / Paper / Spigot / Forge / Fabric / Purpur).</li>
-            <li>Select your java.exe, set memory and port.</li>
+            <li>Open the app and choose Java Edition or Bedrock Dedicated Server. For Java, also select a server type.</li>
+            <li>For Java Edition, use automatic Java setup or select a compatible java.exe. Configure memory, ports and other options supported by the selected edition.</li>
             <li>Press Start to launch the server.</li>
           </ol>
           <p class="muted">Java version compatibility is checked before start. MODs/plugins can be searched and installed via Modrinth integration.</p>
@@ -260,7 +243,7 @@
         <h2>動作環境</h2>
         <ul>
           <li>Windows 10/11</li>
-          <li>Java (server.jar 実行用)</li>
+          <li>Java版は対応するJavaが必要（自動セットアップ可）。統合版BDSには不要</li>
           <li>ネット接続 (バージョン取得/公開IP確認)</li>
         </ul>
       </section>
@@ -269,7 +252,7 @@
         <h2>Requirements</h2>
         <ul>
           <li>Windows 10/11</li>
-          <li>Java (for server.jar)</li>
+          <li>A compatible Java runtime for Java Edition (automatic setup available); not needed for BDS</li>
           <li>Network connection (version info / public IP checks)</li>
         </ul>
       </section>
@@ -315,27 +298,27 @@
       <section class="card" data-lang-block="ja">
         <h2>セキュリティ/プライバシー</h2>
         <ul>
-          <li>データは端末内のみ保存。クラウド送信なし。</li>
+          <li>ワールド・設定・バックアップは端末内に保存し、自動アップロードしません。任意のJava版リソースパック配布を開始した場合は、選んだZIPをCloudflare経由で公開できます。</li>
           <li>解析/テレメトリは行いません。ログの自動送信なし。</li>
-          <li>管理者権限は Firewall/UPnP 操作時のみ。理由を表示します。</li>
+          <li>Firewallルールの変更時は理由を表示して管理者権限を要求します。UPnPは対応ルーターの設定・許可に依存します。</li>
           <li>保存先/ログ/クラッシュレポートはワンクリックで開けます。</li>
-          <li>インストーラーの SHA256 を配布ページに掲載し、改ざん検知が可能です。</li>
+          <li>インストーラーのSHA256は<a href="/updates/win-x64/update.json">更新マニフェスト</a>で確認できます。</li>
         </ul>
       </section>
 
       <section class="card" data-lang-block="en">
         <h2>Security & Privacy</h2>
         <ul>
-          <li>Data stays on your PC. No cloud storage.</li>
+          <li>Worlds, settings and backups are stored locally and are not automatically uploaded. Optional Java resource-pack distribution can publish the selected ZIP through Cloudflare.</li>
           <li>No telemetry. Logs are not sent automatically.</li>
-          <li>Admin rights are requested only for Firewall/UPnP actions with reasons shown.</li>
+          <li>Firewall-rule changes request administrator elevation with an explanation. UPnP depends on router support and permission.</li>
           <li>Data, logs, and crash reports are one click away.</li>
-          <li>SHA256 hashes are posted on the download page for integrity checks.</li>
+          <li>The installer SHA256 is available in the <a href="/updates/win-x64/update.json">update manifest</a>.</li>
         </ul>
       </section>
 
       <section class="card" data-lang-block="ja">
-        <h2>通信先の一覧</h2>
+        <h2>通信先の例</h2>
         <ul>
           <li>launchermeta.mojang.com: Minecraft バージョン一覧</li>
           <li>api.papermc.io: Paper バージョン/ダウンロード</li>
@@ -346,10 +329,11 @@
           <li>api.ipify.org: 公開 IP の取得</li>
         </ul>
         <p class="muted">※ BuildTools は追加で Git/SpigotMC などへアクセスする場合があります。</p>
+        <p class="muted">これは代表例です。利用する機能に応じて、Javaの配布元、統合版BDSやMaiPilot更新の配布先、任意のリソースパック配布用Cloudflareなどにも通信します。</p>
       </section>
 
       <section class="card" data-lang-block="en">
-        <h2>Network Endpoints</h2>
+        <h2>Example Network Endpoints</h2>
         <ul>
           <li>launchermeta.mojang.com: Minecraft version manifest</li>
           <li>api.papermc.io: Paper versions/downloads</li>
@@ -360,6 +344,7 @@
           <li>api.ipify.org: Public IP lookup</li>
         </ul>
         <p class="muted">BuildTools may access Git/SpigotMC sources for builds.</p>
+        <p class="muted">These are examples. Depending on the features used, the app also contacts Java distributors, BDS and MaiPilot update download services, and Cloudflare for optional resource-pack distribution.</p>
       </section>
 
       <section class="card" data-lang-block="ja">
@@ -447,6 +432,7 @@
       const storageKey = "mcsm-docs-lang";
 
       const applyLang = (lang) => {
+        document.documentElement.lang = lang === "en" ? "en" : "ja";
         blocks.forEach((block) => {
           const blockLang = block.getAttribute("data-lang-block");
           const display = block.getAttribute("data-lang-display") || "block";
@@ -459,57 +445,6 @@
           localStorage.setItem(storageKey, lang);
         } catch (error) {
           // ignore
-        }
-      };
-
-      const trackEvent = ({ event_name, link_url, link_text, source }) => {
-        const win = window;
-        if (typeof win.gtag === "function") {
-          win.gtag("event", event_name, {
-            event_category: source || "cta",
-            event_label: link_text || link_url || "",
-            link_url: link_url,
-          });
-          return;
-        }
-        if (Array.isArray(win.dataLayer)) {
-          win.dataLayer.push({
-            event: event_name,
-            link_url: link_url,
-            link_text: link_text,
-            source: source || "cta",
-          });
-        }
-      };
-
-      const handleTrackedClick = (event) => {
-        const target = event.target;
-        if (!target || !target.closest) {
-          return;
-        }
-        const link = target.closest("a");
-        if (!link) {
-          return;
-        }
-        const eventName = link.getAttribute("data-event");
-        const href = link.getAttribute("href") || "";
-        const text = link.textContent ? link.textContent.trim() : "";
-        if (eventName) {
-          trackEvent({
-            event_name: eventName,
-            link_url: href,
-            link_text: text,
-            source: "cta",
-          });
-        }
-        const rel = (link.getAttribute("rel") || "").toLowerCase();
-        if (rel.includes("sponsored") && eventName !== "outbound_affiliate_click") {
-          trackEvent({
-            event_name: "outbound_affiliate_click",
-            link_url: href,
-            link_text: text,
-            source: "affiliate",
-          });
         }
       };
 
@@ -528,8 +463,6 @@
       buttons.forEach((button) => {
         button.addEventListener("click", () => applyLang(button.getAttribute("data-lang")));
       });
-
-      document.addEventListener("click", handleTrackedClick, { passive: true });
     </script>
   </body>
 </html>

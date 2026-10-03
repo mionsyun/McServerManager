@@ -41,25 +41,7 @@
       .nav-links a:hover{color:var(--text);}
       .nav-cta{background:rgba(102,255,136,.12);color:var(--accent)!important;border:1px solid rgba(102,255,136,.35);border-radius:8px;padding:5px 12px;font-weight:700;}
     </style>
-    <!-- Google tag (gtag.js)。localhost などローカル環境からのアクセスは計測しない -->
-    <script>
-      (function () {
-        var id = 'G-MM106D2B2Z';
-        var host = location.hostname;
-        if (!host || host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host === '::1' || /\.localhost$/.test(host)) {
-          window['ga-disable-' + id] = true;
-          return;
-        }
-        var s = document.createElement('script');
-        s.async = true;
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
-        document.head.appendChild(s);
-        window.dataLayer = window.dataLayer || [];
-        window.gtag = function () { window.dataLayer.push(arguments); };
-        window.gtag('js', new Date());
-        window.gtag('config', id);
-      })();
-    </script>
+
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="https://www.maipilot.jp/docs/growth/resource-pack-distribution/" />
     <meta property="og:title" content="Minecraftサーバーにリソースパックを自動配布する方法 | MaiPilot" />
@@ -76,7 +58,7 @@
     <meta property="og:locale" content="ja_JP" />
     <meta property="article:published_time" content="2026-04-05T00:00:00+09:00" />
     <meta property="article:modified_time" content="2026-04-05T00:00:00+09:00" />
-      <script type="application/ld+json" data-seo="breadcrumb">
+                <script type="application/ld+json" data-seo="breadcrumb">
 {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -108,7 +90,7 @@
   ]
 }
   </script>
-      <script type="application/ld+json" data-seo="faq">
+                <script type="application/ld+json" data-seo="faq">
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -142,7 +124,7 @@
       "name": "ZIPのサイズ制限はありますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Minecraftクライアント側の制限はありませんが、大きすぎると参加時の待ち時間が長くなります。目安として50MB以下を推奨します。"
+        "text": "利用するMinecraftクライアントのバージョンごとに、容量上限と互換性を確認してください。大きなファイルは参加時の待ち時間も長くなるため、実際のクライアントで取得と適用を試します。"
       }
     },
     {
@@ -156,6 +138,7 @@
   ]
 }
   </script>
+    <script defer src="/analytics.js" data-measurement-id="G-MM106D2B2Z"></script>
   </head>
   <body>
     <nav class="site-nav">
@@ -163,7 +146,7 @@
       <div class="nav-links">
         <a href="/">ホーム</a>
         <a href="/docs/growth/">ガイド</a>
-        <a href="/?from=docs_nav_resourcepack#download" class="nav-cta" data-event="nav_download_click" data-source="growth_resource_pack">ダウンロード</a>
+        <a href="/?from=docs_nav_resourcepack#download" class="nav-cta" data-event="docs_to_download" data-source="growth_resource_pack">ダウンロード</a>
       </div>
     </nav>
     <main class="wrap">
@@ -174,7 +157,7 @@
         <p class="muted">プレイヤーがサーバーに参加した瞬間、テクスチャやサウンドを自動ダウンロードさせる手順です。</p>
         <div class="chips">
           <span class="chip">想定読了: 7分</span>
-          <span class="chip">対象: サーバー管理者</span>
+          <span class="chip">対象: Java版サーバー管理者（統合版BDSは対象外）</span>
           <span class="chip">目的: リソースパック配布</span>
         </div>
       </section>
@@ -279,7 +262,7 @@
           <dt data-faq-question>プレイヤーがリソースパックを拒否した場合はどうなりますか？</dt>
           <dd data-faq-answer>server.propertiesの <code>require-resource-pack=true</code> を設定すると強制適用できます。拒否したプレイヤーはサーバーへの参加が拒否されます。</dd>
           <dt data-faq-question>ZIPのサイズ制限はありますか？</dt>
-          <dd data-faq-answer>Minecraftクライアント側の制限はありませんが、大きすぎると参加時の待ち時間が長くなります。目安として50MB以下を推奨します。</dd>
+          <dd data-faq-answer>利用するMinecraftクライアントのバージョンごとに、容量上限と互換性を確認してください。大きなファイルは参加時の待ち時間も長くなるため、実際のクライアントで取得と適用を試します。</dd>
           <dt data-faq-question>リソースパックを更新したらどうすればいいですか？</dt>
           <dd data-faq-answer>ZIPを差し替えると SHA-1 が変わります。MaiPilotで再度「server.propertiesに適用」ボタンを押し、サーバーを再起動してください。</dd>
         </dl>
@@ -295,9 +278,9 @@
           <li>ZIPを選択するとSHA-1を自動計算</li>
           <li>Cloudflare Quick TunnelでHTTPS URLをワンクリック生成（アカウント不要）</li>
           <li>「server.propertiesに適用」ボタンで設定を自動書き込み</li>
-          <li>サーバー停止時にトンネルを自動切断</li>
+          <li>配布を終えるときは、リソースパック画面で配信サーバーとトンネルを停止してください。Minecraftサーバーの停止だけで配布終了したと判断しないでください。</li>
         </ul>
-        <p><a href="/?from=growth_resource_pack_distribution" data-event="growth_download_click" data-source="growth_resource_pack" data-label="download">MaiPilotをダウンロード</a></p>
+        <p><a href="/?from=growth_resource_pack_distribution" data-event="docs_to_download" data-source="growth_resource_pack" data-label="download">MaiPilotをダウンロード</a></p>
       </section>
 
       <section class="card">
@@ -307,28 +290,6 @@
       </section>
 
     </main>
-    <script>
-      const trackEvent = ({ event_name, link_url, link_text, source }) => {
-        const win = window;
-        if (typeof win.gtag === "function") {
-          win.gtag("event", event_name, { event_category: source || "cta", event_label: link_text || link_url || "", link_url });
-          return;
-        }
-        if (Array.isArray(win.dataLayer)) {
-          win.dataLayer.push({ event: event_name, link_url, link_text, source: source || "cta" });
-        }
-      };
-      document.addEventListener("click", (event) => {
-        const link = event.target?.closest?.("a");
-        if (!link) return;
-        const eventName = link.getAttribute("data-event");
-        if (!eventName) return;
-        const href = link.getAttribute("href") || "";
-        const label = link.getAttribute("data-label");
-        const text = label || (link.textContent?.trim() ?? "");
-        const source = link.getAttribute("data-source") || "cta";
-        trackEvent({ event_name: eventName, link_url: href, link_text: text, source });
-      }, { passive: true });
-    </script>
+
   </body>
 </html>

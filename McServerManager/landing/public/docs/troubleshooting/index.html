@@ -117,25 +117,7 @@
         font-size: 12px;
       }
     </style>
-      <!-- Google tag (gtag.js)。localhost などローカル環境からのアクセスは計測しない -->
-      <script>
-        (function () {
-          var id = 'G-MM106D2B2Z';
-          var host = location.hostname;
-          if (!host || host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host === '::1' || /\.localhost$/.test(host)) {
-            window['ga-disable-' + id] = true;
-            return;
-          }
-          var s = document.createElement('script');
-          s.async = true;
-          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
-          document.head.appendChild(s);
-          window.dataLayer = window.dataLayer || [];
-          window.gtag = function () { window.dataLayer.push(arguments); };
-          window.gtag('js', new Date());
-          window.gtag('config', id);
-        })();
-      </script>
+
     <meta name="description" content="MaiPilot | トラブルシュート - MaiPilot docs page." />
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="https://www.maipilot.jp/docs/troubleshooting/" />
@@ -149,7 +131,7 @@
     <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
     <meta property="og:image:alt" content="MaiPilot icon" />
     <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
-                <script type="application/ld+json" data-seo="breadcrumb">
+                          <script type="application/ld+json" data-seo="breadcrumb">
 {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -175,6 +157,7 @@
   ]
 }
   </script>
+    <script defer src="/analytics.js" data-measurement-id="G-MM106D2B2Z"></script>
   </head>
   <body>
     <div class="wrap">
@@ -254,9 +237,9 @@
       <section class="card" data-lang-block="ja">
         <h2>自動再起動 / クラッシュ復旧</h2>
         <ul>
-          <li>MaiPilot はクラッシュを検知すると自動でサーバーを再起動します。</li>
+          <li>自動再起動を有効にしている場合、MaiPilotは異常終了を検知するとサーバーの再起動を試みます。</li>
           <li>繰り返しクラッシュする場合は自動再起動を停止し、ログで根本原因を確認してください。</li>
-          <li>リアルタイムモニタリング（CPU・TPS・プレイヤー数）でパフォーマンス低下を事前に察知できます。</li>
+          <li>CPU・RAM・プレイヤー数の表示をログと合わせて確認し、負荷や異常終了の原因を調べてください。</li>
         </ul>
       </section>
 
@@ -283,9 +266,9 @@
       <section class="card" data-lang-block="en">
         <h2>Auto-restart / crash recovery</h2>
         <ul>
-          <li>MaiPilot automatically restarts the server when a crash is detected.</li>
+          <li>When auto-restart is enabled, MaiPilot attempts to restart the server after an unexpected exit.</li>
           <li>If crashes repeat, disable auto-restart and check logs for the root cause.</li>
-          <li>Real-time monitoring (CPU, TPS, players) helps detect performance issues early.</li>
+          <li>Use the CPU, RAM and player-count display together with logs to investigate load or unexpected exits.</li>
         </ul>
       </section>
 
@@ -308,6 +291,7 @@
       const storageKey = "mcsm-docs-lang";
 
       const applyLang = (lang) => {
+        document.documentElement.lang = lang === "en" ? "en" : "ja";
         blocks.forEach((block) => {
           const blockLang = block.getAttribute("data-lang-block");
           const display = block.getAttribute("data-lang-display") || "block";
@@ -320,57 +304,6 @@
           localStorage.setItem(storageKey, lang);
         } catch (error) {
           // ignore
-        }
-      };
-
-      const trackEvent = ({ event_name, link_url, link_text, source }) => {
-        const win = window;
-        if (typeof win.gtag === "function") {
-          win.gtag("event", event_name, {
-            event_category: source || "cta",
-            event_label: link_text || link_url || "",
-            link_url: link_url,
-          });
-          return;
-        }
-        if (Array.isArray(win.dataLayer)) {
-          win.dataLayer.push({
-            event: event_name,
-            link_url: link_url,
-            link_text: link_text,
-            source: source || "cta",
-          });
-        }
-      };
-
-      const handleTrackedClick = (event) => {
-        const target = event.target;
-        if (!target || !target.closest) {
-          return;
-        }
-        const link = target.closest("a");
-        if (!link) {
-          return;
-        }
-        const eventName = link.getAttribute("data-event");
-        const href = link.getAttribute("href") || "";
-        const text = link.textContent ? link.textContent.trim() : "";
-        if (eventName) {
-          trackEvent({
-            event_name: eventName,
-            link_url: href,
-            link_text: text,
-            source: "cta",
-          });
-        }
-        const rel = (link.getAttribute("rel") || "").toLowerCase();
-        if (rel.includes("sponsored") && eventName !== "outbound_affiliate_click") {
-          trackEvent({
-            event_name: "outbound_affiliate_click",
-            link_url: href,
-            link_text: text,
-            source: "affiliate",
-          });
         }
       };
 
@@ -389,8 +322,6 @@
       buttons.forEach((button) => {
         button.addEventListener("click", () => applyLang(button.getAttribute("data-lang")));
       });
-
-      document.addEventListener("click", handleTrackedClick, { passive: true });
     </script>
   </body>
 </html>

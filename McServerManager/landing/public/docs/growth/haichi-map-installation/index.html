@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>マイクラ 配布マップの入れ方・遊び方ガイド（サーバー対応）Windows版 | MaiPilot</title>
-    <meta name="description" content="マイクラの配布マップをサーバーで遊ぶ手順を解説。Planet Minecraftなどからのダウンロード方法、サーバーフォルダへの配置、ワールド切り替えまで初心者向けに説明。" />
+    <title>Planet Minecraftの配布マップの入れ方｜ダウンロード・サーバー導入 | MaiPilot</title>
+    <meta name="description" content="Planet Minecraftの配布マップをJava版サーバーで遊ぶ手順。ワールドZIPとSchematicの違い、MaiPilotでの取込・切替、バックアップ、表示されないときの確認点を解説。" />
     <style>
       :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
       * { box-sizing:border-box; }
@@ -40,29 +40,12 @@
       .nav-links a:hover { color:var(--text); }
       .nav-cta { background:rgba(102,255,136,.12); color:var(--accent)!important; border:1px solid rgba(102,255,136,.35); border-radius:8px; padding:5px 12px; font-weight:700; }
     </style>
-    <!-- Google tag (gtag.js)。localhost などローカル環境からのアクセスは計測しない -->
-    <script>
-      (function () {
-        var id = 'G-MM106D2B2Z';
-        var host = location.hostname;
-        if (!host || host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host === '::1' || /\.localhost$/.test(host)) {
-          window['ga-disable-' + id] = true;
-          return;
-        }
-        var s = document.createElement('script');
-        s.async = true;
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
-        document.head.appendChild(s);
-        window.dataLayer = window.dataLayer || [];
-        window.gtag = function () { window.dataLayer.push(arguments); };
-        window.gtag('js', new Date());
-        window.gtag('config', id);
-      })();
-    </script>
+    <link rel="stylesheet" href="/guide-enhancements.css" />
+
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="https://www.maipilot.jp/docs/growth/haichi-map-installation/" />
-    <meta property="og:title" content="マイクラ 配布マップの入れ方・遊び方ガイド（サーバー対応）Windows版 | MaiPilot" />
-    <meta property="og:description" content="マイクラの配布マップをサーバーで遊ぶ手順を解説。Planet Minecraftなどからのダウンロード方法、サーバーフォルダへの配置、ワールド切り替えまで初心者向けに説明。" />
+    <meta property="og:title" content="Planet Minecraftの配布マップの入れ方｜ダウンロード・サーバー導入 | MaiPilot" />
+    <meta property="og:description" content="Planet Minecraftの配布マップをJava版サーバーで遊ぶ手順。ワールドZIPとSchematicの違い、MaiPilotでの取込・切替、バックアップ、表示されないときの確認点を解説。" />
     <meta property="og:type" content="article" />
     <meta property="og:url" content="https://www.maipilot.jp/docs/growth/haichi-map-installation/" />
     <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
@@ -70,10 +53,10 @@
     <meta property="og:site_name" content="MaiPilot" />
     <meta property="og:locale" content="ja_JP" />
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="マイクラ 配布マップの入れ方・遊び方ガイド（サーバー対応）Windows版 | MaiPilot" />
-    <meta name="twitter:description" content="マイクラの配布マップをサーバーで遊ぶ手順を解説。Planet Minecraftなどからのダウンロード方法、サーバーフォルダへの配置、ワールド切り替えまで初心者向けに説明。" />
+    <meta name="twitter:title" content="Planet Minecraftの配布マップの入れ方｜ダウンロード・サーバー導入 | MaiPilot" />
+    <meta name="twitter:description" content="Planet Minecraftの配布マップをJava版サーバーで遊ぶ手順。ワールドZIPとSchematicの違い、MaiPilotでの取込・切替、バックアップ、表示されないときの確認点を解説。" />
     <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
-    <script type="application/ld+json" data-seo="breadcrumb">
+                        <script type="application/ld+json" data-seo="breadcrumb">
 {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -99,216 +82,149 @@
     {
       "@type": "ListItem",
       "position": 4,
-      "name": "マイクラ 配布マップの入れ方・遊び方ガイド（サーバー対応）Windows版",
+      "name": "Planet Minecraftの配布マップの入れ方｜ダウンロード・サーバー導入",
       "item": "https://www.maipilot.jp/docs/growth/haichi-map-installation/"
     }
   ]
 }
   </script>
-    <script type="application/ld+json" data-seo="faq">
+                        <script type="application/ld+json" data-seo="faq">
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "配布マップはどこでダウンロードできますか？",
+      "name": "Planet Minecraftのマップはどこからダウンロードしますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Planet Minecraft（planetminecraft.com）、CurseForge（curseforge.com）、各種Minecraftコミュニティフォーラムなどが主な入手先です。マップの対応バージョンを必ず確認してください。"
+        "text": "作品の配布ページで、作者が指定するワールドのダウンロード先を選びます。Java版・統合版、対応バージョン、必要なMOD等を確認してください。Schematicやシードだけの投稿は、ワールドZIPの取込手順とは別です。"
       }
     },
     {
       "@type": "Question",
-      "name": "ワールドタブ
-<figure class="doc-screenshot">
-  <img src="/images/screenshots/04-world-tab.png" alt="ワールドタブのスクリーンショット" loading="lazy" style="max-width:100%;border-radius:8px;border:1px solid #e0e0e0;box-shadow:0 2px 8px rgba(0,0,0,.12);">
-  <figcaption style="text-align:center;font-size:.85em;color:#666;margin-top:.5em;">ワールドタブ：使用するワールドを切り替えられます。</figcaption>
-</figure>にマップが表示されません",
+      "name": "ZIP内にワールドが見つからないと表示されます",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "マップフォルダが正しい場所（サーバーフォルダ直下）にあるか確認してください。フォルダの中に「region」フォルダや「level.dat」ファイルがあれば正しい配置です。MaiPilotを一度再起動すると認識される場合があります。"
+        "text": "ワールドデータ入りのZIPか確認してください。MaiPilotはlevel.datまたはregionを含むフォルダーを候補にします。内側に別のZIPがある場合は取り出し、複数候補なら正しい導入元フォルダーを選びます。.schemや.schematicはこの取込の対象ではありません。"
       }
     },
     {
       "@type": "Question",
-      "name": "マップを元のワールドに戻したい",
+      "name": "元のワールドに戻せますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "「ワールド」タブのドロップダウンから元のワールド名（通常は「world」）を選んで切り替えてください。配布マップのデータは削除されずフォルダとして残っています。"
+        "text": "別名で取り込み、元のフォルダーを残した場合は、サーバーを停止して「ワールド」の一覧から元を選び「このワールドに切り替え」を押します。同名で上書きした場合は、残しておいたバックアップからの復元が必要です。"
       }
     },
     {
       "@type": "Question",
-      "name": "友達と一緒に配布マップをプレイしたい",
+      "name": "友達に追加のMODは必要ですか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "友達は追加のMODやデータパックは不要です。サーバーに接続するだけでプレイできます。外部公開する場合はポート開放の設定が必要です。"
+        "text": "作品によります。マップ作者が指定するMOD、リソースパック、バージョン、マルチプレイ対応条件を確認してください。Java版と統合版の違い、家庭用ゲーム機の接続制限、回線の公開条件も別途確認が必要です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "スマホだけでMaiPilotを使えますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "MaiPilotはWindows 10/11用です。スマホで調べている場合は、公式ページのPC用リンクをコピー・共有し、Windows PCで開いてからダウンロードしてください。"
       }
     }
   ]
 }
   </script>
+    <script defer src="/analytics.js" data-measurement-id="G-MM106D2B2Z"></script>
   </head>
   <body>
-    <div class="wrap">
-      <nav class="site-nav">
-        <a class="nav-brand" href="/">MaiPilot</a>
-        <div class="nav-links">
-          <a href="/docs/">ガイド一覧</a>
-          <a href="/docs/growth/">記事ハブ</a>
-          <a href="/" class="nav-cta">ダウンロード</a>
+    <nav class="site-nav" aria-label="サイトナビゲーション">
+      <a class="nav-brand" href="/">MaiPilot</a>
+      <div class="nav-links"><a href="/docs/">ガイド一覧</a><a href="/docs/growth/">記事ハブ</a><a href="/#download" class="nav-cta" data-event="docs_to_download" data-cta-location="docs_nav">無料Windows版</a></div>
+    </nav>
+    <main class="wrap">
+      <section class="card hero">
+        <div class="chips"><span class="chip">Planet Minecraft</span><span class="chip">Java版の配布ワールド</span><span class="chip">Windows 10/11</span></div>
+        <h1>Planet Minecraftの配布マップの入れ方<br>ダウンロードからサーバー導入まで</h1>
+        <p class="muted">「保存したZIPをどこへ入れる？」「友達と遊べる？」を順に解決。まずワールド形式と対応エディションを確認し、元のワールドを残して導入します。</p>
+        <div class="quick-answer" aria-labelledby="quick-answer-title">
+          <h2 id="quick-answer-title">先に答え：Java版のワールドZIPを、停止中のサーバーへ取り込みます</h2>
+          <ol><li>配布ページでJava版・対応バージョン・追加要件を確認してワールドZIPを保存</li><li>対象サーバーを停止し、今のワールドをバックアップ</li><li>MaiPilotの「ワールド」→「配布マップ導入 (.zip)」でZIPと導入先名を選択</li><li>取込後にサーバーを起動し、ゲームから接続して中身を確認</li></ol>
+          <p class="muted"><strong>.schem / .schematicはワールドZIPとは別形式です。</strong>この取込手順は建築データの貼り付けやJava版・統合版間の変換には対応しません。</p>
         </div>
-      </nav>
+        <div class="guide-actions"><a class="cta-btn" href="#maipilot-map">MaiPilotで取り込む手順へ</a><a class="guide-secondary" href="#download-map">まずダウンロード方法を確認</a></div>
+        <p class="guide-mobile"><a href="/#pc-handoff" data-event="docs_to_download" data-cta-location="docs_cta">スマホで見ている方：Windows PC用リンクのコピー・共有へ</a></p>
+      </section>
 
-      <div class="card hero">
-        <div class="chips">
-          <span class="chip">配布マップ 入れ方</span>
-          <span class="chip">配布マップ 遊び方</span>
-          <span class="chip">サーバー対応</span>
-          <span class="chip">Windows 10/11</span>
+      <nav class="card guide-toc" aria-label="この記事の目次"><a href="#download-map">1. ダウンロード</a><a href="#maipilot-map">2. ZIPを取り込む</a><a href="#verify-map">3. 起動・確認</a><a href="#manual-map">手動で配置する場合</a><a href="#map-trouble">表示されないとき</a></nav>
+
+      <section class="card" id="download-map">
+        <h2>1. Planet Minecraftでワールドをダウンロードする</h2>
+        <p class="muted">配布マップはプレイヤーが公開したワールドデータです。<a href="https://www.planetminecraft.com/projects/" target="_blank" rel="noopener noreferrer">Planet MinecraftのMaps一覧</a>にはワールドのほか、Schematic、動画、シードの投稿もあります。投稿名だけで判断せず、作者の説明とファイル形式を確認してください。</p>
+        <ol class="step-list">
+          <li><span class="step-num">1</span><span class="step-body"><strong>作品の配布ページを開きます。</strong>Java版か統合版か、対応するMinecraftバージョン、マルチプレイ対応、必要なMOD・リソースパック・設定を確認します。</span></li>
+          <li><span class="step-num">2</span><span class="step-body"><strong>作者が案内しているワールドのダウンロード先を選びます。</strong>Java版ではワールドデータ入りのZIPを選びます。広告のダウンロードボタンや無関係な実行ファイルと取り違えないでください。</span></li>
+          <li><span class="step-num">3</span><span class="step-body"><strong>ZIPを保存します。</strong>MaiPilotで取り込む場合は事前の解凍は不要です。候補の目印はlevel.dat、またはregionを含むワールドフォルダーです。ZIPが入れ子なら、内側のワールドZIPを取り出して選びます。</span></li>
+        </ol>
+        <div class="warn">作者の利用条件と指定バージョンを優先してください。新しいバージョンで保存したワールドを古いサーバーへ戻せるとは限りません。ダウンロードした原本も残しておきます。</div>
+        <div class="grid guide-comparison">
+          <div class="mini"><h3>ワールドZIP</h3><p class="muted">Java版の配布ワールドなら、このページの取込手順へ。複数候補が見つかったら、説明に沿ったワールドフォルダーを選びます。</p></div>
+          <div class="mini"><h3>Schematic・シード・動画</h3><p class="muted">ワールドの取込用ZIPとは異なります。ファイル名を.zipに変えてもワールドにはなりません。投稿者が案内する別の導入方法を確認します。</p></div>
+          <div class="mini"><h3>統合版の配布ワールド</h3><p class="muted">MaiPilotのBDS用画面では.mcworld / .zipを選べます。統合版用のワールドが必要で、Java版ワールドを自動変換する機能ではありません。</p></div>
         </div>
-        <h1 style="margin-top:14px;font-size:clamp(20px,3vw,30px)">マイクラ 配布マップの入れ方・<br>サーバーで遊ぶ方法</h1>
-        <p class="muted" style="margin-top:8px">Planet Minecraft などで公開されている配布マップを、サーバーに導入して友達と一緒に遊ぶための全手順を解説します。</p>
-        <div class="notice">🗺️ 配布マップはワールドデータです。インストーラーは不要で、フォルダをコピーするだけで導入できます。</div>
-      </div>
+      </section>
 
-      <div class="card">
-        <h2>配布マップとは</h2>
-        <p class="muted" style="margin-top:6px">配布マップとは、他のプレイヤーが作成・公開しているMinecraftのワールドデータです。脱出・謎解き・RPG・PvPなどさまざまなジャンルがあります。サーバーに設定することで複数人で同時にプレイできます。</p>
-        <div class="grid" style="margin-top:12px">
-          <div class="mini">
-            <strong style="color:var(--accent)">Planet Minecraft</strong>
-            <p class="muted" style="font-size:13px;margin-top:4px">最大の配布マップコミュニティ。日本語表示可。</p>
-          </div>
-          <div class="mini">
-            <strong style="color:var(--accent2)">CurseForge Maps</strong>
-            <p class="muted" style="font-size:13px;margin-top:4px">MODと同じサイトでマップも配布している。</p>
-          </div>
-          <div class="mini">
-            <strong style="color:var(--muted)">Minecraftフォーラム等</strong>
-            <p class="muted" style="font-size:13px;margin-top:4px">各種コミュニティで日本語マップも公開されている。</p>
-          </div>
-        </div>
-      </div>
+      <section class="card" id="maipilot-map">
+        <h2>2. MaiPilotの「ワールド」からZIPを取り込む</h2>
+        <p class="muted">MaiPilot 2.2.0の実装・画面名に合わせたJava版の手順です。対象のJavaサーバーを用意してから進めます。</p>
+        <ol class="step-list">
+          <li><span class="step-num">1</span><span class="step-body"><strong>対象サーバーを停止します。</strong>配布マップの導入とワールドの切り替えは停止中に行います。既存ワールドは<a href="/docs/growth/backup-restore-guide/">バックアップ</a>を作成しておきます。</span></li>
+          <li><span class="step-num">2</span><span class="step-body"><strong>左の「ワールド」を開きます。</strong>「配布マップ導入 (.zip)」の「ファイル」横にある「選択」から、保存したZIPを指定します。</span></li>
+          <li><span class="step-num">3</span><span class="step-body"><strong>「導入元フォルダ」を確認します。</strong>候補が1つなら自動選択、複数なら使うワールドを選びます。「導入先ワールド名」には、既存と重ならない名前を付けます。</span></li>
+          <li><span class="step-num">4</span><span class="step-body"><strong>「配布マップを導入」を押します。</strong>Java版でコマンドブロックが無効なときは、有効化の確認が出ます。作者の要件を読んで判断してください。</span></li>
+          <li><span class="step-num">5</span><span class="step-body"><strong>導入完了と「使用中」のワールド名を確認します。</strong>取込後は導入先ワールドへ設定が切り替わり、次回起動時に適用されます。</span></li>
+        </ol>
+        <div class="warn"><strong>「同名ワールドは上書きして導入」は既存データを置き換えます。</strong>まず別名で取り込み、原本とバックアップを残してください。この導入操作が上書き前に自動バックアップするとは限りません。</div>
+        <div class="guide-actions"><a class="cta-btn" href="/#download" data-event="docs_to_download" data-cta-location="docs_cta">無料Windows版のダウンロード案内へ</a><a class="guide-secondary" href="/#pc-handoff" data-event="docs_to_download" data-cta-location="docs_cta">スマホからPCへ引き継ぐ</a></div>
+        <p class="guide-note">Windows 10/11用。個人・非商用利用は無料です。Minecraft本体や配布マップの利用条件は別途ご確認ください。</p>
+      </section>
 
-      <div class="card">
-        <h2>手順 1：配布マップをダウンロードする</h2>
-        <ul class="step-list">
-          <li>
-            <span class="step-num">1</span>
-            <span class="step-body"><strong>Planet Minecraft などで遊びたいマップを見つけます。</strong>マップのバージョン（1.20.x など）を確認してください。サーバーと同じバージョンのマップを選ぶと確実です。</span>
-          </li>
-          <li>
-            <span class="step-num">2</span>
-            <span class="step-body"><strong>ダウンロードボタンを押してファイルを保存します。</strong>多くの場合 .zip 形式でダウンロードされます。</span>
-          </li>
-          <li>
-            <span class="step-num">3</span>
-            <span class="step-body"><strong>ダウンロードした ZIP を解凍します。</strong>右クリック → 「すべて展開」で解凍してください。解凍後に「region」や「level.dat」が入ったフォルダがあれば正しいマップデータです。</span>
-          </li>
-        </ul>
-        <div class="warn">⚠️ マップによっては専用バージョンの指定があります。マップの説明ページを必ず確認してください。</div>
-      </div>
+      <section class="card" id="verify-map">
+        <h2>3. サーバーを起動して、ゲーム内で確認する</h2>
+        <ol><li>マップが指定するバージョン・MOD・ゲームモードを確認して起動します。</li><li>コンソールで起動完了を確認します。起動ログだけでは、正しいマップや仕掛けの動作までは確認できません。</li><li>ゲームから接続し、想定した建物・地形・開始地点かを確認します。既存のプレイヤーデータ等によって開始位置が異なる場合もあります。</li><li>友達を招く前に、作者が指定する追加ファイルとマルチプレイ条件を全員で揃えます。外部接続は<a href="/docs/port-forwarding/">公開・ポート設定</a>も別途確認します。</li></ol>
+        <p class="muted">コマンドブロック、gamemode、必要なMODやリソースパックの条件は作品によって違います。「接続するだけで必ず遊べる」とは限りません。</p>
+      </section>
 
-      <div class="card">
-        <h2>手順 2：マップデータをサーバーに配置する</h2>
-        <ul class="step-list">
-          <li>
-            <span class="step-num">1</span>
-            <span class="step-body"><strong>MaiPilotで対象サーバーを選択し、「ワールド」タブを開きます。</strong></span>
-          </li>
-          <li>
-            <span class="step-num">2</span>
-            <span class="step-body"><strong>「フォルダを開く」ボタンでサーバーフォルダをエクスプローラーで開きます。</strong></span>
-          </li>
-          <li>
-            <span class="step-num">3</span>
-            <span class="step-body"><strong>解凍したマップフォルダをサーバーフォルダ直下にコピーします。</strong>例：サーバーフォルダ（例: C:\Users\xxx\AppData\Roaming\MaiPilot\servers\xxx）の中に、解凍した配布マップのフォルダをそのまま貼り付けます。</span>
-          </li>
-        </ul>
-        <div class="notice" style="background:rgba(51,168,255,.1);color:var(--accent2)">💡 マップフォルダ名が日本語・スペース含みの場合は、半角英数字に変更すると安全です（例: survival-map）。</div>
-      </div>
+      <section class="card" id="manual-map">
+        <h2>手動で配置する場合：コピー先と切り替え方</h2>
+        <p class="muted">ZIPを自分で展開する場合も、サーバーの停止とバックアップを先に行います。Java版では、level.datまたはregionを含むワールドフォルダーをサーバー直下へ、既存と異なる名前で配置します。</p>
+        <p class="muted">例：<code>server/adventure-map/level.dat</code>。二重フォルダーの外側ではなく、ワールドデータが入っている階層を選びます。MaiPilotの「ワールド」の「フォルダを開く」は、選択中のワールドを開くボタンです。サーバー直下と取り違えないでください。</p>
+        <p class="muted">配置後は「一覧更新」→追加したワールドを選択→「このワールドに切り替え」。起動前に「使用中」の名前を確認します。統合版はサーバー直下のworlds配下に保存され、Java版とは配置が異なります。</p>
+      </section>
 
-      <div class="card">
-        <h2>手順 3：ワールドを切り替えて起動する</h2>
-        <ul class="step-list">
-          <li>
-            <span class="step-num">1</span>
-            <span class="step-body"><strong>MaiPilotの「ワールド」タブを再度開きます。</strong>追加したマップのフォルダ名がリストに表示されます。</span>
-          </li>
-          <li>
-            <span class="step-num">2</span>
-            <span class="step-body"><strong>ドロップダウンから配布マップのフォルダ名を選び「切り替え」を押します。</strong>server.properties の level-name が自動で更新されます。</span>
-          </li>
-          <li>
-            <span class="step-num">3</span>
-            <span class="step-body"><strong>サーバーを起動（再起動）します。</strong>コンソールに「Done!」が出たら配布マップが読み込まれています。</span>
-          </li>
-          <li>
-            <span class="step-num">4</span>
-            <span class="step-body"><strong>接続して確認します。</strong>配布マップのスポーン地点にワープされれば成功です。</span>
-          </li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <h2>配布マップでよくある注意点</h2>
-        <div class="grid">
-          <div class="mini">
-            <strong>ゲームモードの設定</strong>
-            <p class="muted" style="font-size:13px;margin-top:4px">マップによってサバイバル・アドベンチャー・クリエイティブの指定があります。server.properties の gamemode を確認してください。</p>
-          </div>
-          <div class="mini">
-            <strong>コマンドブロックの許可</strong>
-            <p class="muted" style="font-size:13px;margin-top:4px">コマンドブロックを使うマップでは server.properties の enable-command-block を true にする必要があります。</p>
-          </div>
-          <div class="mini">
-            <strong>バージョン不一致</strong>
-            <p class="muted" style="font-size:13px;margin-top:4px">マップ作成バージョンより古いサーバーでは読み込めない場合があります。マップの対応バージョンを確認してください。</p>
-          </div>
-          <div class="mini">
-            <strong>チート・コマンドの設定</strong>
-            <p class="muted" style="font-size:13px;margin-top:4px">マップによってはコマンドが必要なものがあります。OPを付与するか、allow-cheats の設定を確認してください。</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>よくある質問</h2>
+      <section class="card" id="map-trouble">
+        <h2>配布マップが表示されない・遊べないとき</h2>
         <dl class="faq-list">
-          <dt data-faq-question>配布マップはどこでダウンロードできますか？</dt>
-          <dd data-faq-answer>Planet Minecraft（planetminecraft.com）、CurseForge（curseforge.com）、各種Minecraftコミュニティフォーラムなどが主な入手先です。マップの対応バージョンを必ず確認してください。</dd>
-          <dt data-faq-question>ワールドタブにマップが表示されません</dt>
-          <dd data-faq-answer>マップフォルダが正しい場所（サーバーフォルダ直下）にあるか確認してください。フォルダの中に「region」フォルダや「level.dat」ファイルがあれば正しい配置です。MaiPilotを一度再起動すると認識される場合があります。</dd>
-          <dt data-faq-question>マップを元のワールドに戻したい</dt>
-          <dd data-faq-answer>「ワールド」タブのドロップダウンから元のワールド名（通常は「world」）を選んで切り替えてください。配布マップのデータは削除されずフォルダとして残っています。</dd>
-          <dt data-faq-question>友達と一緒に配布マップをプレイしたい</dt>
-          <dd data-faq-answer>友達は追加のMODやデータパックは不要です。サーバーに接続するだけでプレイできます。外部公開する場合はポート開放の設定が必要です。</dd>
+          <dt data-faq-question>Planet Minecraftのマップはどこからダウンロードしますか？</dt>
+          <dd data-faq-answer>作品の配布ページで、作者が指定するワールドのダウンロード先を選びます。Java版・統合版、対応バージョン、必要なMOD等を確認してください。Schematicやシードだけの投稿は、ワールドZIPの取込手順とは別です。</dd>
+          <dt data-faq-question>ZIP内にワールドが見つからないと表示されます</dt>
+          <dd data-faq-answer>ワールドデータ入りのZIPか確認してください。MaiPilotはlevel.datまたはregionを含むフォルダーを候補にします。内側に別のZIPがある場合は取り出し、複数候補なら正しい導入元フォルダーを選びます。.schemや.schematicはこの取込の対象ではありません。</dd>
+          <dt data-faq-question>元のワールドに戻せますか？</dt>
+          <dd data-faq-answer>別名で取り込み、元のフォルダーを残した場合は、サーバーを停止して「ワールド」の一覧から元を選び「このワールドに切り替え」を押します。同名で上書きした場合は、残しておいたバックアップからの復元が必要です。</dd>
+          <dt data-faq-question>友達に追加のMODは必要ですか？</dt>
+          <dd data-faq-answer>作品によります。マップ作者が指定するMOD、リソースパック、バージョン、マルチプレイ対応条件を確認してください。Java版と統合版の違い、家庭用ゲーム機の接続制限、回線の公開条件も別途確認が必要です。</dd>
+          <dt data-faq-question>スマホだけでMaiPilotを使えますか？</dt>
+          <dd data-faq-answer>MaiPilotはWindows 10/11用です。スマホで調べている場合は、公式ページのPC用リンクをコピー・共有し、Windows PCで開いてからダウンロードしてください。</dd>
         </dl>
-      </div>
+      </section>
 
-      <div class="card cta" style="text-align:center">
-        <h2 style="margin-bottom:6px">MaiPilotでワールド管理を簡単に</h2>
-        <p class="muted">GUIでワールド切り替え・バックアップ・復元をかんたんに操作。</p>
-        <a class="cta-btn" href="/" data-event="download_click">無料でダウンロード（Windows）</a>
-      </div>
-
-      <div class="card">
-        <h2>関連ガイド</h2>
-        <ul>
-          <li><a href="/docs/growth/backup-restore-guide/">バックアップと復元手順（事故防止）</a></li>
-          <li><a href="/docs/growth/server-type-comparison/">Paper / Purpur / Vanilla の選び方比較</a></li>
-          <li><a href="/docs/growth/forge-fabric-mod-installation/">マイクラ MOD入れ方（Forge/Fabric）</a></li>
-          <li><a href="/docs/growth/windows-minecraft-server-2026/">マイクラサーバーの立て方（Windows/2026年版）</a></li>
-          <li><a href="/docs/growth/port-forwarding/">マイクラポート開放チェックリスト</a></li>
-          <li><a href="/docs/">セットアップガイド一覧</a></li>
-        </ul>
-      </div>
-
-      <footer style="text-align:center;color:var(--muted);font-size:12px;padding:16px 0">
-        <a href="/">MaiPilot</a> — <a href="/docs/">Docs</a> — <a href="/docs/growth/">記事ハブ</a>
-      </footer>
-    </div>
+      <section class="card"><h2>関連ガイドと確認元</h2><ul>
+        <li><a href="/docs/growth/backup-restore-guide/">バックアップと復元手順</a></li><li><a href="/docs/growth/server-type-comparison/">Paper / Purpur / Vanillaの選び方</a></li><li><a href="/docs/growth/forge-fabric-mod-installation/">MODの入れ方（Forge/Fabric）</a></li><li><a href="/docs/growth/windows-minecraft-server-2026/">Windowsでサーバーを立てる手順</a></li><li><a href="/docs/">セットアップガイド一覧</a></li>
+        <li><a href="https://www.planetminecraft.com/projects/" target="_blank" rel="noopener noreferrer">Planet Minecraft Maps（配布形式・作品の説明を確認）</a></li>
+        <li><a href="https://github.com/mionsyun/McServerManager/blob/217ca41399f584d83e411cb095b660c9aea94c24/McServerManager/ViewModels/ServerWorldViewModel.cs" target="_blank" rel="noopener noreferrer">MaiPilotのワールド導入・切り替えの実装</a></li>
+      </ul><p class="guide-note">内容確認：2026年10月3日。配布サイトや各作品の仕様は変更される場合があります。</p></section>
+    </main>
+    <footer class="guide-footer"><a href="/">MaiPilot</a> · <a href="/docs/">Docs</a> · <a href="/docs/growth/">記事ハブ</a></footer>
   </body>
 </html>

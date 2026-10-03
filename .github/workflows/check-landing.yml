@@ -1,0 +1,40 @@
+name: Check landing page
+
+on:
+  pull_request:
+    paths:
+      - 'McServerManager/landing/**'
+      - '.github/workflows/check-landing.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: McServerManager/landing
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: McServerManager/landing/.nvmrc
+          cache: npm
+          cache-dependency-path: McServerManager/landing/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: npm run generate
+      - run: npm run test:static
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+      - name: Retain browser check evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: landing-browser-evidence
+          path: McServerManager/landing/test-results
+          if-no-files-found: ignore
+          retention-days: 1

@@ -17,20 +17,20 @@
     {
       "@context": "https://schema.org",
       "@type": "HowTo",
-      "name": "マイクラサーバー用Javaのインストール方法",
+      "name": "マイクラサーバー用Javaの手動インストール方法",
       "description": "Minecraft Java Editionサーバーを建てるために必要なJavaランタイムの導入手順を初心者向けに解説します。",
       "step": [
         {
           "@type": "HowToStep",
           "position": 1,
           "name": "必要なJavaバージョンを確認",
-          "text": "サーバーのバージョン別に必要なJavaバージョンが異なります。1.17以降はJava 17以上、1.20.5以降はJava 21以上が必要です。"
+          "text": "Java版の目安は、1.17がJava 16以上、1.18〜1.20.4がJava 17以上、1.20.5〜1.21.xがJava 21以上、26.1以降がJava 25以上です。サーバー実装やMODの追加要件も確認してください。統合版にはJavaは不要です。"
         },
         {
           "@type": "HowToStep",
           "position": 2,
           "name": "Eclipse Temurinをダウンロード",
-          "text": "Adoptium公式サイト(adoptium.net)からEclipse Temurin LTSをダウンロードします。"
+          "text": "Adoptium公式サイト(adoptium.net)から、サーバーバージョンに合うEclipse Temurinを選んでダウンロードします。26.1以降にはJava 25、1.20.5〜1.21.xにはJava 21が目安です。"
         },
         {
           "@type": "HowToStep",
@@ -120,32 +120,14 @@
         }
       }
     </style>
-      <!-- Google tag (gtag.js)。localhost などローカル環境からのアクセスは計測しない -->
-      <script>
-        (function () {
-          var id = 'G-MM106D2B2Z';
-          var host = location.hostname;
-          if (!host || host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host === '::1' || /\.localhost$/.test(host)) {
-            window['ga-disable-' + id] = true;
-            return;
-          }
-          var s = document.createElement('script');
-          s.async = true;
-          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
-          document.head.appendChild(s);
-          window.dataLayer = window.dataLayer || [];
-          window.gtag = function () { window.dataLayer.push(arguments); };
-          window.gtag('js', new Date());
-          window.gtag('config', id);
-        })();
-      </script>
+
     <meta name="robots" content="index,follow" />
     <meta name="twitter:title" content="MaiPilot | Java導入ガイド - マイクラサーバーに必要なJavaの入れ方" />
     <meta name="twitter:description" content="Minecraft(マイクラ)サーバーを建てるために必要なJavaのインストール方法を初心者向けに解説。Eclipse Temurin / Oracle JDK の導入手順、バージョンの選び方、PATH設定まで丁寧にガイドします。" />
     <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
     <meta property="og:image:alt" content="MaiPilot icon" />
     <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
-                <script type="application/ld+json" data-seo="breadcrumb">
+                          <script type="application/ld+json" data-seo="breadcrumb">
 {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -171,7 +153,7 @@
   ]
 }
   </script>
-            <script type="application/ld+json" data-seo="faq">
+                      <script type="application/ld+json" data-seo="faq">
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -181,7 +163,7 @@
       "name": "Q. JDK と JRE、どちらを入れればいい？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A. JDK をおすすめします。JRE でもサーバーは動きますが、JDK のほうがトラブルシュート時に便利なツールが含まれています。"
+        "text": "A. MaiPilotの自動セットアップは Temurin JRE を導入します。手動で導入する場合は、実行環境に加えて調査用ツールを含むJDKも選べます。サーバー実装やMODの要件を確認してください。"
       }
     },
     {
@@ -197,7 +179,7 @@
       "name": "Q. 「Java が見つかりません」エラーが出る",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A. インストール時に「Add to PATH」を有効にしていない可能性があります。再インストールするか、手動でJavaのパスを設定してください。MaiPilotの「参照」ボタンから C:\\Program Files\\Eclipse Adoptium\\jdk-21...\\bin\\java.exe を選択できます。"
+        "text": "A. 「サーバー設定」の「Java ランタイム」から「自動セットアップ」を使えます。既存のJavaを使う場合は「自動検出」を試すか、「参照」で対応バージョンの java.exe を選択してください。"
       }
     },
     {
@@ -205,7 +187,7 @@
       "name": "Q. 古いバージョン用に Java 8 も必要？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A. 1.16.5以下のサーバーでも Java 21 で動作するケースがほとんどです。まずは Java 21 で試し、問題があれば Java 8 を追加インストールしてください。"
+        "text": "A. 1.16.5以前の目安はJava 8です。古いサーバーやMODは新しいJavaで動かない場合があるため、対象バージョンの要件に合わせてください。MaiPilotではサーバーごとにJavaを指定できます。"
       }
     },
     {
@@ -221,7 +203,7 @@
       "name": "Q. JDK vs JRE — which one?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A. JDK is recommended. It includes the runtime + useful tools for troubleshooting."
+        "text": "A. MaiPilot's automatic setup installs a Temurin JRE . For a manual installation, you can also choose a JDK, which includes the runtime and troubleshooting tools. Check your server implementation and mod requirements."
       }
     },
     {
@@ -237,7 +219,7 @@
       "name": "Q. \"Java not found\" error?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A. Reinstall with \"Add to PATH\" enabled, or manually browse to java.exe using MaiPilot's Browse button."
+        "text": "A. Use Automatic Setup under Java Runtime in the server settings. To use an existing installation, try Auto Detect or Browse to the java.exe for a compatible version."
       }
     },
     {
@@ -251,6 +233,7 @@
   ]
 }
   </script>
+    <script defer src="/analytics.js" data-measurement-id="G-MM106D2B2Z"></script>
   </head>
   <body>
     <div class="wrap">
@@ -288,9 +271,9 @@
       <!-- ===== 日本語 ===== -->
       <section class="card lang" data-lang-block="ja">
         <h2>🎮 なぜJavaが必要なの？</h2>
-        <p class="muted">Minecraft Java Editionのサーバーは、Javaというプログラム上で動いています。サーバーを起動するにはまずJavaをPCにインストールする必要があります。</p>
+        <p class="muted">Minecraft Java EditionのサーバーにはJava実行環境が必要です。MaiPilotから自動セットアップするか、手動で導入できます。統合版（BDS）にはJavaは不要です。</p>
         <div class="tip">
-          <strong>💡 ポイント:</strong> MaiPilotはJavaのパスを自動検出できるので、インストールさえ済めばあとはボタン一つでOKです。
+          <strong>💡 MaiPilotから導入:</strong> 対象サーバーの「サーバー設定」→「Java ランタイム」→「自動セットアップ」を選び、確認画面の内容を確認して進めます。対応するEclipse Temurin JREをAdoptium/GitHubから取得し、そのサーバーに設定します。インターネット接続が必要です。既存のJavaは「自動検出」や「参照」から指定できます。
         </div>
       </section>
 
@@ -305,16 +288,18 @@
             <tr><td>1.7.10 ～ 1.16.5</td><td>Java 8 以上</td><td>Temurin 8 LTS</td></tr>
             <tr><td>1.17 ～ 1.17.1</td><td>Java 16 以上</td><td>Temurin 17 LTS</td></tr>
             <tr><td>1.18 ～ 1.20.4</td><td>Java 17 以上</td><td>Temurin 17 LTS</td></tr>
-            <tr><td>1.20.5 ～ 最新</td><td>Java 21 以上</td><td>Temurin 21 LTS ✅</td></tr>
+            <tr><td>1.20.5 ～ 1.21.x</td><td>Java 21 以上</td><td>Temurin 21 LTS</td></tr>
+            <tr><td>26.1 以降</td><td>Java 25 以上</td><td>Temurin 25 LTS</td></tr>
           </tbody>
         </table>
         <div class="tip">
-          <strong>迷ったら Java 21 (Temurin LTS) を入れればOK！</strong> 最新バージョンに対応しており、古いバージョンのサーバーでも動作します。
+          <strong>使うサーバーのバージョンに合わせて選びましょう。</strong> MaiPilotの自動セットアップは必要なJavaを判定します。サーバー実装やMODによって追加の要件があるため、対象バージョンの案内も確認してください。
         </div>
       </section>
 
       <section class="card lang" data-lang-block="ja">
-        <h2>🛠️ インストール手順（Windows）</h2>
+        <h2>🛠️ 手動インストール手順（Windows）</h2>
+        <p class="muted">アプリの自動セットアップを使わず、自分でJavaを導入する場合の手順です。</p>
 
         <div class="step-card">
           <div class="step-header"><span class="step-num">1</span> ダウンロードページを開く</div>
@@ -323,13 +308,13 @@
             <li>Operating System: <strong>Windows</strong></li>
             <li>Architecture: <strong>x64</strong></li>
             <li>Package Type: <strong>JDK</strong></li>
-            <li>Version: <strong>21 (LTS)</strong> を選択</li>
+            <li>Version: 対応表に合わせて選択（26.1以降は <strong>25 (LTS)</strong>、1.20.5〜1.21.xは <strong>21 (LTS)</strong>）</li>
           </ul>
         </div>
 
         <div class="step-card">
           <div class="step-header"><span class="step-num">2</span> .msi インストーラーをダウンロード</div>
-          <p class="muted">「Latest - LTS」の行にある <code>.msi</code> リンクをクリックしてダウンロードします。</p>
+          <p class="muted">選択したJavaバージョンの <code>.msi</code> インストーラーをダウンロードします。</p>
         </div>
 
         <div class="step-card">
@@ -349,7 +334,7 @@
           <div class="step-header"><span class="step-num">4</span> インストール完了を確認</div>
           <p class="muted">スタートメニューから「PowerShell」を開き、次のコマンドを入力します：</p>
           <code>java -version</code>
-          <p class="muted">例: <code>openjdk version "21.0.x"</code> と表示されれば成功です。</p>
+          <p class="muted">選択したバージョンが表示されることを確認します。26.1用にJava 25を導入した場合の例: <code>openjdk version "25.0.x"</code>。</p>
         </div>
 
         <div class="step-card">
@@ -362,16 +347,16 @@
         <h2>❓ よくある質問（FAQ）</h2>
 
         <h3 data-faq-question>Q. JDK と JRE、どちらを入れればいい？</h3>
-        <p class="muted" data-faq-answer>A. <strong>JDK</strong> をおすすめします。JRE でもサーバーは動きますが、JDK のほうがトラブルシュート時に便利なツールが含まれています。</p>
+        <p class="muted" data-faq-answer>A. MaiPilotの自動セットアップは<strong>Temurin JRE</strong>を導入します。手動で導入する場合は、実行環境に加えて調査用ツールを含むJDKも選べます。サーバー実装やMODの要件を確認してください。</p>
 
         <h3 data-faq-question>Q. Oracle JDK と Eclipse Temurin の違いは？</h3>
         <p class="muted" data-faq-answer>A. どちらも同じ OpenJDK ベースです。Temurin は完全無料で商用利用も可能。個人利用なら Oracle JDK でも問題ありませんが、ライセンスを気にしなくてよい Temurin がおすすめです。</p>
 
         <h3 data-faq-question>Q. 「Java が見つかりません」エラーが出る</h3>
-        <p class="muted" data-faq-answer>A. インストール時に「Add to PATH」を有効にしていない可能性があります。再インストールするか、手動でJavaのパスを設定してください。MaiPilotの「参照」ボタンから <code>C:\Program Files\Eclipse Adoptium\jdk-21...\bin\java.exe</code> を選択できます。</p>
+        <p class="muted" data-faq-answer>A. 「サーバー設定」の「Java ランタイム」から「自動セットアップ」を使えます。既存のJavaを使う場合は「自動検出」を試すか、「参照」で対応バージョンの <code>java.exe</code> を選択してください。</p>
 
         <h3 data-faq-question>Q. 古いバージョン用に Java 8 も必要？</h3>
-        <p class="muted" data-faq-answer>A. 1.16.5以下のサーバーでも Java 21 で動作するケースがほとんどです。まずは Java 21 で試し、問題があれば Java 8 を追加インストールしてください。</p>
+        <p class="muted" data-faq-answer>A. 1.16.5以前の目安はJava 8です。古いサーバーやMODは新しいJavaで動かない場合があるため、対象バージョンの要件に合わせてください。MaiPilotではサーバーごとにJavaを指定できます。</p>
 
         <h3 data-faq-question>Q. 複数のJavaバージョンを共存できる？</h3>
         <p class="muted" data-faq-answer>A. はい。MaiPilotではサーバーごとに個別のJavaパスを指定できるので、バージョンごとに異なるJavaを使い分けられます。</p>
@@ -390,16 +375,16 @@
 
       <div class="cta-box lang" data-lang-block="ja">
         <h3>🚀 Javaの準備ができたら、サーバーを建てよう！</h3>
-        <p class="muted">MaiPilotなら、初心者でも3分でMinecraftサーバーが完成します。</p>
-        <a class="cta-btn" href="/">MaiPilot を無料ダウンロード</a>
+        <p class="muted">MaiPilotなら、サーバー作成と起動前の準備をGUIで進められます。</p>
+        <a class="cta-btn" href="/" data-event="docs_to_download">MaiPilot を無料ダウンロード</a>
       </div>
 
       <!-- ===== English ===== -->
       <section class="card lang" data-lang-block="en">
         <h2>🎮 Why Do You Need Java?</h2>
-        <p class="muted">Minecraft Java Edition servers run on the Java runtime. You need to install Java on your PC before starting a server.</p>
+        <p class="muted">Minecraft Java Edition servers need a Java runtime. MaiPilot can set it up for you, or you can install it manually. Bedrock Dedicated Server does not require Java.</p>
         <div class="tip">
-          <strong>💡 Tip:</strong> MaiPilot can auto-detect your Java installation — just install Java and click one button.
+          <strong>💡 Set up Java in MaiPilot:</strong> Open the selected server's settings (サーバー設定), find Java Runtime (Java ランタイム), and choose Automatic Setup (自動セットアップ). Review the confirmation, then proceed to download a compatible Eclipse Temurin JRE from Adoptium/GitHub and set it for that server. Internet access is required. You can also use Auto Detect or Browse to select an existing Java installation.
         </div>
       </section>
 
@@ -413,25 +398,27 @@
             <tr><td>1.7.10 – 1.16.5</td><td>Java 8+</td><td>Temurin 8 LTS</td></tr>
             <tr><td>1.17 – 1.17.1</td><td>Java 16+</td><td>Temurin 17 LTS</td></tr>
             <tr><td>1.18 – 1.20.4</td><td>Java 17+</td><td>Temurin 17 LTS</td></tr>
-            <tr><td>1.20.5 – Latest</td><td>Java 21+</td><td>Temurin 21 LTS ✅</td></tr>
+            <tr><td>1.20.5 – 1.21.x</td><td>Java 21+</td><td>Temurin 21 LTS</td></tr>
+            <tr><td>26.1 and later</td><td>Java 25+</td><td>Temurin 25 LTS</td></tr>
           </tbody>
         </table>
         <div class="tip">
-          <strong>When in doubt, install Java 21 (Temurin LTS).</strong> It works with all recent versions.
+          <strong>Match Java to your server version.</strong> MaiPilot's automatic setup checks the required Java version. Server implementations and mods can have additional requirements; check their version-specific guidance too.
         </div>
       </section>
 
       <section class="card lang" data-lang-block="en">
-        <h2>🛠️ Installation Steps (Windows)</h2>
+        <h2>🛠️ Manual Installation Steps (Windows)</h2>
+        <p class="muted">Use these steps if you prefer to install Java yourself instead of using the app's automatic setup.</p>
 
         <div class="step-card">
           <div class="step-header"><span class="step-num">1</span> Open the Download Page</div>
-          <p class="muted">Go to <a href="https://adoptium.net/temurin/releases/?os=windows&arch=x64&package=jdk" target="_blank" rel="noopener">Adoptium</a> and select: Windows, x64, JDK, Version 21 (LTS).</p>
+          <p class="muted">Go to <a href="https://adoptium.net/temurin/releases/?os=windows&arch=x64&package=jdk" target="_blank" rel="noopener">Adoptium</a> and select Windows, x64, JDK, and the version from the table: 25 (LTS) for 26.1 and later, or 21 (LTS) for 1.20.5–1.21.x.</p>
         </div>
 
         <div class="step-card">
           <div class="step-header"><span class="step-num">2</span> Download the .msi Installer</div>
-          <p class="muted">Click the <code>.msi</code> link under "Latest - LTS".</p>
+          <p class="muted">Download the <code>.msi</code> installer for the Java version you selected.</p>
         </div>
 
         <div class="step-card">
@@ -449,7 +436,7 @@
         <div class="step-card">
           <div class="step-header"><span class="step-num">4</span> Verify Installation</div>
           <p class="muted">Open PowerShell and run: <code>java -version</code></p>
-          <p class="muted">You should see something like: <code>openjdk version "21.0.x"</code></p>
+          <p class="muted">Check that the selected version is shown. For Java 25 installed for Minecraft 26.1, for example: <code>openjdk version "25.0.x"</code>.</p>
         </div>
 
         <div class="step-card">
@@ -462,13 +449,13 @@
         <h2>❓ FAQ</h2>
 
         <h3 data-faq-question>Q. JDK vs JRE — which one?</h3>
-        <p class="muted" data-faq-answer>A. <strong>JDK</strong> is recommended. It includes the runtime + useful tools for troubleshooting.</p>
+        <p class="muted" data-faq-answer>A. MaiPilot's automatic setup installs a <strong>Temurin JRE</strong>. For a manual installation, you can also choose a JDK, which includes the runtime and troubleshooting tools. Check your server implementation and mod requirements.</p>
 
         <h3 data-faq-question>Q. Oracle JDK vs Eclipse Temurin?</h3>
         <p class="muted" data-faq-answer>A. Both are based on OpenJDK. Temurin is completely free for all uses. We recommend Temurin for simplicity.</p>
 
         <h3 data-faq-question>Q. "Java not found" error?</h3>
-        <p class="muted" data-faq-answer>A. Reinstall with "Add to PATH" enabled, or manually browse to <code>java.exe</code> using MaiPilot's Browse button.</p>
+        <p class="muted" data-faq-answer>A. Use Automatic Setup under Java Runtime in the server settings. To use an existing installation, try Auto Detect or Browse to the <code>java.exe</code> for a compatible version.</p>
 
         <h3 data-faq-question>Q. Can I install multiple Java versions?</h3>
         <p class="muted" data-faq-answer>A. Yes. MaiPilot lets you set a per-server Java path, so you can mix versions easily.</p>
@@ -476,8 +463,8 @@
 
       <div class="cta-box lang" data-lang-block="en">
         <h3>🚀 Java Ready? Let's Build a Server!</h3>
-        <p class="muted">With MaiPilot, you can spin up a Minecraft server in under 3 minutes.</p>
-        <a class="cta-btn" href="/">Download MaiPilot Free</a>
+        <p class="muted">Use MaiPilot to create a server and prepare it for launch through a GUI.</p>
+        <a class="cta-btn" href="/" data-event="docs_to_download">Download MaiPilot Free</a>
       </div>
 
       <footer>
@@ -491,6 +478,7 @@
         let current = stored;
         const btns = document.querySelectorAll(".lang-btn");
         function apply(lang) {
+          document.documentElement.lang = lang === "en" ? "en" : "ja";
           current = lang;
           localStorage.setItem("lang", lang);
           document.querySelectorAll("[data-lang-block]").forEach(el => {

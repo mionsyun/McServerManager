@@ -41,25 +41,7 @@
       .nav-links a:hover { color:var(--text); }
       .nav-cta { background:rgba(102,255,136,.12); color:var(--accent)!important; border:1px solid rgba(102,255,136,.35); border-radius:8px; padding:5px 12px; font-weight:700; }
     </style>
-    <!-- Google tag (gtag.js)。localhost などローカル環境からのアクセスは計測しない -->
-    <script>
-      (function () {
-        var id = 'G-MM106D2B2Z';
-        var host = location.hostname;
-        if (!host || host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host === '::1' || /\.localhost$/.test(host)) {
-          window['ga-disable-' + id] = true;
-          return;
-        }
-        var s = document.createElement('script');
-        s.async = true;
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
-        document.head.appendChild(s);
-        window.dataLayer = window.dataLayer || [];
-        window.gtag = function () { window.dataLayer.push(arguments); };
-        window.gtag('js', new Date());
-        window.gtag('config', id);
-      })();
-    </script>
+
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="https://www.maipilot.jp/docs/growth/minecraft-server-gamerule-settings/" />
     <meta property="og:title" content="マイクラサーバーのgamerule（ゲームルール）設定完全ガイド【2026年版】 | MaiPilot" />
@@ -76,17 +58,38 @@
     <meta property="og:locale" content="ja_JP" />
     <meta property="article:published_time" content="2026-04-12T00:00:00+09:00" />
     <meta property="article:modified_time" content="2026-04-12T00:00:00+09:00" />
-    <script type="application/ld+json" data-seo="breadcrumb">
+              <script type="application/ld+json" data-seo="breadcrumb">
 {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.maipilot.jp/" },
-    { "@type": "ListItem", "position": 2, "name": "ガイド一覧", "item": "https://www.maipilot.jp/docs/growth/" },
-    { "@type": "ListItem", "position": 3, "name": "gamerule設定ガイド", "item": "https://www.maipilot.jp/docs/growth/minecraft-server-gamerule-settings/" }
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://www.maipilot.jp/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Docs",
+      "item": "https://www.maipilot.jp/docs/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Growth",
+      "item": "https://www.maipilot.jp/docs/growth/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "マイクラサーバーのgamerule（ゲームルール）設定完全ガイド【2026年版】",
+      "item": "https://www.maipilot.jp/docs/growth/minecraft-server-gamerule-settings/"
+    }
   ]
 }
-</script>
+  </script>
     <script type="application/ld+json" data-seo="article">
 {
   "@context": "https://schema.org",
@@ -101,36 +104,14 @@
   "image": "https://www.maipilot.jp/icon.png"
 }
 </script>
-    <script type="application/ld+json" data-seo="faq">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "gameruleの設定はサーバー再起動後も保持されますか？",
-      "acceptedAnswer": { "@type": "Answer", "text": "はい。/gamerule コマンドで設定した値はワールドデータに保存されるため、サーバーを再起動しても維持されます。" }
-    },
-    {
-      "@type": "Question",
-      "name": "keepInventoryをtrueにするとどうなりますか？",
-      "acceptedAnswer": { "@type": "Answer", "text": "プレイヤーが死亡してもアイテムをドロップせず、そのままインベントリを保持できます。友達同士のカジュアルサーバーに向いています。" }
-    },
-    {
-      "@type": "Question",
-      "name": "gameruleはワールドごとに設定できますか？",
-      "acceptedAnswer": { "@type": "Answer", "text": "Java版のgameruleはワールド（ディメンション）ごとではなく、サーバー全体に適用されます。ディメンション別に設定したい場合はデータパックを使う方法があります。" }
-    }
-  ]
-}
-</script>
+    <script defer src="/analytics.js" data-measurement-id="G-MM106D2B2Z"></script>
   </head>
   <body>
     <nav class="site-nav">
       <a class="nav-brand" href="/">MaiPilot</a>
       <div class="nav-links">
         <a href="/docs/growth/">ガイド一覧</a>
-        <a href="/#download" class="nav-cta">無料ダウンロード</a>
+        <a href="/#download" class="nav-cta" data-event="docs_to_download">無料ダウンロード</a>
       </div>
     </nav>
     <div class="wrap">
@@ -302,8 +283,8 @@
       <!-- CTA -->
       <div class="card cta" style="text-align:center;">
         <div style="font-weight:700;font-size:16px;">MaiPilotでコンソールをGUIから操作</div>
-        <p class="muted" style="margin:8px 0 12px;font-size:14px;">gameruleコマンドもMaiPilotのコンソールタブから手軽に実行。完全無料・日本語対応。</p>
-        <a href="/#download" style="display:inline-block;background:var(--accent);color:#0b0f17;font-weight:700;border-radius:10px;padding:10px 28px;font-size:15px;">無料ダウンロード</a>
+        <p class="muted" style="margin:8px 0 12px;font-size:14px;">gameruleコマンドもMaiPilotのコンソールタブから手軽に実行。個人・非商用利用は無料。日本語対応。</p>
+        <a href="/#download" style="display:inline-block;background:var(--accent);color:#0b0f17;font-weight:700;border-radius:10px;padding:10px 28px;font-size:15px;" data-event="docs_to_download">無料ダウンロード</a>
       </div>
 
     </div>

@@ -1,0 +1,27 @@
+MaiPilot 2.2.0 UI images: provenance and limits
+
+Source: MaiPilot 2.2.0 application assembly McServerManager.dll.
+ProductVersion: 2.2.0+592b05f7825668711d7534938913231cf2df89fa.
+
+These images render the original WPF MainWindow, ServerDetailControl and
+NewServerWindow with the original application resources in an isolated
+development harness. They are not desktop screenshots. No imitation interface
+was drawn, and no application controls were rebuilt, moved or restyled.
+
+The actual ViewModels use synthetic demo data and test services instead of
+network access, firewall changes, updates, Java installation and scheduling.
+The views were measured and arranged at 1600x1000, then rendered at 96 DPI
+with WPF RenderTargetBitmap over the original BrushBg resource.
+The native OS title bar and window border are omitted. The edition-selector
+image is a 1600x240 crop that excludes the unfinished import tile.
+
+No real player data, IP addresses or credentials appear. Display paths and
+addresses use explicit demo labels. The server remains stopped throughout.
+The demo server, plugins, worlds and backup rows are synthetic fixtures,
+not runnable plugins, playable worlds or usable backups. The displayed
+0.0 MB backup rows are not a performance or compression claim.
+
+The renders do not capture pointer/focus state, the full live-window lifecycle
+or actual user interaction. They are not evidence of live gameplay,
+connectivity or successful server operations. All landing-page images carry
+a visible caption identifying the WPF demo render and synthetic data.

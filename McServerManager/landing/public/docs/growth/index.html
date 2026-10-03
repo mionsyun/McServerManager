@@ -90,25 +90,7 @@
       .nav-links a:hover{color:var(--text);}
       .nav-cta{background:rgba(102,255,136,.12);color:var(--accent)!important;border:1px solid rgba(102,255,136,.35);border-radius:8px;padding:5px 12px;font-weight:700;}
     </style>
-      <!-- Google tag (gtag.js)。localhost などローカル環境からのアクセスは計測しない -->
-      <script>
-        (function () {
-          var id = 'G-MM106D2B2Z';
-          var host = location.hostname;
-          if (!host || host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host === '::1' || /\.localhost$/.test(host)) {
-            window['ga-disable-' + id] = true;
-            return;
-          }
-          var s = document.createElement('script');
-          s.async = true;
-          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
-          document.head.appendChild(s);
-          window.dataLayer = window.dataLayer || [];
-          window.gtag = function () { window.dataLayer.push(arguments); };
-          window.gtag('js', new Date());
-          window.gtag('config', id);
-        })();
-      </script>
+
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="https://www.maipilot.jp/docs/growth/" />
     <meta property="og:title" content="MaiPilot | マイクラサーバー立て方・ポート開放ガイド" />
@@ -123,7 +105,7 @@
     <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
     <meta property="og:site_name" content="MaiPilot" />
     <meta property="og:locale" content="ja_JP" />
-                <script type="application/ld+json" data-seo="breadcrumb">
+                          <script type="application/ld+json" data-seo="breadcrumb">
 {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -149,6 +131,7 @@
   ]
 }
   </script>
+    <script defer src="/analytics.js" data-measurement-id="G-MM106D2B2Z"></script>
   </head>
   <body>
     <nav class="site-nav">
@@ -156,7 +139,7 @@
       <div class="nav-links">
         <a href="/">ホーム</a>
         <a href="/docs/">セットアップノート</a>
-        <a href="/?from=docs_growth_nav#download" class="nav-cta" data-event="nav_download_click" data-source="growth_hub">ダウンロード</a>
+        <a href="/?from=docs_growth_nav#download" class="nav-cta" data-event="docs_to_download" data-source="growth_hub">ダウンロード</a>
       </div>
     </nav>
     <main class="wrap">
@@ -288,63 +271,6 @@
         </ul>
       </section>
     </main>
-    <script>
-      const trackEvent = ({ event_name, link_url, link_text, source }) => {
-        const win = window;
-        if (typeof win.gtag === "function") {
-          win.gtag("event", event_name, {
-            event_category: source || "cta",
-            event_label: link_text || link_url || "",
-            link_url: link_url,
-          });
-          return;
-        }
-        if (Array.isArray(win.dataLayer)) {
-          win.dataLayer.push({
-            event: event_name,
-            link_url: link_url,
-            link_text: link_text,
-            source: source || "cta",
-          });
-        }
-      };
 
-      const handleTrackedClick = (event) => {
-        const target = event.target;
-        if (!target || !target.closest) {
-          return;
-        }
-        const link = target.closest("a");
-        if (!link) {
-          return;
-        }
-        const eventName = link.getAttribute("data-event");
-        const href = link.getAttribute("href") || "";
-        const label = link.getAttribute("data-label");
-        const text = label || (link.textContent ? link.textContent.trim() : "");
-        const source = link.getAttribute("data-source") || "cta";
-
-        if (eventName) {
-          trackEvent({
-            event_name: eventName,
-            link_url: href,
-            link_text: text,
-            source,
-          });
-        }
-
-        const rel = (link.getAttribute("rel") || "").toLowerCase();
-        if (rel.includes("sponsored") && eventName !== "outbound_affiliate_click") {
-          trackEvent({
-            event_name: "outbound_affiliate_click",
-            link_url: href,
-            link_text: text,
-            source: "affiliate",
-          });
-        }
-      };
-
-      document.addEventListener("click", handleTrackedClick, { passive: true });
-    </script>
   </body>
 </html>
