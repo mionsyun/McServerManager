@@ -43,25 +43,7 @@
       th { background:rgba(102,255,136,.1); color:var(--accent); padding:8px 10px; text-align:left; border-bottom:1px solid rgba(126,157,201,.25); }
       td { padding:8px 10px; color:var(--muted); border-bottom:1px solid rgba(126,157,201,.12); }
     </style>
-    <!-- Google tag (gtag.js)。localhost などローカル環境からのアクセスは計測しない -->
-    <script>
-      (function () {
-        var id = 'G-MM106D2B2Z';
-        var host = location.hostname;
-        if (!host || host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host === '::1' || /\.localhost$/.test(host)) {
-          window['ga-disable-' + id] = true;
-          return;
-        }
-        var s = document.createElement('script');
-        s.async = true;
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
-        document.head.appendChild(s);
-        window.dataLayer = window.dataLayer || [];
-        window.gtag = function () { window.dataLayer.push(arguments); };
-        window.gtag('js', new Date());
-        window.gtag('config', id);
-      })();
-    </script>
+
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="https://www.maipilot.jp/docs/growth/forge-fabric-mod-installation/" />
     <meta property="og:title" content="マイクラ MOD 入れ方・導入ガイド（Forge / Fabric）Windows版 | MaiPilot" />
@@ -76,7 +58,7 @@
     <meta name="twitter:title" content="マイクラ MOD 入れ方・導入ガイド（Forge / Fabric）Windows版 | MaiPilot" />
     <meta name="twitter:description" content="マイクラサーバーへのMOD入れ方を解説。ForgeとFabricの違い、MODのダウンロード先、サーバーへの追加手順、クライアント側の設定まで初心者向けにまとめ。" />
     <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
-    <script type="application/ld+json" data-seo="breadcrumb">
+              <script type="application/ld+json" data-seo="breadcrumb">
 {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -108,7 +90,7 @@
   ]
 }
   </script>
-    <script type="application/ld+json" data-seo="faq">
+              <script type="application/ld+json" data-seo="faq">
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -148,6 +130,7 @@
   ]
 }
   </script>
+    <script defer src="/analytics.js" data-measurement-id="G-MM106D2B2Z"></script>
   </head>
   <body>
     <div class="wrap">
@@ -156,7 +139,7 @@
         <div class="nav-links">
           <a href="/docs/">ガイド一覧</a>
           <a href="/docs/growth/">記事ハブ</a>
-          <a href="/" class="nav-cta">ダウンロード</a>
+          <a href="/" class="nav-cta" data-event="docs_to_download">ダウンロード</a>
         </div>
       </nav>
 
@@ -173,7 +156,7 @@
       </div>
 
       <div class="card">
-        
+
 <figure class="doc-screenshot">
   <img src="/images/screenshots/05-addon-tab.png" alt="MaiPilot MOD/プラグインタブのスクリーンショット" loading="lazy" style="max-width:100%;border-radius:8px;border:1px solid #e0e0e0;box-shadow:0 2px 8px rgba(0,0,0,.12);">
   <figcaption style="text-align:center;font-size:.85em;color:#666;margin-top:.5em;">MaiPilot の MOD/プラグインタブ。ファイルをドロップするだけで導入できます。</figcaption>
@@ -302,7 +285,7 @@
       <div class="card cta" style="text-align:center">
         <h2 style="margin-bottom:6px">MaiPilotでMOD管理を簡単に</h2>
         <p class="muted">GUIでMODの追加・有効化・無効化。Modrinth検索もアプリ内で完結。</p>
-        <a class="cta-btn" href="/" data-event="download_click">無料でダウンロード（Windows）</a>
+        <a class="cta-btn" href="/" data-event="docs_to_download">無料でダウンロード（Windows）</a>
       </div>
 
       <div class="card">

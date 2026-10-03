@@ -1,0 +1,120 @@
+/* Preserve the navy/green brand while giving real app captures enough space. */
+.hero .hero-content {
+  grid-column: 1 / -1;
+  max-width: 920px;
+}
+
+.hero .hero-title {
+  font-family: "Rajdhani", "Noto Sans JP", "Segoe UI", sans-serif;
+  font-size: clamp(32px, 5.4vw, 64px);
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+  text-wrap: wrap;
+}
+
+.hero-title span { display: inline-block; }
+
+.hero .hero-sub { max-width: 720px; font-size: clamp(18px, 2vw, 24px); }
+.hero-screenshot { grid-column: 1 / -1; }
+
+.product-shot {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--stroke);
+  border-radius: 18px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.product-shot-media {
+  aspect-ratio: 16 / 9;
+  background: #0b1018;
+  overflow: hidden;
+}
+
+.product-shot-media a {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.product-shot-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.product-shot-pending {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+  padding: clamp(16px, 3vw, 36px);
+  background: radial-gradient(ellipse at top, rgba(102,255,136,.08), transparent 70%);
+}
+
+.product-shot-brand {
+  color: var(--accent);
+  font-size: clamp(24px, 4vw, 44px);
+  font-weight: 700;
+  letter-spacing: .025em;
+}
+
+.product-shot-pending strong { font-size: 14px; color: var(--muted); }
+.product-shot-pending p { font-size: 13px; color: var(--muted); margin: 0; }
+.product-shot figcaption { padding: 22px 24px; border-top: 1px solid var(--stroke); }
+.product-shot figcaption h3 { margin: 0 0 8px; font-size: 21px; }
+.product-shot figcaption p { margin: 0; color: var(--muted); line-height: 1.7; }
+.product-shot-source { display: block; margin-top: 10px; color: var(--muted); line-height: 1.5; }
+#how .product-shot-media { aspect-ratio: 20 / 3; }
+.product-gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.product-gallery .product-shot:first-child { grid-column: 1 / -1; }
+.product-gallery .product-shot:first-child .product-shot-media { max-height: 540px; }
+
+@media (max-width: 760px) {
+  .product-gallery { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .product-shot figcaption { padding: 18px; }
+  .product-shot-pending { gap: 8px; }
+  .hero .hero-title { line-height: 1.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+@media (max-width: 768px) {
+  .nav-links:not(.mobile-open) { visibility: hidden; }
+  .hero .hero-bg { right: 0; }
+  .hero .eyebrow { letter-spacing: .08em; line-height: 1.6; }
+}
+
+.download-reassurance { color: var(--accent); font-size: 14px; margin: 8px 0; }
+.support-note { color: var(--muted); font-size: 13px; margin: 8px 0 18px; }
+.support-note a { text-decoration: underline; text-underline-offset: 3px; }
+.pc-handoff { max-width: 720px; margin: 16px 0; border: 1px solid var(--stroke); border-radius: 12px; background: var(--panel); scroll-margin-top: 84px; }
+.pc-handoff summary { cursor: pointer; padding: 14px 16px; min-height: 48px; color: var(--text); font-weight: 600; }
+.pc-handoff-body { padding: 0 16px 16px; }
+.pc-handoff-body p { margin: 0 0 12px; color: var(--muted); line-height: 1.6; }
+.pc-handoff-body small { display: block; color: var(--muted); line-height: 1.6; }
+.pc-handoff-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.pc-handoff-actions .btn { min-height: 44px; cursor: pointer; }
+.pc-handoff-body .handoff-status { margin: 12px 0 0; color: var(--accent); }
+.handoff-manual { display: grid; gap: 8px; margin: 12px 0; }
+.handoff-manual input { width: 100%; min-width: 0; padding: 12px; background: var(--bg); border: 1px solid var(--stroke); border-radius: 8px; color: var(--text); font-size: 16px; }
+:focus-visible { outline: 3px solid var(--accent-2); outline-offset: 4px; }
+button:disabled { opacity: .65; cursor: wait; }
+@media (max-width: 480px) {
+  .hero .hero-title { font-size: 30px; }
+  .hero .hero-sub { font-size: 17px; }
+  .hero .hero-notes { display: none; }
+  .hero-actions { margin-bottom: 10px; }
+  .pc-handoff-actions { flex-direction: column; }
+  .pc-handoff-actions .btn { width: 100%; }
+  .hero-meta { margin-top: 14px; }
+}
