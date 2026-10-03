@@ -5,7 +5,7 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs';
 const guides = ['haichi-map-installation', 'minecraft-server-recommended-specs'];
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 for (const slug of guides) {
-  test(`${slug}: practical answer, canonical URL, relevant operation and PC handoff`, () => {
+  test(`${slug}: practical answer, canonical URL, relevant operation and a Windows PC notice`, () => {
     const html = read(`public/docs/growth/${slug}/index.html`);
     assert.equal((html.match(/<h1\b/g) || []).length, 1);
     const title = html.match(/<title>([^<]+)<\/title>/)?.[1];
@@ -19,7 +19,8 @@ for (const slug of guides) {
     assert.match(html, /class="quick-answer"/);
     assert.match(html, new RegExp(`rel="canonical" href="https://www.maipilot.jp/docs/growth/${slug}/"`));
     assert.match(html, /href="\/#download"[^>]*data-event="docs_to_download"/);
-    assert.match(html, /href="\/#pc-handoff"[^>]*data-event="docs_to_download"/);
+    assert.match(html, /Windows PCでダウンロードしてください。/);
+    assert.doesNotMatch(html, /pc-handoff|PC用リンク|コピー・共有/);
     assert.doesNotMatch(html, /<a\b[^>]*href="#[^"]*"[^>]*data-event="docs_to_download"/);
     assert.doesNotMatch(html, /data-event="download_click"/); // Navigation is never an installer click.
     assert.match(html, /個人・非商用利用は無料/);
@@ -45,7 +46,7 @@ test('specs guide distinguishes Windows RAM, Java heap and process working set w
 test('QA has no unconditional Google preconnect and stable multilingual menu selector', () => {
   assert.doesNotMatch(read('nuxt.config.ts'), /rel: "preconnect", href: "https:\/\/www.googletagmanager.com"/);
   assert.match(read('tests/browser/journey.spec.mjs'), /button\.hamburger\[aria-controls=/);
-  assert.match(read('app.vue'), /pcHandoffOpen.value = isMobileDevice.value \|\| window.location.hash === "#pc-handoff"/);
+  assert.doesNotMatch(read('app.vue'), /pcHandoffOpen|#pc-handoff/);
 });
 
 test('published guides use current support terms and released product capabilities', () => {

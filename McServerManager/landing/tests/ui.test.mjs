@@ -20,7 +20,7 @@ test('version comes from the updater manifest, and support price is metadata onl
   assert.match(app,/price: "0"/); assert.match(app,/price: "100"/); assert.doesNotMatch(app,/price: "980"/);
   assert.match(app,/https:\/\/maipilot.booth.pm\/items\/8118402/);
 });
-for(const filename of ['app.vue','components/PcHandoff.vue','components/ProductScreenshot.vue']) {
+for(const filename of ['app.vue','components/ProductScreenshot.vue']) {
   test(`Vue script and template compile: ${filename}`,()=>{
     const source=readFileSync(new URL('../'+filename,import.meta.url),'utf8');
     const {descriptor,errors}=parse(source,{filename}); assert.deepEqual(errors,[]);
@@ -29,7 +29,9 @@ for(const filename of ['app.vue','components/PcHandoff.vue','components/ProductS
     assert.deepEqual(template.errors,[]);
   });
 }
-test('all primary installer paths hand mobile users off to Windows',()=>{
-  assert.equal((app.match(/:data-event="isMobileDevice \? 'pc_handoff_open' : 'download_click'"/g)||[]).length,2);
-  assert.match(app,/:data-event="isMobileDevice && option.id === 'local' \? 'pc_handoff_open' : downloadOptionEvents\[option.id\]"/);
+test('mobile gets a plain Windows notice while desktop download links remain',()=>{
+  assert.equal((app.match(/class="windows-pc-notice"/g)||[]).length,3);
+  assert.match(app,/v-else :href="downloadUrl" class="btn primary" data-event="download_click"/);
+  assert.match(app,/:data-event="downloadOptionEvents\[option.id\]"/);
+  assert.doesNotMatch(app,/PcHandoff|pcHandoff|pc-handoff|pc_link_|navigator\.(share|clipboard)/);
 });

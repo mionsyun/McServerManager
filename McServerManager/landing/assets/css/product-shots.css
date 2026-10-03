@@ -97,24 +97,12 @@
 .download-reassurance { color: var(--accent); font-size: 14px; margin: 8px 0; }
 .support-note { color: var(--muted); font-size: 13px; margin: 8px 0 18px; }
 .support-note a { text-decoration: underline; text-underline-offset: 3px; }
-.pc-handoff { max-width: 720px; margin: 16px 0; border: 1px solid var(--stroke); border-radius: 12px; background: var(--panel); scroll-margin-top: 84px; }
-.pc-handoff summary { cursor: pointer; padding: 14px 16px; min-height: 48px; color: var(--text); font-weight: 600; }
-.pc-handoff-body { padding: 0 16px 16px; }
-.pc-handoff-body p { margin: 0 0 12px; color: var(--muted); line-height: 1.6; }
-.pc-handoff-body small { display: block; color: var(--muted); line-height: 1.6; }
-.pc-handoff-actions { display: flex; flex-wrap: wrap; gap: 10px; }
-.pc-handoff-actions .btn { min-height: 44px; cursor: pointer; }
-.pc-handoff-body .handoff-status { margin: 12px 0 0; color: var(--accent); }
-.handoff-manual { display: grid; gap: 8px; margin: 12px 0; }
-.handoff-manual input { width: 100%; min-width: 0; padding: 12px; background: var(--bg); border: 1px solid var(--stroke); border-radius: 8px; color: var(--text); font-size: 16px; }
 :focus-visible { outline: 3px solid var(--accent-2); outline-offset: 4px; }
-button:disabled { opacity: .65; cursor: wait; }
 @media (max-width: 480px) {
   .hero .hero-title { font-size: 30px; }
   .hero .hero-sub { font-size: 17px; }
   .hero .hero-notes { display: none; }
   .hero-actions { margin-bottom: 10px; }
-  .pc-handoff-actions { flex-direction: column; }
-  .pc-handoff-actions .btn { width: 100%; }
   .hero-meta { margin-top: 14px; }
 }
+.windows-pc-notice { margin: 0; color: var(--muted); line-height: 1.6; }

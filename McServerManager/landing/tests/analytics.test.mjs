@@ -229,17 +229,15 @@ test("platform and displayed-language dimensions have a closed vocabulary", () =
   assert.equal(eventParams(f).ui_language, "unknown");
 });
 
-test("mobile handoff recognizes only the fixed campaign token, not arbitrary query contents", () => {
+test("retired handoff events and legacy query markers are not collected", () => {
   const f = fixture({ url: "https://www.maipilot.jp/?from=mobile_handoff&email=secret@example.test#download" });
-  f.dispatch(anchor({ href: "#pc-handoff", "data-event": "pc_handoff_open", "data-cta-location": "hero" }));
-  assert.equal(f.events().at(-1)[1], "pc_handoff_open");
-  assert.equal(eventParams(f).entry_point, "mobile_handoff");
-  assert.equal(eventParams(f).journey_stage, "handoff");
-  for (const event of ["pc_link_copy", "pc_link_share"]) assert.equal(f.api.track(event, { cta_location: "download" }), true);
+  for (const event of ["pc_handoff_open", "pc_link_copy", "pc_link_share"]) assert.equal(f.api.track(event, { cta_location: "hero" }), false);
+  assert.equal(f.events().length, 0);
+  f.dispatch(anchor());
+  assert.equal(eventParams(f).download_kind, "official_free");
+  assert.equal(eventParams(f).entry_point, undefined);
+  assert.ok(!JSON.stringify(f.commands()).includes("mobile_handoff"));
   assert.ok(!JSON.stringify(f.commands()).includes("secret"));
-  const other = fixture({ url: "https://www.maipilot.jp/?from=private@example.test" });
-  other.dispatch(anchor());
-  assert.equal(eventParams(other).entry_point, "direct_or_other");
 });
 
 test("tracking fails closed after opt-out, host changes, or gtag errors", () => {
