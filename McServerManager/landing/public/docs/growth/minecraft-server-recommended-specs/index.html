@@ -62,7 +62,7 @@
     <meta name="twitter:title" content="マイクラサーバーの必要スペック｜メモリは何GB？ CPU・容量の確認 | MaiPilot" />
     <meta name="twitter:description" content="マイクラサーバーのメモリは何GB必要？ 人数だけで決めず、Java版のXms/Xmx、Windows全体のRAM、CPU・容量を確認する手順と、MaiPilotでの設定・監視方法を解説。" />
     <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
-                              <script type="application/ld+json" data-seo="breadcrumb">
+                                  <script type="application/ld+json" data-seo="breadcrumb">
 {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -94,7 +94,7 @@
   ]
 }
   </script>
-                              <script type="application/ld+json" data-seo="faq">
+                                  <script type="application/ld+json" data-seo="faq">
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -136,7 +136,7 @@
       "name": "スマホからMaiPilotを使えますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "MaiPilotを動かすにはWindows 10/11のPCが必要です。スマホで記事を読んでいる方は、公式ページのPC用リンクをコピー・共有して、Windows PCで続きを開いてください。"
+        "text": "MaiPilotを動かすにはWindows 10/11のPCが必要です。Windows PCでダウンロードしてください。"
       }
     }
   ]
@@ -157,7 +157,7 @@
           <p class="muted">MaiPilotはWindows 10/11用の管理アプリです。Java版のXms/Xmxを設定し、稼働中のCPU/RAMを確認できますが、性能不足を自動で解消したり、参加人数を保証したりするものではありません。</p>
         </div>
         <div class="guide-actions"><a class="cta-btn" href="#maipilot-memory">MaiPilotで設定・確認する</a><a class="guide-secondary" href="#memory-budget">RAMの確認手順へ</a></div>
-        <p class="guide-mobile"><a href="/#pc-handoff" data-event="docs_to_download" data-cta-location="docs_cta">スマホで見ている方：Windows PC用リンクのコピー・共有へ</a></p>
+        <p class="guide-mobile">MaiPilotはWindows 10/11用です。Windows PCでダウンロードしてください。</p>
         <p class="guide-note">この記事には既存の広告・PRリンクを含みます。</p>
       </section>
 
@@ -187,7 +187,7 @@
       <section class="card" id="maipilot-memory">
         <h2>MaiPilotでメモリを設定し、稼働中の負荷を見る</h2>
         <ol><li><strong>対象のJavaサーバーを選び、現在の設定を控えます。</strong>ワールドのバックアップも残し、変更前後を比較できるようにします。</li><li><strong>「サーバー設定」→「起動安定化・パフォーマンス」を開きます。</strong><code>Xms (MB)</code>と<code>Xmx (MB)</code>を確認・変更します。表示単位はMBです。</li><li><strong>「設定を保存」を押し、サーバーを再起動します。</strong>起動中のJavaに新しいヒープ設定がその場で適用されるわけではありません。</li><li><strong>「概要」でCPU・RAMを見て、コンソールのログと照らします。</strong>MaiPilotのRAM表示はサーバープロセスのワーキングセットを基にした値です。Javaヒープの使用量そのものや、PC全体の空きRAMとは区別してください。</li><li><strong>同じ条件で再確認します。</strong>設定を一度にいくつも変えず、症状と使用状況を記録します。PC全体の状況はWindows側でも確認してください。</li></ol>
-        <div class="guide-actions"><a class="cta-btn" href="/#download" data-event="docs_to_download" data-cta-location="docs_cta">無料Windows版のダウンロード案内へ</a><a class="guide-secondary" href="/#pc-handoff" data-event="docs_to_download" data-cta-location="docs_cta">スマホからPCへ引き継ぐ</a></div>
+        <div class="guide-actions"><a class="cta-btn" href="/#download" data-event="docs_to_download" data-cta-location="docs_cta">無料Windows版のダウンロード案内へ</a></div>
         <p class="guide-note">個人・非商用利用は無料。Java版とBDSの管理に対応しますが、Xms/XmxはJava版向けの設定です。MaiPilot自体をLinuxのVPSへインストールする手順ではありません。</p>
       </section>
 
@@ -220,7 +220,7 @@
           <dt data-faq-question>CPUコア数やGHzだけで必要スペックが分かりますか？</dt>
           <dd data-faq-answer>それだけでは決まりません。サーバーの構成と処理、ワールド、同時に動かすアプリ等の影響を受けます。予定する使い方で負荷とログを確認し、RAM・CPU・ディスク・回線を切り分けてください。</dd>
           <dt data-faq-question>スマホからMaiPilotを使えますか？</dt>
-          <dd data-faq-answer>MaiPilotを動かすにはWindows 10/11のPCが必要です。スマホで記事を読んでいる方は、公式ページのPC用リンクをコピー・共有して、Windows PCで続きを開いてください。</dd>
+          <dd data-faq-answer>MaiPilotを動かすにはWindows 10/11のPCが必要です。Windows PCでダウンロードしてください。</dd>
         </dl>
       </section>
 

@@ -8,8 +8,6 @@ const featureShots = ["addons", "backups", "worlds"] as const;
 const mobileMenuOpen = ref(false);
 const closeMobileMenu = () => { mobileMenuOpen.value = false; };
 const isMobileDevice = ref(false);
-const pcHandoffOpen = ref(false);
-const openPcHandoff = () => { if (isMobileDevice.value) pcHandoffOpen.value = true; };
 const closeMenuOnEscape = (event: KeyboardEvent) => {
   if (event.key === "Escape") closeMobileMenu();
 };
@@ -65,7 +63,7 @@ const translations = {
     heroAffiliateLabel: "Need always-on hosting?",
     heroAffiliateCta: "See hosting options (PR)",
     heroCtaPrimary: "Download free for Windows",
-    heroMobileCta: "Use on a Windows PC",
+    windowsPcNotice: "Please download MaiPilot on a Windows PC.",
     freeNote: "Official installer · Free for personal, non-commercial use",
     supportNote: "Optional ¥100 support edition on BOOTH. Same features.",
     heroCtaSecondary: "Read the setup guide",
@@ -285,7 +283,7 @@ const translations = {
     faq: [
       {
         title: "Can I run MaiPilot on my phone or Mac?",
-        body: "MaiPilot runs on a Windows 10/11 PC, not on phones or macOS. If you are browsing on mobile, copy this page’s link and open it on your Windows PC. Player-device compatibility depends on the Minecraft edition and server; console access is not guaranteed."
+        body: "MaiPilot runs on a Windows 10/11 PC, not on phones or macOS. Please download MaiPilot on a Windows PC. Player-device compatibility depends on the Minecraft edition and server; console access is not guaranteed."
       },
       {
         "title": "Which server types are supported?",
@@ -403,7 +401,7 @@ const translations = {
     heroAffiliateLabel: "24時間運用の選択肢もあります",
     heroAffiliateCta: "VPSの比較を見る（PR）",
     heroCtaPrimary: "Windows版を無料ダウンロード",
-    heroMobileCta: "Windows PCで使う準備をする",
+    windowsPcNotice: "Windows PCでダウンロードしてください。",
     freeNote: "公式インストーラー・個人／非商用利用は無料",
     supportNote: "BOOTHの100円支援版は任意購入です。機能は同じ。",
     heroCtaSecondary: "セットアップガイド",
@@ -623,7 +621,7 @@ const translations = {
     faq: [
       {
         title: "スマホやMacでも使えますか？",
-        body: "MaiPilotを動かすにはWindows 10/11のPCが必要です。スマホで見ている方は、このページのリンクをコピーしてWindows PCで開いてください。参加できる端末はMinecraftのエディションやサーバーの条件によって異なり、家庭用ゲーム機からの接続を保証するものではありません。"
+        body: "MaiPilotを動かすにはWindows 10/11のPCが必要です。Windows PCでダウンロードしてください。参加できる端末はMinecraftのエディションやサーバーの条件によって異なり、家庭用ゲーム機からの接続を保証するものではありません。"
       },
       {
         "title": "対応サーバー種別は？",
@@ -817,7 +815,6 @@ onMounted(() => {
   document.addEventListener("keydown", closeMenuOnEscape);
   isMobileDevice.value = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  pcHandoffOpen.value = isMobileDevice.value || window.location.hash === "#pc-handoff";
 
   // Fallback for environments without IntersectionObserver.
   nextTick(() => {
@@ -1034,14 +1031,12 @@ useHead(() => ({
             <li v-for="note in t.heroNotes" :key="note">{{ note }}</li>
           </ul>
           <div class="hero-actions">
-            <a :href="isMobileDevice ? '#pc-handoff' : downloadUrl" class="btn primary"
-              :data-event="isMobileDevice ? 'pc_handoff_open' : 'download_click'" data-cta-location="hero"
-              @click="openPcHandoff">{{ isMobileDevice ? t.heroMobileCta : t.heroCtaPrimary }}</a>
+            <p v-if="isMobileDevice" class="windows-pc-notice">{{ t.windowsPcNotice }}</p>
+            <a v-else :href="downloadUrl" class="btn primary" data-event="download_click" data-cta-location="hero">{{ t.heroCtaPrimary }}</a>
             <a :href="docsUrl" class="btn ghost" data-event="setup_guide_click" data-cta-location="hero">{{ t.heroCtaSecondary }}</a>
           </div>
           <p class="download-reassurance">{{ t.freeNote }}</p>
           <p class="support-note"><a href="#support">{{ t.supportNote }}</a></p>
-          <PcHandoff id="pc-handoff" :locale="currentLang" :open="pcHandoffOpen" @toggle="pcHandoffOpen = $event" />
           <div class="hero-meta">
             <span class="chip">{{ t.heroMetaVersion }} {{ version }}</span>
             <span class="chip">{{ t.heroMetaWindows }}</span>
@@ -1158,9 +1153,8 @@ useHead(() => ({
             <p class="download-reassurance">{{ t.freeNote }}</p>
           </div>
           <div class="callout-actions">
-            <a :href="isMobileDevice ? '#pc-handoff' : downloadUrl" class="btn primary"
-              :data-event="isMobileDevice ? 'pc_handoff_open' : 'download_click'" data-cta-location="download"
-              @click="openPcHandoff">{{ isMobileDevice ? t.heroMobileCta : t.downloadPrimary }}</a>
+            <p v-if="isMobileDevice" class="windows-pc-notice">{{ t.windowsPcNotice }}</p>
+            <a v-else :href="downloadUrl" class="btn primary" data-event="download_click" data-cta-location="download">{{ t.downloadPrimary }}</a>
             <a :href="docsUrl" class="btn ghost" data-event="setup_guide_click" data-cta-location="download">{{ t.downloadSecondary }}</a>
           </div>
         </div>
@@ -1173,14 +1167,14 @@ useHead(() => ({
             <div v-for="option in t.downloadOptions" :key="option.title" class="panel">
               <h3>{{ option.title }}</h3>
               <p>{{ option.body }}</p>
-              <a
-                :href="isMobileDevice && option.id === 'local' ? '#pc-handoff' : downloadOptionLinks[option.id]"
+              <p v-if="isMobileDevice && option.id === 'local'" class="windows-pc-notice">{{ t.windowsPcNotice }}</p>
+              <a v-else
+                :href="downloadOptionLinks[option.id]"
                 class="btn ghost"
-                :data-event="isMobileDevice && option.id === 'local' ? 'pc_handoff_open' : downloadOptionEvents[option.id]"
+                :data-event="downloadOptionEvents[option.id]"
                 data-cta-location="options"
-                @click="option.id === 'local' && openPcHandoff()"
               >
-                {{ isMobileDevice && option.id === 'local' ? t.heroMobileCta : option.cta }}
+                {{ option.cta }}
               </a>
             </div>
           </div>

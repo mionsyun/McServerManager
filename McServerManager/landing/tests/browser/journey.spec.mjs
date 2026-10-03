@@ -8,7 +8,7 @@ const windowsUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 
 const mobileUA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
 const mime = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.xml': 'application/xml', '.txt': 'text/plain' };
 
-async function setup(browser, { locale='ja-JP', width=1440, mobile=false, hostname='www.maipilot.jp', clipboard='success', share='success', storage='enabled' }={}) {
+async function setup(browser, { locale='ja-JP', width=1440, mobile=false, hostname='www.maipilot.jp', storage='enabled' }={}) {
   const context = await browser.newContext({ viewport: { width, height: mobile ? 844 : 1000 }, locale,
     userAgent: mobile ? mobileUA : windowsUA, isMobile: mobile, hasTouch: mobile });
   // Intercept EVERY request. This suite never contacts GA, BOOTH, installer storage, ads or the live site.
@@ -27,19 +27,11 @@ async function setup(browser, { locale='ja-JP', width=1440, mobile=false, hostna
     if (url.pathname.endsWith('.exe')) return route.fulfill({ contentType: 'application/octet-stream', headers: { 'content-disposition': 'attachment; filename="TEST-ONLY.txt"' }, body: 'Installer request mocked; no executable downloaded.' });
     return route.fulfill({ status: 204, body: '' });
   });
-  await context.addInitScript(({ clipboard, share, storage }) => {
-    window.__copied = []; window.__shares = [];
-    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => {
-      if (clipboard === 'deny') throw new DOMException('Denied', 'NotAllowedError'); window.__copied.push(text);
-    } } });
-    Object.defineProperty(navigator, 'share', { configurable: true, writable: true, value: async data => {
-      if (share === 'cancel') throw new DOMException('Cancelled', 'AbortError');
-      if (share === 'fail') throw new Error('Unavailable'); window.__shares.push(data);
-    } });
+  await context.addInitScript(({ storage }) => {
     if (storage === 'disabled') Object.defineProperty(window, 'localStorage', { get() { throw new DOMException('Denied', 'SecurityError'); } });
-  }, { clipboard, share, storage });
+  }, { storage });
   const page = await context.newPage(); page.on('pageerror', err => errors.push(err.message));
-  await page.goto(`https://${hostname}/`); await page.waitForFunction(() => document.querySelector('.pc-handoff'));
+  await page.goto(`https://${hostname}/`); await page.waitForSelector(mobile ? '.hero-actions .windows-pc-notice' : '.hero-actions [data-event="download_click"]');
   await page.waitForTimeout(250);
   return { page, context, requests, errors, missing };
 }
@@ -69,34 +61,30 @@ test('desktop free-download path, truthful copy, manifest/schema and one event p
   await context.close();
 });
 
-test('mobile CTA hands off to PC; confirmed copy/share and cancellation are distinct', async ({ browser }) => {
+test('mobile shows a plain Windows notice without dedicated sharing or download controls', async ({ browser }) => {
   const { page, context, errors, missing } = await setup(browser, { mobile: true, width: 390 });
-  const hero = page.locator('.hero-actions .primary');
-  await expect(hero).toHaveAttribute('href', '#pc-handoff'); await expect(hero).toContainText('Windows PC');
-  const bounds = await hero.boundingBox(); expect(bounds.y + bounds.height).toBeLessThan(844);
-  await hero.click(); expect(await events(page, 'download_click')).toHaveLength(0);
-  expect(await events(page, 'pc_handoff_open')).toHaveLength(1);
-  await page.getByRole('button', { name: 'PC用リンクをコピー' }).click();
-  await expect(page.getByRole('status')).toContainText('コピーしました');
-  expect(await page.evaluate(() => window.__copied)).toEqual(['https://www.maipilot.jp/?from=mobile_handoff#download']);
-  expect(await events(page, 'pc_link_copy')).toHaveLength(1);
-  await page.getByRole('button', { name: 'リンクを共有', exact: true }).click();
-  expect(await events(page, 'pc_link_share')).toHaveLength(1);
-  await page.evaluate(() => { navigator.share = async () => { window.__shareCancelled = true; throw new DOMException('Cancelled','AbortError'); }; });
-  await page.getByRole('button', { name: 'リンクを共有', exact: true }).click();
-  expect(await page.evaluate(() => window.__shareCancelled)).toBe(true);
-  expect(await events(page, 'pc_link_share')).toHaveLength(1);
-  await assertNoOverflow(page); expect(errors).toEqual([]); expect(missing).toEqual([]);
-  await page.evaluate(() => window.scrollTo(0,0)); await page.screenshot({ path: path.join(screenshotRoot,'ja-mobile.png') });
+  const notice = page.locator('.hero-actions .windows-pc-notice');
+  await expect(notice).toHaveText('Windows PCでダウンロードしてください。');
+  await expect(page.locator('.windows-pc-notice')).toHaveCount(3);
+  await expect(page.locator('a[data-event="download_click"]')).toHaveCount(0);
+  await expect(page.locator('#pc-handoff, .pc-handoff')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /コピー|共有|Copy link|Share link/ })).toHaveCount(0);
+  const bounds = await notice.boundingBox(); expect(bounds.y + bounds.height).toBeLessThan(844);
+  await assertNoOverflow(page);
+  await mkdir(screenshotRoot, { recursive: true });
+  await page.screenshot({ path: path.join(screenshotRoot, 'ja-mobile.png') });
+  await page.goto('https://www.maipilot.jp/?from=mobile_handoff#download');
+  await expect(page.locator('#download .windows-pc-notice')).toHaveCount(2);
+  await expect(page.locator('#pc-handoff, .pc-handoff')).toHaveCount(0);
+  expect(await page.evaluate(() => location.hash)).toBe('#download');
+  expect(await events(page)).toHaveLength(0);
+  expect(await page.evaluate(() => JSON.stringify(window.dataLayer))).not.toContain('mobile_handoff');
+  expect(errors).toEqual([]); expect(missing).toEqual([]);
   await context.close();
 });
 
-test('clipboard denied + unavailable storage fail safely; mobile menu Escape/close/reopen', async ({ browser }) => {
-  const { page, context, errors } = await setup(browser, { mobile:true, width:320, clipboard:'deny', storage:'disabled' });
-  await page.getByRole('button', { name:'PC用リンクをコピー' }).click();
-  await expect(page.getByRole('status')).toContainText('手動');
-  await expect(page.locator('.handoff-manual input')).toHaveValue('https://www.maipilot.jp/?from=mobile_handoff#download');
-  expect(await events(page,'pc_link_copy')).toHaveLength(0);
+test('unavailable storage fails safely; mobile menu Escape/close/reopen', async ({ browser }) => {
+  const { page, context, errors } = await setup(browser, { mobile:true, width:320, storage:'disabled' });
   const menu = page.locator('button.hamburger[aria-controls="main-navigation"]');
   await menu.click(); await expect(menu).toHaveAttribute('aria-expanded','true');
   await page.keyboard.press('Escape'); await expect(menu).toHaveAttribute('aria-expanded','false');
@@ -133,15 +121,16 @@ for (const hostname of ['localhost','127.0.0.2','preview.example.com']) {
   });
 }
 
-test('docs to download is a navigation, with one shared loader; return marker is anonymous', async ({ browser }) => {
+test('docs navigation and legacy download URLs work with no handoff tracking', async ({ browser }) => {
   const { page, context, requests, errors } = await setup(browser);
   await page.goto('https://www.maipilot.jp/docs/growth/windows-minecraft-server-2026/');
   await page.locator('[data-event="docs_to_download"]').first().click();
   await expect(page).toHaveURL(/maipilot.jp\//);
-  await page.goto('https://www.maipilot.jp/?from=mobile_handoff&email=DO_NOT_TRACK#private');
+  await page.goto('https://www.maipilot.jp/?from=mobile_handoff&email=DO_NOT_TRACK#download');
   const download=page.waitForEvent('download'); await page.locator('.hero-actions .primary').click(); await download;
-  const payload=(await events(page,'download_click'))[0][2]; expect(payload.entry_point).toBe('mobile_handoff');
-  const layer=await page.evaluate(()=>JSON.stringify(window.dataLayer)); expect(layer).not.toContain('DO_NOT_TRACK'); expect(layer).not.toContain('#private');
+  const payload=(await events(page,'download_click'))[0][2]; expect(payload).not.toHaveProperty('entry_point');
+  const layer=await page.evaluate(()=>JSON.stringify(window.dataLayer)); expect(layer).not.toContain('DO_NOT_TRACK'); expect(layer).not.toContain('mobile_handoff');
+  await expect(page.locator('#pc-handoff, .pc-handoff')).toHaveCount(0);
   expect(await page.locator('script[src="/analytics.js"]').count()).toBe(1);
   expect(errors).toEqual([]); expect(requests.filter(url=>/google-analytics/.test(url))).toEqual([]);
   await context.close();
@@ -161,8 +150,11 @@ for (const [slug, anchor] of [['haichi-map-installation', 'maipilot-map'], ['min
       expect(await events(page, 'docs_to_download')).toHaveLength(0);
       expect(await events(page, 'download_click')).toHaveLength(0);
       await assertNoOverflow(page);
-      await page.locator('.guide-actions a[href="/#pc-handoff"]').first().click();
-      await expect(page.locator('.pc-handoff')).toHaveAttribute('open', '');
+      await page.locator('.guide-actions a[href="/#download"]').first().click();
+      await expect(page).toHaveURL(/#download$/);
+      await expect(page.locator('#pc-handoff, .pc-handoff')).toHaveCount(0);
+      if (width === 320) await expect(page.locator('#download .windows-pc-notice')).toHaveCount(2);
+      else await expect(page.locator('#download a[data-event="download_click"]').first()).toBeVisible();
       await page.goBack();
       await expect(page.locator('h1')).toBeVisible();
       await assertNoOverflow(page);

@@ -13,8 +13,6 @@ The API is `window.MaiPilotAnalytics.init({ measurementId })` and `track(eventNa
 - `download_click`: one custom event per native activation of the real installer link; `download_kind=official_free`
 - `booth_click`: BOOTH support-store navigation; `download_kind=booth_support`. It is not a completed purchase
 - `docs_to_download`: docs CTA navigation to the landing page, not a file download
-- `pc_handoff_open`: open the PC handoff from mobile
-- `pc_link_copy` / `pc_link_share`: the UI calls these after the clipboard/share promise succeeds. Cancellation/failure does not count
 - Existing provider events (`pr_conoha_click`, `pr_xserver_click`, `pr_shinvps_click`) and their aggregate `outbound_affiliate_click` are retained. Those two affiliate views should not be summed
 - `download_section_click`, `setup_guide_click`, docs article/navigation events remain distinct from actual installer intent
 
@@ -24,11 +22,10 @@ These are intent measurements. They do not demonstrate download completion, inst
 
 ## Bounded fields and privacy
 
-Custom events include `cta_location`, `page_path`, `ui_language` (`ja`, `en`, `unknown`), `platform_class` (`windows`, `mobile`, `other`, `unknown`), `entry_point`, and `journey_origin`/`journey_stage`. Only download/support events include `download_kind`. Provider events may include an allowlisted `affiliate_partner`.
+Custom events include `cta_location`, `page_path`, `ui_language` (`ja`, `en`, `unknown`), `platform_class` (`windows`, `mobile`, `other`, `unknown`), and `journey_origin`/`journey_stage`. Only download/support events include `download_kind`. Provider events may include an allowlisted `affiliate_partner`.
 
 Paths come from the fixed public route catalog; docs aliases resolve to canonical `/docs/` routes and unknown paths become `/other/`. Page titles are generated from controlled static docs titles plus fixed Japanese/English homepage titles. No arbitrary DOM text, link labels, link URLs, email addresses, user IDs, arbitrary input parameters, query strings or fragments are copied into custom events. A same-site referrer is normalized to a known route; an external referrer retains only its origin. Page-location overrides contain only origin + safe path.
 
-`entry_point=mobile_handoff` recognizes only the exact fixed `from=mobile_handoff` token; all other values are `direct_or_other`. This is a broad entry marker, not a cross-device identity match.
 
 The homepage's initial page view omits `ui_language` because Nuxt may not have hydrated the selected language yet. Custom activations always read the currently displayed document language. Docs language controls update `html.lang` before the deferred script runs.
 
@@ -49,4 +46,4 @@ These repository tests do not verify receipt in the live property or its setting
 
 ## Verification
 
-Run `npm test` (or `node --test tests/analytics.test.mjs`) for the closed host/route/parameter vocabularies, single activation semantics, mocked injected-GA handling, mobile handoff token, docs migration preservation/idempotence, static titles and safe campaign extraction. Browser tests should intercept all requests before navigating to a mocked production hostname. No QA run should contact Google collection endpoints.
+Run `npm test` (or `node --test tests/analytics.test.mjs`) for the closed host/route/parameter vocabularies, single activation semantics, mocked injected-GA handling, ignored legacy query parameters, docs migration preservation/idempotence, static titles and safe campaign extraction. Browser tests should intercept all requests before navigating to a mocked production hostname. No QA run should contact Google collection endpoints.

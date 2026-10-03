@@ -13,7 +13,7 @@
     "growth_home_banner_click", "growth_lp_banner_click", "growth_docs_click",
     "growth_article_click", "docs_home_banner_click", "docs_lp_banner_click",
     "pr_conoha_click", "pr_xserver_click", "pr_shinvps_click",
-    "outbound_affiliate_click", "pc_handoff_open", "pc_link_copy", "pc_link_share"
+    "outbound_affiliate_click"
   ]);
   var PLACEMENTS = new Set([
     "nav", "header", "hero", "features", "help", "how", "compat", "security",
@@ -140,7 +140,6 @@
       page_referrer: safeReferrer(),
       ui_language: language(),
       platform_class: platformClass(win.navigator),
-      entry_point: new URL(win.location.href).searchParams.get("from") === "mobile_handoff" ? "mobile_handoff" : "direct_or_other",
       journey_origin: path.startsWith("/docs/") || referralPath.startsWith("/docs/") ? "docs" : "landing"
     }, campaignParams());
   }
@@ -151,7 +150,7 @@
     params.cta_location = PLACEMENTS.has(input.cta_location) ? input.cta_location : "other";
     params.event_category = name === "outbound_affiliate_click" || name.startsWith("pr_") ? "affiliate" : "cta";
     params.journey_stage = name === "download_click" ? "download" : name === "booth_click" ? "support" :
-      name === "docs_to_download" ? "docs_to_download" : name.startsWith("pc_") ? "handoff" :
+      name === "docs_to_download" ? "docs_to_download" :
       params.event_category === "affiliate" ? "affiliate" : "navigation";
     if (name === "download_click" || name === "docs_to_download") params.download_kind = "official_free";
     if (name === "booth_click") params.download_kind = "booth_support";
@@ -256,7 +255,6 @@
       page_referrer: base.page_referrer,
       page_title: base.page_title,
       platform_class: base.platform_class,
-      entry_point: base.entry_point,
       allow_google_signals: false,
       allow_ad_personalization_signals: false
     }, campaignParams());
