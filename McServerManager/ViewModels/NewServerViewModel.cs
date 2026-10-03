@@ -7,6 +7,7 @@ using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using WpfApplication = System.Windows.Application;
 using McServerManager.Models;
 using McServerManager.Services;
+using McServerManager.Services.Templates;
 using McServerManager.Utilities;
 
 namespace McServerManager.ViewModels;
@@ -53,9 +54,10 @@ public sealed class NewServerViewModel : ObservableObject
     public const string EditionBedrock = "bedrock";
     public const string RouteBedrock = "bedrock";
 
-    public NewServerViewModel(AppServices services, IBedrockServerService bedrockServer, IEnumerable<string> existingNames)
+    public NewServerViewModel(AppServices services, IBedrockServerService bedrockServer, IEnumerable<string> existingNames, ITemplateManifestService templateManifests)
     {
         _services = services;
+        TemplateInspection = new TemplateInspectionViewModel(templateManifests);
         Bedrock = new NewBedrockServerViewModel(bedrockServer);
         PropertyChanged += (_, e) => ClearValidationErrorOnInput(e.PropertyName);
         Bedrock.PropertyChanged += (_, e) => ClearValidationErrorOnInput(e.PropertyName);
@@ -166,6 +168,7 @@ public sealed class NewServerViewModel : ObservableObject
 
     /// <summary>統合版 (BE) フォームの状態。</summary>
     public NewBedrockServerViewModel Bedrock { get; }
+    public TemplateInspectionViewModel TemplateInspection { get; }
 
     /// <summary>入口で選んだエディション。"java" | "bedrock"。</summary>
     public string Edition
@@ -192,6 +195,7 @@ public sealed class NewServerViewModel : ObservableObject
         {
             if (SetProperty(ref _route, value))
             {
+                TemplateInspection.Cancel();
                 OnPropertyChanged(nameof(IsRouteSelected));
                 OnPropertyChanged(nameof(IsBedrockRoute));
                 StatusMessage = string.Empty;
@@ -378,6 +382,13 @@ public sealed class NewServerViewModel : ObservableObject
     {
         StatusMessage = string.Empty;
         HasError = false;
+
+        // The import route is inspection-only, including direct command invocation.
+        if (Route == "import")
+        {
+            StatusMessage = "テンプレートの内容確認のみ対応しています。この画面からサーバーは作成できません。";
+            return;
+        }
 
         if (!ValidateInput())
         {

@@ -4,6 +4,7 @@ using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using McServerManager.Models;
 using McServerManager.Services;
+using McServerManager.Services.Templates;
 using McServerManager.ViewModels;
 using McServerManager.Views;
 
@@ -107,6 +108,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<AppPathsService>();
         services.AddSingleton<IAppSettingsService, AppSettingsService>();
         services.AddSingleton<IServerConfigService, ServerConfigService>();
+        services.AddSingleton<ITemplateManifestService, TemplateManifestService>();
         services.AddSingleton<IServerPropertiesService, ServerPropertiesService>();
         services.AddSingleton<IMinecraftVersionService, MinecraftVersionService>();
         services.AddSingleton<IServerRuntimeManager, ServerRuntimeManager>();

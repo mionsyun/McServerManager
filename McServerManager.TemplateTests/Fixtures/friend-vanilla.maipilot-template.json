@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1.0",
+  "templateId": "7b4643cb-6e70-4a4f-bd3d-dbf6f3b9a1bc",
+  "revision": 1,
+  "name": "友達と遊ぶ Vanilla",
+  "description": "公式初期レシピ候補。起動と接続公開は利用者が別途行う。",
+  "edition": "java",
+  "runtime": {
+    "type": "vanilla",
+    "minecraftVersion": "1.21.1"
+  },
+  "settings": {
+    "difficulty": "normal",
+    "gamemode": "survival",
+    "maxPlayers": 10,
+    "viewDistance": 8,
+    "simulationDistance": 6,
+    "pvp": true,
+    "spawnProtection": 16
+  },
+  "addons": []
+}

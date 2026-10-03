@@ -6,6 +6,7 @@ using System.Text.Json;
 using WpfApplication = System.Windows.Application;
 using McServerManager.Models;
 using McServerManager.Services;
+using McServerManager.Services.Templates;
 using McServerManager.Utilities;
 using McServerManager.Views;
 
@@ -15,6 +16,7 @@ public sealed class MainViewModel : ObservableObject
 {
     private static readonly TimeSpan UpdateSnoozeDuration = TimeSpan.FromHours(24);
     private readonly AppServices _services;
+    private readonly ITemplateManifestService _templateManifests;
     private readonly IBackupSchedulerService _backupScheduler;
     private readonly IBedrockServerService _bedrockServer;
     private readonly IBedrockPropertiesService _bedrockProperties;
@@ -30,9 +32,11 @@ public sealed class MainViewModel : ObservableObject
         IBedrockServerService bedrockServer,
         IBedrockPropertiesService bedrockProperties,
         IPortForwardingService portForwarding,
-        IJavaRuntimeInstaller javaInstaller)
+        IJavaRuntimeInstaller javaInstaller,
+        ITemplateManifestService templateManifests)
     {
         _services = services;
+        _templateManifests = templateManifests;
         _backupScheduler = backupScheduler;
         _bedrockServer = bedrockServer;
         _bedrockProperties = bedrockProperties;
@@ -364,7 +368,7 @@ public sealed class MainViewModel : ObservableObject
             Owner = WpfApplication.Current.MainWindow
         };
 
-        var vm = new NewServerViewModel(_services, _bedrockServer, Servers.Select(s => s.Name));
+        var vm = new NewServerViewModel(_services, _bedrockServer, Servers.Select(s => s.Name), _templateManifests);
         vm.RequestClose += result =>
         {
             window.DialogResult = result;
