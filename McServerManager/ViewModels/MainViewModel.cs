@@ -7,6 +7,7 @@ using WpfApplication = System.Windows.Application;
 using McServerManager.Models;
 using McServerManager.Services;
 using McServerManager.Services.Templates;
+using McServerManager.Services.Modrinth;
 using McServerManager.Utilities;
 using McServerManager.Views;
 
@@ -17,6 +18,7 @@ public sealed class MainViewModel : ObservableObject
     private static readonly TimeSpan UpdateSnoozeDuration = TimeSpan.FromHours(24);
     private readonly AppServices _services;
     private readonly ITemplateManifestService _templateManifests;
+    private readonly IModrinthInspectionService _modInspection;
     private readonly IBackupSchedulerService _backupScheduler;
     private readonly IBedrockServerService _bedrockServer;
     private readonly IBedrockPropertiesService _bedrockProperties;
@@ -33,10 +35,12 @@ public sealed class MainViewModel : ObservableObject
         IBedrockPropertiesService bedrockProperties,
         IPortForwardingService portForwarding,
         IJavaRuntimeInstaller javaInstaller,
-        ITemplateManifestService templateManifests)
+        ITemplateManifestService templateManifests,
+        IModrinthInspectionService modInspection)
     {
         _services = services;
         _templateManifests = templateManifests;
+        _modInspection = modInspection;
         _backupScheduler = backupScheduler;
         _bedrockServer = bedrockServer;
         _bedrockProperties = bedrockProperties;
@@ -368,7 +372,7 @@ public sealed class MainViewModel : ObservableObject
             Owner = WpfApplication.Current.MainWindow
         };
 
-        var vm = new NewServerViewModel(_services, _bedrockServer, Servers.Select(s => s.Name), _templateManifests);
+        var vm = new NewServerViewModel(_services, _bedrockServer, Servers.Select(s => s.Name), _templateManifests, _modInspection);
         vm.RequestClose += result =>
         {
             window.DialogResult = result;

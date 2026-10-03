@@ -8,6 +8,7 @@ using WpfApplication = System.Windows.Application;
 using McServerManager.Models;
 using McServerManager.Services;
 using McServerManager.Services.Templates;
+using McServerManager.Services.Modrinth;
 using McServerManager.Utilities;
 
 namespace McServerManager.ViewModels;
@@ -54,10 +55,11 @@ public sealed class NewServerViewModel : ObservableObject
     public const string EditionBedrock = "bedrock";
     public const string RouteBedrock = "bedrock";
 
-    public NewServerViewModel(AppServices services, IBedrockServerService bedrockServer, IEnumerable<string> existingNames, ITemplateManifestService templateManifests)
+    public NewServerViewModel(AppServices services, IBedrockServerService bedrockServer, IEnumerable<string> existingNames, ITemplateManifestService templateManifests, IModrinthInspectionService modInspection)
     {
         _services = services;
         TemplateInspection = new TemplateInspectionViewModel(templateManifests);
+        ModInspection = new ModInspectionViewModel(modInspection);
         Bedrock = new NewBedrockServerViewModel(bedrockServer);
         PropertyChanged += (_, e) => ClearValidationErrorOnInput(e.PropertyName);
         Bedrock.PropertyChanged += (_, e) => ClearValidationErrorOnInput(e.PropertyName);
@@ -169,6 +171,7 @@ public sealed class NewServerViewModel : ObservableObject
     /// <summary>統合版 (BE) フォームの状態。</summary>
     public NewBedrockServerViewModel Bedrock { get; }
     public TemplateInspectionViewModel TemplateInspection { get; }
+    public ModInspectionViewModel ModInspection { get; }
 
     /// <summary>入口で選んだエディション。"java" | "bedrock"。</summary>
     public string Edition
@@ -196,6 +199,7 @@ public sealed class NewServerViewModel : ObservableObject
             if (SetProperty(ref _route, value))
             {
                 TemplateInspection.Cancel();
+                ModInspection.Cancel();
                 OnPropertyChanged(nameof(IsRouteSelected));
                 OnPropertyChanged(nameof(IsBedrockRoute));
                 StatusMessage = string.Empty;

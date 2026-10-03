@@ -1,5 +1,9 @@
 # Template inspection and dependency planning: first milestone
 
+Historical first-stage boundary. The later live inspection panel is documented
+in [live-mod-inspection.md](live-mod-inspection.md); template application remains
+disabled.
+
 ## Delivered boundary
 
 This is a read-only preview milestone with an offline parser and planner, not the complete template MVP.

@@ -1,0 +1,452 @@
+[
+  {
+    "Name": "Chunky: missing required Fabric API",
+    "Request": {
+      "MinecraftVersion": "1.21.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "21",
+      "SelectedPins": [
+        {
+          "VersionId": "RVFHfo1D"
+        }
+      ],
+      "DependencyPins": []
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [
+      "RVFHfo1D"
+    ],
+    "ExpectedFindingCodes": [
+      "UnresolvedProjectDependency",
+      "MissingRequiredDependency"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindings": [
+      {
+        "Code": "UnresolvedProjectDependency",
+        "Dependency": "P7dR8mSH"
+      },
+      {
+        "Code": "MissingRequiredDependency",
+        "Dependency": "fabric"
+      }
+    ]
+  },
+  {
+    "Name": "Chunky: explicit Fabric API alias and 49 nested modules",
+    "Request": {
+      "MinecraftVersion": "1.21.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "21",
+      "SelectedPins": [
+        {
+          "VersionId": "RVFHfo1D"
+        }
+      ],
+      "DependencyPins": [
+        {
+          "VersionId": "Mys3P7lK"
+        }
+      ]
+    },
+    "ExpectedResolved": true,
+    "ExpectedVersionIds": [
+      "RVFHfo1D",
+      "Mys3P7lK"
+    ],
+    "ExpectedFindingCodes": [
+      "RequiredSatisfied",
+      "ClientNestedModulesIgnored"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindings": []
+  },
+  {
+    "Name": "Waystones: transitive Balm and Fabric API deduplicated",
+    "Request": {
+      "MinecraftVersion": "1.21.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "21",
+      "SelectedPins": [
+        {
+          "VersionId": "nSAwjAk4"
+        }
+      ],
+      "DependencyPins": [
+        {
+          "VersionId": "EghJxg4h"
+        },
+        {
+          "VersionId": "Mys3P7lK"
+        }
+      ]
+    },
+    "ExpectedResolved": true,
+    "ExpectedVersionIds": [
+      "nSAwjAk4",
+      "EghJxg4h",
+      "Mys3P7lK"
+    ],
+    "ExpectedFindingCodes": [
+      "TransitiveRequired"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindings": []
+  },
+  {
+    "Name": "No Chat Reports: required API satisfied, optional projects not added",
+    "Request": {
+      "MinecraftVersion": "1.21.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "21",
+      "SelectedPins": [
+        {
+          "VersionId": "D8K0KJXM"
+        }
+      ],
+      "DependencyPins": [
+        {
+          "VersionId": "Mys3P7lK"
+        }
+      ]
+    },
+    "ExpectedResolved": true,
+    "ExpectedVersionIds": [
+      "D8K0KJXM",
+      "Mys3P7lK"
+    ],
+    "ExpectedFindingCodes": [
+      "OptionalSuggestion"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindings": [
+      {
+        "Code": "OptionalSuggestion",
+        "Dependency": "9s6osm5g"
+      },
+      {
+        "Code": "OptionalSuggestion",
+        "Dependency": "mOgUt4GM"
+      }
+    ]
+  },
+  {
+    "Name": "Ledger: Kotlin plus Fabric API and nested dependencies",
+    "Request": {
+      "MinecraftVersion": "1.21.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "21",
+      "SelectedPins": [
+        {
+          "VersionId": "t1AtqfxZ"
+        }
+      ],
+      "DependencyPins": [
+        {
+          "VersionId": "eRRZzGMc"
+        },
+        {
+          "VersionId": "Mys3P7lK"
+        }
+      ]
+    },
+    "ExpectedResolved": true,
+    "ExpectedVersionIds": [
+      "t1AtqfxZ",
+      "eRRZzGMc",
+      "Mys3P7lK"
+    ],
+    "ExpectedFindingCodes": [
+      "RequiredSatisfied",
+      "ConflictChecked"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindings": []
+  },
+  {
+    "Name": "Ledger + Cardboard: genuine API and Fabric breaks conflict",
+    "Request": {
+      "MinecraftVersion": "1.21.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "21",
+      "SelectedPins": [
+        {
+          "VersionId": "t1AtqfxZ"
+        },
+        {
+          "VersionId": "q1Hxw5tl"
+        }
+      ],
+      "DependencyPins": [
+        {
+          "VersionId": "eRRZzGMc"
+        },
+        {
+          "VersionId": "Mys3P7lK"
+        }
+      ]
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [
+      "t1AtqfxZ",
+      "q1Hxw5tl",
+      "eRRZzGMc",
+      "Mys3P7lK"
+    ],
+    "ExpectedFindingCodes": [
+      "Conflict"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindings": [
+      {
+        "Code": "Conflict",
+        "Dependency": "MLYQ9VGP"
+      },
+      {
+        "Code": "Conflict",
+        "Dependency": "cardboard"
+      }
+    ]
+  },
+  {
+    "Name": "Cardboard: API closure does not identify JAR-only icommon",
+    "Request": {
+      "MinecraftVersion": "1.21.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "21",
+      "SelectedPins": [
+        {
+          "VersionId": "q1Hxw5tl"
+        },
+        {
+          "VersionId": "Mys3P7lK"
+        }
+      ],
+      "DependencyPins": []
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [
+      "q1Hxw5tl",
+      "Mys3P7lK"
+    ],
+    "ExpectedFindingCodes": [
+      "MissingRequiredDependency"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindings": [
+      {
+        "Code": "MissingRequiredDependency",
+        "Dependency": "icommon"
+      }
+    ]
+  },
+  {
+    "Name": "iCommon: unsupported alternative nested candidates",
+    "Request": {
+      "MinecraftVersion": "1.21.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "21",
+      "SelectedPins": [
+        {
+          "VersionId": "7UUgrDDA"
+        }
+      ],
+      "DependencyPins": []
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [
+      "7UUgrDDA"
+    ],
+    "ExpectedFindingCodes": [
+      "DuplicateModId"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindings": []
+  },
+  {
+    "Name": "Chunky: wrong Minecraft target",
+    "Request": {
+      "MinecraftVersion": "1.20.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "21",
+      "SelectedPins": [
+        {
+          "VersionId": "RVFHfo1D"
+        }
+      ],
+      "DependencyPins": [
+        {
+          "VersionId": "Mys3P7lK"
+        }
+      ]
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [
+      "RVFHfo1D",
+      "Mys3P7lK"
+    ],
+    "ExpectedFindingCodes": [
+      "IncompatiblePlatform",
+      "RuntimeMismatch"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindings": [
+      {
+        "Code": "RuntimeMismatch",
+        "Dependency": "minecraft"
+      }
+    ]
+  },
+  {
+    "Name": "Kotlin: wrong Fabric Loader version",
+    "Request": {
+      "MinecraftVersion": "1.21.1",
+      "LoaderVersion": "0.16.14",
+      "JavaVersion": "21",
+      "SelectedPins": [
+        {
+          "VersionId": "eRRZzGMc"
+        }
+      ],
+      "DependencyPins": []
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [
+      "eRRZzGMc"
+    ],
+    "ExpectedFindingCodes": [
+      "RuntimeMismatch"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindings": [
+      {
+        "Code": "RuntimeMismatch",
+        "Dependency": "fabricloader"
+      }
+    ]
+  },
+  {
+    "Name": "Chunky: wrong Java major",
+    "Request": {
+      "MinecraftVersion": "1.21.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "17",
+      "SelectedPins": [
+        {
+          "VersionId": "RVFHfo1D"
+        }
+      ],
+      "DependencyPins": [
+        {
+          "VersionId": "Mys3P7lK"
+        }
+      ]
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [
+      "RVFHfo1D",
+      "Mys3P7lK"
+    ],
+    "ExpectedFindingCodes": [
+      "RuntimeMismatch"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindings": [
+      {
+        "Code": "RuntimeMismatch",
+        "Dependency": "java"
+      }
+    ]
+  },
+  {
+    "Name": "FerriteCore: NeoForge artifact rejected for Fabric target",
+    "Request": {
+      "MinecraftVersion": "1.21.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "21",
+      "SelectedPins": [
+        {
+          "VersionId": "x7kQWVju"
+        }
+      ],
+      "DependencyPins": []
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [
+      "x7kQWVju"
+    ],
+    "ExpectedFindingCodes": [
+      "IncompatiblePlatform",
+      "MissingFabricMetadata"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindings": []
+  },
+  {
+    "Name": "FerriteCore: real Fabric declarations",
+    "Request": {
+      "MinecraftVersion": "1.21.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "21",
+      "SelectedPins": [
+        {
+          "VersionId": "sOzRw3CG"
+        }
+      ],
+      "DependencyPins": []
+    },
+    "ExpectedResolved": true,
+    "ExpectedVersionIds": [
+      "sOzRw3CG"
+    ],
+    "ExpectedFindingCodes": [
+      "RuntimeSatisfied"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindings": []
+  },
+  {
+    "Name": "Lithium: real breaks declaration with conflicting mod absent",
+    "Request": {
+      "MinecraftVersion": "1.21.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "21",
+      "SelectedPins": [
+        {
+          "VersionId": "N08Z8wog"
+        }
+      ],
+      "DependencyPins": []
+    },
+    "ExpectedResolved": true,
+    "ExpectedVersionIds": [
+      "N08Z8wog"
+    ],
+    "ExpectedFindingCodes": [
+      "ConflictChecked"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindings": []
+  },
+  {
+    "Name": "Unknown version: intentional invalid ID gives live API unavailable",
+    "Request": {
+      "MinecraftVersion": "1.21.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "21",
+      "SelectedPins": [
+        {
+          "VersionId": "NoSuchV1"
+        }
+      ],
+      "DependencyPins": []
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [],
+    "ExpectedFindingCodes": [
+      "ApiUnavailable"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindings": []
+  }
+]

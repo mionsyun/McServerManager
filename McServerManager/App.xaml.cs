@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using McServerManager.Models;
 using McServerManager.Services;
 using McServerManager.Services.Templates;
+using McServerManager.Services.Modrinth;
+using McServerManager.Services.Fabric;
 using McServerManager.ViewModels;
 using McServerManager.Views;
 
@@ -109,6 +111,10 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IAppSettingsService, AppSettingsService>();
         services.AddSingleton<IServerConfigService, ServerConfigService>();
         services.AddSingleton<ITemplateManifestService, TemplateManifestService>();
+        services.AddSingleton<IModrinthProvider, ModrinthProvider>();
+        services.AddSingleton<IFabricJarInspector, FabricJarInspector>();
+        services.AddSingleton<IFabricVersionMatcher, FabricVersionMatcher>();
+        services.AddSingleton<IModrinthInspectionService, ModrinthInspectionService>();
         services.AddSingleton<IServerPropertiesService, ServerPropertiesService>();
         services.AddSingleton<IMinecraftVersionService, MinecraftVersionService>();
         services.AddSingleton<IServerRuntimeManager, ServerRuntimeManager>();

@@ -41,9 +41,42 @@ public partial class NewServerWindow : Window
         if (DataContext is NewServerViewModel viewModel) viewModel.TemplateInspection.Cancel();
     }
 
+    private void OnSelectInspectionMods(object sender, RoutedEventArgs e) => SelectModFiles(false);
+    private void OnSelectInstalledMods(object sender, RoutedEventArgs e) => SelectModFiles(true);
+    private void SelectModFiles(bool installed)
+    {
+        if (DataContext is not NewServerViewModel viewModel) return;
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = installed ? "導入済みとして比較するMOD" : "確認するMOD",
+            Filter = "Java MOD (*.jar)|*.jar", CheckFileExists = true, Multiselect = true
+        };
+        if (dialog.ShowDialog(this) != true) return;
+        if (dialog.FileNames.Length > 256) { viewModel.ModInspection.ReportFileSelectionFailure(); return; }
+        if (installed) viewModel.ModInspection.SetInstalledFiles(dialog.FileNames);
+        else viewModel.ModInspection.SetSelectedFiles(dialog.FileNames);
+    }
+    private void OnClearInspectionMods(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is NewServerViewModel viewModel) viewModel.ModInspection.ClearFiles();
+    }
+    private async void OnInspectMods(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is NewServerViewModel viewModel && !viewModel.ModInspection.IsBusy)
+            await viewModel.ModInspection.InspectAsync();
+    }
+    private void OnCancelModInspection(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is NewServerViewModel viewModel) viewModel.ModInspection.Cancel();
+    }
+
     protected override void OnClosed(EventArgs e)
     {
-        if (DataContext is NewServerViewModel viewModel) viewModel.TemplateInspection.Cancel();
+        if (DataContext is NewServerViewModel viewModel)
+        {
+            viewModel.TemplateInspection.Cancel();
+            viewModel.ModInspection.Cancel();
+        }
         base.OnClosed(e);
     }
 
