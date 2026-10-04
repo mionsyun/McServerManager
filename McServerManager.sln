@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McServerManager.TemplateTes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McServerManager.LiveChecks", "McServerManager.LiveChecks\McServerManager.LiveChecks.csproj", "{4DD9F42A-750F-4E91-AA60-E5FC52F53C78}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McServerManager.OwnershipTestChild", "McServerManager.OwnershipTestChild\McServerManager.OwnershipTestChild.csproj", "{0D89C72B-D8BA-484C-A8E3-A052A3F17751}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{4DD9F42A-750F-4E91-AA60-E5FC52F53C78}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DD9F42A-750F-4E91-AA60-E5FC52F53C78}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4DD9F42A-750F-4E91-AA60-E5FC52F53C78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D89C72B-D8BA-484C-A8E3-A052A3F17751}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D89C72B-D8BA-484C-A8E3-A052A3F17751}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D89C72B-D8BA-484C-A8E3-A052A3F17751}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D89C72B-D8BA-484C-A8E3-A052A3F17751}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
