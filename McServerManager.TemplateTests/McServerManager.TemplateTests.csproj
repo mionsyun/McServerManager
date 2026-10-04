@@ -50,6 +50,7 @@
     <Compile Include="../McServerManager/Models/Participants/**/*.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="../McServerManager/Services/Participants/**/*.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="../McServerManager/ViewModels/EditionViewModel.cs" Link="NewCore/ViewModels/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/ViewModels/ParticipantExportViewModel.cs" Link="NewCore/ViewModels/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="../McServerManager/Models/ServerConfig.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="../McServerManager/Models/FirewallRuleInfo.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="../McServerManager/Models/WorldBackupEntry.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />

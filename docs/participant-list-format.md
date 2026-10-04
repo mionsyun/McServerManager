@@ -1,12 +1,12 @@
 # Participant reference-list ZIP core
 
-現段階では参加者向け ZIP のコア API のみ実装しています。WPF のクライアント定義の
-編集・読み込み・レビュー・ZIP 保存フローは未接続です。これは Free 版の制限ではなく、
-UI 統合が未実装のためです。Free / Pro のどちらも共通の出力権限を持ちます。
+参加者向け ZIP は、明示的なクライアント定義 JSON を読み込み、内容を確認して保存します。
+Free / Pro のどちらも共通の出力権限を持ちます。定義を作成・編集する GUI は別の作業です。
+サーバーの MOD 一覧から参加者に必要な MOD を自動で推測することはありません。
 
-This is a core API and an offline test suite. The application UI is not enabled by
-these files. Any UI caller must separately select and review an explicit client
-definition; inspected server artifacts must never be used to infer this list.
+The application review flow uses this core API and requires an explicit client
+definition. Inspected server artifacts are never used to infer this list. See
+`participant-export-ui-milestone.md` for the UI boundary and verification limits.
 
 `ParticipantClientDefinitionService` accepts bounded UTF-8 JSON with this shape:
 

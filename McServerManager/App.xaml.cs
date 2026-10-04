@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using McServerManager.Models;
 using McServerManager.Services;
 using McServerManager.Services.Templates;
+using McServerManager.Services.Participants;
 using McServerManager.Services.Modrinth;
 using McServerManager.Services.Fabric;
 using McServerManager.Services.Editions;
@@ -37,7 +38,7 @@ public partial class App : System.Windows.Application
 
             RestoreScheduledBackups(provider, appSettings);
 
-            var mainWindow = new MainWindow
+            var mainWindow = new MainWindow(() => provider.GetRequiredService<ParticipantExportWindow>())
             {
                 DataContext = provider.GetRequiredService<MainViewModel>()
             };
@@ -106,6 +107,9 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IAppSettingsService, AppSettingsService>();
         services.AddSingleton<IServerConfigService, ServerConfigService>();
         services.AddSingleton<ITemplateManifestService, TemplateManifestService>();
+        services.AddSingleton<IParticipantClientDefinitionService, ParticipantClientDefinitionService>();
+        services.AddSingleton<IParticipantListZipService, ParticipantListZipService>();
+        services.AddSingleton<IParticipantExportFileService, ParticipantExportFileService>();
         services.AddSingleton<IModrinthProvider, ModrinthProvider>();
         services.AddSingleton<IFabricJarInspector, FabricJarInspector>();
         services.AddSingleton<IFabricVersionMatcher, FabricVersionMatcher>();
@@ -143,6 +147,8 @@ public partial class App : System.Windows.Application
 
         // プレゼンテーション層
         services.AddTransient<MainViewModel>();
+        services.AddTransient<ParticipantExportViewModel>();
+        services.AddTransient<ParticipantExportWindow>();
 
         return services.BuildServiceProvider();
     }

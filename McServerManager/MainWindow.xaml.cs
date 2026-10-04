@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using McServerManager.ViewModels;
+using McServerManager.Views;
 using WpfPoint = System.Windows.Point;
 using WpfRect = System.Windows.Rect;
 
@@ -12,13 +13,39 @@ namespace McServerManager;
 public partial class MainWindow : Window
 {
     private TutorialViewModel? _tutorial;
+    private readonly Func<ParticipantExportWindow>? _participantExportWindowFactory;
+    private bool _participantExportOpen;
 
     public MainWindow()
     {
         InitializeComponent();
+        ParticipantExportButton.IsEnabled = false;
         Loaded += OnLoaded;
         SizeChanged += (_, _) => UpdateTutorialLayout();
         DataContextChanged += (_, _) => BindTutorial();
+    }
+
+    public MainWindow(Func<ParticipantExportWindow> participantExportWindowFactory) : this()
+    {
+        _participantExportWindowFactory = participantExportWindowFactory
+            ?? throw new ArgumentNullException(nameof(participantExportWindowFactory));
+        ParticipantExportButton.IsEnabled = true;
+    }
+
+    private void OpenParticipantExport(object sender, RoutedEventArgs e)
+    {
+        if (_participantExportOpen || _participantExportWindowFactory is null) return;
+        _participantExportOpen = true;
+        try
+        {
+            var window = _participantExportWindowFactory();
+            window.Owner = this;
+            window.ShowDialog();
+        }
+        finally
+        {
+            _participantExportOpen = false;
+        }
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
