@@ -115,6 +115,9 @@
                                                         <DataTrigger Binding="{Binding Status}" Value="Stopping">
                                                             <Setter Property="Fill" Value="{DynamicResource BrushWarning}"/>
                                                         </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Unknown">
+                                                            <Setter Property="Fill" Value="{DynamicResource BrushWarning}"/>
+                                                        </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </Ellipse.Style>

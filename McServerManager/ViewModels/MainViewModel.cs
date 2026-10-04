@@ -436,10 +436,11 @@ public sealed class MainViewModel : ObservableObject
         if (!runtimeReleased)
         {
             _services.Dialog.Show(
-                "サーバーランタイムの解放に失敗しました。アプリ再起動で解消する場合があります。",
+                "停止状態を確認できないか、別の操作が進行中のため、削除を中止しました。サーバーの状態を確認してください。",
                 "警告",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
+            return;
         }
 
         var directory = target.ServerDirectory;

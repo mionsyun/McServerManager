@@ -66,4 +66,13 @@
     <Compile Include="../McServerManager/Services/BackupSchedulerService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="../McServerManager/Services/BackupScheduleRestorer.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../McServerManager/Models/RuntimeLifecycle/**/*.cs" Link="RuntimeCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/RuntimeLifecycle/**/*.cs" Link="RuntimeCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/ServerStatus.cs" Link="RuntimeCore/ServerStatus.cs" />
+    <Compile Include="../McServerManager/Services/ServerRuntimeManager.cs" Link="RuntimeCore/ServerRuntimeManager.cs" />
+    <Compile Include="../McServerManager/Services/Interfaces/IServerRuntimeManager.cs" Link="RuntimeCore/IServerRuntimeManager.cs" />
+    <Compile Include="../McServerManager/Services/ServerEditions.cs" Link="RuntimeCore/ServerEditions.cs" />
+    <Compile Include="../McServerManager/Services/JavaNotFoundException.cs" Link="RuntimeCore/JavaNotFoundException.cs" />
+  </ItemGroup>
 </Project>

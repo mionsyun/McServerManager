@@ -276,6 +276,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     };
 
     public bool IsRunning => Status == ServerStatus.Running;
+    public bool IsStopped => Status == ServerStatus.Stopped;
 
     /// <summary>稼働時間(起動時刻からの経過)。1秒ごとの統計タイマーで更新。</summary>
     public string Uptime
@@ -350,6 +351,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
                 OnPropertyChanged(nameof(StopButtonLabel));
                 OnPropertyChanged(nameof(RestartButtonLabel));
                 OnPropertyChanged(nameof(IsRunning));
+                OnPropertyChanged(nameof(IsStopped));
                 OnPropertyChanged(nameof(Uptime));
                 OnPropertyChanged(nameof(LanReady));
                 OnPropertyChanged(nameof(PublicReady));
@@ -381,11 +383,17 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
             ServerStatus.Starting => "起動中",
             ServerStatus.Running => "稼働中",
             ServerStatus.Stopping => "停止中",
-            _ => "停止",
+            ServerStatus.Stopped => "停止",
+            _ => "停止を確認できません",
         };
 
     public string StartButtonLabel => Status == ServerStatus.Starting ? "起動中..." : "▶ 起動";
-    public string StopButtonLabel => Status == ServerStatus.Stopping ? "停止中..." : "■ 停止";
+    public string StopButtonLabel => Status switch
+    {
+        ServerStatus.Stopping => "停止中...",
+        ServerStatus.Unknown => "■ 停止を再確認",
+        _ => "■ 停止",
+    };
     public string RestartButtonLabel =>
         Status is ServerStatus.Starting or ServerStatus.Stopping ? "再起動中..." : "↻ 再起動";
 
@@ -1014,7 +1022,7 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
         try
         {
             await _services.Runtime.StartAsync(_config, ServerDirectory);
-            if (_runtime.Status != ServerStatus.Stopped)
+            if (_runtime.Status is ServerStatus.Starting or ServerStatus.Running)
             {
                 _config.LastStartedAt = DateTime.UtcNow;
                 _services.Configs.Save(_config);
