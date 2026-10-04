@@ -161,6 +161,88 @@ public sealed class WindowsTransactionIntentJournalTests(ITestOutputHelper outpu
     }
 
     [Fact]
+    public void HardlinkedReservationIsRejectedWithoutChangingEitherNameOrJournal()
+    {
+        var root = Sandbox(); WindowsIntentTicket ticket;
+        using (var journal = WindowsTransactionIntentJournal.CreateNew(root, Receipt())) { ticket = journal.Ticket; journal.WriteAndFlush(); }
+        var reservation = Path.Combine(root, WindowsOwnedDirectory.ReservationName);
+        var link = Path.Combine(root, "reservation-second-name.bin");
+        var reservationBytes = File.ReadAllBytes(reservation);
+        var journalBytes = File.ReadAllBytes(RecordPath(root));
+        Assert.Equal(WindowsIntentObservation.ExactIntentPresent, WindowsTransactionIntentJournal.Inspect(root, ticket));
+        if (!CreateHardLinkW(link, reservation, IntPtr.Zero)) throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+        Assert.Equal(WindowsIntentObservation.Unknown, WindowsTransactionIntentJournal.Inspect(root, ticket));
+        Assert.Equal(reservationBytes, File.ReadAllBytes(reservation));
+        Assert.Equal(reservationBytes, File.ReadAllBytes(link));
+        Assert.Equal(journalBytes, File.ReadAllBytes(RecordPath(root)));
+        File.Delete(link); // Fixture-only removal restores the single-link positive control.
+        Assert.Equal(WindowsIntentObservation.ExactIntentPresent, WindowsTransactionIntentJournal.Inspect(root, ticket));
+        Directory.Delete(root, true);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void TrailingOrOversizedJournalIsUnknownAndInspectionDoesNotTruncate(bool oversized)
+    {
+        var root = Sandbox(); WindowsIntentTicket ticket;
+        using (var journal = WindowsTransactionIntentJournal.CreateNew(root, Receipt())) { ticket = journal.Ticket; journal.WriteAndFlush(); }
+        var path = RecordPath(root);
+        var original = File.ReadAllBytes(path);
+        Assert.Equal(WindowsIntentObservation.ExactIntentPresent, WindowsTransactionIntentJournal.Inspect(root, ticket));
+        using (var append = new FileStream(path, FileMode.Append, FileAccess.Write))
+            append.Write(new byte[oversized ? 4097 - original.Length : 1]);
+        var changed = File.ReadAllBytes(path);
+        Assert.Equal(oversized ? 4097 : original.Length + 1, changed.Length);
+        Assert.Equal(WindowsIntentObservation.Unknown, WindowsTransactionIntentJournal.Inspect(root, ticket));
+        Assert.Equal(changed, File.ReadAllBytes(path));
+        using (var restore = new FileStream(path, FileMode.Open, FileAccess.Write)) restore.SetLength(original.Length);
+        Assert.Equal(WindowsIntentObservation.ExactIntentPresent, WindowsTransactionIntentJournal.Inspect(root, ticket));
+        Directory.Delete(root, true);
+    }
+
+    [Theory]
+    [InlineData("null-ticket")]
+    [InlineData("null-receipt")]
+    [InlineData("null-root")]
+    [InlineData("null-reservation")]
+    [InlineData("null-journal")]
+    [InlineData("version")]
+    [InlineData("empty-install")]
+    [InlineData("empty-owner")]
+    [InlineData("invalid-storage")]
+    [InlineData("invalid-fingerprint")]
+    public void InvalidTicketIsUnknownWithoutChangingExistingFilesOrCreatingMissingRoot(string invalid)
+    {
+        var root = Sandbox(); WindowsIntentTicket ticket;
+        using (var journal = WindowsTransactionIntentJournal.CreateNew(root, Receipt())) { ticket = journal.Ticket; journal.WriteAndFlush(); }
+        WindowsIntentTicket malformed = invalid switch
+        {
+            "null-ticket" => null!,
+            "null-receipt" => ticket with { Receipt = null! },
+            "null-root" => ticket with { Root = null! },
+            "null-reservation" => ticket with { Reservation = null! },
+            "null-journal" => ticket with { Journal = null! },
+            "version" => ticket with { Version = -1 },
+            "empty-install" => ticket with { Receipt = ticket.Receipt with { InstallId = Guid.Empty } },
+            "empty-owner" => ticket with { Receipt = ticket.Receipt with { OwnerToken = Guid.Empty } },
+            "invalid-storage" => ticket with { Receipt = ticket.Receipt with { StorageId = "../invalid" } },
+            "invalid-fingerprint" => ticket with { Receipt = ticket.Receipt with { PlanFingerprint = new string('A', 64) } },
+            _ => throw new ArgumentOutOfRangeException(nameof(invalid))
+        };
+        var paths = Directory.GetFiles(root).OrderBy(path => path, StringComparer.Ordinal).ToArray();
+        var before = paths.Select(File.ReadAllBytes).ToArray();
+        Assert.Equal(WindowsIntentObservation.Unknown, WindowsTransactionIntentJournal.Inspect(root, malformed));
+        Assert.Equal(paths, Directory.GetFiles(root).OrderBy(path => path, StringComparer.Ordinal).ToArray());
+        for (var i = 0; i < paths.Length; i++) Assert.Equal(before[i], File.ReadAllBytes(paths[i]));
+        var missing = root + "-missing";
+        Assert.Equal(WindowsIntentObservation.Unknown, WindowsTransactionIntentJournal.Inspect(missing, malformed));
+        Assert.False(Directory.Exists(missing));
+        Assert.Equal(WindowsIntentObservation.ExactIntentPresent, WindowsTransactionIntentJournal.Inspect(root, ticket));
+        Directory.Delete(root, true);
+    }
+
+    [Fact]
     public void InvalidReceiptRejectsBeforeCreationAndNoGlobalInstallIdClaimIsMade()
     {
         var root = Sandbox();
