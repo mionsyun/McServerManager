@@ -38,7 +38,7 @@ public partial class App : System.Windows.Application
 
             RestoreScheduledBackups(provider, appSettings);
 
-            var mainWindow = new MainWindow(() => provider.GetRequiredService<ParticipantExportWindow>())
+            var mainWindow = new MainWindow(provider.GetRequiredService<Func<ParticipantExportWindow>>())
             {
                 DataContext = provider.GetRequiredService<MainViewModel>()
             };
@@ -147,8 +147,14 @@ public partial class App : System.Windows.Application
 
         // プレゼンテーション層
         services.AddTransient<MainViewModel>();
+        services.AddTransient<TemplateInspectionViewModel>();
         services.AddTransient<ParticipantExportViewModel>();
         services.AddTransient<ParticipantExportWindow>();
+        services.AddSingleton<Func<ParticipantExportWindow>>(provider =>
+            () => provider.GetRequiredService<ParticipantExportWindow>());
+        services.AddTransient<NewServerWindow>();
+        services.AddSingleton<Func<NewServerWindow>>(provider =>
+            () => provider.GetRequiredService<NewServerWindow>());
 
         return services.BuildServiceProvider();
     }

@@ -19,6 +19,7 @@ public sealed class MainViewModel : ObservableObject
     private readonly AppServices _services;
     private readonly ITemplateManifestService _templateManifests;
     private readonly IModrinthInspectionService _modInspection;
+    private readonly Func<NewServerWindow>? _newServerWindowFactory;
     private readonly IBackupSchedulerService _backupScheduler;
     private readonly IBedrockServerService _bedrockServer;
     private readonly IBedrockPropertiesService _bedrockProperties;
@@ -37,12 +38,14 @@ public sealed class MainViewModel : ObservableObject
         IJavaRuntimeInstaller javaInstaller,
         ITemplateManifestService templateManifests,
         IModrinthInspectionService modInspection,
-        EditionViewModel edition)
+        EditionViewModel edition,
+        Func<NewServerWindow>? newServerWindowFactory = null)
     {
         _services = services;
         Edition = edition;
         _templateManifests = templateManifests;
         _modInspection = modInspection;
+        _newServerWindowFactory = newServerWindowFactory;
         _backupScheduler = backupScheduler;
         _bedrockServer = bedrockServer;
         _bedrockProperties = bedrockProperties;
@@ -385,10 +388,8 @@ public sealed class MainViewModel : ObservableObject
 
     private void OpenCreateServerWindow()
     {
-        var window = new NewServerWindow
-        {
-            Owner = WpfApplication.Current.MainWindow
-        };
+        var window = _newServerWindowFactory?.Invoke() ?? new NewServerWindow();
+        window.Owner = WpfApplication.Current.MainWindow;
 
         var vm = new NewServerViewModel(_services, _bedrockServer, Servers.Select(s => s.Name), _templateManifests, _modInspection);
         vm.RequestClose += result =>

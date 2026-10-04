@@ -15,7 +15,7 @@
         <StackPanel Margin="0,0,0,16">
             <TextBlock Text="参加者向け案内ZIP" Style="{StaticResource ScreenTitle}"/>
             <TextBlock Margin="0,7,0,0" TextWrapping="Wrap" Style="{StaticResource MutedText}"
-                       Text="Free / Pro 共通。参加者に渡す MOD 一覧と説明を、明示的なクライアント定義から作ります。"/>
+                       Text="Free / Pro 共通。テンプレートに明記された参加者用の構成を確認し、MOD 一覧と説明を保存できます。"/>
         </StackPanel>
 
         <ScrollViewer x:Name="ContentScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,10,0">
@@ -31,26 +31,40 @@
                 </Border>
                 <Border Style="{StaticResource SurfacePanel}" Margin="0,0,0,14">
                     <StackPanel>
-                        <TextBlock Text="1  参加者用の定義を読み込む" Style="{StaticResource SectionHeading}"/>
+                        <TextBlock Text="1  テンプレートから参加者用の構成を読み込む" Style="{StaticResource SectionHeading}"/>
                         <TextBlock TextWrapping="Wrap" Margin="0,4,0,12"
-                                   Text="管理者が参加者用に用意したクライアント定義 JSON を選んでください。サーバーの MOD 一覧やテンプレートから、自動で参加者用の構成を推測することはありません。"/>
-                        <StackPanel x:Name="ImportControls" Orientation="Horizontal">
-                            <Button x:Name="ImportButton" Content="クライアント定義を選ぶ…" Click="OnImport"
-                                    IsEnabled="{Binding CapabilityAvailable}" Style="{StaticResource BaseButton}" Padding="16,9"/>
+                                   Text="管理者から受け取った MaiPilot テンプレートを選んでください。テンプレート内の明示的なクライアント定義だけを使い、サーバーの MOD 一覧からは推測しません。"/>
+                        <StackPanel x:Name="ImportControls">
+                            <Button Content="テンプレートから読み込む…" Click="OnImportTemplate"
+                                    IsEnabled="{Binding CapabilityAvailable}" Style="{StaticResource PrimaryButton}"
+                                    HorizontalAlignment="Left" Padding="16,9"/>
+                            <TextBlock Text="対応: UTF-8 の .maipilot-template.json（最大 1 MiB）。参加者用の定義が明記されている必要があります。"
+                                       Margin="0,9,0,0" TextWrapping="Wrap" Style="{StaticResource MutedText}"/>
+                            <Expander Header="詳細設定: クライアント定義 JSON を直接読み込む" Margin="0,14,0,0">
+                                <StackPanel Margin="0,9,0,0">
+                                    <TextBlock Text="既存の参加者用 JSON がある管理者向けです。テンプレートがあれば、上の「テンプレートから読み込む」を使ってください。"
+                                               TextWrapping="Wrap" Style="{StaticResource MutedText}" Margin="0,0,0,9"/>
+                                    <Button x:Name="ImportButton" Content="クライアント定義 JSON を選ぶ…" Click="OnImport"
+                                            IsEnabled="{Binding CapabilityAvailable}" Style="{StaticResource BaseButton}"
+                                            HorizontalAlignment="Left" Padding="16,9"/>
+                                    <TextBlock Text="対応: UTF-8 の .json（最大 256 KiB / MOD 256 件）。Modrinth、Fabric / Forge の明示的な定義。CurseForge は未対応です。"
+                                               Margin="0,9,0,0" TextWrapping="Wrap" Style="{StaticResource MutedText}"/>
+                                </StackPanel>
+                            </Expander>
                         </StackPanel>
-                        <TextBlock Text="対応: UTF-8 の .json（最大 256 KiB / MOD 256 件）。Modrinth、Fabric / Forge の明示的な定義。CurseForge は未対応です。"
-                                   Margin="0,9,0,0" TextWrapping="Wrap" Style="{StaticResource MutedText}"/>
                         <TextBlock x:Name="SelectedFileText" Text="ファイル未選択"
                                    Margin="0,5,0,0" TextWrapping="Wrap" Style="{StaticResource MutedText}"/>
+                        <TextBlock x:Name="TemplateStatusText" Visibility="Collapsed" Margin="0,9,0,0"
+                                   TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource PendingBanner}" Margin="0,0,0,14"
                         Visibility="{Binding HasDefinition, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                     <StackPanel>
-                        <TextBlock Text="クライアント定義がまだない場合" FontWeight="SemiBold"/>
+                        <TextBlock Text="テンプレートに参加者用の定義がない場合" FontWeight="SemiBold"/>
                         <TextBlock Margin="0,5,0,0" TextWrapping="Wrap"
-                                   Text="この画面では定義の作成・編集はできません。管理者に、Minecraft・ローダー・Java の指定と、参加者が使う MOD の正確な版、必須 / 任意を記載した MaiPilot 用 JSON を用意してもらってください。サーバー用ファイルをそのまま選ばないでください。"/>
+                                   Text="案内 ZIP は作れません。管理者に、Minecraft・ローダー・Java の指定と、参加者が使う MOD の正確な版、必須 / 任意を明記したクライアント定義付きテンプレートを依頼してください。この画面では定義の作成・編集はできません。既存の参加者用 JSON がある場合だけ「詳細設定」から読み込めます。"/>
                     </StackPanel>
                 </Border>
 

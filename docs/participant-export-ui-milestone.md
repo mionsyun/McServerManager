@@ -1,5 +1,10 @@
 # Participant reference-list review and ZIP export
 
+Historical snapshot of the initial standalone-definition UI. The subsequent
+[template client-declaration bridge](template-client-declaration.md) makes
+template selection the primary route and keeps standalone JSON import under
+advanced options. The file publication and native Windows gates below remain.
+
 ## Scope
 
 This slice connects the existing free participant-list core to a WPF review flow.

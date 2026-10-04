@@ -32,6 +32,12 @@ internal static class TemplateManifestConsistency
 
     public static void Validate(TemplateManifest manifest)
     {
+        if (manifest.ClientDefinition is { } client &&
+            !string.Equals(manifest.Runtime.MinecraftVersion, client.Runtime.MinecraftVersion, StringComparison.Ordinal))
+            Fail("ClientMinecraftVersionMismatch", "$.clientDefinition.runtime.minecraftVersion",
+                "The explicit client and server declarations must pin the same Minecraft version.");
+        // Loader families and loader pins are independent declarations. Matching Minecraft
+        // versions do not establish that a client can connect or that its MODs are compatible.
         var entries = new Dictionary<string, TemplateAddon>(StringComparer.Ordinal);
         var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var projects = new HashSet<string>(StringComparer.Ordinal);

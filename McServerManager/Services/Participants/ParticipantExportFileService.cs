@@ -1,5 +1,6 @@
 using System.IO;
 using System.Threading;
+using McServerManager.Services.Templates;
 
 namespace McServerManager.Services.Participants;
 
@@ -19,26 +20,41 @@ public sealed class ParticipantExportFileService : IParticipantExportFileService
     internal ParticipantExportFileService(IParticipantExportFileOperations operations) =>
         _operations = operations ?? throw new ArgumentNullException(nameof(operations));
 
-    public async Task<byte[]> ReadDefinitionAsync(string path, CancellationToken cancellationToken = default)
+    public Task<byte[]> ReadDefinitionAsync(string path, CancellationToken cancellationToken = default) =>
+        ReadBoundedAsync(path, ".json", ParticipantDefinitionPolicy.MaxDefinitionBytes,
+            "クライアント定義 JSON は 256 KiB 以下にしてください。", cancellationToken);
+
+    public Task<byte[]> ReadTemplateAsync(string path, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!path.EndsWith(".maipilot-template.json", StringComparison.OrdinalIgnoreCase))
+            throw new ArgumentException(".maipilot-template.json ファイルを選択してください。", nameof(path));
+        return ReadBoundedAsync(path, ".json", TemplatePolicy.MaxManifestBytes,
+            "テンプレートは 1 MiB 以下にしてください。", cancellationToken);
+    }
+
+    private static async Task<byte[]> ReadBoundedAsync(string path, string extension, int maximumBytes,
+        string sizeError, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var fullPath = NormalizePath(path, ".json");
+        var fullPath = NormalizePath(path, extension);
         CheckRegularFile(fullPath);
         await using var file = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read,
             8192, FileOptions.Asynchronous | FileOptions.SequentialScan);
         CheckRegularFile(fullPath);
-        if (file.Length > ParticipantDefinitionPolicy.MaxDefinitionBytes)
-            throw DefinitionTooLarge();
+        if (file.Length > maximumBytes)
+            throw new IOException(sizeError);
 
         // One sentinel byte detects growth after Length was checked without an unbounded read.
-        var buffer = new byte[ParticipantDefinitionPolicy.MaxDefinitionBytes + 1];
+        var buffer = new byte[maximumBytes + 1];
         var total = 0;
         while (total < buffer.Length)
         {
             var read = await file.ReadAsync(buffer.AsMemory(total), cancellationToken).ConfigureAwait(false);
             if (read == 0) break;
             total += read;
-            if (total > ParticipantDefinitionPolicy.MaxDefinitionBytes) throw DefinitionTooLarge();
+            if (total > maximumBytes) throw new IOException(sizeError);
         }
         cancellationToken.ThrowIfCancellationRequested();
         return buffer.AsSpan(0, total).ToArray();
@@ -181,8 +197,6 @@ public sealed class ParticipantExportFileService : IParticipantExportFileService
         if ((attributes & (FileAttributes.ReparsePoint | FileAttributes.Directory)) != 0)
             throw new IOException("通常のファイルを選択してください。リンクやフォルダーは使用できません。");
     }
-
-    private static IOException DefinitionTooLarge() => new("クライアント定義 JSON は 256 KiB 以下にしてください。");
 
     private static bool IsSharingViolation(IOException exception) =>
         OperatingSystem.IsWindows() && (exception.HResult & 0xffff) is 32 or 33;

@@ -1,12 +1,16 @@
+using System.Text;
 using System.Text.Json;
+using McServerManager.Models.Participants;
 using McServerManager.Models.Templates;
+using McServerManager.Services.Participants;
 using static McServerManager.Services.Templates.TemplateJsonFields;
 
 namespace McServerManager.Services.Templates;
 
 internal static class TemplateManifestReader
 {
-    private static readonly string[] RootKeys = ["schemaVersion", "templateId", "revision", "name", "description", "edition", "runtime", "settings", "addons"];
+    private static readonly string[] RequiredRootKeys = ["schemaVersion", "templateId", "revision", "name", "description", "edition", "runtime", "settings", "addons"];
+    private static readonly string[] RootKeys = [.. RequiredRootKeys, "clientDefinition"];
     private static readonly string[] RuntimeKeys = ["type", "minecraftVersion", "build", "loaderVersion", "installerVersion"];
     private static readonly string[] SettingsKeys = ["difficulty", "gamemode", "maxPlayers", "viewDistance", "simulationDistance", "pvp", "spawnProtection"];
     private static readonly string[] AddonKeys = ["entryId", "kind", "selection", "source", "sha256", "sizeBytes", "requires"];
@@ -17,7 +21,7 @@ internal static class TemplateManifestReader
 
     public static TemplateManifest Read(JsonElement root)
     {
-        Object(root, "$", RootKeys, RootKeys);
+        Object(root, "$", RootKeys, RequiredRootKeys);
         var schema = Choice(root.GetProperty("schemaVersion"), "$.schemaVersion", "1.0");
         var id = Text(root.GetProperty("templateId"), "$.templateId", 36, 36);
         if (!Guid.TryParseExact(id, "D", out var templateId))
@@ -32,8 +36,26 @@ internal static class TemplateManifestReader
             Edition = Choice(root.GetProperty("edition"), "$.edition", "java"),
             Runtime = ReadRuntime(root.GetProperty("runtime")),
             Settings = ReadSettings(root.GetProperty("settings")),
-            Addons = ReadAddons(root.GetProperty("addons"))
+            Addons = ReadAddons(root.GetProperty("addons")),
+            ClientDefinition = ReadClientDefinition(root)
         };
+    }
+
+    private static ParticipantClientDefinition? ReadClientDefinition(JsonElement root)
+    {
+        if (!root.TryGetProperty("clientDefinition", out var value))
+            return null;
+
+        // GetRawText preserves the original object's whitespace, property order and escapes.
+        // The whole manifest was already snapshotted and checked for strict UTF-8, so this
+        // is the exact UTF-8 subtree, not a reserialization of mutable JSON or server addons.
+        var result = new ParticipantClientDefinitionService().Parse(Encoding.UTF8.GetBytes(value.GetRawText()));
+        if (!result.IsValid)
+        {
+            var issue = result.Issues[0];
+            Fail(issue.Code, "$.clientDefinition" + issue.Path[1..], issue.Message);
+        }
+        return result.Definition!;
     }
 
     private static TemplateRuntime ReadRuntime(JsonElement value)

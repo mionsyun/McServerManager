@@ -15,9 +15,10 @@ public sealed class ParticipantExportViewModel : ObservableObject
     private readonly IEditionPolicy _editionPolicy;
     private CancellationTokenSource? _cancellation;
     private ParticipantClientDefinition? _definition;
+    private string? _originalManifestSha256;
     private long _generation;
     private bool _isBusy, _isLoading, _acknowledgedLimitations;
-    private string _summary = "1. 参加者のゲーム環境を明記したクライアント定義 JSON を選んでください。";
+    private string _summary = "1. テンプレートを選んでください。上級者向けにクライアント定義 JSON を直接読み込むこともできます。";
     private string _details = "";
 
     public ParticipantExportViewModel(IParticipantClientDefinitionService definitions,
@@ -31,6 +32,9 @@ public sealed class ParticipantExportViewModel : ObservableObject
     public string Summary { get => _summary; private set => SetProperty(ref _summary, value); }
     public string Details { get => _details; private set => SetProperty(ref _details, value); }
     public string DefinitionName => _definition?.Name ?? "未選択";
+    public string? OriginalManifestSha256 => _originalManifestSha256;
+    public string? DefinitionSha256 => _definition?.InputSha256;
+    public bool IsTemplateDefinition => OriginalManifestSha256 is not null;
     public bool HasDefinition => _definition is not null;
     public long ReviewRevision => _generation;
     public bool CapabilityAvailable => _editionPolicy.Allows(EditionCapability.ParticipantPackExport);
@@ -76,12 +80,7 @@ public sealed class ParticipantExportViewModel : ObservableObject
                 Details = string.Join("\n", result.Issues.Select(issue => $"{issue.Message} [{issue.Code}] {issue.Path}"));
                 return;
             }
-            _definition = result.Definition;
-            Details = ReviewDetails(_definition);
-            NotifyReview();
-            Summary = CapabilityAvailable
-                ? "2. 入力形式のみ確認できました。内容と下の注意事項を確認してから、チェックを入れてください。"
-                : "入力形式は確認できましたが、このエディションでは参加者向け ZIP を作れません。";
+            ApplyDefinition(result.Definition);
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
         {
@@ -92,6 +91,31 @@ public sealed class ParticipantExportViewModel : ObservableObject
             if (generation == _generation) Summary = "定義を読み込めませんでした。読み取れる JSON ファイルを選び直してください。";
         }
         finally { FinishOperation(generation); }
+    }
+
+    /// <summary>Reviews the parser's opaque client declaration without reserializing or resolving it.</summary>
+    public void LoadValidatedDefinition(ParticipantClientDefinition definition, string originalManifestSha256)
+    {
+        StopOperation();
+        ClearReview();
+        ArgumentNullException.ThrowIfNull(definition);
+        if (originalManifestSha256 is not { Length: 64 }
+            || !originalManifestSha256.All(character => character is >= '0' and <= '9' or >= 'a' and <= 'f'))
+            throw new ArgumentException("A lowercase SHA-256 of the original template is required.", nameof(originalManifestSha256));
+        _originalManifestSha256 = originalManifestSha256;
+        ApplyDefinition(definition);
+    }
+
+    private void ApplyDefinition(ParticipantClientDefinition definition)
+    {
+        _definition = definition;
+        Details = (IsTemplateDefinition
+            ? $"入力元: テンプレート内の明示的な参加者用の構成定義\n元テンプレート SHA-256: {OriginalManifestSha256}\n埋め込み定義 SHA-256: {DefinitionSha256}\n\n"
+            : "入力元: 手動で選んだクライアント定義 JSON\n\n") + ReviewDetails(definition);
+        NotifyReview();
+        Summary = CapabilityAvailable
+            ? "2. 入力形式のみ確認できました。内容と下の注意事項を確認してから、チェックを入れてください。"
+            : "入力形式は確認できましたが、このエディションでは参加者向け ZIP を作れません。";
     }
 
     public async Task<byte[]?> CreateZipAsync(CancellationToken cancellationToken = default)
@@ -156,7 +180,7 @@ public sealed class ParticipantExportViewModel : ObservableObject
     {
         StopOperation();
         ClearReview();
-        Summary = "1. 参加者のゲーム環境を明記したクライアント定義 JSON を選んでください。";
+        Summary = "1. テンプレートを選んでください。上級者向けにクライアント定義 JSON を直接読み込むこともできます。";
     }
 
     public void ReportOpenFailure()
@@ -165,12 +189,19 @@ public sealed class ParticipantExportViewModel : ObservableObject
         Summary = "ファイルを開けませんでした。読み取れるクライアント定義 JSON を選び直してください。";
     }
 
+    public void ReportTemplateUnavailable(string details)
+    {
+        Clear();
+        Summary = "このテンプレートからは参加者向け案内 ZIP を作れません。理由を確認し、別のテンプレートを選んでください。";
+        Details = details;
+    }
+
     public void ReportOpenCanceled()
     {
         if (IsBusy) { Cancel(); return; }
         Summary = HasDefinition
             ? "ファイル選択を取り消しました。現在の確認内容は残っています。"
-            : "ファイル選択を取り消しました。クライアント定義 JSON を選んでください。";
+            : "ファイル選択を取り消しました。テンプレートまたはクライアント定義を選び直してください。";
     }
 
     public void ReportSaved(string savedPath, long revision)
@@ -213,6 +244,7 @@ public sealed class ParticipantExportViewModel : ObservableObject
     private void ClearReview()
     {
         _definition = null;
+        _originalManifestSha256 = null;
         Details = "";
         ResetAcknowledgment();
         NotifyReview();
@@ -228,6 +260,9 @@ public sealed class ParticipantExportViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(DefinitionName));
         OnPropertyChanged(nameof(HasDefinition));
+        OnPropertyChanged(nameof(OriginalManifestSha256));
+        OnPropertyChanged(nameof(DefinitionSha256));
+        OnPropertyChanged(nameof(IsTemplateDefinition));
         NotifyActions();
     }
 
