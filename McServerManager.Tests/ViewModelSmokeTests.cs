@@ -1,6 +1,7 @@
 using System.Windows;
 using McServerManager.Models;
 using McServerManager.Services;
+using McServerManager.Services.Editions;
 using McServerManager.Tests.TestInfrastructure;
 using McServerManager.ViewModels;
 
@@ -25,7 +26,8 @@ public sealed class ViewModelSmokeTests
             new PortForwardingService(new StubUpnpService(), bedrockProperties),
             new StubJavaRuntimeInstaller(),
             new McServerManager.Services.Templates.TemplateManifestService(),
-            new StubModInspectionService());
+            new StubModInspectionService(),
+            new EditionViewModel(EditionPolicy.Current, ProDistributionLinks.Current, new ProStoreNavigation(ProDistributionLinks.Current)));
 
         Assert.NotNull(vm.Servers);
         Assert.NotNull(vm.Tutorial);

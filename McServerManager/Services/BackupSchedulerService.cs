@@ -31,7 +31,7 @@ public sealed class BackupSchedulerService : IBackupSchedulerService, IDisposabl
 
         var intervalMs = (long)config.ScheduledBackupIntervalMinutes * 60_000L;
         var nextRunAt = DateTime.UtcNow.AddMilliseconds(intervalMs);
-        var entry = new ScheduledEntry(config.ServerId, nextRunAt);
+        var entry = new ScheduledEntry(config.ServerId, config.DirectoryPath, nextRunAt);
         entry.Timer = new System.Threading.Timer(_ => OnTick(entry), null, intervalMs, intervalMs);
 
         if (_entries.TryRemove(config.ServerId, out var previous))
@@ -69,8 +69,12 @@ public sealed class BackupSchedulerService : IBackupSchedulerService, IDisposabl
             return;
         }
 
-        var config = _serverConfigService.Load(entry.ServerId);
-        if (config is null || !config.ScheduledBackupEnabled)
+        // A server explicitly registered outside the default root must be reloaded from
+        // that same directory, never replaced by a same-ID default-root configuration.
+        var config = string.IsNullOrWhiteSpace(entry.ServerDirectory)
+            ? _serverConfigService.Load(entry.ServerId)
+            : _serverConfigService.LoadFromDirectory(entry.ServerDirectory);
+        if (config is null || !string.Equals(config.ServerId, entry.ServerId, StringComparison.OrdinalIgnoreCase) || !config.ScheduledBackupEnabled)
         {
             Unschedule(entry.ServerId);
             return;
@@ -118,13 +122,15 @@ public sealed class BackupSchedulerService : IBackupSchedulerService, IDisposabl
 
     private sealed class ScheduledEntry
     {
-        public ScheduledEntry(string serverId, DateTime nextRunAtUtc)
+        public ScheduledEntry(string serverId, string serverDirectory, DateTime nextRunAtUtc)
         {
             ServerId = serverId;
+            ServerDirectory = serverDirectory;
             NextRunAtUtc = nextRunAtUtc;
         }
 
         public string ServerId { get; }
+        public string ServerDirectory { get; }
         public DateTime NextRunAtUtc { get; set; }
         public System.Threading.Timer? Timer { get; set; }
     }

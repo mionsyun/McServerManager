@@ -36,9 +36,11 @@ public sealed class MainViewModel : ObservableObject
         IPortForwardingService portForwarding,
         IJavaRuntimeInstaller javaInstaller,
         ITemplateManifestService templateManifests,
-        IModrinthInspectionService modInspection)
+        IModrinthInspectionService modInspection,
+        EditionViewModel edition)
     {
         _services = services;
+        Edition = edition;
         _templateManifests = templateManifests;
         _modInspection = modInspection;
         _backupScheduler = backupScheduler;
@@ -75,14 +77,22 @@ public sealed class MainViewModel : ObservableObject
             var nextTheme = value ? ThemeService.DarkTheme : ThemeService.LightTheme;
             if (!string.Equals(_settings.Theme, nextTheme, StringComparison.OrdinalIgnoreCase))
             {
+                try { _services.Settings.Update(s => s.Theme = nextTheme); }
+                catch (AppSettingsStorageException)
+                {
+                    _services.Dialog.Show("設定を安全に保存できなかったため、表示テーマは変更していません。別のアプリを終了して再確認してください。", "設定の保存", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    OnPropertyChanged();
+                    return;
+                }
                 _settings.Theme = nextTheme;
-                _services.Settings.Update(s => s.Theme = nextTheme);
                 _services.Theme.Apply(_settings.Theme);
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(ThemeLabel));
             }
         }
     }
+
+    public EditionViewModel Edition { get; }
 
     public string ThemeLabel => IsDarkTheme ? "ダーク" : "ライト";
     public string AppVersion => ResolveAppVersion();
@@ -236,13 +246,20 @@ public sealed class MainViewModel : ObservableObject
         switch (applyResult.Status)
         {
             case AppUpdateDownloadStatus.Success:
-                ClearDeferredUpdatePrompt();
-                _services.Dialog.Show(
-                    "インストーラーを起動しました。アプリを終了します。",
-                    "アプリ更新",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-                WpfApplication.Current?.Shutdown();
+                // The installer has already launched. Preference cleanup must never turn that
+                // committed outcome into an apparent update failure or prevent required shutdown.
+                var cleanupFailed = false;
+                try { ClearDeferredUpdatePrompt(); }
+                catch (AppSettingsStorageException) { cleanupFailed = true; }
+                try
+                {
+                    _services.Dialog.Show(
+                        cleanupFailed
+                            ? "インストーラーを起動しました。更新通知の設定は保存できませんでしたが、更新のためアプリを終了します。"
+                            : "インストーラーを起動しました。アプリを終了します。",
+                        "アプリ更新", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                finally { WpfApplication.Current?.Shutdown(); }
                 return;
             case AppUpdateDownloadStatus.HashMismatch:
                 _services.Dialog.Show(
@@ -286,13 +303,14 @@ public sealed class MainViewModel : ObservableObject
 
     private void DeferUpdatePrompt(string version)
     {
-        _settings.DeferredAppUpdateVersion = version;
-        _settings.DeferredAppUpdateUntilUtc = DateTime.UtcNow.Add(UpdateSnoozeDuration);
+        var until = DateTime.UtcNow.Add(UpdateSnoozeDuration);
         _services.Settings.Update(s =>
         {
-            s.DeferredAppUpdateVersion = _settings.DeferredAppUpdateVersion;
-            s.DeferredAppUpdateUntilUtc = _settings.DeferredAppUpdateUntilUtc;
+            s.DeferredAppUpdateVersion = version;
+            s.DeferredAppUpdateUntilUtc = until;
         });
+        _settings.DeferredAppUpdateVersion = version;
+        _settings.DeferredAppUpdateUntilUtc = until;
     }
 
     private void ClearDeferredUpdatePrompt()
@@ -302,13 +320,13 @@ public sealed class MainViewModel : ObservableObject
             return;
         }
 
-        _settings.DeferredAppUpdateVersion = null;
-        _settings.DeferredAppUpdateUntilUtc = null;
         _services.Settings.Update(s =>
         {
             s.DeferredAppUpdateVersion = null;
             s.DeferredAppUpdateUntilUtc = null;
         });
+        _settings.DeferredAppUpdateVersion = null;
+        _settings.DeferredAppUpdateUntilUtc = null;
     }
 
     private void OpenTutorialGuideWindow()
@@ -820,12 +838,12 @@ public sealed class MainViewModel : ObservableObject
 
         if (!_settings.ServerDirectories.Contains(baseDir, StringComparer.OrdinalIgnoreCase))
         {
-            _settings.ServerDirectories.Add(baseDir);
             _services.Settings.Update(s =>
             {
                 if (!s.ServerDirectories.Contains(baseDir, StringComparer.OrdinalIgnoreCase))
                     s.ServerDirectories.Add(baseDir);
             });
+            _settings.ServerDirectories.Add(baseDir);
         }
     }
 

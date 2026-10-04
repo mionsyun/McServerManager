@@ -1,12 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <MaiPilotEdition Condition="'$(MaiPilotEdition)' == ''">Free</MaiPilotEdition>
+    <DefineConstants Condition="'$(MaiPilotEdition)' == 'Pro'">$(DefineConstants);MAIPILOT_PRO</DefineConstants>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
+  <Target Name="ValidateMaiPilotEdition" BeforeTargets="PrepareForBuild;CoreCompile">
+    <Error Condition="'$(MaiPilotEdition)' != 'Free' And '$(MaiPilotEdition)' != 'Pro'" Text="MaiPilotEdition must be Free or Pro." />
+  </Target>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="xunit" Version="2.5.3" />
@@ -28,5 +33,32 @@
     <Compile Include="../McServerManager/ViewModels/ModInspectionViewModel.cs" Link="Core/ViewModels/ModInspectionViewModel.cs" />
     <Compile Include="../McServerManager/Utilities/ObservableObject.cs" Link="Core/Utilities/ObservableObject.cs" />
     <None Update="Fixtures/**/*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../McServerManager/Models/Editions/**/*.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Editions/**/*.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/AppUpdate*.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/AppUpdateService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Interfaces/IAppUpdateService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/ExternalApiUrls.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Utilities/AuthenticodeVerifier.cs" Link="NewCore/Utilities/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/AppSettings.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/AppPathsService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Interfaces/IAppSettingsService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/AppSettingsService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/SettingsStorage/**/*.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/Participants/**/*.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Participants/**/*.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/ViewModels/EditionViewModel.cs" Link="NewCore/ViewModels/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/ServerConfig.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/FirewallRuleInfo.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/WorldBackupEntry.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/ArchiveWorldCandidate.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Interfaces/IServerConfigService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Interfaces/IWorldService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Interfaces/IBackupSchedulerService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Interfaces/IBackupScheduleRestorer.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/BackupSchedulerService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/BackupScheduleRestorer.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>
