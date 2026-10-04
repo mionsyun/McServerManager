@@ -26,7 +26,7 @@ public sealed class ParticipantListZipService(IEditionPolicy editionPolicy) : IP
             throw new InvalidOperationException("このエディションでは参加者向け一覧を出力できません。");
 
         var mods = definition.Mods.OrderBy(mod => mod.ProjectId, StringComparer.Ordinal).ToArray();
-        var manifest = JsonSerializer.SerializeToUtf8Bytes(new
+        var manifestJson = JsonSerializer.Serialize(new
         {
             schemaVersion = "1.0",
             definitionKind = "client-reference-list",
@@ -56,6 +56,9 @@ public sealed class ParticipantListZipService(IEditionPolicy editionPolicy) : IP
                 note = mod.Note
             }).ToArray()
         }, new JsonSerializerOptions { WriteIndented = true });
+        // .NET 8 indents JSON with platform newlines. Keep every archive entry LF-only;
+        // escaped newlines inside JSON string values are left unchanged.
+        var manifest = Utf8.GetBytes(manifestJson.Replace("\r\n", "\n", StringComparison.Ordinal));
 
         // All output is private until archive finalization succeeds. Cancellation and errors
         // cannot leave a user file behind because this API has no destination stream or path.
