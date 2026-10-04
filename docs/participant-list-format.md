@@ -2,7 +2,8 @@
 
 参加者向け ZIP は、テンプレート内の明示的なクライアント定義を読み込み、内容を確認して保存します。
 単独のクライアント定義 JSON は詳細設定から読み込めます。
-Free / Pro のどちらも共通の出力権限を持ちます。定義を作成・編集する GUI は別の作業です。
+Free / Pro のどちらも共通の出力権限を持ちます。定義を作成・編集するフォームは
+[Pro の限定的な宣言エディター](pro-template-authoring.md)で利用します。
 サーバーの MOD 一覧から参加者に必要な MOD を自動で推測することはありません。
 
 The application review flow uses this core API and requires an explicit client

@@ -19,6 +19,10 @@
     <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="../McServerManager/Models/Authoring/**/*.cs" Link="Authoring/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Authoring/**/*.cs" Link="Authoring/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/AuthoringFiles/**/*.cs" Link="Authoring/Files/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/ViewModels/Authoring/**/*.cs" Link="Authoring/ViewModels/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="../McServerManager/Models/Transactions/**/*.cs" Link="Core/Models/Transactions/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="../McServerManager/Services/Transactions/**/*.cs" Link="Core/Services/Transactions/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="../McServerManager/Models/Fabric/**/*.cs" Link="Core/Models/Fabric/%(RecursiveDir)%(Filename)%(Extension)" />

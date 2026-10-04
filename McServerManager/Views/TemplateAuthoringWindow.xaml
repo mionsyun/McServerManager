@@ -1,0 +1,326 @@
+<Window x:Class="McServerManager.Views.TemplateAuthoringWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:authoring="clr-namespace:McServerManager.ViewModels.Authoring"
+        Title="テンプレート作成・編集（Pro）- MaiPilot"
+        Width="1000" Height="880" MinWidth="800" MinHeight="640"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <Window.Resources>
+        <Style x:Key="FieldLabel" TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+            <Setter Property="Margin" Value="0,0,0,5"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <Style x:Key="FormField" TargetType="StackPanel">
+            <Setter Property="Margin" Value="0,0,14,12"/>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,14">
+            <TextBlock Text="テンプレート作成・編集  Pro" Style="{StaticResource ScreenTitle}"/>
+            <TextBlock Text="構成を自分で記入し、配布用のテンプレートを新しいファイルに保存します。"
+                       TextWrapping="Wrap" Style="{StaticResource MutedText}" Margin="0,7,0,0"/>
+        </StackPanel>
+
+        <ScrollViewer x:Name="ContentScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled" Padding="0,0,10,0">
+            <StackPanel>
+                <Border x:Name="FileWarningPanel" Style="{StaticResource WarnBanner}" Visibility="Collapsed" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="削除できなかった作業用ファイルがあります" FontWeight="SemiBold" Foreground="{DynamicResource BrushWarning}"/>
+                        <TextBlock Text="保存に失敗し、一時ファイルが残りました。以下の場所を確認してください。このファイルは配布しないでください。その後の保存結果とは別の注意事項です。"
+                                   TextWrapping="Wrap" Margin="0,5,0,8"/>
+                        <TextBox x:Name="FileWarningPaths" IsReadOnly="True" TextWrapping="Wrap" BorderThickness="0"
+                                 AutomationProperties.Name="削除できなかった作業用ファイルの場所"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource WarnBanner}" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="サーバーから取得した構成ではありません" FontWeight="SemiBold" Foreground="{DynamicResource BrushWarning}"/>
+                        <TextBlock Text="入力した構成、または読み込んだテンプレートの申告内容を保存します。既存サーバー、ワールド、接続情報、秘密情報を自動取得する機能ではありません。"
+                                   TextWrapping="Wrap" Margin="0,5,0,0"/>
+                        <TextBlock Text="確認できるのは入力形式のみです。提供元の実在・公開状態、依存 MOD の不足、サーバーとクライアントの互換性・動作は未確認です。ダウンロード・導入・サーバーへの適用は行いません。"
+                                   TextWrapping="Wrap" Margin="0,5,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel x:Name="InputControls">
+                    <Border Style="{StaticResource SurfacePanel}" Margin="0,0,0,14">
+                        <StackPanel>
+                            <TextBlock Text="1  新しく作る・既存テンプレートを編集する" Style="{StaticResource SectionHeading}"/>
+                            <WrapPanel Margin="0,8,0,0">
+                                <Button Content="新規作成" Click="OnNew" IsEnabled="{Binding CanCreate}"
+                                        Style="{StaticResource PrimaryButton}" Margin="0,0,10,8"/>
+                                <Button Content="既存テンプレートを読み込む…" Click="OnLoad" IsEnabled="{Binding CanLoad}"
+                                        Style="{StaticResource BaseButton}" Margin="0,0,0,8"/>
+                            </WrapPanel>
+                            <TextBlock Text="対応: UTF-8 の .maipilot-template.json（最大 1 MiB）。作成・編集・保存は Pro 専用です。"
+                                       Style="{StaticResource MutedText}" TextWrapping="Wrap"/>
+                            <TextBlock Text="既存テンプレートも別のファイル名で保存します。元のファイルは上書きしません。"
+                                       Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,5,0,0"/>
+                            <TextBlock Text="{Binding SourceFileName, StringFormat=読み込み元: {0}}"
+                                       TextWrapping="Wrap" Margin="0,8,0,0"
+                                       Visibility="{Binding SourceFileName, Converter={StaticResource NullOrEmptyToCollapsedConverter}}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel Visibility="{Binding HasDraft, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel Visibility="{Binding IsReviewing, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                    IsEnabled="{Binding CanEdit}">
+                            <Border Style="{StaticResource SurfacePanel}" Margin="0,0,0,14">
+                                <StackPanel>
+                                    <TextBlock Text="2  テンプレートの説明" Style="{StaticResource SectionHeading}"/>
+                                    <TextBlock Text="パスワード、IP アドレス、トークン、個人情報を記入しないでください。"
+                                               TextWrapping="Wrap" Style="{StaticResource MutedText}" Margin="0,4,0,12"/>
+                                    <TextBlock Text="名前（必須・80 文字以内）" Style="{StaticResource FieldLabel}"/>
+                                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MaxLength="80"
+                                             AutomationProperties.Name="テンプレート名" Margin="0,0,0,12"/>
+                                    <TextBlock Text="説明（任意・1000 文字以内）" Style="{StaticResource FieldLabel}"/>
+                                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" MaxLength="1000"
+                                             TextWrapping="Wrap" AcceptsReturn="True" MinHeight="64" MaxHeight="150"
+                                             VerticalScrollBarVisibility="Auto" AutomationProperties.Name="テンプレートの説明"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource SurfacePanel}" Margin="0,0,0,14">
+                                <StackPanel>
+                                    <TextBlock Text="3  サーバーの実行環境（Java 版）" Style="{StaticResource SectionHeading}"/>
+                                    <TextBlock Text="版は正確に記入してください。「最新」や範囲指定は使えません。"
+                                               Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,4,0,12"/>
+                                    <Border Style="{StaticResource PendingBanner}" Margin="0,0,0,12"
+                                            Visibility="{Binding IsServerRuntimeLocked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Text="既存のサーバー用 MOD・プラグインを保持するため、このテンプレートの実行環境は変更できません。"
+                                                   TextWrapping="Wrap"/>
+                                    </Border>
+                                    <StackPanel IsEnabled="{Binding CanEditServerRuntime}">
+                                        <UniformGrid Columns="2">
+                                            <StackPanel Style="{StaticResource FormField}">
+                                                <TextBlock Text="サーバーの種類" Style="{StaticResource FieldLabel}"/>
+                                                <ComboBox ItemsSource="{x:Static authoring:TemplateAuthoringViewModel.ServerTypes}"
+                                                          SelectedItem="{Binding ServerRuntime.Type, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                          AutomationProperties.Name="サーバーの種類"/>
+                                            </StackPanel>
+                                            <StackPanel Style="{StaticResource FormField}">
+                                                <TextBlock Text="Minecraft の版（例: 1.21.1）" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding ServerRuntime.MinecraftVersion, UpdateSourceTrigger=PropertyChanged}" MaxLength="256"
+                                                         AutomationProperties.Name="サーバー Minecraft の固定バージョン"/>
+                                            </StackPanel>
+                                        </UniformGrid>
+                                        <StackPanel Margin="0,0,14,12">
+                                            <TextBlock Text="Paper / Forge のビルド（Paper は整数、Forge は 47.3.0 など）" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding ServerRuntime.Build, UpdateSourceTrigger=PropertyChanged}" MaxLength="256"
+                                                     AutomationProperties.Name="Paper または Forge の固定ビルド"/>
+                                        </StackPanel>
+                                        <UniformGrid Columns="2">
+                                            <StackPanel Style="{StaticResource FormField}">
+                                                <TextBlock Text="Fabric ローダーの版（例: 0.16.10）" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding ServerRuntime.LoaderVersion, UpdateSourceTrigger=PropertyChanged}" MaxLength="256"
+                                                         AutomationProperties.Name="サーバー Fabric ローダーの固定バージョン"/>
+                                            </StackPanel>
+                                            <StackPanel Style="{StaticResource FormField}">
+                                                <TextBlock Text="Fabric インストーラーの版（例: 1.0.1）" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding ServerRuntime.InstallerVersion, UpdateSourceTrigger=PropertyChanged}" MaxLength="256"
+                                                         AutomationProperties.Name="Fabric インストーラーの固定バージョン"/>
+                                            </StackPanel>
+                                        </UniformGrid>
+                                        <TextBlock Text="Vanilla は Minecraft の版のみ。Paper / Forge はビルドも必須。Fabric はローダーとインストーラーの版も必須です。関係のない欄は空にしてください。例は書式の説明で、対応版の推奨ではありません。"
+                                                   TextWrapping="Wrap" Style="{StaticResource MutedText}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource SurfacePanel}" Margin="0,0,0,14">
+                                <Expander Header="4  サーバーの共有設定（任意）" IsExpanded="False">
+                                <StackPanel Margin="0,12,0,0">
+                                    <TextBlock Text="指定しない欄は空のままにします。稼働中のサーバー設定は変更しません。"
+                                               TextWrapping="Wrap" Style="{StaticResource MutedText}" Margin="0,4,0,12"/>
+                                    <UniformGrid Columns="2">
+                                        <StackPanel Style="{StaticResource FormField}">
+                                            <TextBlock Text="難易度（空欄は指定なし）" Style="{StaticResource FieldLabel}"/>
+                                            <ComboBox ItemsSource="{x:Static authoring:TemplateAuthoringViewModel.Difficulties}"
+                                                      SelectedItem="{Binding Settings.Difficulty, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      AutomationProperties.Name="難易度"/>
+                                        </StackPanel>
+                                        <StackPanel Style="{StaticResource FormField}">
+                                            <TextBlock Text="ゲームモード（空欄は指定なし）" Style="{StaticResource FieldLabel}"/>
+                                            <ComboBox ItemsSource="{x:Static authoring:TemplateAuthoringViewModel.Gamemodes}"
+                                                      SelectedItem="{Binding Settings.Gamemode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      AutomationProperties.Name="ゲームモード"/>
+                                        </StackPanel>
+                                        <StackPanel Style="{StaticResource FormField}">
+                                            <TextBlock Text="最大人数（1〜1000）" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding Settings.MaxPlayers, UpdateSourceTrigger=PropertyChanged}" MaxLength="10"
+                                                     AutomationProperties.Name="最大人数"/>
+                                        </StackPanel>
+                                        <StackPanel Style="{StaticResource FormField}">
+                                            <TextBlock Text="描画距離（2〜32 チャンク）" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding Settings.ViewDistance, UpdateSourceTrigger=PropertyChanged}" MaxLength="10"
+                                                     AutomationProperties.Name="描画距離"/>
+                                        </StackPanel>
+                                        <StackPanel Style="{StaticResource FormField}">
+                                            <TextBlock Text="シミュレーション距離（2〜32 チャンク）" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding Settings.SimulationDistance, UpdateSourceTrigger=PropertyChanged}" MaxLength="10"
+                                                     AutomationProperties.Name="シミュレーション距離"/>
+                                        </StackPanel>
+                                        <StackPanel Style="{StaticResource FormField}">
+                                            <TextBlock Text="スポーン保護範囲（0〜256）" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding Settings.SpawnProtection, UpdateSourceTrigger=PropertyChanged}" MaxLength="10"
+                                                     AutomationProperties.Name="スポーン保護範囲"/>
+                                        </StackPanel>
+                                    </UniformGrid>
+                                    <CheckBox IsChecked="{Binding Settings.Pvp, Mode=TwoWay}" IsThreeState="True"
+                                              Content="PvP（チェック: 有効 / 空: 無効 / −: 指定なし）"/>
+                                </StackPanel>
+                                </Expander>
+                            </Border>
+
+                            <Border Style="{StaticResource SurfacePanel}" Margin="0,0,0,14">
+                                <StackPanel>
+                                    <TextBlock Text="サーバー用 MOD・プラグイン（読み取り専用）" Style="{StaticResource SectionHeading}"/>
+                                    <TextBlock Text="新規作成時は空です。読み込んだテンプレートに記載があれば、その内容を変更せず保存します。ここから追加・編集はできません。"
+                                               TextWrapping="Wrap" Style="{StaticResource MutedText}" Margin="0,4,0,10"/>
+                                    <TextBox Text="{Binding ServerAddonsSummary, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
+                                             AcceptsReturn="True" BorderThickness="0" MaxHeight="230" VerticalScrollBarVisibility="Auto"
+                                             AutomationProperties.Name="保持されるサーバー用 MOD・プラグイン"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource SurfacePanel}" Margin="0,0,0,14">
+                                <StackPanel>
+                                    <TextBlock Text="5  参加者が使う構成（任意・明示的に記入）" Style="{StaticResource SectionHeading}"/>
+                                    <TextBlock Text="サーバー用 MOD から推測しません。参加者向け案内 ZIP の元となる、別のクライアント定義です。正確な情報が分からない場合は有効にせず、確認してから記入してください。"
+                                               TextWrapping="Wrap" Style="{StaticResource MutedText}" Margin="0,4,0,12"/>
+                                    <CheckBox IsChecked="{Binding HasClientDefinition, Mode=TwoWay}"
+                                              Content="参加者用の構成をテンプレートに含める" Margin="0,0,0,12"/>
+                                    <StackPanel Visibility="{Binding HasClientDefinition, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Text="参加者用構成の名前（必須）" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding ClientName, UpdateSourceTrigger=PropertyChanged}" MaxLength="120"
+                                                 AutomationProperties.Name="参加者用構成の名前" Margin="0,0,0,12"/>
+                                        <UniformGrid Columns="2">
+                                            <StackPanel Style="{StaticResource FormField}">
+                                                <TextBlock Text="参加者の Minecraft の版" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding ClientRuntime.MinecraftVersion, UpdateSourceTrigger=PropertyChanged}" MaxLength="256"
+                                                         AutomationProperties.Name="参加者 Minecraft の固定バージョン"/>
+                                            </StackPanel>
+                                            <StackPanel Style="{StaticResource FormField}">
+                                                <TextBlock Text="参加者のローダー" Style="{StaticResource FieldLabel}"/>
+                                                <ComboBox ItemsSource="{x:Static authoring:TemplateAuthoringViewModel.ClientLoaders}"
+                                                          SelectedItem="{Binding ClientRuntime.Loader, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                          AutomationProperties.Name="参加者のローダー"/>
+                                            </StackPanel>
+                                            <StackPanel Style="{StaticResource FormField}">
+                                                <TextBlock Text="参加者のローダーの版" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding ClientRuntime.LoaderVersion, UpdateSourceTrigger=PropertyChanged}" MaxLength="256"
+                                                         AutomationProperties.Name="参加者ローダーの固定バージョン"/>
+                                            </StackPanel>
+                                            <StackPanel Style="{StaticResource FormField}">
+                                                <TextBlock Text="参加者の Java の版（例: 21.0.5）" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding ClientRuntime.JavaVersion, UpdateSourceTrigger=PropertyChanged}" MaxLength="256"
+                                                         AutomationProperties.Name="参加者 Java の固定バージョン"/>
+                                            </StackPanel>
+                                        </UniformGrid>
+                                        <TextBlock Text="MOD 一覧: Modrinth のみ。ID は英数字 8 文字の正確な ID を記入してください。名前や URL から検索・補完はしません。バージョン ID と表示する版を両方指定します。"
+                                                   TextWrapping="Wrap" Style="{StaticResource MutedText}" Margin="0,0,0,12"/>
+                                        <ItemsControl ItemsSource="{Binding ClientMods}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,12">
+                                                        <StackPanel>
+                                                            <UniformGrid Columns="2">
+                                                                <StackPanel Style="{StaticResource FormField}">
+                                                                    <TextBlock Text="MOD 名" Style="{StaticResource FieldLabel}"/>
+                                                                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MaxLength="120" AutomationProperties.Name="MOD 名"/>
+                                                                </StackPanel>
+                                                                <StackPanel Style="{StaticResource FormField}">
+                                                                    <TextBlock Text="正確な表示バージョン" Style="{StaticResource FieldLabel}"/>
+                                                                    <TextBox Text="{Binding Version, UpdateSourceTrigger=PropertyChanged}" MaxLength="256" AutomationProperties.Name="MOD の正確な表示バージョン"/>
+                                                                </StackPanel>
+                                                                <StackPanel Style="{StaticResource FormField}">
+                                                                    <TextBlock Text="Modrinth プロジェクト ID" Style="{StaticResource FieldLabel}"/>
+                                                                    <TextBox Text="{Binding ProjectId, UpdateSourceTrigger=PropertyChanged}" MaxLength="96" AutomationProperties.Name="Modrinth プロジェクト ID"/>
+                                                                </StackPanel>
+                                                                <StackPanel Style="{StaticResource FormField}">
+                                                                    <TextBlock Text="Modrinth バージョン ID" Style="{StaticResource FieldLabel}"/>
+                                                                    <TextBox Text="{Binding VersionId, UpdateSourceTrigger=PropertyChanged}" MaxLength="96" AutomationProperties.Name="Modrinth バージョン ID"/>
+                                                                </StackPanel>
+                                                            </UniformGrid>
+                                                            <TextBlock Text="参加者に必須か任意か" Style="{StaticResource FieldLabel}"/>
+                                                            <ComboBox SelectedValue="{Binding ClientSide, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Tag"
+                                                                      AutomationProperties.Name="参加者に必須か任意か" Margin="0,0,14,12">
+                                                                <ComboBoxItem Content="必須（required）" Tag="required"/>
+                                                                <ComboBoxItem Content="任意（optional）" Tag="optional"/>
+                                                            </ComboBox>
+                                                            <TextBlock Text="補足（任意・URL やコマンドは記入しません）" Style="{StaticResource FieldLabel}"/>
+                                                            <TextBox Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}" MaxLength="240" TextWrapping="Wrap" AutomationProperties.Name="MOD の補足" Margin="0,0,14,10"/>
+                                                            <Button Content="この MOD 行を削除" Click="OnRemoveClientMod" Style="{StaticResource GhostButton}" HorizontalAlignment="Right"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <Button Content="＋ 参加者用 MOD を記入する" Click="OnAddClientMod" IsEnabled="{Binding CanAddClientMod}"
+                                                Style="{StaticResource BaseButton}" HorizontalAlignment="Left"/>
+                                        <TextBlock Text="最大 256 件。記入した内容は管理者の申告値で、提供元と照合していません。"
+                                                   TextWrapping="Wrap" Style="{StaticResource MutedText}" Margin="0,8,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <Border x:Name="ReviewPanel" Style="{StaticResource SurfacePanel}" Margin="0,0,0,14"
+                        Visibility="{Binding Details, Converter={StaticResource NullOrEmptyToCollapsedConverter}}">
+                    <StackPanel>
+                        <TextBlock Text="入力形式の確認結果・保存前の確認" Style="{StaticResource SectionHeading}"/>
+                        <TextBlock Text="入力不備があれば修正してください。形式チェックに通っても互換性は不明です。内容を最後まで読み、下の確認欄にチェックしてください。"
+                                   TextWrapping="Wrap" Style="{StaticResource MutedText}" Margin="0,4,0,10"/>
+                        <TextBox Text="{Binding Details, Mode=OneWay}" IsReadOnly="True" IsReadOnlyCaretVisible="True"
+                                 TextWrapping="Wrap" AcceptsReturn="True" BorderThickness="0"
+                                 AutomationProperties.Name="テンプレートの入力形式の確認結果と全保存内容"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" Style="{StaticResource SurfacePanel}" Margin="0,12,0,0">
+            <StackPanel>
+                <TextBlock Text="{Binding Summary}" TextWrapping="Wrap" FontWeight="SemiBold" AutomationProperties.LiveSetting="Polite"/>
+                <StackPanel x:Name="BusyStatusPanel" Visibility="Collapsed" Margin="0,8,0,0">
+                    <TextBlock x:Name="OperationStatusText" TextWrapping="Wrap" Style="{StaticResource MutedText}"/>
+                    <ProgressBar IsIndeterminate="True" Margin="0,8,0,0" AutomationProperties.Name="テンプレートファイルの処理中"/>
+                </StackPanel>
+                <StackPanel x:Name="AcknowledgementControls" Margin="0,10,0,0">
+                    <CheckBox IsChecked="{Binding AcknowledgedLimitations, Mode=TwoWay}" IsEnabled="{Binding CanAcknowledge}"
+                              HorizontalContentAlignment="Stretch" VerticalContentAlignment="Top">
+                        <TextBlock Text="保存内容を確認しました。入力形式のみの確認で、提供元・依存関係・互換性は未確認です。記載内容は自分で確認した申告値であることを理解しました。"
+                                   TextWrapping="Wrap"/>
+                    </CheckBox>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        <Grid Grid.Row="3" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <TextBlock Text="新しいファイル名で保存します。内容を編集すると再確認が必要です。"
+                       TextWrapping="Wrap" Style="{StaticResource MutedText}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+            <WrapPanel Grid.Column="1" VerticalAlignment="Center">
+                <Button x:Name="CancelOperationButton" Content="処理を中止" Click="OnCancelOperation" IsEnabled="False"
+                        Style="{StaticResource GhostButton}" Margin="0,0,8,0"/>
+                <Button x:Name="CloseButton" Content="閉じる" Click="OnClose" Style="{StaticResource BaseButton}" Margin="0,0,8,0"/>
+                <StackPanel x:Name="ExportControls" Orientation="Horizontal">
+                    <Button Content="編集へ戻る" Click="OnBackToEditor" Style="{StaticResource BaseButton}" Margin="0,0,8,0"
+                            Visibility="{Binding IsReviewing, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <Button Content="入力形式を確認" Click="OnValidate" IsEnabled="{Binding CanValidate}"
+                            Style="{StaticResource BaseButton}" Margin="0,0,8,0"
+                            Visibility="{Binding IsReviewing, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                    <Button Content="新しい名前で保存…" Click="OnSave" IsEnabled="{Binding CanExport}" Style="{StaticResource PrimaryButton}"/>
+                </StackPanel>
+            </WrapPanel>
+        </Grid>
+    </Grid>
+</Window>

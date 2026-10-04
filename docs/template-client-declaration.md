@@ -1,5 +1,9 @@
 # Explicit participant definition inside a template
 
+The later [bounded Pro declaration editor](pro-template-authoring.md) can author
+this explicit client section with forms. This document records the bridge stage;
+its validation and Free participant-export boundaries still apply.
+
 ## Contract
 
 Schema `1.0` now accepts an optional root `clientDefinition` object. Its fields

@@ -15,6 +15,8 @@ public partial class MainWindow : Window
     private TutorialViewModel? _tutorial;
     private readonly Func<ParticipantExportWindow>? _participantExportWindowFactory;
     private bool _participantExportOpen;
+    private readonly Func<TemplateAuthoringWindow>? _templateAuthoringWindowFactory;
+    private bool _templateAuthoringOpen;
 
     public MainWindow()
     {
@@ -30,6 +32,30 @@ public partial class MainWindow : Window
         _participantExportWindowFactory = participantExportWindowFactory
             ?? throw new ArgumentNullException(nameof(participantExportWindowFactory));
         ParticipantExportButton.IsEnabled = true;
+    }
+
+    public MainWindow(Func<ParticipantExportWindow> participantExportWindowFactory,
+        Func<TemplateAuthoringWindow> templateAuthoringWindowFactory) : this(participantExportWindowFactory)
+    {
+        _templateAuthoringWindowFactory = templateAuthoringWindowFactory
+            ?? throw new ArgumentNullException(nameof(templateAuthoringWindowFactory));
+    }
+
+    private void OpenTemplateAuthoring(object sender, RoutedEventArgs e)
+    {
+        if (_templateAuthoringOpen || _templateAuthoringWindowFactory is null
+            || DataContext is not MainViewModel { Edition.IsPro: true }) return;
+        _templateAuthoringOpen = true;
+        try
+        {
+            var window = _templateAuthoringWindowFactory();
+            window.Owner = this;
+            window.ShowDialog();
+        }
+        finally
+        {
+            _templateAuthoringOpen = false;
+        }
     }
 
     private void OpenParticipantExport(object sender, RoutedEventArgs e)

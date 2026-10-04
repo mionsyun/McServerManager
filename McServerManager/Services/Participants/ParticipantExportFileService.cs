@@ -60,13 +60,24 @@ public sealed class ParticipantExportFileService : IParticipantExportFileService
         return buffer.AsSpan(0, total).ToArray();
     }
 
-    public async Task<string> SaveNewZipAsync(string path, ReadOnlyMemory<byte> bytes,
-        CancellationToken cancellationToken = default)
+    public Task<string> SaveNewZipAsync(string path, ReadOnlyMemory<byte> bytes,
+        CancellationToken cancellationToken = default) =>
+        SaveNewFileAsync(path, bytes, ".zip", ParticipantDefinitionPolicy.MaxZipBytes, null, cancellationToken);
+
+    // Internal reuse keeps participant ZIP and Pro declaration publication on the same tested
+    // no-overwrite boundary. The Pro-facing service owns validation and capability checks.
+    internal Task<string> SaveNewTemplateAsync(string path, ReadOnlyMemory<byte> bytes,
+        Action verifyAuthority, CancellationToken cancellationToken) =>
+        SaveNewFileAsync(path, bytes, ".json", TemplatePolicy.MaxManifestBytes, verifyAuthority, cancellationToken);
+
+    private async Task<string> SaveNewFileAsync(string path, ReadOnlyMemory<byte> bytes,
+        string extension, int maximumBytes, Action? verifyAuthority, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var fullPath = NormalizePath(path, ".zip");
-        if (bytes.IsEmpty || bytes.Length > ParticipantDefinitionPolicy.MaxZipBytes)
-            throw new ArgumentException("参加者向け ZIP のサイズが許容範囲外です。", nameof(bytes));
+        verifyAuthority?.Invoke();
+        var fullPath = NormalizePath(path, extension);
+        if (bytes.IsEmpty || bytes.Length > maximumBytes)
+            throw new ArgumentException("出力ファイルのサイズが許容範囲外です。", nameof(bytes));
         CheckNewDestination(fullPath);
         var directory = Path.GetDirectoryName(fullPath)!;
         var stagePath = Path.Combine(directory, $".maipilot-participant-{Guid.NewGuid():N}.tmp");
@@ -93,6 +104,7 @@ public sealed class ParticipantExportFileService : IParticipantExportFileService
                 CheckRegularFile(stagePath);
                 CheckNewDestination(fullPath);
                 cancellationToken.ThrowIfCancellationRequested();
+                verifyAuthority?.Invoke();
                 try
                 {
                     _operations.MoveNew(stagePath, fullPath);
@@ -183,7 +195,7 @@ public sealed class ParticipantExportFileService : IParticipantExportFileService
     {
         CheckAncestors(path);
         if (TryGetAttributes(path) is not null)
-            throw new IOException("同じ名前のファイルまたはフォルダーが存在します。新しい ZIP ファイル名を選択してください。");
+            throw new IOException("同じ名前のファイルまたはフォルダーが存在します。新しいファイル名を選択してください。");
     }
 
     private static FileAttributes? TryGetAttributes(string path)
@@ -206,7 +218,7 @@ public sealed class ParticipantExportFileService : IParticipantExportFileService
 public sealed class ParticipantExportCleanupException : IOException
 {
     internal ParticipantExportCleanupException(string stagePath, Exception failure, Exception cleanupFailure)
-        : base("ZIP の保存に失敗し、一時ファイルを削除できませんでした。", new AggregateException(failure, cleanupFailure)) =>
+        : base("ファイルの保存に失敗し、一時ファイルを削除できませんでした。", new AggregateException(failure, cleanupFailure)) =>
         StagePath = stagePath;
 
     public string StagePath { get; }

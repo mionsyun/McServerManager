@@ -2,8 +2,9 @@
 
 Historical snapshot of the edition/retention stage. The subsequent
 [participant review and ZIP export UI](participant-export-ui-milestone.md)
-connects the explicit-client-definition import/review/save flow; native Windows
-validation and the authoring GUI remain separate gates.
+connects the explicit-client-definition import/review/save flow. The later
+[bounded Pro declaration editor](pro-template-authoring.md) adds authoring forms;
+native Windows validation and production template Apply remain separate gates.
 
 This is a bounded implementation milestone, not a released Pro product. It adds
 build identity, a central capability policy, guarded store/update navigation,

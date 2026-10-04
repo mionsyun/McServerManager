@@ -170,6 +170,12 @@
                                 HorizontalAlignment="Stretch" Margin="0,8,4,0" Height="38"
                                 ToolTip="Free / Pro 共通。参加者用 JSON から MOD 一覧と説明の ZIP を作成します"/>
 
+                        <Button x:Name="TemplateAuthoringButton" Content="テンプレート作成・編集（Pro）"
+                                Click="OpenTemplateAuthoring" IsEnabled="{Binding Edition.IsPro}"
+                                Style="{StaticResource BaseButton}" HorizontalAlignment="Stretch"
+                                Margin="0,8,4,0" Height="38" ToolTipService.ShowOnDisabled="True"
+                                ToolTip="Pro 専用。構成を記入するか、既存テンプレートを編集して新しいファイルに保存します"/>
+
                         <!-- 選択サーバーのナビ -->
                         <StackPanel Margin="0,16,0,0"
                                     Visibility="{Binding SelectedServer, Converter={StaticResource NotNullToVisibilityConverter}}">

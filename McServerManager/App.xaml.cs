@@ -5,11 +5,14 @@ using Microsoft.Extensions.DependencyInjection;
 using McServerManager.Models;
 using McServerManager.Services;
 using McServerManager.Services.Templates;
+using McServerManager.Services.Authoring;
+using McServerManager.Services.AuthoringFiles;
 using McServerManager.Services.Participants;
 using McServerManager.Services.Modrinth;
 using McServerManager.Services.Fabric;
 using McServerManager.Services.Editions;
 using McServerManager.ViewModels;
+using McServerManager.ViewModels.Authoring;
 using McServerManager.Views;
 
 namespace McServerManager;
@@ -38,7 +41,9 @@ public partial class App : System.Windows.Application
 
             RestoreScheduledBackups(provider, appSettings);
 
-            var mainWindow = new MainWindow(provider.GetRequiredService<Func<ParticipantExportWindow>>())
+            var mainWindow = new MainWindow(
+                provider.GetRequiredService<Func<ParticipantExportWindow>>(),
+                provider.GetRequiredService<Func<TemplateAuthoringWindow>>())
             {
                 DataContext = provider.GetRequiredService<MainViewModel>()
             };
@@ -107,6 +112,8 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IAppSettingsService, AppSettingsService>();
         services.AddSingleton<IServerConfigService, ServerConfigService>();
         services.AddSingleton<ITemplateManifestService, TemplateManifestService>();
+        services.AddSingleton<ITemplateAuthoringService, TemplateAuthoringService>();
+        services.AddSingleton<ITemplateAuthoringFileService, TemplateAuthoringFileService>();
         services.AddSingleton<IParticipantClientDefinitionService, ParticipantClientDefinitionService>();
         services.AddSingleton<IParticipantListZipService, ParticipantListZipService>();
         services.AddSingleton<IParticipantExportFileService, ParticipantExportFileService>();
@@ -149,6 +156,10 @@ public partial class App : System.Windows.Application
         services.AddTransient<MainViewModel>();
         services.AddTransient<TemplateInspectionViewModel>();
         services.AddTransient<ParticipantExportViewModel>();
+        services.AddTransient<TemplateAuthoringViewModel>();
+        services.AddTransient<TemplateAuthoringWindow>();
+        services.AddSingleton<Func<TemplateAuthoringWindow>>(provider =>
+            () => provider.GetRequiredService<TemplateAuthoringWindow>());
         services.AddTransient<ParticipantExportWindow>();
         services.AddSingleton<Func<ParticipantExportWindow>>(provider =>
             () => provider.GetRequiredService<ParticipantExportWindow>());
