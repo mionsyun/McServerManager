@@ -3,6 +3,9 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using McServerManager.Services.WindowsOwnership;
+using McServerManager.Services.WindowsTransactions;
+using McServerManager.Models.Transactions;
+using System.Text.Json;
 
 // Fixture-only executable: no network, server/JAR execution, or writes outside the supplied sandbox.
 if (args.Length < 2) return 2;
@@ -66,6 +69,29 @@ if (mode == "breakaway")
     var escape = BreakawayProbe.Attempt(true, root);
     Publish("breakaway-result", $"controlCreated={ordinary.Created};controlInCleanupJob={ordinary.InJob};escapeCreated={escape.Created};escapeError={escape.Error}");
     return 0;
+}
+if (mode == "journal-crash")
+{
+    var checkpoint = Enum.Parse<IntentWriteCheckpoint>(args[2]);
+    var receipt = new TransactionReceipt(Guid.NewGuid(), Guid.NewGuid(), "synthetic-journal", new string('a', 64));
+    WindowsTransactionIntentJournal? journal = null;
+    journal = WindowsTransactionIntentJournal.CreateNew(Path.Combine(root, "journal"), receipt, phase =>
+    {
+        if (phase != checkpoint) return;
+        Publish("checkpoint-ready", phase.ToString());
+        var deadline = Stopwatch.StartNew();
+        while (!File.Exists(Path.Combine(root, "crash-now")))
+        {
+            if (deadline.Elapsed > TimeSpan.FromSeconds(15)) throw new TimeoutException("Journal crash trigger did not arrive.");
+            Thread.Sleep(10);
+        }
+        Process.GetCurrentProcess().Kill();
+        GC.KeepAlive(journal);
+    });
+    Publish("ticket.json", JsonSerializer.Serialize(journal.Ticket));
+    journal.WriteAndFlush();
+    journal.Dispose();
+    return 6; // The requested checkpoint must terminate this fixture before return.
 }
 if (mode != "hold") return 4;
 Publish("child-ready", Environment.ProcessId.ToString());

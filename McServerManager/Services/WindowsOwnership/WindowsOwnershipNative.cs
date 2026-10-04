@@ -19,6 +19,26 @@ internal static class WindowsOwnershipNative
 
     [StructLayout(LayoutKind.Sequential)] internal struct FileIdentity { internal ulong Volume, Low, High; }
     [StructLayout(LayoutKind.Sequential)] internal struct AttributeTag { internal uint Attributes, Tag; }
+    [StructLayout(LayoutKind.Sequential)] internal struct FileStandard
+    {
+        internal long AllocationSize, EndOfFile;
+        internal uint NumberOfLinks;
+        internal byte DeletePending, Directory;
+    }
+
+    internal static FileIdentity InspectRegularFile(SafeFileHandle handle)
+    {
+        if (!GetFileInformationByHandleEx(handle, 9, out AttributeTag attributes, (uint)Marshal.SizeOf<AttributeTag>())) throw Error();
+        if ((attributes.Attributes & (0x400 | 0x10)) != 0) throw new System.IO.IOException("A non-reparse regular file is required.");
+        if (!GetFileInformationByHandleEx(handle, 1, out FileStandard standard, (uint)Marshal.SizeOf<FileStandard>())) throw Error();
+        if (standard.NumberOfLinks != 1 || standard.DeletePending != 0 || standard.Directory != 0)
+            throw new System.IO.IOException("A single-link, non-deleting regular file is required.");
+        if (!GetFileInformationByHandleEx(handle, 18, out FileIdentity identity, (uint)Marshal.SizeOf<FileIdentity>())) throw Error();
+        return identity;
+    }
+
+    internal static bool SameIdentity(FileIdentity first, FileIdentity second) =>
+        first.Volume == second.Volume && first.Low == second.Low && first.High == second.High;
     [StructLayout(LayoutKind.Sequential)] internal struct BasicAccounting
     {
         internal long User, Kernel, PeriodUser, PeriodKernel;
@@ -55,6 +75,7 @@ internal static class WindowsOwnershipNative
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)] [return: MarshalAs(UnmanagedType.Bool)] internal static extern bool CreateDirectoryW(string path, IntPtr security);
     [DllImport("kernel32.dll", SetLastError = true)] [return: MarshalAs(UnmanagedType.Bool)] internal static extern bool GetFileInformationByHandleEx(SafeFileHandle handle, int kind, out FileIdentity info, uint size);
     [DllImport("kernel32.dll", SetLastError = true)] [return: MarshalAs(UnmanagedType.Bool)] internal static extern bool GetFileInformationByHandleEx(SafeFileHandle handle, int kind, out AttributeTag info, uint size);
+    [DllImport("kernel32.dll", SetLastError = true)] [return: MarshalAs(UnmanagedType.Bool)] internal static extern bool GetFileInformationByHandleEx(SafeFileHandle handle, int kind, out FileStandard info, uint size);
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)] internal static extern uint GetFinalPathNameByHandleW(SafeFileHandle handle, StringBuilder path, uint size, uint flags);
     [DllImport("kernel32.dll", SetLastError = true)] internal static extern KernelHandle CreateJobObjectW(IntPtr security, IntPtr name);
     [DllImport("kernel32.dll", SetLastError = true)] [return: MarshalAs(UnmanagedType.Bool)] internal static extern bool SetInformationJobObject(KernelHandle job, int kind, ref ExtendedLimits info, uint size);

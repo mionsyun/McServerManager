@@ -12,10 +12,18 @@ internal sealed class WindowsOwnedDirectory : IDisposable
     private readonly List<(SafeFileHandle Handle, FileIdentity Identity, string Path)> _pins = new();
     private FileStream? _reservation;
     internal string Path { get; }
+    internal FileIdentity RootIdentity => _pins[^1].Identity;
+    internal FileIdentity ReservationIdentity => InspectRegularFile(_reservation!.SafeFileHandle);
 
     private WindowsOwnedDirectory(string path) => Path = path;
 
-    internal static WindowsOwnedDirectory CreateNew(string path)
+    internal static WindowsOwnedDirectory CreateNew(string path) => Open(path, null, null);
+
+    // Inspection only: OPEN_EXISTING, read access, no runtime adoption or recovery writes.
+    internal static WindowsOwnedDirectory OpenExistingForReadOnlyInspection(string path, FileIdentity root, FileIdentity reservation) =>
+        Open(path, root, reservation);
+
+    private static WindowsOwnedDirectory Open(string path, FileIdentity? expectedRoot, FileIdentity? expectedReservation)
     {
         if (!OperatingSystem.IsWindowsVersionAtLeast(10)) throw new PlatformNotSupportedException("Windows 10 or later is required.");
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
@@ -47,13 +55,22 @@ internal sealed class WindowsOwnedDirectory : IDisposable
                 owner.Pin(current);
             }
             // Never adopt an existing directory, including abandoned owners. No crash recovery is implied.
-            if (!CreateDirectoryW(path, IntPtr.Zero)) throw Error();
+            if (expectedRoot is null && !CreateDirectoryW(path, IntPtr.Zero)) throw Error();
             owner.Pin(path);
-            var reservation = CreateFileW(System.IO.Path.Combine(path, ReservationName), 0xC0000000, 0, IntPtr.Zero, 1, OpenReparse, IntPtr.Zero);
-            if (reservation.IsInvalid) { reservation.Dispose(); throw Error(); }
-            owner._reservation = new FileStream(reservation, FileAccess.ReadWrite);
-            owner._reservation.Write(Encoding.UTF8.GetBytes("MaiPilot experimental owner; never adopt this directory.\n"));
-            owner._reservation.Flush(true);
+            if (expectedRoot is { } root && !SameIdentity(root, owner.RootIdentity)) throw new IOException("Directory identity differs from the inspection ticket.");
+            var inspecting = expectedRoot is not null;
+            var reservation = CreateFileW(System.IO.Path.Combine(path, ReservationName), inspecting ? 0x80000000u : 0xC0000000u,
+                0, IntPtr.Zero, inspecting ? 3u : 1u, OpenReparse, IntPtr.Zero);
+            if (reservation.IsInvalid) { var error = Error(); reservation.Dispose(); throw error; }
+            try { owner._reservation = new FileStream(reservation, inspecting ? FileAccess.Read : FileAccess.ReadWrite); }
+            catch { reservation.Dispose(); throw; }
+            var reservationIdentity = owner.ReservationIdentity;
+            if (expectedReservation is { } expected && !SameIdentity(expected, reservationIdentity)) throw new IOException("Reservation identity differs from the inspection ticket.");
+            if (!inspecting)
+            {
+                owner._reservation.Write(Encoding.UTF8.GetBytes("MaiPilot experimental owner; never adopt this directory.\n"));
+                owner._reservation.Flush(true);
+            }
             owner.Validate();
             return owner;
         }
