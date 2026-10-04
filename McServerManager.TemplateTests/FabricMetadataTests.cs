@@ -102,34 +102,41 @@ public sealed class FabricMetadataTests
         Assert.Contains((await Inspect(Jar(("fabric.mod.json", Utf8(deep))))).Issues, x => x.Code == "InvalidMetadata");
     }
 
-    [Fact]
-    public async Task CumulativeMetadataBudgetAppliesAcrossNestedJars()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task CumulativeMetadataBudgetAppliesAcrossNestedJars(bool identicalContent)
     {
         var paths = Enumerable.Range(0, 9).Select(x => $"nested/{x}.jar").ToArray();
         var root = Minimal[..^1] + ",\"jars\":" + JsonSerializer.Serialize(paths.Select(x => new { file = x })) + "}";
         var entries = new List<(string, byte[])> { ("fabric.mod.json", Utf8(root)) };
+        var repeated = Jar(("fabric.mod.json", Utf8(JsonSerializer.Serialize(new { schemaVersion = 1, id = "shared-child", version = "1", description = new string('a', 480 * 1024) }))));
         for (var i = 0; i < paths.Length; i++)
         {
             var child = JsonSerializer.Serialize(new { schemaVersion = 1, id = $"child-{i}", version = "1", description = new string('a', 480 * 1024) });
-            entries.Add((paths[i], Jar(("fabric.mod.json", Utf8(child)))));
+            entries.Add((paths[i], identicalContent ? repeated : Jar(("fabric.mod.json", Utf8(child)))));
         }
         var result = await Inspect(Jar(entries.ToArray()));
         Assert.False(result.IsComplete);
         Assert.Contains(result.Issues, x => x.Code == "MetadataSizeLimit");
+        Assert.Equal(9, result.Mods.Count); // root plus eight occurrences, including identical copies
     }
 
-    [Fact]
-    public async Task CumulativeNestedBytesAreBoundedBeforeFourthLargeJarInflates()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task CumulativeNestedBytesAreBoundedBeforeFourthLargeJarInflates(bool identicalContent)
     {
         var padding = new byte[17 * 1024 * 1024];
         var entries = new List<(string, byte[])>();
         var paths = Enumerable.Range(0, 4).Select(x => $"nested/{x}.jar").ToArray();
         var root = Minimal[..^1] + ",\"jars\":" + JsonSerializer.Serialize(paths.Select(x => new { file = x })) + "}";
         entries.Add(("fabric.mod.json", Utf8(root)));
+        var repeated = Jar(("fabric.mod.json", Utf8(Minimal.Replace("example-mod", "shared-child"))), ("opaque.bin", padding));
         for (var i = 0; i < paths.Length; i++)
         {
             var metadata = JsonSerializer.Serialize(new { schemaVersion = 1, id = $"child-{i}", version = "1" });
-            entries.Add((paths[i], Jar(("fabric.mod.json", Utf8(metadata)), ("opaque.bin", padding))));
+            entries.Add((paths[i], identicalContent ? repeated : Jar(("fabric.mod.json", Utf8(metadata)), ("opaque.bin", padding))));
         }
         var result = await Inspect(Jar(entries.ToArray()));
         Assert.False(result.IsComplete);
@@ -174,13 +181,88 @@ public sealed class FabricMetadataTests
         Assert.DoesNotContain(result.Mods, x => x.Id == "example-mod");
     }
 
-    [Fact]
-    public async Task DuplicateNestedModIdsAreUnsupportedCandidateSelection()
+    [Theory]
+    [InlineData("1")]
+    [InlineData("1.2.3")]
+    public async Task RootAndNestedDuplicateModIdsAreNeverCollapsed(string nestedVersion)
     {
-        var result = await Inspect(Wrap(Jar(("fabric.mod.json", Utf8(Minimal))), "example-mod"));
+        var result = await Inspect(Wrap(Jar(("fabric.mod.json", Utf8(Minimal.Replace("1.2.3", nestedVersion)))), "example-mod"));
         Assert.False(result.IsComplete);
         Assert.Contains(result.Issues, x => x.Code == "DuplicateModId");
         Assert.Equal(2, result.Mods.Count);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task IdenticalNestedContentKeepsEveryPathAndEnvironmentAncestor(bool clientParent)
+    {
+        var shared = Jar(("fabric.mod.json", Utf8(Minimal)));
+        var parentMetadata = JsonSerializer.Serialize(new { schemaVersion = 1, id = "parent-mod", version = "1", environment = clientParent ? "client" : "*",
+            jars = new[] { new { file = "shared.jar" } } });
+        var parent = Jar(("fabric.mod.json", Utf8(parentMetadata)), ("shared.jar", shared));
+        var result = await Inspect(Bundle("root-mod", shared, parent));
+
+        Assert.True(result.IsComplete, JsonSerializer.Serialize(result.Issues));
+        Assert.Equal(4, result.Mods.Count);
+        var copies = result.Mods.Where(x => x.Id == "example-mod").ToArray();
+        Assert.Equal(2, copies.Length);
+        Assert.Equal(copies[0].ContentSha256, copies[1].ContentSha256);
+        Assert.Equal(new[] { "test.jar!/nested/0.jar", "test.jar!/nested/1.jar!/shared.jar" }, copies.Select(x => x.ArchivePath));
+        Assert.Equal(new[] { 1, 2 }, copies.Select(x => x.NestedDepth));
+        Assert.Equal(clientParent ? FabricEnvironment.Client : FabricEnvironment.Universal, result.Mods.Single(x => x.Id == "parent-mod").Environment);
+    }
+
+    [Theory]
+    [InlineData("1.2.3")]
+    [InlineData("2.0.0")]
+    public async Task DifferentNestedContentStillRequiresCandidateSelection(string otherVersion)
+    {
+        var first = Jar(("fabric.mod.json", Utf8(Minimal)), ("payload.bin", [1]));
+        var other = Jar(("fabric.mod.json", Utf8(Minimal.Replace("1.2.3", otherVersion))), ("payload.bin", [2]));
+        var result = await Inspect(Bundle("root-mod", first, first, other));
+
+        Assert.False(result.IsComplete);
+        Assert.Single(result.Issues, x => x.Code == "DuplicateModId");
+        Assert.Equal(4, result.Mods.Count);
+        Assert.Equal(result.Mods[1].ContentSha256, result.Mods[2].ContentSha256);
+        Assert.NotEqual(result.Mods[1].ContentSha256, result.Mods[3].ContentSha256);
+    }
+
+    [Fact]
+    public async Task RepeatedNestedContentDoesNotBypassCumulativeEntryBudget()
+    {
+        var entries = new List<(string, byte[])> { ("fabric.mod.json", Utf8(Minimal)) };
+        entries.AddRange(Enumerable.Range(0, FabricJarInspector.MaxArchiveEntries / 2 - 1).Select(x => ($"payload/{x}", Array.Empty<byte>())));
+        var shared = Jar(entries.ToArray());
+        var result = await Inspect(Bundle("root-mod", shared, shared));
+
+        Assert.False(result.IsComplete);
+        Assert.Contains(result.Issues, x => x.Code == "EntryLimit");
+        Assert.Equal(2, result.Mods.Count); // root and first occurrence, never the over-budget copy
+    }
+
+    [Fact]
+    public async Task RepeatedNestedContentDoesNotBypassCumulativeRelationBudget()
+    {
+        var metadata = JsonSerializer.Serialize(new { schemaVersion = 1, id = "shared-mod", version = "1",
+            depends = Enumerable.Range(0, 2048).ToDictionary(x => $"dependency-{x}", _ => "*") });
+        var shared = Jar(("fabric.mod.json", Utf8(metadata)));
+        var result = await Inspect(Bundle("root-mod", shared, shared, shared));
+
+        Assert.False(result.IsComplete);
+        Assert.Contains(result.Issues, x => x.Code == "RelationLimit");
+        Assert.Equal(3, result.Mods.Count); // root and two occurrences consume all 4096 relations
+    }
+
+    [Fact]
+    public async Task RepeatedNestedContentDoesNotBypassDepthBudget()
+    {
+        var shared = Wrap(Jar(("fabric.mod.json", Utf8(Minimal))), "shared-parent");
+        var result = await Inspect(Bundle("root-mod", shared, Wrap(shared, "middle-mod")));
+
+        Assert.False(result.IsComplete);
+        Assert.Contains(result.Issues, x => x.Code == "NestedDepthLimit" && x.ArchivePath == "test.jar!/nested/1.jar!/nested.jar");
     }
 
     [Theory]
@@ -306,6 +388,12 @@ public sealed class FabricMetadataTests
     {
         var root = JsonSerializer.Serialize(new { schemaVersion = 1, id, version = "1", jars = new[] { new { file = "nested.jar" } } });
         return Jar(("fabric.mod.json", Utf8(root)), ("nested.jar", nested));
+    }
+    private static byte[] Bundle(string id, params byte[][] nested)
+    {
+        var paths = Enumerable.Range(0, nested.Length).Select(x => $"nested/{x}.jar").ToArray();
+        var metadata = JsonSerializer.Serialize(new { schemaVersion = 1, id, version = "1", jars = paths.Select(x => new { file = x }).ToArray() });
+        return Jar(new[] { ("fabric.mod.json", Utf8(metadata)) }.Concat(paths.Select((path, i) => (path, nested[i]))).ToArray());
     }
     private static byte[] Utf8(string value) => Encoding.UTF8.GetBytes(value);
     private static byte[] Jar(params (string Name, byte[] Content)[] entries)

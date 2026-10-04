@@ -1,0 +1,644 @@
+[
+  {
+    "Name": "MI: missing required Fabric API and Cloth Config",
+    "Request": {
+      "MinecraftVersion": "1.20.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "17",
+      "SelectedPins": [
+        {
+          "VersionId": "18Bcl0A4"
+        }
+      ],
+      "DependencyPins": []
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [
+      "18Bcl0A4"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindingCodes": [],
+    "ExpectedFindings": [
+      {
+        "Code": "UnresolvedProjectDependency",
+        "Dependency": "P7dR8mSH"
+      },
+      {
+        "Code": "UnresolvedProjectDependency",
+        "Dependency": "9s6osm5g"
+      },
+      {
+        "Code": "MissingRequiredDependency",
+        "Dependency": "cloth-config"
+      }
+    ]
+  },
+  {
+    "Name": "MI: pinned three-file closure and embedded dependencies",
+    "Request": {
+      "MinecraftVersion": "1.20.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "17",
+      "SelectedPins": [
+        {
+          "VersionId": "18Bcl0A4"
+        }
+      ],
+      "DependencyPins": [
+        {
+          "VersionId": "rvI2dfzR"
+        },
+        {
+          "VersionId": "2xQdCMyG"
+        }
+      ]
+    },
+    "ExpectedResolved": true,
+    "ExpectedVersionIds": [
+      "18Bcl0A4",
+      "rvI2dfzR",
+      "2xQdCMyG"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindingCodes": [
+      "ClientNestedModulesIgnored"
+    ],
+    "ExpectedFindings": [
+      {
+        "Code": "RequiredSatisfied",
+        "Dependency": "cloth-config"
+      },
+      {
+        "Code": "RequiredSatisfied",
+        "Dependency": "team_reborn_energy"
+      }
+    ]
+  },
+  {
+    "Name": "MI: wrong Minecraft target",
+    "Request": {
+      "MinecraftVersion": "1.21.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "17",
+      "SelectedPins": [
+        {
+          "VersionId": "18Bcl0A4"
+        }
+      ],
+      "DependencyPins": [
+        {
+          "VersionId": "rvI2dfzR"
+        },
+        {
+          "VersionId": "2xQdCMyG"
+        }
+      ]
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [
+      "18Bcl0A4",
+      "rvI2dfzR",
+      "2xQdCMyG"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindingCodes": [
+      "IncompatiblePlatform"
+    ],
+    "ExpectedFindings": [
+      {
+        "Code": "RuntimeMismatch",
+        "Dependency": "minecraft"
+      }
+    ]
+  },
+  {
+    "Name": "MI: wrong Java target",
+    "Request": {
+      "MinecraftVersion": "1.20.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "16",
+      "SelectedPins": [
+        {
+          "VersionId": "18Bcl0A4"
+        }
+      ],
+      "DependencyPins": [
+        {
+          "VersionId": "rvI2dfzR"
+        },
+        {
+          "VersionId": "2xQdCMyG"
+        }
+      ]
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [
+      "18Bcl0A4",
+      "rvI2dfzR",
+      "2xQdCMyG"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindingCodes": [],
+    "ExpectedFindings": [
+      {
+        "Code": "RuntimeMismatch",
+        "Dependency": "java"
+      }
+    ]
+  },
+  {
+    "Name": "Tech Reborn: missing Fabric API with identical nested energy evidence",
+    "Request": {
+      "MinecraftVersion": "1.20.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "17",
+      "SelectedPins": [
+        {
+          "VersionId": "5ordAPa5"
+        }
+      ],
+      "DependencyPins": []
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [
+      "5ordAPa5"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindingCodes": [],
+    "ExpectedFindings": [
+      {
+        "Code": "UnresolvedProjectDependency",
+        "Dependency": "P7dR8mSH"
+      }
+    ]
+  },
+  {
+    "Name": "Tech Reborn: pinned closure shares byte-identical nested energy",
+    "Request": {
+      "MinecraftVersion": "1.20.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "17",
+      "SelectedPins": [
+        {
+          "VersionId": "5ordAPa5"
+        }
+      ],
+      "DependencyPins": [
+        {
+          "VersionId": "rvI2dfzR"
+        }
+      ]
+    },
+    "ExpectedResolved": true,
+    "ExpectedVersionIds": [
+      "5ordAPa5",
+      "rvI2dfzR"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindingCodes": [],
+    "ExpectedFindings": [
+      {
+        "Code": "RequiredSatisfied",
+        "Dependency": "reborncore"
+      },
+      {
+        "Code": "RequiredSatisfied",
+        "Dependency": "team_reborn_energy"
+      }
+    ]
+  },
+  {
+    "Name": "Tech Reborn: actual Loader minimum mismatch",
+    "Request": {
+      "MinecraftVersion": "1.20.1",
+      "LoaderVersion": "0.18.3",
+      "JavaVersion": "17",
+      "SelectedPins": [
+        {
+          "VersionId": "5ordAPa5"
+        }
+      ],
+      "DependencyPins": [
+        {
+          "VersionId": "rvI2dfzR"
+        }
+      ]
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [
+      "5ordAPa5",
+      "rvI2dfzR"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindingCodes": [],
+    "ExpectedFindings": [
+      {
+        "Code": "RuntimeMismatch",
+        "Dependency": "fabricloader"
+      }
+    ]
+  },
+  {
+    "Name": "Wizards: missing direct prerequisites",
+    "Request": {
+      "MinecraftVersion": "1.20.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "17",
+      "SelectedPins": [
+        {
+          "VersionId": "sN5qsxEU"
+        }
+      ],
+      "DependencyPins": []
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [
+      "sN5qsxEU"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindingCodes": [],
+    "ExpectedFindings": [
+      {
+        "Code": "UnresolvedProjectDependency",
+        "Dependency": "XvoWJaA2"
+      },
+      {
+        "Code": "MissingRequiredDependency",
+        "Dependency": "spell_engine"
+      }
+    ]
+  },
+  {
+    "Name": "Wizards: pinned nine-file closure and server environment rule",
+    "Request": {
+      "MinecraftVersion": "1.20.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "17",
+      "SelectedPins": [
+        {
+          "VersionId": "sN5qsxEU"
+        }
+      ],
+      "DependencyPins": [
+        {
+          "VersionId": "mvZvOSVL"
+        },
+        {
+          "VersionId": "rvI2dfzR"
+        },
+        {
+          "VersionId": "2xQdCMyG"
+        },
+        {
+          "VersionId": "7FbHvvWA"
+        },
+        {
+          "VersionId": "yDqYTUaf"
+        },
+        {
+          "VersionId": "AHxQGtuC"
+        },
+        {
+          "VersionId": "y5a2WAp4"
+        },
+        {
+          "VersionId": "1yvucvYz"
+        }
+      ]
+    },
+    "ExpectedResolved": true,
+    "ExpectedVersionIds": [
+      "sN5qsxEU",
+      "mvZvOSVL",
+      "rvI2dfzR",
+      "2xQdCMyG",
+      "7FbHvvWA",
+      "yDqYTUaf",
+      "AHxQGtuC",
+      "y5a2WAp4",
+      "1yvucvYz"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindingCodes": [],
+    "ExpectedFindings": [
+      {
+        "Code": "EnvironmentDisabledDependency",
+        "Dependency": "fabric-rendering-v1"
+      },
+      {
+        "Code": "RequiredSatisfied",
+        "Dependency": "spell_engine"
+      },
+      {
+        "Code": "OptionalSuggestion",
+        "Dependency": "lP9Yrr1E"
+      }
+    ]
+  },
+  {
+    "Name": "Wizards: missing transitive Spell Power",
+    "Request": {
+      "MinecraftVersion": "1.20.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "17",
+      "SelectedPins": [
+        {
+          "VersionId": "sN5qsxEU"
+        }
+      ],
+      "DependencyPins": [
+        {
+          "VersionId": "mvZvOSVL"
+        },
+        {
+          "VersionId": "rvI2dfzR"
+        },
+        {
+          "VersionId": "2xQdCMyG"
+        },
+        {
+          "VersionId": "yDqYTUaf"
+        },
+        {
+          "VersionId": "AHxQGtuC"
+        },
+        {
+          "VersionId": "y5a2WAp4"
+        },
+        {
+          "VersionId": "1yvucvYz"
+        }
+      ]
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [
+      "sN5qsxEU",
+      "mvZvOSVL",
+      "rvI2dfzR",
+      "2xQdCMyG",
+      "yDqYTUaf",
+      "AHxQGtuC",
+      "y5a2WAp4",
+      "1yvucvYz"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindingCodes": [],
+    "ExpectedFindings": [
+      {
+        "Code": "UnresolvedProjectDependency",
+        "Dependency": "8ooWzSQP"
+      },
+      {
+        "Code": "MissingRequiredDependency",
+        "Dependency": "spell_power"
+      }
+    ]
+  },
+  {
+    "Name": "Wizards: API-required Trinkets remains required despite JAR recommends",
+    "Request": {
+      "MinecraftVersion": "1.20.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "17",
+      "SelectedPins": [
+        {
+          "VersionId": "sN5qsxEU"
+        }
+      ],
+      "DependencyPins": [
+        {
+          "VersionId": "mvZvOSVL"
+        },
+        {
+          "VersionId": "rvI2dfzR"
+        },
+        {
+          "VersionId": "2xQdCMyG"
+        },
+        {
+          "VersionId": "7FbHvvWA"
+        },
+        {
+          "VersionId": "yDqYTUaf"
+        },
+        {
+          "VersionId": "y5a2WAp4"
+        },
+        {
+          "VersionId": "1yvucvYz"
+        }
+      ]
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [
+      "sN5qsxEU",
+      "mvZvOSVL",
+      "rvI2dfzR",
+      "2xQdCMyG",
+      "7FbHvvWA",
+      "yDqYTUaf",
+      "y5a2WAp4",
+      "1yvucvYz"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindingCodes": [],
+    "ExpectedFindings": [
+      {
+        "Code": "UnresolvedProjectDependency",
+        "Dependency": "5aaWibi9"
+      }
+    ]
+  },
+  {
+    "Name": "Wizards: wrong Minecraft target",
+    "Request": {
+      "MinecraftVersion": "1.21.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "17",
+      "SelectedPins": [
+        {
+          "VersionId": "sN5qsxEU"
+        }
+      ],
+      "DependencyPins": [
+        {
+          "VersionId": "mvZvOSVL"
+        },
+        {
+          "VersionId": "rvI2dfzR"
+        },
+        {
+          "VersionId": "2xQdCMyG"
+        },
+        {
+          "VersionId": "7FbHvvWA"
+        },
+        {
+          "VersionId": "yDqYTUaf"
+        },
+        {
+          "VersionId": "AHxQGtuC"
+        },
+        {
+          "VersionId": "y5a2WAp4"
+        },
+        {
+          "VersionId": "1yvucvYz"
+        }
+      ]
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [
+      "sN5qsxEU",
+      "mvZvOSVL",
+      "rvI2dfzR",
+      "2xQdCMyG",
+      "7FbHvvWA",
+      "yDqYTUaf",
+      "AHxQGtuC",
+      "y5a2WAp4",
+      "1yvucvYz"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindingCodes": [
+      "IncompatiblePlatform"
+    ],
+    "ExpectedFindings": [
+      {
+        "Code": "RuntimeMismatch",
+        "Dependency": "minecraft"
+      }
+    ]
+  },
+  {
+    "Name": "Spell Engine: independent pinned six-file closure",
+    "Request": {
+      "MinecraftVersion": "1.20.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "17",
+      "SelectedPins": [
+        {
+          "VersionId": "mvZvOSVL"
+        }
+      ],
+      "DependencyPins": [
+        {
+          "VersionId": "rvI2dfzR"
+        },
+        {
+          "VersionId": "2xQdCMyG"
+        },
+        {
+          "VersionId": "7FbHvvWA"
+        },
+        {
+          "VersionId": "yDqYTUaf"
+        },
+        {
+          "VersionId": "AHxQGtuC"
+        }
+      ]
+    },
+    "ExpectedResolved": true,
+    "ExpectedVersionIds": [
+      "mvZvOSVL",
+      "rvI2dfzR",
+      "2xQdCMyG",
+      "7FbHvvWA",
+      "yDqYTUaf",
+      "AHxQGtuC"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindingCodes": [],
+    "ExpectedFindings": [
+      {
+        "Code": "RequiredSatisfied",
+        "Dependency": "spell_power"
+      }
+    ]
+  },
+  {
+    "Name": "Paladins: embedded Shield present but API-required standalone project unresolved",
+    "Request": {
+      "MinecraftVersion": "1.20.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "17",
+      "SelectedPins": [
+        {
+          "VersionId": "1t4iuZkn"
+        }
+      ],
+      "DependencyPins": [
+        {
+          "VersionId": "mvZvOSVL"
+        },
+        {
+          "VersionId": "rvI2dfzR"
+        },
+        {
+          "VersionId": "2xQdCMyG"
+        },
+        {
+          "VersionId": "7FbHvvWA"
+        },
+        {
+          "VersionId": "yDqYTUaf"
+        },
+        {
+          "VersionId": "AHxQGtuC"
+        },
+        {
+          "VersionId": "y5a2WAp4"
+        },
+        {
+          "VersionId": "1yvucvYz"
+        }
+      ]
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [
+      "1t4iuZkn",
+      "mvZvOSVL",
+      "rvI2dfzR",
+      "2xQdCMyG",
+      "7FbHvvWA",
+      "yDqYTUaf",
+      "AHxQGtuC",
+      "y5a2WAp4",
+      "1yvucvYz"
+    ],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindingCodes": [],
+    "ExpectedFindings": [
+      {
+        "Code": "UnresolvedProjectDependency",
+        "Dependency": "y9clIFY4"
+      },
+      {
+        "Code": "RequiredSatisfied",
+        "Dependency": "shield_api"
+      }
+    ]
+  },
+  {
+    "Name": "Spectrum: current file capacity rejected before download",
+    "Request": {
+      "MinecraftVersion": "1.20.1",
+      "LoaderVersion": "0.19.5",
+      "JavaVersion": "17",
+      "SelectedPins": [
+        {
+          "VersionId": "mDJAjTuc"
+        }
+      ],
+      "DependencyPins": []
+    },
+    "ExpectedResolved": false,
+    "ExpectedVersionIds": [],
+    "ExpectedInstalledCount": 0,
+    "ExpectedFindingCodes": [
+      "InvalidFile"
+    ],
+    "ExpectedFindings": []
+  }
+]

@@ -113,11 +113,19 @@ public sealed partial class ModrinthInspectionService
                 }
             var providers = new Dictionary<string, List<ModProvider>>(StringComparer.Ordinal);
             var active = new List<ModProvider>();
+            var environmentDisabled = new Dictionary<string, List<ModProvider>>(StringComparer.Ordinal);
             foreach (var artifact in _artifacts.Where(x => x.Metadata.IsComplete))
             {
                 var clientModules = artifact.Metadata.Mods.Count(x => x.Environment == FabricEnvironment.Client && x.NestedDepth > 0);
                 if (clientModules > 0)
                     Add("ClientNestedModulesIgnored", ModrinthFindingSeverity.Information, $"{clientModules} client-only nested module(s) are excluded from the dedicated-server provider set.", "fabric.mod.json environment", artifact);
+                // Fabric 0.19.5 discovers an environment-disabled candidate itself, but does not
+                // traverse its nested children. Disabled aliases are not indexed by ModDiscoverer.
+                foreach (var mod in artifact.Metadata.Mods.Where(x => x.Environment == FabricEnvironment.Client && !HasClientAncestor(artifact, x)))
+                {
+                    if (!environmentDisabled.TryGetValue(mod.Id, out var disabled)) environmentDisabled[mod.Id] = disabled = [];
+                    disabled.Add(new ModProvider(artifact, mod));
+                }
                 foreach (var mod in artifact.Metadata.Mods.Where(x => IsServerActive(artifact, x)))
                 {
                     var supplied = new ModProvider(artifact, mod);
@@ -154,7 +162,7 @@ public sealed partial class ModrinthInspectionService
                 foreach (var (id, constraint) in supplied.Mod.Depends)
                 {
                     if (!CountRelation(supplied.Artifact)) return;
-                    ReviewRequired(supplied, id, constraint, providers);
+                    ReviewRequired(supplied, id, constraint, providers, environmentDisabled);
                 }
                 foreach (var (id, constraint) in supplied.Mod.Breaks)
                 {
@@ -177,7 +185,8 @@ public sealed partial class ModrinthInspectionService
             }
         }
 
-        private void ReviewRequired(ModProvider supplied, string id, FabricVersionConstraint constraint, Dictionary<string, List<ModProvider>> providers)
+        private void ReviewRequired(ModProvider supplied, string id, FabricVersionConstraint constraint, Dictionary<string, List<ModProvider>> providers,
+            Dictionary<string, List<ModProvider>> environmentDisabled)
         {
             var source = MetadataSource(supplied);
             var runtime = id switch { "minecraft" => request.MinecraftVersion, "fabricloader" => request.LoaderVersion, "java" => request.JavaVersion, _ => null };
@@ -193,6 +202,20 @@ public sealed partial class ModrinthInspectionService
             }
             if (!providers.TryGetValue(id, out var candidates) || candidates.Count == 0)
             {
+                // Supported metadata is schema 1. This precisely scoped Loader profile follows
+                // FabricMC/fabric-loader tag 0.19.5, ModResolver.java lines 57-76: an actually
+                // discovered but wrong-environment exact ID can soften a positive dependency,
+                // only when no active candidate exists and its version satisfies the constraint.
+                // Do not generalize this rule to unverified Loader versions, aliases, or children
+                // hidden under client-only parents. API-required relations remain unchanged.
+                if (request.LoaderVersion == "0.19.5" && environmentDisabled.TryGetValue(id, out var disabled) &&
+                    disabled.Any(x => matcher.Match(x.Mod.Version, constraint) == FabricVersionMatch.Match))
+                {
+                    Add("EnvironmentDisabledDependency", ModrinthFindingSeverity.Information,
+                        $"{supplied.Mod.Id} declares {id} {Display(constraint)}. A matching inspected client-only candidate is present; Fabric Loader 0.19.5 schema-1 resolution softens this dependency on a dedicated server. It is not an active server provider.",
+                        source, supplied.Artifact, id);
+                    return;
+                }
                 Add("MissingRequiredDependency", ModrinthFindingSeverity.Blocker,
                     $"{supplied.Mod.Id} requires Fabric ID {id} {Display(constraint)}. No actual server-applicable inspected JAR supplies it; no display-name/project search guess was made.", source, supplied.Artifact, id);
                 return;
@@ -221,7 +244,9 @@ public sealed partial class ModrinthInspectionService
         }
         private static bool IsServerActive(ModrinthInspectedArtifact artifact, FabricModMetadata mod) =>
             mod.Environment is FabricEnvironment.Universal or FabricEnvironment.Server &&
-            !artifact.Metadata.Mods.Any(parent => parent.Environment == FabricEnvironment.Client &&
+            !HasClientAncestor(artifact, mod);
+        private static bool HasClientAncestor(ModrinthInspectedArtifact artifact, FabricModMetadata mod) =>
+            artifact.Metadata.Mods.Any(parent => parent.Environment == FabricEnvironment.Client &&
                 mod.ArchivePath.StartsWith(parent.ArchivePath + "!/", StringComparison.Ordinal));
         private static string MetadataSource(ModProvider supplied) => "fabric.mod.json: " + supplied.Mod.ArchivePath;
         private static string Display(FabricVersionConstraint constraint) => string.Join(" OR ", constraint.Alternatives);

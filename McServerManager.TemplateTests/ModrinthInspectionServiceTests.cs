@@ -174,6 +174,78 @@ public sealed class ModrinthInspectionServiceTests
         Assert.Contains(result.Findings, x => x.Code == "MissingRequiredDependency" && x.Dependency == "grandchild");
     }
 
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task IdenticalNestedCandidatesKeepServerApplicabilityPerAncestry(bool allParentsClient, bool reverseOrder)
+    {
+        var shared = ModrinthHttpFixture.Jar("""{"schemaVersion":1,"id":"grandchild","version":"1.0.0","provides":["shared_alias"],"depends":{"minecraft":"1.21.1"}}""");
+        var client = NestedJar("""{"schemaVersion":1,"id":"clientmodule","version":"1.0.0","environment":"client","jars":[{"file":"shared.jar"}]}""", "shared.jar", shared);
+        var second = NestedJar(JsonSerializer.Serialize(new { schemaVersion = 1, id = "secondmodule", version = "1.0.0", environment = allParentsClient ? "client" : "*",
+            jars = new[] { new { file = "shared.jar" } } }), "shared.jar", shared);
+        var children = new[] { ("client.jar", client), ("second.jar", second) };
+        if (reverseOrder) Array.Reverse(children);
+        var root = BundledJar("rootmod", new { grandchild = "1.0.0", shared_alias = "*" }, children);
+        var fixture = new ModrinthHttpFixture(); fixture.Add("RootProj", "RootVer1", "rootmod", "1.0.0", content: root);
+        using var provider = fixture.Provider();
+        var result = await new ModrinthInspectionService(provider).InspectAsync(Request("RootVer1"));
+
+        var metadata = Assert.Single(result.Artifacts).Metadata;
+        Assert.True(metadata.IsComplete);
+        Assert.Equal(5, metadata.Mods.Count);
+        var copies = metadata.Mods.Where(x => x.Id == "grandchild").ToArray();
+        Assert.Equal(2, copies.Length);
+        Assert.Equal(copies[0].ContentSha256, copies[1].ContentSha256);
+        Assert.NotEqual(copies[0].ArchivePath, copies[1].ArchivePath);
+        Assert.Equal(!allParentsClient, result.IsResolved);
+        foreach (var dependency in new[] { "grandchild", "shared_alias" })
+        {
+            Assert.Contains(result.Findings, x => x.Dependency == dependency && x.Code == (allParentsClient ? "MissingRequiredDependency" : "RequiredSatisfied"));
+            Assert.DoesNotContain(result.Findings, x => x.Dependency == dependency && x.Code == (allParentsClient ? "RequiredSatisfied" : "MissingRequiredDependency"));
+        }
+        var sharedRuntimeChecks = result.Findings.Where(x => x.Dependency == "minecraft" && x.Code == "RuntimeSatisfied").ToArray();
+        if (allParentsClient) Assert.Empty(sharedRuntimeChecks);
+        else Assert.EndsWith("!/second.jar!/shared.jar", Assert.Single(sharedRuntimeChecks).Source);
+        Assert.DoesNotContain(result.Findings, x => x.Code is "DuplicateModId" or "UnsupportedNestedAlternatives");
+    }
+
+    [Fact]
+    public async Task IdenticalNestedContentAtSiblingAndGrandchildPathsSuppliesOneProvider()
+    {
+        var shared = ModrinthHttpFixture.Jar("""{"schemaVersion":1,"id":"sharedmod","version":"1.0.0"}""");
+        var parent = NestedJar("""{"schemaVersion":1,"id":"parentmod","version":"1.0.0","depends":{"sharedmod":"1.0.0"},"jars":[{"file":"shared.jar"}]}""", "shared.jar", shared);
+        var root = BundledJar("rootmod", new { sharedmod = "1.0.0" }, ("shared.jar", shared), ("parent.jar", parent));
+        var fixture = new ModrinthHttpFixture(); fixture.Add("RootProj", "RootVer1", "rootmod", "1.0.0", content: root);
+        using var provider = fixture.Provider();
+        var result = await new ModrinthInspectionService(provider).InspectAsync(Request("RootVer1"));
+
+        Assert.True(result.IsResolved);
+        Assert.Equal(4, Assert.Single(result.Artifacts).Metadata.Mods.Count);
+        Assert.Equal(2, result.Findings.Count(x => x.Code == "RequiredSatisfied" && x.Dependency == "sharedmod"));
+        Assert.DoesNotContain(result.Findings, x => x.Code is "DuplicateModId" or "UnsupportedNestedAlternatives");
+    }
+
+    [Theory]
+    [InlineData("1.0.0")]
+    [InlineData("2.0.0")]
+    public async Task DifferentNestedBytesAcrossArtifactsRemainUnsupportedAlternatives(string otherVersion)
+    {
+        var first = ModrinthHttpFixture.Jar("""{"schemaVersion":1,"id":"sharedmod","version":"1.0.0","description":"first"}""");
+        var other = ModrinthHttpFixture.Jar(JsonSerializer.Serialize(new { schemaVersion = 1, id = "sharedmod", version = otherVersion, description = "other" }));
+        var fixture = new ModrinthHttpFixture();
+        fixture.Add("RootProj", "RootVer1", "rootmod", "1.0.0", content: BundledJar("rootmod", new { sharedmod = "*" }, ("shared.jar", first)));
+        fixture.Add("OtherPro", "OtherVer", "othermod", "1.0.0", content: BundledJar("othermod", new { }, ("shared.jar", other)));
+        using var provider = fixture.Provider();
+        var result = await new ModrinthInspectionService(provider).InspectAsync(Request("RootVer1", "OtherVer"));
+
+        Assert.False(result.IsResolved);
+        Assert.All(result.Artifacts, x => Assert.True(x.Metadata.IsComplete));
+        Assert.Contains(result.Findings, x => x.Code == "UnsupportedNestedAlternatives" && x.Dependency == "sharedmod");
+        Assert.DoesNotContain(result.Findings, x => x.Code == "RequiredSatisfied" && x.Dependency == "sharedmod");
+    }
+
     [Fact]
     public async Task RootAliasesAndActualNestedProvidersSatisfyDependencies()
     {
@@ -197,17 +269,44 @@ public sealed class ModrinthInspectionServiceTests
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => new ModrinthInspectionService(provider).InspectAsync(Request("RootVer1"), ct.Token));
     }
 
-    [Fact]
-    public async Task DistinctRootArtifactsWithIdenticalBytesRemainDuplicateProviders()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task DistinctRootArtifactsWithIdenticalBytesRemainDuplicateProviders(bool repeatedNestedContent)
     {
         var bytes = ModrinthHttpFixture.Jar("""{"schemaVersion":1,"id":"same_root","version":"1.0.0"}""");
+        if (repeatedNestedContent)
+        {
+            var shared = ModrinthHttpFixture.Jar("""{"schemaVersion":1,"id":"sharedmod","version":"1.0.0"}""");
+            bytes = BundledJar("same_root", new { sharedmod = "*" }, ("first.jar", shared), ("second.jar", shared));
+        }
         var fixture = new ModrinthHttpFixture();
         fixture.Add("RootProj", "RootVer1", "same_root", "1.0.0", content: bytes);
         fixture.Add("OtherPro", "OtherVer", "same_root", "1.0.0", content: bytes);
         using var provider = fixture.Provider();
         var result = await new ModrinthInspectionService(provider).InspectAsync(Request("RootVer1", "OtherVer"));
         Assert.False(result.IsResolved);
-        Assert.Contains(result.Findings, x => x.Code == "DuplicateModId");
+        Assert.All(result.Artifacts, x => Assert.True(x.Metadata.IsComplete));
+        Assert.Contains(result.Findings, x => x.Code == "DuplicateModId" && x.Dependency == "same_root");
+        Assert.DoesNotContain(result.Findings, x => x.Code == "UnsupportedNestedAlternatives");
+    }
+
+    [Fact]
+    public async Task IdenticalNestedOccurrencesStillConsumeMetadataRegistrationBudget()
+    {
+        var shared = ModrinthHttpFixture.Jar(JsonSerializer.Serialize(new { schemaVersion = 1, id = "sharedmod", version = "1.0.0",
+            provides = Enumerable.Range(0, 256).Select(x => $"shared_alias_{x}").ToArray() }));
+        var root = BundledJar("rootmod", new { }, Enumerable.Range(0, 17).Select(x => ($"shared-{x}.jar", shared)).ToArray());
+        var fixture = new ModrinthHttpFixture(); fixture.Add("RootProj", "RootVer1", "rootmod", "1.0.0", content: root);
+        using var provider = fixture.Provider();
+        var result = await new ModrinthInspectionService(provider).InspectAsync(Request("RootVer1"));
+
+        Assert.False(result.IsResolved);
+        var metadata = Assert.Single(result.Artifacts).Metadata;
+        Assert.True(metadata.IsComplete);
+        Assert.Equal(18, metadata.Mods.Count);
+        Assert.Contains(result.Findings, x => x.Code == "MetadataLimit");
+        Assert.DoesNotContain(result.Findings, x => x.Code is "DuplicateModId" or "UnsupportedNestedAlternatives");
     }
 
     [Fact]
@@ -294,6 +393,22 @@ public sealed class ModrinthInspectionServiceTests
         {
             using (var writer = new StreamWriter(zip.CreateEntry("fabric.mod.json").Open())) writer.Write(metadata);
             using (var stream = zip.CreateEntry(nestedName).Open()) stream.Write(nested);
+        }
+        return bytes.ToArray();
+    }
+    private static byte[] BundledJar(string id, object depends, params (string Name, byte[] Content)[] nested)
+    {
+        var metadata = JsonSerializer.Serialize(new { schemaVersion = 1, id, version = "1.0.0", depends,
+            jars = nested.Select(x => new { file = x.Name }).ToArray() });
+        using var bytes = new MemoryStream();
+        using (var zip = new ZipArchive(bytes, ZipArchiveMode.Create, leaveOpen: true))
+        {
+            using (var writer = new StreamWriter(zip.CreateEntry("fabric.mod.json", CompressionLevel.NoCompression).Open())) writer.Write(metadata);
+            foreach (var (name, content) in nested)
+            {
+                using var stream = zip.CreateEntry(name, CompressionLevel.NoCompression).Open();
+                stream.Write(content);
+            }
         }
         return bytes.ToArray();
     }

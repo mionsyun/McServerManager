@@ -24,3 +24,9 @@ hashes, byte sizes, metadata declarations, findings, timestamps and expected
 outcomes. It does not contain MOD binaries. Keep third-party artifacts out of
 the repository and public attachments. API availability can change; a network
 failure is a failed/inconclusive check, never evidence of compatibility.
+
+`magic-technology-cases.json` adds 15 pinned magic/technology inputs. The
+[2026-10-04 report](../docs/magic-technology-verification-2026-10-04.md) clearly
+separates initial live acquisition from final offline replay after corrections.
+Running these inputs with `--live` makes new network requests; it is not the
+recorded replay. Spectrum remains an API-size rejection, not a downloaded JAR.

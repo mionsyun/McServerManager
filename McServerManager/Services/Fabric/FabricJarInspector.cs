@@ -53,7 +53,15 @@ public sealed class FabricJarInspector : IFabricJarInspector
         {
             var root = await InspectArchiveAsync(archive, path, 0).ConfigureAwait(false);
             foreach (var group in _mods.GroupBy(x => x.Id, StringComparer.Ordinal).Where(x => x.Count() > 1))
+            {
+                var first = group.First();
+                // Repeated exact-content nested JARs are the same candidate, not Loader
+                // alternatives. Keep every occurrence and its ancestry in Mods: server
+                // applicability is decided per path, and all inspection budgets still apply.
+                if (group.All(x => x.NestedDepth > 0 && x.Version == first.Version && x.ContentSha256 == first.ContentSha256))
+                    continue;
                 _issues.Add(new() { Code = "DuplicateModId", Message = $"Multiple bundled metadata entries declare mod ID {group.Key}; Loader candidate selection is not assumed.", ArchivePath = path });
+            }
             return new() { IsComplete = root is not null && _issues.Count == 0, Root = root, Mods = _mods.ToArray(), Issues = _issues.ToArray() };
         }
 
