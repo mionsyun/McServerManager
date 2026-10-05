@@ -108,7 +108,7 @@
       "name": "クライアントにもMODは必要ですか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "はい、必要です。サーバーとクライアントの両方に同じMODを同じバージョンで入れる必要があります。プレイヤー全員のPCに同様の設定が必要です。"
+        "text": "MODによります。両方に導入が必要なMODは参加者全員のクライアントにも入れ、作者が指定する対応バージョンをそろえます。サーバー専用MODは通常クライアントへの導入が不要で、クライアント専用MODはサーバーに入れません。配布ページで導入先、対応Minecraft・ローダー・MODのバージョン、依存MODを確認してください。"
       }
     },
     {
@@ -124,7 +124,7 @@
       "name": "VanillaサーバーにMODは入れられますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "入れられません。MODを使う場合はサーバーの種別をForgeまたはFabricに変更する必要があります。MaiPilotで新しいサーバーを作成してください。"
+        "text": "VanillaサーバーにForge/Fabric用のMODを追加することはできません。サーバー側にMODが必要な場合は、対応する種別のサーバーをMaiPilotで新しく作成してください。クライアント専用MODは、作者の対応条件を満たせばVanillaサーバーへの接続時にも使えるものがあります。"
       }
     }
   ]
@@ -152,7 +152,7 @@
         </div>
         <h1 style="margin-top:14px;font-size:clamp(20px,3vw,30px)">マイクラ MOD 入れ方ガイド<br>（Forge / Fabric サーバー）</h1>
         <p class="muted" style="margin-top:8px">マイクラサーバーへのMOD導入手順を、Forge・Fabric 別に分かりやすく解説します。ダウンロード先からクライアント設定まで、初心者でも迷わず進める完全ガイド。</p>
-        <div class="notice">⚠️ MODはサーバーとクライアント（Minecraftを起動するPC）の両方に同じものを入れる必要があります。</div>
+        <div class="notice">⚠️ MODの導入先は種類によって異なります。両方に必要なもの・サーバー専用・クライアント専用があるため、作者の配布ページを確認してください。</div>
       </div>
 
       <div class="card">
@@ -184,22 +184,22 @@
           </li>
           <li>
             <span class="step-num">2</span>
-            <span class="step-body"><strong>バージョンを選択します。</strong>MODが対応しているMinecraftのバージョンに合わせてください。バージョン確認は Modrinth や CurseForge のMOD配布ページで行えます。</span>
+            <span class="step-body"><strong>Minecraftのバージョンを選択します。</strong>使いたいMODに対応するMinecraftバージョンとサーバー種別（Forge / Fabric）を選びます。必要なローダーバージョンは作者の配布ページで確認し、作成したサーバーの構成が対応条件を満たすことを確認してください。</span>
           </li>
           <li>
             <span class="step-num">3</span>
-            <span class="step-body"><strong>サーバーを一度起動します。</strong>初回起動でローダーのインストールが自動で行われます。「Done!」のログが出れば準備完了です。</span>
+            <span class="step-body"><strong>サーバーを一度起動します。</strong>作成が完了したら起動し、コンソールで起動完了を確認します。</span>
           </li>
         </ul>
       </div>
 
       <div class="card">
         <h2>手順 2：MODをダウンロードする</h2>
-        <p class="muted" style="margin-top:6px">信頼できる配布サイトからダウンロードします。</p>
+        <p class="muted" style="margin-top:6px">信頼できる配布サイトからダウンロードします。ファイルごとに対応Minecraftバージョン、ローダーの種類・バージョン、導入先（サーバー／クライアント）、必要な依存MODを確認してください。Fabric APIなどは、使用するMODが要求する場合に対応版を用意します。</p>
         <div class="grid" style="margin-top:12px">
           <div class="mini">
             <strong style="color:var(--accent)">Modrinth</strong>
-            <p class="muted" style="margin:6px 0 0;font-size:13px">modrinth.com — 新しい主流。MaiPilot内から直接検索・インストール可能。</p>
+            <p class="muted" style="margin:6px 0 0;font-size:13px">modrinth.com — MaiPilot内で検索し、「ページ」から配布ページを開けます。対応する .jar をダウンロードしてください。</p>
           </div>
           <div class="mini">
             <strong style="color:var(--accent2)">CurseForge</strong>
@@ -219,19 +219,25 @@
           </li>
           <li>
             <span class="step-num">2</span>
-            <span class="step-body"><strong>「追加」ボタンを押してダウンロードした .jar ファイルを選択します。</strong>または Modrinth 検索欄でMOD名を検索し、直接インストールすることもできます。</span>
+            <span class="step-body"><strong>「追加」ボタンを押してダウンロードした .jar ファイルを選択します。</strong>Modrinth検索を使う場合は「ページ」で配布ページを開き、対応する .jar をダウンロードしてから「追加」で選択します。</span>
           </li>
           <li>
             <span class="step-num">3</span>
             <span class="step-body"><strong>サーバーを再起動します。</strong>コンソールで MOD の読み込みログが表示されれば成功です。</span>
           </li>
         </ul>
-        <div class="notice" style="margin-top:14px">Forge では mods フォルダ、Fabric では mods フォルダにMODが配置されます。手動配置する場合もこのフォルダを使います。</div>
+        <div class="notice" style="margin-top:14px">Forge / Fabric ともに、サーバーの mods フォルダにはサーバー側で必要なMODと依存MODを配置します。クライアント専用MODは入れないでください。手動配置する場合もこのフォルダを使います。</div>
       </div>
 
       <div class="card">
-        <h2>手順 4：クライアント（自分のMinecraft）にも MOD を入れる</h2>
-        <p class="muted" style="margin-top:6px">サーバー側のMODは、接続するプレイヤー全員のMinecraftにも同じMODが必要です。</p>
+        <h2>手順 4：必要な MOD をクライアント（自分のMinecraft）に入れる</h2>
+        <p class="muted" style="margin-top:6px">サーバーの mods フォルダをそのまま全員にコピーするのではなく、作者の説明に従って導入先を分けます。</p>
+        <ul>
+          <li><strong>両方に導入が必要なMOD：</strong>サーバーと参加者全員のクライアントに導入し、作者が指定する互換性のあるバージョンをそろえます。同一バージョンが必須とされている場合は一致させてください。</li>
+          <li><strong>サーバー専用MOD：</strong>サーバーに導入します。通常、参加者のクライアントへの導入は不要ですが、接続条件は作者の説明を確認してください。</li>
+          <li><strong>クライアント専用MOD：</strong>必要なプレイヤーのクライアントだけに導入します。サーバーにコピーしないでください。</li>
+        </ul>
+        <p class="muted" style="margin-top:10px">クライアント側にMODが必要な場合は、次の手順で準備します。</p>
         <ul class="step-list">
           <li>
             <span class="step-num">1</span>
@@ -239,14 +245,15 @@
           </li>
           <li>
             <span class="step-num">2</span>
-            <span class="step-body"><strong>クライアント側の mods フォルダ（%AppData%\\.minecraft\\mods）に同じ .jar ファイルをコピーします。</strong>サーバーとバージョンが一致していることを確認してください。</span>
+            <span class="step-body"><strong>クライアント側で必要なMODと依存MODの .jar ファイルを mods フォルダに入れます。</strong>標準の場所は <code>%AppData%\.minecraft\mods</code> です。起動構成でゲームディレクトリを変更している場合は、その中の mods フォルダを使います。Minecraft・ローダー・MODのバージョンが作者の対応条件を満たすことを確認してください。</span>
           </li>
           <li>
             <span class="step-num">3</span>
             <span class="step-body"><strong>Minecraft を起動してサーバーに接続します。</strong>MODが正しく入っていれば問題なく接続できます。</span>
           </li>
         </ul>
-        <p class="muted" style="margin-top:10px">友達も接続する場合は、友達のPCにも同じMODと同じバージョンのForge/Fabricをインストールしてもらう必要があります。</p>
+        <p class="muted" style="margin-top:10px">友達には、クライアントに必要なMODと依存MOD、対応するMinecraft・ローダー・MODのバージョンを伝えてください。サーバー専用MODまで同じ構成にする必要はありません。</p>
+        <p class="muted" style="margin-top:10px;font-size:13px">最終確認: 2026年10月5日。参考：<a href="https://wiki.fabricmc.net/player:tutorials:server:windows">Fabric公式Wiki：Windowsサーバーへの導入</a>、<a href="https://docs.fabricmc.net/develop/loader/fabric-mod-json">Fabric公式ドキュメント：導入環境・依存関係</a>。Fabricの <code>environment: &quot;*&quot;</code> は両環境で動作する指定であり、両方への導入が必須という意味ではありません。必要な導入先は作者の説明で判断してください。</p>
       </div>
 
       <div class="card">
@@ -254,7 +261,7 @@
         <div class="grid">
           <div class="mini">
             <strong>バージョン不一致</strong>
-            <p class="muted" style="font-size:13px;margin-top:4px">MODのバージョンがサーバーのMinecraftバージョンと一致しているか確認してください。</p>
+            <p class="muted" style="font-size:13px;margin-top:4px">MODファイルの対応Minecraftバージョン、Forge / Fabricの種類と必要なローダーバージョンを確認してください。MOD自体のバージョン番号とMinecraftの番号は別です。</p>
           </div>
           <div class="mini">
             <strong>MOD同士の競合</strong>
@@ -262,10 +269,11 @@
           </div>
           <div class="mini">
             <strong>依存MODが不足</strong>
-            <p class="muted" style="font-size:13px;margin-top:4px">一部のMODは別のMOD（API）が必要です。配布ページの「Dependencies（必要なMOD）」を確認してください。</p>
+            <p class="muted" style="font-size:13px;margin-top:4px">一部のMODは別のMOD（API）が必要です。配布ページの「Dependencies（必要なMOD）」で必要な種類・バージョン・導入先を確認してください。</p>
           </div>
         </div>
-        <p class="muted" style="margin-top:10px">コンソールのエラーログは MaiPilot の「コンソール」タブ → 「ログフォルダを開く」から確認できます。</p>
+        <p class="muted" style="margin-top:10px">コンソールのエラーログは MaiPilot の「コンソール」タブ → 「📁 ログフォルダ」から確認できます。</p>
+        <p class="muted" style="margin-top:10px">クライアント専用MODをサーバーに入れていないかも確認してください。Java関連のエラーは<a href="/docs/java-setup/">Javaの設定ガイド</a>、詳しい切り分けは<a href="/docs/troubleshooting/">トラブルシュート</a>を参照してください。</p>
       </div>
 
       <div class="card">
@@ -274,17 +282,17 @@
           <dt data-faq-question>ForgeとFabricはどっちがいい？</dt>
           <dd data-faq-answer>使いたいMODがどちらに対応しているかで決めます。Create MODなど人気のMODはForge対応が多く、軽量化系はFabricが強いです。MODの配布ページで「Forge」「Fabric」の記載を確認してください。</dd>
           <dt data-faq-question>クライアントにもMODは必要ですか？</dt>
-          <dd data-faq-answer>はい、必要です。サーバーとクライアントの両方に同じMODを同じバージョンで入れる必要があります。プレイヤー全員のPCに同様の設定が必要です。</dd>
+          <dd data-faq-answer>MODによります。両方に導入が必要なMODは参加者全員のクライアントにも入れ、作者が指定する対応バージョンをそろえます。サーバー専用MODは通常クライアントへの導入が不要で、クライアント専用MODはサーバーに入れません。配布ページで導入先、対応Minecraft・ローダー・MODのバージョン、依存MODを確認してください。</dd>
           <dt data-faq-question>MODを削除するには？</dt>
           <dd data-faq-answer>MaiPilotの「MOD/プラグイン」タブで無効化または削除できます。手動で削除する場合はサーバーフォルダ内の mods フォルダから .jar ファイルを削除してください。</dd>
           <dt data-faq-question>VanillaサーバーにMODは入れられますか？</dt>
-          <dd data-faq-answer>入れられません。MODを使う場合はサーバーの種別をForgeまたはFabricに変更する必要があります。MaiPilotで新しいサーバーを作成してください。</dd>
+          <dd data-faq-answer>VanillaサーバーにForge/Fabric用のMODを追加することはできません。サーバー側にMODが必要な場合は、対応する種別のサーバーをMaiPilotで新しく作成してください。クライアント専用MODは、作者の対応条件を満たせばVanillaサーバーへの接続時にも使えるものがあります。</dd>
         </dl>
       </div>
 
       <div class="card cta" style="text-align:center">
         <h2 style="margin-bottom:6px">MaiPilotでMOD管理を簡単に</h2>
-        <p class="muted">GUIでMODの追加・有効化・無効化。Modrinth検索もアプリ内で完結。</p>
+        <p class="muted">GUIでMODの追加・有効化・無効化。Modrinth検索から配布ページを開き、対応ファイルを確認できます。</p>
         <a class="cta-btn" href="/" data-event="docs_to_download">無料でダウンロード（Windows）</a>
       </div>
 
@@ -295,6 +303,7 @@
           <li><a href="/docs/growth/server-type-comparison/">Paper / Purpur / Vanilla の選び方比較</a></li>
           <li><a href="/docs/growth/forge-fabric-server-setup/">Forge/Fabricサーバーの立て方（初心者向け）</a></li>
           <li><a href="/docs/growth/windows-minecraft-server-2026/">マイクラサーバーの立て方（Windows/2026年版）</a></li>
+          <li><a href="/docs/java-setup/">Javaのインストールと設定</a></li>
           <li><a href="/docs/troubleshooting/">トラブルシュート</a></li>
           <li><a href="/docs/">セットアップガイド一覧</a></li>
         </ul>

@@ -4,15 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>マイクラサーバーが重い・ラグの原因と対処法 | MaiPilot</title>
-    <meta name="description" content="マイクラサーバーのラグ・重い問題を解消する方法。view-distance調整、Aikarフラグ、プラグイン見直しまで原因別に対処手順を解説。TPS確認方法付き。" />
+    <meta name="description" content="マイクラサーバーのラグを計測して原因別に対処。PaperのTPS・spark確認、view-distanceとsimulation-distance、メモリ・GCの見直しを解説。" />
     <meta name="keywords" content="マイクラサーバー 重い, マイクラサーバー ラグ, Minecraft サーバー TPS, マイクラ view-distance, Aikarフラグ, マイクラサーバー 最適化" />
     <meta name="author" content="MaiPilot" />
     <style>
       :root { color-scheme: dark; --bg:#0b0f17; --panel:#121a2a; --panel2:#162038; --text:#e6eefb; --muted:#9fb0c8; --accent:#66ff88; --accent2:#33a8ff; }
       *{box-sizing:border-box;}
       body{margin:0;padding:32px 16px;font-family:"Noto Sans JP","Segoe UI",sans-serif;color:var(--text);background:radial-gradient(circle at 15% 15%, #1a2b44 0%, var(--bg) 60%, #070a10 100%);}
-      .wrap{max-width:980px;margin:0 auto;display:grid;gap:16px;}
-      .card{background:var(--panel);border:1px solid rgba(126,157,201,.25);border-radius:16px;padding:22px;}
+      .wrap{max-width:980px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:16px;}
+      .card{min-width:0;overflow-wrap:anywhere;background:var(--panel);border:1px solid rgba(126,157,201,.25);border-radius:16px;padding:22px;}
       .hero{background:linear-gradient(135deg, rgba(102,255,136,.1), rgba(51,168,255,.08)), var(--panel);}
       .muted{color:var(--muted);}
       .notice{background:rgba(255,209,102,.12);color:#ffd166;border-radius:10px;padding:10px 14px;font-weight:700;font-size:13px;margin-top:12px;}
@@ -50,7 +50,7 @@
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="https://www.maipilot.jp/docs/growth/minecraft-server-lag-fix/" />
     <meta property="og:title" content="マイクラサーバーが重い・ラグの原因と対処法 | MaiPilot" />
-    <meta property="og:description" content="マイクラサーバーのラグ・重い問題を解消する方法。view-distance調整、Aikarフラグ、プラグイン見直しまで原因別に対処手順を解説。TPS確認方法付き。" />
+    <meta property="og:description" content="マイクラサーバーのラグを計測して原因別に対処。PaperのTPS・spark確認、view-distanceとsimulation-distance、メモリ・GCの見直しを解説。" />
     <meta property="og:type" content="article" />
     <meta property="og:url" content="https://www.maipilot.jp/docs/growth/minecraft-server-lag-fix/" />
     <meta property="og:image" content="https://www.maipilot.jp/icon.png" />
@@ -58,10 +58,10 @@
     <meta property="og:site_name" content="MaiPilot" />
     <meta property="og:locale" content="ja_JP" />
     <meta property="article:published_time" content="2026-03-08T00:00:00+09:00" />
-    <meta property="article:modified_time" content="2026-03-08T00:00:00+09:00" />
+    <meta property="article:modified_time" content="2026-10-05T00:00:00+09:00" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="マイクラサーバーが重い・ラグの原因と対処法 | MaiPilot" />
-    <meta name="twitter:description" content="マイクラサーバーのラグ・重い問題を解消する方法。view-distance調整、Aikarフラグ、プラグイン見直しまで原因別に対処手順を解説。TPS確認方法付き。" />
+    <meta name="twitter:description" content="マイクラサーバーのラグを計測して原因別に対処。PaperのTPS・spark確認、view-distanceとsimulation-distance、メモリ・GCの見直しを解説。" />
     <meta name="twitter:image" content="https://www.maipilot.jp/icon.png" />
                     <script type="application/ld+json" data-seo="breadcrumb">
 {
@@ -105,7 +105,7 @@
       "name": "TPSとは何ですか？どうやって確認しますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "TPS（Ticks Per Second）はサーバーの処理速度の指標で、正常値は20です。Paperサーバーなら /tps コマンドで確認できます。TPS が 15 以下になるとゲームプレイに明確なラグが生じます。"
+        "text": "TPSは1秒あたりのサーバーの処理回数で、通常の目標は20です。Paperでは権限があれば /tps で確認できますが、Vanilla標準のコマンドではありません。低下は処理遅延の目安で、通信遅延や短い停止はTPSだけでは判断できません。詳しい調査にはsparkを使います。"
       }
     },
     {
@@ -113,7 +113,7 @@
       "name": "Aikarフラグとは何ですか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Aikarフラグとは、Paper開発チームのAikar氏が提唱したMinecraftサーバー向けJVM起動オプションです。GCの動作を最適化し、Stop-the-worldポーズを短縮することでTPSを安定させます。Paper公式サイトでも推奨されています。"
+        "text": "Minecraftサーバー向けにGCの動作を調整するJVM起動オプション群です。Paper公式は、Java 17・21以降の現代のJVMではまず追加GCフラグなしを試し、GCの問題がある場合や古い環境で検討するよう案内しています。効果は計測して判断してください。"
       }
     },
     {
@@ -121,7 +121,7 @@
       "name": "view-distanceを下げるとどんな影響がありますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "プレイヤーが見えるチャンクの範囲が狭くなります。デフォルト10チャンクを6〜8に下げると、サーバーが処理するチャンク数が大幅に減り、TPSが改善します。プレイ感への影響は軽微で、まず試すべき設定です。"
+        "text": "クライアントへ送るワールドの範囲が狭くなり、負荷を減らせる場合があります。simulation-distanceはエンティティを更新する範囲に関係します。見える景色や離れたモブ・装置の動作に影響するため、一項目ずつ変更し、再起動後に比較してください。"
       }
     },
     {
@@ -129,7 +129,7 @@
       "name": "プラグインがラグの原因か調べるには？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Paperサーバーなら /timings report コマンドで各プラグインの処理時間を計測できます。また、プラグインを1つずつ無効化してTPSを比較する方法も有効です。"
+        "text": "Paper 1.21以降は同梱のsparkで、ラグ発生中に /spark profiler start --timeout 600 を実行し、10分後のレポートを確認します。旧Paperでは公式手順で対応するsparkを導入してください。疑わしいプラグインはバックアップ後、停止中に一つずつ見直し、再起動して比較します。"
       }
     }
   ]
@@ -150,105 +150,81 @@
       <section class="card hero">
         <a href="/docs/growth/">← ガイド一覧へ</a>
         <h1>マイクラサーバーが重い・ラグの原因と対処法</h1>
-        <p class="muted">TPS低下・ラグの原因を素早く特定し、効果が高い順に対処するためのガイドです。</p>
+        <p class="muted">TPS低下・ラグを計測し、原因に合った対処を一つずつ試すためのガイドです。</p>
         <div class="chips">
           <span class="chip">想定読了: 8分</span>
-          <span class="chip">対象: Paper / Vanilla サーバー</span>
+          <span class="chip">対象: Java版 Paper / Vanilla</span>
           <span class="chip">目的: TPS改善・ラグ解消</span>
         </div>
         <div class="notice">※この記事には広告・PRリンクを含みます。</div>
       </section>
 
       <section class="card">
-        <h2>先に結論（効果が高い順）</h2>
+        <h2>先に結論（計測してから対処）</h2>
         <ol>
-          <li><strong>view-distance を 10 → 6〜8 に下げる</strong>（最も即効性が高い）</li>
-          <li><strong>Aikarフラグ</strong>に切り替えてGCによるラグを減らす</li>
-          <li><strong>RAM割り当てを確認・増加</strong>する（Xms/Xmxを適切に設定）</li>
-          <li><strong>プラグインを精査</strong>して不要なものを無効化する</li>
-          <li><strong>simulation-distance を下げる</strong>（1.18以降）</li>
+          <li><strong>TPS・処理時間・回線状況を確認</strong>して、サーバー負荷と通信・クライアント側の問題を切り分ける</li>
+          <li>チャンク関連の負荷が高ければ、<strong>view-distance / simulation-distance</strong>を下げて比較する</li>
+          <li><strong>RAM割り当てとGCを確認</strong>する。メモリを増やすだけで改善するとは限らない</li>
+          <li><strong>sparkで重い処理を調べる</strong>。疑わしいプラグインはバックアップを取り、停止中に一つずつ見直す</li>
+          <li><strong>追加GCフラグは必要な場合に検証</strong>する。現代のJVMでは、まず既定のGC設定で計測する</li>
         </ol>
       </section>
 
       <section class="card">
-        <h2>症状別 原因の特定</h2>
+        <h2>症状別 原因の候補</h2>
+        <p class="muted">症状だけでは原因を断定できません。ラグが起きている時間の計測結果やログと照合してください。</p>
         <table>
           <tr><th>症状</th><th>考えられる原因</th><th>優先確認箇所</th></tr>
-          <tr><td>全員が同時にラグる</td><td>サーバー側の負荷超過</td><td>TPS / RAM / CPU使用率</td></tr>
-          <tr><td>特定のプレイヤーだけラグる</td><td>そのプレイヤーの回線問題</td><td>pingコマンド・接続環境</td></tr>
-          <tr><td>特定のエリアに入ると重くなる</td><td>大量エンティティ・チャンク生成</td><td>エンティティ数・ワールド境界</td></tr>
-          <tr><td>定期的に一瞬フリーズする</td><td>GC（ガベージコレクション）</td><td>Aikarフラグの有無</td></tr>
-          <tr><td>夜間だけ重くなる</td><td>バックアップ・自動タスク</td><td>バックアップスケジュール</td></tr>
+          <tr><td>全員が同時にラグる</td><td>サーバー負荷・サーバー側回線の混雑など</td><td>TPS / CPU / メモリ / 通信状況</td></tr>
+          <tr><td>特定のプレイヤーだけラグる</td><td>そのプレイヤーの回線・端末描画負荷など</td><td>遅延・パケットロス・FPS</td></tr>
+          <tr><td>特定のエリアに入ると重くなる</td><td>大量エンティティ・チャンク生成・描画負荷など</td><td>sparkの計測結果・エンティティ数・FPS</td></tr>
+          <tr><td>定期的に一瞬フリーズする</td><td>GC・保存処理・ディスクI/Oなど</td><td>GCログ・spark・保存時刻</td></tr>
+          <tr><td>夜間だけ重くなる</td><td>バックアップ・自動タスク・回線混雑など</td><td>実行スケジュール・通信状況</td></tr>
         </table>
       </section>
 
       <section class="card">
-        <h2>TPS の確認方法</h2>
-        <p class="muted">まず現在の TPS を確認して、ラグがサーバー側の問題か確認します。</p>
+        <h2>TPS の確認方法（Paper）</h2>
+        <p class="muted">Paperでは、権限のあるプレイヤーがゲーム内で <code>/tps</code> を実行すると、直近1・5・15分のTPSを確認できます。Vanilla標準にはこのコマンドはありません。コンソールでは先頭の <code>/</code> を省きます。</p>
         <pre><code>/tps</code></pre>
         <p class="muted">出力例: <code>TPS from last 1m, 5m, 15m: 19.98, 19.54, 18.31</code></p>
-        <p class="muted">TPS 20 が正常値です。15 以下になるとラグが体感されます。</p>
+        <p class="muted">通常の目標は20 TPSです。低下が続く場合はサーバーの処理遅延が疑われますが、平均TPSだけでは短い停止や通信遅延を判断できません。Paper公式は詳しい性能確認にsparkを案内しています（<a href="https://docs.papermc.io/paper/reference/commands/">Paperのコマンド一覧</a>）。</p>
       </section>
 
       <section class="card">
-        <h2>対処1: view-distance を下げる</h2>
-        <p class="muted"><code>server.properties</code> を編集します。</p>
+        <h2>対処1: 描画距離・シミュレーション距離を見直す</h2>
+        <p class="muted">サーバーを停止して設定ファイルをバックアップし、<code>server.properties</code> の既存行を編集します。以下は比較用の例で、万能な推奨値ではありません。</p>
         <pre><code>view-distance=8
 simulation-distance=6</code></pre>
-        <p class="muted">デフォルトは両方 <code>10</code> です。<code>view-distance=8</code>、<code>simulation-distance=6</code> に変更するだけで、サーバーが管理するチャンク数が大幅に減ります。変更後はサーバーを再起動してください。</p>
+        <p class="muted">両方の既定値は <code>10</code> です。<code>view-distance</code> はクライアントへ送るワールドの範囲、<code>simulation-distance</code> はエンティティを更新する範囲に関係します。下げると負荷が減る場合がありますが、見える範囲や離れた場所のモブ・装置の動作に影響します。一度に一項目を変更し、再起動して同じ条件で比較してください。Paper/Spigotのワールド別設定による上書きにも注意してください（<a href="https://docs.papermc.io/paper/reference/server-properties/">server.properties公式リファレンス</a>）。</p>
       </section>
 
       <section class="card">
-        <h2>対処2: Aikarフラグへの切り替え</h2>
-        <p class="muted">Paper公式が推奨するJVM起動フラグです。GCによる「一瞬フリーズ」を大幅に軽減します。<br>サーバー起動コマンド（<code>start.bat</code> や起動スクリプト）を以下のように書き換えます。</p>
-        <pre><code>java -Xms4G -Xmx4G \
-  -XX:+UseG1GC \
-  -XX:+ParallelRefProcEnabled \
-  -XX:MaxGCPauseMillis=200 \
-  -XX:+UnlockExperimentalVMOptions \
-  -XX:+DisableExplicitGC \
-  -XX:+AlwaysPreTouch \
-  -XX:G1NewSizePercent=30 \
-  -XX:G1MaxNewSizePercent=40 \
-  -XX:G1HeapRegionSize=8M \
-  -XX:G1ReservePercent=20 \
-  -XX:G1HeapWastePercent=5 \
-  -XX:G1MixedGCCountTarget=4 \
-  -XX:InitiatingHeapOccupancyPercent=15 \
-  -XX:G1MixedGCLiveThresholdPercent=90 \
-  -XX:G1RSetUpdatingPauseTimePercent=5 \
-  -XX:SurvivorRatio=32 \
-  -XX:+PerfDisableSharedMem \
-  -XX:MaxTenuringThreshold=1 \
-  -jar server.jar nogui</code></pre>
-        <p class="muted" style="margin-top:8px;"><code>-Xms4G -Xmx4G</code> の部分はサーバーのRAM搭載量に合わせて変更してください。</p>
+        <h2>対処2: メモリ・GCを確認して起動設定を見直す</h2>
+        <p class="muted">Paperの<a href="https://docs.papermc.io/misc/tools/start-script-gen/">公式起動スクリプトジェネレーター</a>は、Java 17・21以降の現代のJVMでは、まず追加GCフラグなしの既定設定を試すよう案内しています。使用するサーバーバージョンに対応したJavaで計測し、GCが問題の場合や古い環境で必要な場合に、<a href="https://docs.papermc.io/paper/aikars-flags/">Aikarフラグの公式説明</a>を確認して比較してください。すべてのラグが改善する設定ではありません。</p>
+        <p class="muted">手動起動の例です。<code>server.jar</code> があるフォルダで実行する一行のコマンドで、Windowsの <code>start.bat</code> にも記述できます。<code>java</code> が利用可能であることを確認してください。</p>
+        <pre><code>java -Xms4G -Xmx4G -jar server.jar --nogui</code></pre>
+        <p class="muted"><code>4G</code> は例です。<code>Xms</code> は初期ヒープ、<code>Xmx</code> は最大ヒープで、Javaプロセス全体のメモリ上限ではありません。OS・同時起動するゲーム・ヒープ外メモリの余裕を残してください。MaiPilotから起動する場合は、アプリの設定を変更し、別のスクリプトから同じサーバーを重複起動しないでください。</p>
       </section>
 
       <section class="card">
-        <h2>対処3: プラグインが原因の場合</h2>
-        <p class="muted">Paperサーバーなら <code>/timings report</code> コマンドでプラグインごとの処理時間を確認できます。</p>
+        <h2>対処3: sparkで重い処理を調べる</h2>
+        <p class="muted">Paper 1.21以降にはsparkが同梱されています。旧バージョンのPaperでは、<a href="https://spark.lucko.me/docs/Installation">spark公式の導入手順</a>に従い、使用中のサーバー・Javaに対応するプラグインを導入してください。VanillaにはPaper用プラグインをそのまま追加できません。</p>
         <ol>
-          <li>コンソールで <code>/timings reset</code> を実行してリセット。</li>
-          <li>ラグが発生する操作を5〜10分行う。</li>
-          <li><code>/timings report</code> を実行してURLを取得し、ブラウザで開く。</li>
-          <li>処理時間が長いプラグインを特定して無効化・設定変更する。</li>
+          <li>ラグが発生している状態で、権限のあるプレイヤーがゲーム内で次のコマンドを実行する。コンソールでは先頭の <code>/</code> を省く。</li>
+          <li>問題が再現する通常のプレイを続けて計測する。</li>
+          <li>10分後に出力されるレポートURLを開き、時間を使っている処理を確認する。</li>
+          <li>プラグインが疑われる場合はバックアップを取り、サーバー停止中に依存関係も確認して一つずつ設定変更・無効化する。再起動後、同じ条件で再計測する。</li>
         </ol>
+        <pre><code>/spark profiler start --timeout 600</code></pre>
+        <p class="muted">Timingsは非推奨で、Paper 1.21では既定で無効です。新たな診断にはsparkを使ってください。レポートを他人へ共有する前には内容を確認してください（<a href="https://docs.papermc.io/paper/profiling/">Paper公式のプロファイリング手順</a>）。</p>
       </section>
 
       <section class="card">
-        <h2>対処4: エンティティ数を減らす</h2>
-        <p class="muted"><code>server.properties</code> または <code>spigot.yml</code> でモブの湧き上限を調整できます。</p>
-        <pre><code># server.properties
-max-entities=150
-
-# spigot.yml（より細かく制御）
-mob-spawn-range: 4
-entity-activation-range:
-  animals: 32
-  monsters: 32
-  raiders: 48
-  misc: 16</code></pre>
-        <p class="muted">エンティティ（モブ・ドロップアイテム）が大量に溜まっているチャンクはコマンドで確認できます。</p>
+        <h2>対処4: エンティティの負荷を見直す</h2>
+        <p class="muted">大量のモブやドロップアイテムが原因と分かった場合は、装置や飼育数、アイテム回収を見直します。<code>server.properties</code> に <code>max-entities</code> という標準設定はありません。</p>
+        <p class="muted">Paper/Spigotのスポーン上限は <code>bukkit.yml</code> の <code>spawn-limits</code> などで管理され、Paperではワールド設定で上書きされる場合があります。<code>spigot.yml</code> の <code>entity-activation-range</code> はエンティティの動作範囲の設定で、総数の上限ではありません。設定場所・階層・対応バージョンは、<a href="https://docs.papermc.io/paper/reference/bukkit-configuration/">bukkit.yml</a>と<a href="https://docs.papermc.io/paper/reference/spigot-configuration/">spigot.yml</a>の公式リファレンスで確認し、バックアップ後に編集してください。</p>
+        <p class="muted">Paperでは、権限のあるプレイヤーが次のコマンドで現在のワールドのエンティティ数を種類別に確認できます。これだけで重いチャンクや原因を断定せず、sparkの結果と合わせて調べてください（<a href="https://docs.papermc.io/paper/reference/commands/#entity">コマンドの説明</a>）。</p>
         <pre><code>/paper entity list</code></pre>
       </section>
 
@@ -256,13 +232,13 @@ entity-activation-range:
         <h2>よくある質問</h2>
         <dl class="faq-list">
           <dt data-faq-question>TPSとは何ですか？どうやって確認しますか？</dt>
-          <dd data-faq-answer>TPS（Ticks Per Second）はサーバーの処理速度の指標で、正常値は20です。Paperサーバーなら /tps コマンドで確認できます。TPS が 15 以下になるとゲームプレイに明確なラグが生じます。</dd>
+          <dd data-faq-answer>TPSは1秒あたりのサーバーの処理回数で、通常の目標は20です。Paperでは権限があれば /tps で確認できますが、Vanilla標準のコマンドではありません。低下は処理遅延の目安で、通信遅延や短い停止はTPSだけでは判断できません。詳しい調査にはsparkを使います。</dd>
           <dt data-faq-question>Aikarフラグとは何ですか？</dt>
-          <dd data-faq-answer>Aikarフラグとは、Paper開発チームのAikar氏が提唱したMinecraftサーバー向けJVM起動オプションです。GCの動作を最適化し、Stop-the-worldポーズを短縮することでTPSを安定させます。Paper公式サイトでも推奨されています。</dd>
+          <dd data-faq-answer>Minecraftサーバー向けにGCの動作を調整するJVM起動オプション群です。Paper公式は、Java 17・21以降の現代のJVMではまず追加GCフラグなしを試し、GCの問題がある場合や古い環境で検討するよう案内しています。効果は計測して判断してください。</dd>
           <dt data-faq-question>view-distanceを下げるとどんな影響がありますか？</dt>
-          <dd data-faq-answer>プレイヤーが見えるチャンクの範囲が狭くなります。デフォルト10チャンクを6〜8に下げると、サーバーが処理するチャンク数が大幅に減り、TPSが改善します。プレイ感への影響は軽微で、まず試すべき設定です。</dd>
+          <dd data-faq-answer>クライアントへ送るワールドの範囲が狭くなり、負荷を減らせる場合があります。simulation-distanceはエンティティを更新する範囲に関係します。見える景色や離れたモブ・装置の動作に影響するため、一項目ずつ変更し、再起動後に比較してください。</dd>
           <dt data-faq-question>プラグインがラグの原因か調べるには？</dt>
-          <dd data-faq-answer>Paperサーバーなら /timings report コマンドで各プラグインの処理時間を計測できます。また、プラグインを1つずつ無効化してTPSを比較する方法も有効です。</dd>
+          <dd data-faq-answer>Paper 1.21以降は同梱のsparkで、ラグ発生中に /spark profiler start --timeout 600 を実行し、10分後のレポートを確認します。旧Paperでは公式手順で対応するsparkを導入してください。疑わしいプラグインはバックアップ後、停止中に一つずつ見直し、再起動して比較します。</dd>
         </dl>
       </section>
 
@@ -271,7 +247,7 @@ entity-activation-range:
         <div class="banner-grid">
           <article class="banner-card">
             <span class="banner-pill">公式ホームページ</span>
-            <p class="muted">MaiPilotのサーバーモニタリング機能でリソース使用状況をリアルタイム確認できます。</p>
+            <p class="muted">MaiPilotではサーバープロセスのCPU使用率・RAM使用量を確認できます。ラグの原因はsparkなどの計測結果と合わせて調べましょう。</p>
             <a class="banner-link" href="/?from=growth_lag_fix_home_banner" data-event="growth_home_banner_click" data-source="growth_lag_fix" data-label="home_banner">ホームページを見る →</a>
           </article>
           <article class="banner-card lp">
@@ -285,10 +261,10 @@ entity-activation-range:
       <section class="card cta">
         <h2>MaiPilotならパフォーマンス管理も簡単</h2>
         <ul>
-          <li>起動フラグ（Aikarフラグ含む）をUIから設定・切り替え</li>
-          <li>サーバーモニタリングでCPU・RAM使用率をリアルタイム確認</li>
-          <li>クラッシュ検知 + 自動再起動で障害を最小化</li>
-          <li>view-distance などの設定をGUIの server.properties エディタで変更</li>
+          <li>設定画面の「追加Java引数」で必要なJVM引数を編集</li>
+          <li>サーバープロセスのCPU使用率・RAM使用量を確認（RAMはワーキングセットで、Javaヒープ使用量ではありません）</li>
+          <li>クラッシュ時の自動再起動を設定（有効にしている場合）</li>
+          <li>view-distance など、対応する server.properties の項目をGUIから変更</li>
         </ul>
         <p><a href="/?from=growth_lag_fix" data-event="docs_to_download" data-source="growth_lag_fix" data-label="download">MaiPilotをダウンロード</a> / <a href="/docs/growth/minecraft-server-memory-settings/" data-event="growth_docs_click" data-source="growth_lag_fix" data-label="memory_settings">メモリ設定ガイド</a></p>
       </section>
