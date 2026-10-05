@@ -1,0 +1,1829 @@
+{
+  "schema": "maipilot.magic-tech-declaration-check.v1",
+  "generated_at": "2026-10-04T02:44:01.056695+00:00",
+  "scope": "Real public JAR declaration inspection, not installation, startup, gameplay, performance, or Windows UI validation.",
+  "acquisition": {
+    "mode": "Official Modrinth API and API-returned CDN files read before additional retrieval became unavailable. No JAR was executed.",
+    "started_at": "2026-10-04T02:28:30.444751+00:00",
+    "last_recorded_at": "2026-10-04T02:32:02.162470+00:00",
+    "root_jars": 12,
+    "total_bytes": 30067023,
+    "spectrum_api_only": true
+  },
+  "final_verification": {
+    "mode": "Offline replay of previously recorded official API responses and verified real JAR bytes through production ModrinthProvider, FabricJarInspector and ModrinthInspectionService; no network fallback.",
+    "completed_at": "2026-10-04T02:39:11.9261452+00:00",
+    "cases": 16,
+    "failures": 0,
+    "oracle_independent": "Python standard-library API/archive inspection plus official Fabric Loader source; not the production detector used as its own expected-result oracle."
+  },
+  "target": {
+    "minecraft": "1.20.1",
+    "fabric_loader": "0.19.5",
+    "java_major": "17",
+    "environment": "dedicated server"
+  },
+  "artifacts": [
+    {
+      "project_id": "Gov5Dboq",
+      "version_id": "18Bcl0A4",
+      "slug": "modern-industrialization",
+      "title": "Modern Industrialization",
+      "version_number": "1.8.6",
+      "game_versions": [
+        "1.20.1"
+      ],
+      "loaders": [
+        "fabric"
+      ],
+      "api_environment": "client_and_server",
+      "project_client_side": "required",
+      "project_server_side": "required",
+      "api_dependencies": [
+        {
+          "version_id": null,
+          "project_id": "6AQIaxuO",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "nU0bVIaL",
+          "file_name": null,
+          "dependency_type": "embedded"
+        },
+        {
+          "version_id": null,
+          "project_id": "P7dR8mSH",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "Hv40r83o",
+          "file_name": null,
+          "dependency_type": "embedded"
+        },
+        {
+          "version_id": null,
+          "project_id": "nfn13YXA",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "u6dRKJwZ",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "fRiHVvU7",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "9s6osm5g",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "outcome": "verified_nonexecuting_metadata",
+      "api_url": "https://api.modrinth.com/v2/version/18Bcl0A4",
+      "file": {
+        "filename": "Modern-Industrialization-1.8.6.jar",
+        "size": 7223370,
+        "hashes": {
+          "sha1": "cf1f266420d1cd3776fef05a5ec690802268656a",
+          "sha512": "da1d05f6eacdd4f5ebb104bf331fcebc757874deb6a0d8d4dfb9954a4bb3411dba19dd24778983a1c5e42616a388e2fb62284a870aeaed7733f933a60ce6fb20"
+        },
+        "url": "https://cdn.modrinth.com/data/Gov5Dboq/versions/18Bcl0A4/Modern-Industrialization-1.8.6.jar"
+      },
+      "actual_hashes": {
+        "sha1": "cf1f266420d1cd3776fef05a5ec690802268656a",
+        "sha256": "a82a4e2bd76f9625cf398e555f4c6b6aea696e7d40d2422ba1a7d3909476370b",
+        "sha512": "da1d05f6eacdd4f5ebb104bf331fcebc757874deb6a0d8d4dfb9954a4bb3411dba19dd24778983a1c5e42616a388e2fb62284a870aeaed7733f933a60ce6fb20"
+      }
+    },
+    {
+      "project_id": "3eMENr4V",
+      "version_id": "5ordAPa5",
+      "slug": "techreborn",
+      "title": "Tech Reborn",
+      "version_number": "5.8.15",
+      "game_versions": [
+        "1.20.1"
+      ],
+      "loaders": [
+        "fabric"
+      ],
+      "api_environment": "client_and_server",
+      "project_client_side": "required",
+      "project_server_side": "required",
+      "api_dependencies": [
+        {
+          "version_id": null,
+          "project_id": "3NCrJdj3",
+          "file_name": null,
+          "dependency_type": "embedded"
+        },
+        {
+          "version_id": null,
+          "project_id": "P7dR8mSH",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "outcome": "verified_nonexecuting_metadata",
+      "api_url": "https://api.modrinth.com/v2/version/5ordAPa5",
+      "file": {
+        "filename": "TechReborn-5.8.15.jar",
+        "size": 6217907,
+        "hashes": {
+          "sha512": "bc4feb57728ba2bb2332b91f907e7cdfd13d0eb6d1c19f38c51268ecf8bc1d5c8a8e552181d92bf8ef22f5e536d7a3d0575167c6e2536cac51bdb0597c1628a5",
+          "sha1": "d0eef40b106f6595f1d8a85654edc83ce8002c8a"
+        },
+        "url": "https://cdn.modrinth.com/data/3eMENr4V/versions/5ordAPa5/TechReborn-5.8.15.jar"
+      },
+      "actual_hashes": {
+        "sha1": "d0eef40b106f6595f1d8a85654edc83ce8002c8a",
+        "sha256": "0e53dcb8c14904f4ca66cfefb22c8ff5a70c42c5b3897515381ed0a04749e83f",
+        "sha512": "bc4feb57728ba2bb2332b91f907e7cdfd13d0eb6d1c19f38c51268ecf8bc1d5c8a8e552181d92bf8ef22f5e536d7a3d0575167c6e2536cac51bdb0597c1628a5"
+      }
+    },
+    {
+      "project_id": "NkGaQMDA",
+      "version_id": "sN5qsxEU",
+      "slug": "wizards",
+      "title": "Wizards (RPG Series)",
+      "version_number": "3.1.3+1.20.1-fabric",
+      "game_versions": [
+        "1.20.1"
+      ],
+      "loaders": [
+        "fabric"
+      ],
+      "api_environment": "client_and_server",
+      "project_client_side": "required",
+      "project_server_side": "required",
+      "api_dependencies": [
+        {
+          "version_id": null,
+          "project_id": "XvoWJaA2",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "lP9Yrr1E",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "LrYZi08Q",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "P7dR8mSH",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "onz2NN2n",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "outcome": "verified_nonexecuting_metadata",
+      "api_url": "https://api.modrinth.com/v2/version/sN5qsxEU",
+      "file": {
+        "filename": "wizards-fabric-3.1.3+1.20.1.jar",
+        "size": 4546742,
+        "hashes": {
+          "sha512": "64384c9b37d28c088ed6c9ff4f84337372d0d369934790ccfce53606520ee79ed24d0cc3bf19cdb29c5749e5f7960aa5448db023ca21f07a880372875658135c",
+          "sha1": "65566705989ccd8055d12a71ade7cba857b11668"
+        },
+        "url": "https://cdn.modrinth.com/data/NkGaQMDA/versions/sN5qsxEU/wizards-fabric-3.1.3%2B1.20.1.jar"
+      },
+      "actual_hashes": {
+        "sha1": "65566705989ccd8055d12a71ade7cba857b11668",
+        "sha256": "7ef51499ff5685a62d3d961a3aaba1a42a7c2234a76954eed10fd01cb09f92e8",
+        "sha512": "64384c9b37d28c088ed6c9ff4f84337372d0d369934790ccfce53606520ee79ed24d0cc3bf19cdb29c5749e5f7960aa5448db023ca21f07a880372875658135c"
+      }
+    },
+    {
+      "project_id": "XvoWJaA2",
+      "version_id": "mvZvOSVL",
+      "slug": "spell-engine",
+      "title": "Spell Engine",
+      "version_number": "1.10.10+1.20.1-fabric",
+      "game_versions": [
+        "1.20.1"
+      ],
+      "loaders": [
+        "fabric"
+      ],
+      "api_environment": "client_and_server",
+      "project_client_side": "required",
+      "project_server_side": "required",
+      "api_dependencies": [
+        {
+          "version_id": null,
+          "project_id": "9s6osm5g",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "8ooWzSQP",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "gedNE4y2",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "P7dR8mSH",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "5aaWibi9",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "outcome": "verified_nonexecuting_metadata",
+      "api_url": "https://api.modrinth.com/v2/version/mvZvOSVL",
+      "file": {
+        "filename": "spell_engine-fabric-1.10.10+1.20.1.jar",
+        "size": 4756966,
+        "hashes": {
+          "sha512": "f2eb2bac7eae22af3e197bc63f5842f3e6a2d8a95928335cbcee58b6eb62ffd0e6f08e5b079c1780dbcb7cdf9b7be2938f58b82bb930308d4b438db5c266238d",
+          "sha1": "87d409f6e3ce8b44fd55b07b78e1833c4345f616"
+        },
+        "url": "https://cdn.modrinth.com/data/XvoWJaA2/versions/mvZvOSVL/spell_engine-fabric-1.10.10%2B1.20.1.jar"
+      },
+      "actual_hashes": {
+        "sha1": "87d409f6e3ce8b44fd55b07b78e1833c4345f616",
+        "sha256": "bc69c9021f43a996acadac89e51e5e3874dafbfdbb3f1704e5b7cb90615926ac",
+        "sha512": "f2eb2bac7eae22af3e197bc63f5842f3e6a2d8a95928335cbcee58b6eb62ffd0e6f08e5b079c1780dbcb7cdf9b7be2938f58b82bb930308d4b438db5c266238d"
+      }
+    },
+    {
+      "project_id": "3rc31Hgo",
+      "version_id": "mDJAjTuc",
+      "slug": "spectrum",
+      "title": "Spectrum",
+      "version_number": "1.8.13",
+      "game_versions": [
+        "1.20.1"
+      ],
+      "loaders": [
+        "fabric"
+      ],
+      "api_environment": "client_and_server",
+      "project_client_side": "required",
+      "project_server_side": "required",
+      "api_dependencies": [],
+      "outcome": "rejected_before_download",
+      "api_url": "https://api.modrinth.com/v2/version/mDJAjTuc",
+      "file": {
+        "filename": "spectrum-1.8.13.jar",
+        "size": 87723541,
+        "hashes": {
+          "sha512": "8e5e0354c98856b131564f81d83a6500ef188dfeb25d94b9c04cc09dcf7f81ab252ce41c3cd66feca49237e8a67d49c3a98bed2acbc2835ac62399676c6833da",
+          "sha1": "18a068dff70c82039cc84d3321c95a6d637619c3"
+        },
+        "url": "https://cdn.modrinth.com/data/3rc31Hgo/versions/mDJAjTuc/spectrum-1.8.13.jar"
+      },
+      "actual_hashes": null
+    },
+    {
+      "project_id": "P7dR8mSH",
+      "version_id": "rvI2dfzR",
+      "slug": "fabric-api",
+      "title": "Fabric API",
+      "version_number": "0.92.12+1.20.1",
+      "game_versions": [
+        "1.20.1"
+      ],
+      "loaders": [
+        "fabric"
+      ],
+      "api_environment": "client_or_server_prefers_both",
+      "project_client_side": "optional",
+      "project_server_side": "optional",
+      "api_dependencies": [],
+      "outcome": "verified_nonexecuting_metadata",
+      "api_url": "https://api.modrinth.com/v2/version/rvI2dfzR",
+      "file": {
+        "filename": "fabric-api-0.92.12+1.20.1.jar",
+        "size": 2137232,
+        "hashes": {
+          "sha512": "de9da2344043b3e9ef9fb7dbfff5f2577b06000c4f73f2a37959a80123141169084cece19133bd299b45feaaa4648bdaca2ea085684888cc8c55cc9134a477ca",
+          "sha1": "3e9cdd3e2f827ca9a259df9eb8e31949437b6bd4"
+        },
+        "url": "https://cdn.modrinth.com/data/P7dR8mSH/versions/rvI2dfzR/fabric-api-0.92.12%2B1.20.1.jar"
+      },
+      "actual_hashes": {
+        "sha1": "3e9cdd3e2f827ca9a259df9eb8e31949437b6bd4",
+        "sha256": "4197ff4fbdac13cffccd267c1bc59e9fbabb2b5683a9d5f8023f4b5ea16a1c1e",
+        "sha512": "de9da2344043b3e9ef9fb7dbfff5f2577b06000c4f73f2a37959a80123141169084cece19133bd299b45feaaa4648bdaca2ea085684888cc8c55cc9134a477ca"
+      }
+    },
+    {
+      "project_id": "9s6osm5g",
+      "version_id": "2xQdCMyG",
+      "slug": "cloth-config",
+      "title": "Cloth Config API",
+      "version_number": "11.1.136+fabric",
+      "game_versions": [
+        "1.20",
+        "1.20.1"
+      ],
+      "loaders": [
+        "fabric"
+      ],
+      "api_environment": "client_or_server_prefers_both",
+      "project_client_side": "optional",
+      "project_server_side": "optional",
+      "api_dependencies": [],
+      "outcome": "verified_nonexecuting_metadata",
+      "api_url": "https://api.modrinth.com/v2/version/2xQdCMyG",
+      "file": {
+        "filename": "cloth-config-11.1.136-fabric.jar",
+        "size": 1172214,
+        "hashes": {
+          "sha512": "2da85c071c854223cc30c8e46794391b77e53f28ecdbbde59dc83b3dbbdfc74be9e68da9ed464e7f98b4361033899ba4f681ebff1f35edc2c60e599a59796f1c",
+          "sha1": "d5fe84a0cc9ed5c7290a76ba570e1f8716afecab"
+        },
+        "url": "https://cdn.modrinth.com/data/9s6osm5g/versions/2xQdCMyG/cloth-config-11.1.136-fabric.jar"
+      },
+      "actual_hashes": {
+        "sha1": "d5fe84a0cc9ed5c7290a76ba570e1f8716afecab",
+        "sha256": "844f49c339c8f3144e167ab21b7d0059f0d571054e26285a0749348da25c49fa",
+        "sha512": "2da85c071c854223cc30c8e46794391b77e53f28ecdbbde59dc83b3dbbdfc74be9e68da9ed464e7f98b4361033899ba4f681ebff1f35edc2c60e599a59796f1c"
+      }
+    },
+    {
+      "project_id": "8ooWzSQP",
+      "version_id": "7FbHvvWA",
+      "slug": "spell-power",
+      "title": "Spell Power Attributes",
+      "version_number": "1.6.1+1.20.1-fabric",
+      "game_versions": [
+        "1.20.1"
+      ],
+      "loaders": [
+        "fabric"
+      ],
+      "api_environment": "client_and_server",
+      "project_client_side": "required",
+      "project_server_side": "required",
+      "api_dependencies": [
+        {
+          "version_id": null,
+          "project_id": "P7dR8mSH",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "outcome": "verified_nonexecuting_metadata",
+      "api_url": "https://api.modrinth.com/v2/version/7FbHvvWA",
+      "file": {
+        "filename": "spell_power-fabric-1.6.1+1.20.1.jar",
+        "size": 234554,
+        "hashes": {
+          "sha1": "f4d9c6504b87ab7fb376a6e21f744edd01e685c9",
+          "sha512": "278cd09d2aeed37d362032b88b09ccb77f452f3e0e87b2b49e1ac2c4baf4f25aabf15208468e704f1afdc19100b66a388cf005a020ac0b5bbf2813cf4c67407d"
+        },
+        "url": "https://cdn.modrinth.com/data/8ooWzSQP/versions/7FbHvvWA/spell_power-fabric-1.6.1%2B1.20.1.jar"
+      },
+      "actual_hashes": {
+        "sha1": "f4d9c6504b87ab7fb376a6e21f744edd01e685c9",
+        "sha256": "6e4b0c41d360a8dca19823a42abdf8bf7e4a2b824b65b0f80a2137d46c1ad6e7",
+        "sha512": "278cd09d2aeed37d362032b88b09ccb77f452f3e0e87b2b49e1ac2c4baf4f25aabf15208468e704f1afdc19100b66a388cf005a020ac0b5bbf2813cf4c67407d"
+      }
+    },
+    {
+      "project_id": "gedNE4y2",
+      "version_id": "yDqYTUaf",
+      "slug": "playeranimator",
+      "title": "playerAnimator",
+      "version_number": "1.0.2-rc1+1.20-fabric",
+      "game_versions": [
+        "1.20",
+        "1.20.1"
+      ],
+      "loaders": [
+        "fabric",
+        "quilt"
+      ],
+      "api_environment": "client_and_server",
+      "project_client_side": "required",
+      "project_server_side": "required",
+      "api_dependencies": [
+        {
+          "version_id": null,
+          "project_id": "aRnIEV0F",
+          "file_name": null,
+          "dependency_type": "optional"
+        }
+      ],
+      "outcome": "verified_nonexecuting_metadata",
+      "api_url": "https://api.modrinth.com/v2/version/yDqYTUaf",
+      "file": {
+        "filename": "player-animation-lib-fabric-1.0.2-rc1+1.20.jar",
+        "size": 181008,
+        "hashes": {
+          "sha512": "4ed2659c9e9c1a1fa8936523f7d6de1b8012d8e06e6c58ef65ea5c7acef2b3a113afe584b3a31d70eee00423dbe533c06022cc5f169ab5a2ddf8167acf259ec8",
+          "sha1": "9182c38bcf614d0ed7091b15f7e099a7f2fb3617"
+        },
+        "url": "https://cdn.modrinth.com/data/gedNE4y2/versions/yDqYTUaf/player-animation-lib-fabric-1.0.2-rc1%2B1.20.jar"
+      },
+      "actual_hashes": {
+        "sha1": "9182c38bcf614d0ed7091b15f7e099a7f2fb3617",
+        "sha256": "0b10021fa638997398110777747726b1cb7a27bc3f8ff1b12e2b93ac01784018",
+        "sha512": "4ed2659c9e9c1a1fa8936523f7d6de1b8012d8e06e6c58ef65ea5c7acef2b3a113afe584b3a31d70eee00423dbe533c06022cc5f169ab5a2ddf8167acf259ec8"
+      }
+    },
+    {
+      "project_id": "5aaWibi9",
+      "version_id": "AHxQGtuC",
+      "slug": "trinkets",
+      "title": "Trinkets",
+      "version_number": "3.7.2",
+      "game_versions": [
+        "1.20",
+        "1.20.1"
+      ],
+      "loaders": [
+        "fabric"
+      ],
+      "api_environment": "client_and_server",
+      "project_client_side": "required",
+      "project_server_side": "required",
+      "api_dependencies": [],
+      "outcome": "verified_nonexecuting_metadata",
+      "api_url": "https://api.modrinth.com/v2/version/AHxQGtuC",
+      "file": {
+        "filename": "trinkets-3.7.2.jar",
+        "size": 238532,
+        "hashes": {
+          "sha512": "bedf97c87c5e556416410267108ad358b32806448be24ef8ae1a79ac63b78b48b9c851c00c845b8aedfc7805601385420716b9e65326fdab21340e8ba3cc4274",
+          "sha1": "d58cc8759587f03f320f188972ca66baa788d008"
+        },
+        "url": "https://cdn.modrinth.com/data/5aaWibi9/versions/AHxQGtuC/trinkets-3.7.2.jar"
+      },
+      "actual_hashes": {
+        "sha1": "d58cc8759587f03f320f188972ca66baa788d008",
+        "sha256": "a6f11a4206c1285cd260a60d9bfe9cefa9914d2190d08b3c52050f42044b53b3",
+        "sha512": "bedf97c87c5e556416410267108ad358b32806448be24ef8ae1a79ac63b78b48b9c851c00c845b8aedfc7805601385420716b9e65326fdab21340e8ba3cc4274"
+      }
+    },
+    {
+      "project_id": "LrYZi08Q",
+      "version_id": "y5a2WAp4",
+      "slug": "structure-pool-api",
+      "title": "Structure Pool API",
+      "version_number": "1.2.1+1.20.1-fabric",
+      "game_versions": [
+        "1.20.1"
+      ],
+      "loaders": [
+        "fabric"
+      ],
+      "api_environment": "client_and_server",
+      "project_client_side": "unsupported",
+      "project_server_side": "required",
+      "api_dependencies": [
+        {
+          "version_id": null,
+          "project_id": "P7dR8mSH",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "outcome": "verified_nonexecuting_metadata",
+      "api_url": "https://api.modrinth.com/v2/version/y5a2WAp4",
+      "file": {
+        "filename": "structure_pool_api-fabric-1.2.1+1.20.1.jar",
+        "size": 128086,
+        "hashes": {
+          "sha1": "9f778bd3dec18cdb62e4041d2cadf3bc515e8d96",
+          "sha512": "8279b483b247c301118f43f3b2cb26c5195c8b930ca1ba3468c0a8c9c55ab4fabd76de22e154c2ddf07148adf487af214b86c06ea9105bc6f3adf18d14986dd2"
+        },
+        "url": "https://cdn.modrinth.com/data/LrYZi08Q/versions/y5a2WAp4/structure_pool_api-fabric-1.2.1%2B1.20.1.jar"
+      },
+      "actual_hashes": {
+        "sha1": "9f778bd3dec18cdb62e4041d2cadf3bc515e8d96",
+        "sha256": "7ee2ffa8def57f1206a6e51836bd7393b75f2ce9ce9c53b1fbf1b242d7ef7c2b",
+        "sha512": "8279b483b247c301118f43f3b2cb26c5195c8b930ca1ba3468c0a8c9c55ab4fabd76de22e154c2ddf07148adf487af214b86c06ea9105bc6f3adf18d14986dd2"
+      }
+    },
+    {
+      "project_id": "onz2NN2n",
+      "version_id": "1yvucvYz",
+      "slug": "armor-model-api",
+      "title": "Armor Model API",
+      "version_number": "1.0.0+1.20.1-fabric",
+      "game_versions": [
+        "1.20.1"
+      ],
+      "loaders": [
+        "fabric"
+      ],
+      "api_environment": "client_and_server",
+      "project_client_side": "required",
+      "project_server_side": "required",
+      "api_dependencies": [
+        {
+          "version_id": null,
+          "project_id": "P7dR8mSH",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "outcome": "verified_nonexecuting_metadata",
+      "api_url": "https://api.modrinth.com/v2/version/1yvucvYz",
+      "file": {
+        "filename": "armor_model_api-fabric-1.0.0+1.20.1.jar",
+        "size": 85754,
+        "hashes": {
+          "sha1": "29b81076f83852e7a162845cbbad0250f27ffffc",
+          "sha512": "302a05b9ad56653aac6727ff8796be0f1633bd4d335d170efe32b8712576a81b9754ee4ddf20b5c701d1b1e0335615af68041466ec8da173e13f49332cd2b973"
+        },
+        "url": "https://cdn.modrinth.com/data/onz2NN2n/versions/1yvucvYz/armor_model_api-fabric-1.0.0%2B1.20.1.jar"
+      },
+      "actual_hashes": {
+        "sha1": "29b81076f83852e7a162845cbbad0250f27ffffc",
+        "sha256": "036fa120f2761b705ee9732997c1a6ddacd1e512bac67e4fa9090210a700c103",
+        "sha512": "302a05b9ad56653aac6727ff8796be0f1633bd4d335d170efe32b8712576a81b9754ee4ddf20b5c701d1b1e0335615af68041466ec8da173e13f49332cd2b973"
+      }
+    },
+    {
+      "project_id": "FxXkHaLe",
+      "version_id": "1t4iuZkn",
+      "slug": "paladins-and-priests",
+      "title": "Paladins & Priests (RPG Series)",
+      "version_number": "3.1.3+1.20.1-fabric",
+      "game_versions": [
+        "1.20.1"
+      ],
+      "loaders": [
+        "fabric"
+      ],
+      "api_environment": "client_and_server",
+      "project_client_side": "required",
+      "project_server_side": "required",
+      "api_dependencies": [
+        {
+          "version_id": null,
+          "project_id": "lP9Yrr1E",
+          "file_name": null,
+          "dependency_type": "optional"
+        },
+        {
+          "version_id": null,
+          "project_id": "onz2NN2n",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "P7dR8mSH",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "XvoWJaA2",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "LrYZi08Q",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "y9clIFY4",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "outcome": "verified_nonexecuting_metadata",
+      "api_url": "https://api.modrinth.com/v2/version/1t4iuZkn",
+      "file": {
+        "filename": "paladins-fabric-3.1.3+1.20.1.jar",
+        "size": 3144658,
+        "hashes": {
+          "sha1": "09c6db2e578252474ef99fd94b7e28271af32042",
+          "sha512": "e031600849386cb6d6e31357fb7c9c8b7a04bc346c7e2a2a82c84fac92f93014e02bd3f598a54af593c1bae45b3678eff9c15f500cc6da7310a9c1e1be16a892"
+        },
+        "url": "https://cdn.modrinth.com/data/FxXkHaLe/versions/1t4iuZkn/paladins-fabric-3.1.3%2B1.20.1.jar"
+      },
+      "actual_hashes": {
+        "sha1": "09c6db2e578252474ef99fd94b7e28271af32042",
+        "sha256": "1bfa597997e1ccad9e5c06a5a16bd79f4c9b5fefaaf22e3818f9d8c6e2271eda",
+        "sha512": "e031600849386cb6d6e31357fb7c9c8b7a04bc346c7e2a2a82c84fac92f93014e02bd3f598a54af593c1bae45b3678eff9c15f500cc6da7310a9c1e1be16a892"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "Name": "MI: missing required Fabric API and Cloth Config",
+      "StartedAt": "2026-10-04T02:39:09.5641392+00:00",
+      "CompletedAt": "2026-10-04T02:39:09.7370022+00:00",
+      "Target": {
+        "MinecraftVersion": "1.20.1",
+        "LoaderVersion": "0.19.5",
+        "JavaVersion": "17"
+      },
+      "ExpectedResolved": false,
+      "ActualResolved": false,
+      "Passed": true,
+      "ExpectedFindingCodes": [],
+      "ExpectedFindings": [
+        {
+          "Code": "UnresolvedProjectDependency",
+          "Dependency": "P7dR8mSH"
+        },
+        {
+          "Code": "UnresolvedProjectDependency",
+          "Dependency": "9s6osm5g"
+        },
+        {
+          "Code": "MissingRequiredDependency",
+          "Dependency": "cloth-config"
+        }
+      ],
+      "ExpectedVersionIds": [
+        "18Bcl0A4"
+      ],
+      "ExpectedInstalledCount": 0,
+      "actual_versions": [
+        "18Bcl0A4"
+      ],
+      "actual_installed_count": 0,
+      "finding_counts": {
+        "SelectedArtifact": 1,
+        "OptionalSuggestion": 4,
+        "EmbeddedDeclaration": 2,
+        "UnresolvedProjectDependency": 2,
+        "ClientNestedModulesIgnored": 1,
+        "RuntimeSatisfied": 10,
+        "MissingRequiredDependency": 7,
+        "RequiredSatisfied": 1,
+        "ConflictChecked": 2
+      },
+      "relevant_findings": [
+        {
+          "Code": "UnresolvedProjectDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "18Bcl0A4",
+          "Dependency": "P7dR8mSH"
+        },
+        {
+          "Code": "UnresolvedProjectDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "18Bcl0A4",
+          "Dependency": "9s6osm5g"
+        },
+        {
+          "Code": "MissingRequiredDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "18Bcl0A4",
+          "Dependency": "fabric"
+        },
+        {
+          "Code": "MissingRequiredDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "18Bcl0A4",
+          "Dependency": "cloth-config"
+        },
+        {
+          "Code": "MissingRequiredDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "18Bcl0A4",
+          "Dependency": "fabric-transfer-api-v1"
+        }
+      ]
+    },
+    {
+      "Name": "MI: pinned three-file closure and embedded dependencies",
+      "StartedAt": "2026-10-04T02:39:09.7651269+00:00",
+      "CompletedAt": "2026-10-04T02:39:09.9268944+00:00",
+      "Target": {
+        "MinecraftVersion": "1.20.1",
+        "LoaderVersion": "0.19.5",
+        "JavaVersion": "17"
+      },
+      "ExpectedResolved": true,
+      "ActualResolved": true,
+      "Passed": true,
+      "ExpectedFindingCodes": [
+        "ClientNestedModulesIgnored"
+      ],
+      "ExpectedFindings": [
+        {
+          "Code": "RequiredSatisfied",
+          "Dependency": "cloth-config"
+        },
+        {
+          "Code": "RequiredSatisfied",
+          "Dependency": "team_reborn_energy"
+        }
+      ],
+      "ExpectedVersionIds": [
+        "18Bcl0A4",
+        "rvI2dfzR",
+        "2xQdCMyG"
+      ],
+      "ExpectedInstalledCount": 0,
+      "actual_versions": [
+        "18Bcl0A4",
+        "2xQdCMyG",
+        "rvI2dfzR"
+      ],
+      "actual_installed_count": 0,
+      "finding_counts": {
+        "SelectedArtifact": 1,
+        "TransitiveArtifact": 2,
+        "OptionalSuggestion": 4,
+        "EmbeddedDeclaration": 2,
+        "TransitiveRequired": 2,
+        "ClientNestedModulesIgnored": 2,
+        "RuntimeSatisfied": 60,
+        "RequiredSatisfied": 55,
+        "ConflictChecked": 2
+      },
+      "relevant_findings": [
+        {
+          "Code": "RequiredSatisfied",
+          "Severity": "Information",
+          "ArtifactVersionId": "18Bcl0A4",
+          "Dependency": "team_reborn_energy"
+        },
+        {
+          "Code": "RequiredSatisfied",
+          "Severity": "Information",
+          "ArtifactVersionId": "18Bcl0A4",
+          "Dependency": "cloth-config"
+        }
+      ]
+    },
+    {
+      "Name": "MI: actual installed Fabric API identified by hash",
+      "StartedAt": "2026-10-04T02:39:09.9279401+00:00",
+      "CompletedAt": "2026-10-04T02:39:10.0805205+00:00",
+      "Target": {
+        "MinecraftVersion": "1.20.1",
+        "LoaderVersion": "0.19.5",
+        "JavaVersion": "17"
+      },
+      "ExpectedResolved": true,
+      "ActualResolved": true,
+      "Passed": true,
+      "ExpectedFindingCodes": [],
+      "ExpectedFindings": [
+        {
+          "Code": "AlreadyInstalled",
+          "Dependency": "fabric"
+        }
+      ],
+      "ExpectedVersionIds": [
+        "18Bcl0A4",
+        "2xQdCMyG",
+        "rvI2dfzR"
+      ],
+      "ExpectedInstalledCount": 1,
+      "actual_versions": [
+        "18Bcl0A4",
+        "2xQdCMyG",
+        "rvI2dfzR"
+      ],
+      "actual_installed_count": 1,
+      "finding_counts": {
+        "Installed": 1,
+        "SelectedArtifact": 1,
+        "TransitiveArtifact": 1,
+        "OptionalSuggestion": 4,
+        "EmbeddedDeclaration": 2,
+        "AlreadyInstalled": 54,
+        "TransitiveRequired": 1,
+        "ClientNestedModulesIgnored": 2,
+        "RuntimeSatisfied": 60,
+        "RequiredSatisfied": 2,
+        "ConflictChecked": 2
+      },
+      "relevant_findings": [
+        {
+          "Code": "AlreadyInstalled",
+          "Severity": "Information",
+          "ArtifactVersionId": "18Bcl0A4",
+          "Dependency": "fabric"
+        }
+      ]
+    },
+    {
+      "Name": "MI: wrong Minecraft target",
+      "StartedAt": "2026-10-04T02:39:10.0826024+00:00",
+      "CompletedAt": "2026-10-04T02:39:10.2333225+00:00",
+      "Target": {
+        "MinecraftVersion": "1.21.1",
+        "LoaderVersion": "0.19.5",
+        "JavaVersion": "17"
+      },
+      "ExpectedResolved": false,
+      "ActualResolved": false,
+      "Passed": true,
+      "ExpectedFindingCodes": [
+        "IncompatiblePlatform"
+      ],
+      "ExpectedFindings": [
+        {
+          "Code": "RuntimeMismatch",
+          "Dependency": "minecraft"
+        }
+      ],
+      "ExpectedVersionIds": [
+        "18Bcl0A4",
+        "rvI2dfzR",
+        "2xQdCMyG"
+      ],
+      "ExpectedInstalledCount": 0,
+      "actual_versions": [
+        "18Bcl0A4",
+        "2xQdCMyG",
+        "rvI2dfzR"
+      ],
+      "actual_installed_count": 0,
+      "finding_counts": {
+        "IncompatiblePlatform": 3,
+        "SelectedArtifact": 1,
+        "TransitiveArtifact": 2,
+        "OptionalSuggestion": 4,
+        "EmbeddedDeclaration": 2,
+        "TransitiveRequired": 2,
+        "ClientNestedModulesIgnored": 2,
+        "RuntimeSatisfied": 57,
+        "RequiredSatisfied": 55,
+        "RuntimeMismatch": 3,
+        "ConflictChecked": 2
+      },
+      "relevant_findings": [
+        {
+          "Code": "IncompatiblePlatform",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "18Bcl0A4",
+          "Dependency": null
+        },
+        {
+          "Code": "IncompatiblePlatform",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "rvI2dfzR",
+          "Dependency": null
+        },
+        {
+          "Code": "IncompatiblePlatform",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "2xQdCMyG",
+          "Dependency": null
+        },
+        {
+          "Code": "RuntimeMismatch",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "18Bcl0A4",
+          "Dependency": "minecraft"
+        },
+        {
+          "Code": "RuntimeMismatch",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "rvI2dfzR",
+          "Dependency": "minecraft"
+        }
+      ]
+    },
+    {
+      "Name": "MI: wrong Java target",
+      "StartedAt": "2026-10-04T02:39:10.2357452+00:00",
+      "CompletedAt": "2026-10-04T02:39:10.4022432+00:00",
+      "Target": {
+        "MinecraftVersion": "1.20.1",
+        "LoaderVersion": "0.19.5",
+        "JavaVersion": "16"
+      },
+      "ExpectedResolved": false,
+      "ActualResolved": false,
+      "Passed": true,
+      "ExpectedFindingCodes": [],
+      "ExpectedFindings": [
+        {
+          "Code": "RuntimeMismatch",
+          "Dependency": "java"
+        }
+      ],
+      "ExpectedVersionIds": [
+        "18Bcl0A4",
+        "rvI2dfzR",
+        "2xQdCMyG"
+      ],
+      "ExpectedInstalledCount": 0,
+      "actual_versions": [
+        "18Bcl0A4",
+        "2xQdCMyG",
+        "rvI2dfzR"
+      ],
+      "actual_installed_count": 0,
+      "finding_counts": {
+        "SelectedArtifact": 1,
+        "TransitiveArtifact": 2,
+        "OptionalSuggestion": 4,
+        "EmbeddedDeclaration": 2,
+        "TransitiveRequired": 2,
+        "ClientNestedModulesIgnored": 2,
+        "RuntimeSatisfied": 58,
+        "RequiredSatisfied": 55,
+        "ConflictChecked": 2,
+        "RuntimeMismatch": 2
+      },
+      "relevant_findings": [
+        {
+          "Code": "RuntimeMismatch",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "18Bcl0A4",
+          "Dependency": "java"
+        },
+        {
+          "Code": "RuntimeMismatch",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "rvI2dfzR",
+          "Dependency": "java"
+        }
+      ]
+    },
+    {
+      "Name": "Tech Reborn: missing Fabric API with identical nested energy evidence",
+      "StartedAt": "2026-10-04T02:39:10.4060454+00:00",
+      "CompletedAt": "2026-10-04T02:39:10.5180297+00:00",
+      "Target": {
+        "MinecraftVersion": "1.20.1",
+        "LoaderVersion": "0.19.5",
+        "JavaVersion": "17"
+      },
+      "ExpectedResolved": false,
+      "ActualResolved": false,
+      "Passed": true,
+      "ExpectedFindingCodes": [],
+      "ExpectedFindings": [
+        {
+          "Code": "UnresolvedProjectDependency",
+          "Dependency": "P7dR8mSH"
+        }
+      ],
+      "ExpectedVersionIds": [
+        "5ordAPa5"
+      ],
+      "ExpectedInstalledCount": 0,
+      "actual_versions": [
+        "5ordAPa5"
+      ],
+      "actual_installed_count": 0,
+      "finding_counts": {
+        "SelectedArtifact": 1,
+        "EmbeddedDeclaration": 1,
+        "UnresolvedProjectDependency": 1,
+        "RuntimeSatisfied": 8,
+        "MissingRequiredDependency": 6,
+        "RequiredSatisfied": 3
+      },
+      "relevant_findings": [
+        {
+          "Code": "UnresolvedProjectDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "5ordAPa5",
+          "Dependency": "P7dR8mSH"
+        },
+        {
+          "Code": "MissingRequiredDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "5ordAPa5",
+          "Dependency": "fabric-api"
+        },
+        {
+          "Code": "MissingRequiredDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "5ordAPa5",
+          "Dependency": "fabric-biome-api-v1"
+        },
+        {
+          "Code": "MissingRequiredDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "5ordAPa5",
+          "Dependency": "fabric-transfer-api-v1"
+        }
+      ]
+    },
+    {
+      "Name": "Tech Reborn: pinned closure shares byte-identical nested energy",
+      "StartedAt": "2026-10-04T02:39:10.5217305+00:00",
+      "CompletedAt": "2026-10-04T02:39:10.7002455+00:00",
+      "Target": {
+        "MinecraftVersion": "1.20.1",
+        "LoaderVersion": "0.19.5",
+        "JavaVersion": "17"
+      },
+      "ExpectedResolved": true,
+      "ActualResolved": true,
+      "Passed": true,
+      "ExpectedFindingCodes": [],
+      "ExpectedFindings": [
+        {
+          "Code": "RequiredSatisfied",
+          "Dependency": "reborncore"
+        },
+        {
+          "Code": "RequiredSatisfied",
+          "Dependency": "team_reborn_energy"
+        }
+      ],
+      "ExpectedVersionIds": [
+        "5ordAPa5",
+        "rvI2dfzR"
+      ],
+      "ExpectedInstalledCount": 0,
+      "actual_versions": [
+        "5ordAPa5",
+        "rvI2dfzR"
+      ],
+      "actual_installed_count": 0,
+      "finding_counts": {
+        "SelectedArtifact": 1,
+        "TransitiveArtifact": 1,
+        "EmbeddedDeclaration": 1,
+        "TransitiveRequired": 1,
+        "ClientNestedModulesIgnored": 1,
+        "RuntimeSatisfied": 56,
+        "RequiredSatisfied": 56
+      },
+      "relevant_findings": [
+        {
+          "Code": "RequiredSatisfied",
+          "Severity": "Information",
+          "ArtifactVersionId": "5ordAPa5",
+          "Dependency": "reborncore"
+        },
+        {
+          "Code": "RequiredSatisfied",
+          "Severity": "Information",
+          "ArtifactVersionId": "5ordAPa5",
+          "Dependency": "team_reborn_energy"
+        }
+      ]
+    },
+    {
+      "Name": "Tech Reborn: actual Loader minimum mismatch",
+      "StartedAt": "2026-10-04T02:39:10.7039652+00:00",
+      "CompletedAt": "2026-10-04T02:39:10.8835892+00:00",
+      "Target": {
+        "MinecraftVersion": "1.20.1",
+        "LoaderVersion": "0.18.3",
+        "JavaVersion": "17"
+      },
+      "ExpectedResolved": false,
+      "ActualResolved": false,
+      "Passed": true,
+      "ExpectedFindingCodes": [],
+      "ExpectedFindings": [
+        {
+          "Code": "RuntimeMismatch",
+          "Dependency": "fabricloader"
+        }
+      ],
+      "ExpectedVersionIds": [
+        "5ordAPa5",
+        "rvI2dfzR"
+      ],
+      "ExpectedInstalledCount": 0,
+      "actual_versions": [
+        "5ordAPa5",
+        "rvI2dfzR"
+      ],
+      "actual_installed_count": 0,
+      "finding_counts": {
+        "SelectedArtifact": 1,
+        "TransitiveArtifact": 1,
+        "EmbeddedDeclaration": 1,
+        "TransitiveRequired": 1,
+        "ClientNestedModulesIgnored": 1,
+        "RuntimeMismatch": 2,
+        "RequiredSatisfied": 56,
+        "RuntimeSatisfied": 54
+      },
+      "relevant_findings": [
+        {
+          "Code": "RuntimeMismatch",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "5ordAPa5",
+          "Dependency": "fabricloader"
+        }
+      ]
+    },
+    {
+      "Name": "Wizards: missing direct prerequisites",
+      "StartedAt": "2026-10-04T02:39:10.8887345+00:00",
+      "CompletedAt": "2026-10-04T02:39:10.9243057+00:00",
+      "Target": {
+        "MinecraftVersion": "1.20.1",
+        "LoaderVersion": "0.19.5",
+        "JavaVersion": "17"
+      },
+      "ExpectedResolved": false,
+      "ActualResolved": false,
+      "Passed": true,
+      "ExpectedFindingCodes": [],
+      "ExpectedFindings": [
+        {
+          "Code": "UnresolvedProjectDependency",
+          "Dependency": "XvoWJaA2"
+        },
+        {
+          "Code": "MissingRequiredDependency",
+          "Dependency": "spell_engine"
+        }
+      ],
+      "ExpectedVersionIds": [
+        "sN5qsxEU"
+      ],
+      "ExpectedInstalledCount": 0,
+      "actual_versions": [
+        "sN5qsxEU"
+      ],
+      "actual_installed_count": 0,
+      "finding_counts": {
+        "SelectedArtifact": 1,
+        "UnresolvedProjectDependency": 4,
+        "OptionalSuggestion": 2,
+        "RuntimeSatisfied": 3,
+        "MissingRequiredDependency": 4
+      },
+      "relevant_findings": [
+        {
+          "Code": "UnresolvedProjectDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "sN5qsxEU",
+          "Dependency": "XvoWJaA2"
+        },
+        {
+          "Code": "UnresolvedProjectDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "sN5qsxEU",
+          "Dependency": "LrYZi08Q"
+        },
+        {
+          "Code": "UnresolvedProjectDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "sN5qsxEU",
+          "Dependency": "P7dR8mSH"
+        },
+        {
+          "Code": "UnresolvedProjectDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "sN5qsxEU",
+          "Dependency": "onz2NN2n"
+        },
+        {
+          "Code": "MissingRequiredDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "sN5qsxEU",
+          "Dependency": "fabric-api"
+        },
+        {
+          "Code": "MissingRequiredDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "sN5qsxEU",
+          "Dependency": "armor_model_api"
+        },
+        {
+          "Code": "MissingRequiredDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "sN5qsxEU",
+          "Dependency": "spell_engine"
+        },
+        {
+          "Code": "MissingRequiredDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "sN5qsxEU",
+          "Dependency": "structure_pool_api"
+        }
+      ]
+    },
+    {
+      "Name": "Wizards: pinned nine-file closure and server environment rule",
+      "StartedAt": "2026-10-04T02:39:10.9295915+00:00",
+      "CompletedAt": "2026-10-04T02:39:11.1030543+00:00",
+      "Target": {
+        "MinecraftVersion": "1.20.1",
+        "LoaderVersion": "0.19.5",
+        "JavaVersion": "17"
+      },
+      "ExpectedResolved": true,
+      "ActualResolved": true,
+      "Passed": true,
+      "ExpectedFindingCodes": [],
+      "ExpectedFindings": [
+        {
+          "Code": "EnvironmentDisabledDependency",
+          "Dependency": "fabric-rendering-v1"
+        },
+        {
+          "Code": "RequiredSatisfied",
+          "Dependency": "spell_engine"
+        },
+        {
+          "Code": "OptionalSuggestion",
+          "Dependency": "lP9Yrr1E"
+        }
+      ],
+      "ExpectedVersionIds": [
+        "sN5qsxEU",
+        "mvZvOSVL",
+        "rvI2dfzR",
+        "2xQdCMyG",
+        "7FbHvvWA",
+        "yDqYTUaf",
+        "AHxQGtuC",
+        "y5a2WAp4",
+        "1yvucvYz"
+      ],
+      "ExpectedInstalledCount": 0,
+      "actual_versions": [
+        "1yvucvYz",
+        "2xQdCMyG",
+        "7FbHvvWA",
+        "AHxQGtuC",
+        "mvZvOSVL",
+        "rvI2dfzR",
+        "sN5qsxEU",
+        "y5a2WAp4",
+        "yDqYTUaf"
+      ],
+      "actual_installed_count": 0,
+      "finding_counts": {
+        "SelectedArtifact": 1,
+        "TransitiveArtifact": 8,
+        "TransitiveRequired": 12,
+        "OptionalSuggestion": 7,
+        "ClientNestedModulesIgnored": 1,
+        "RuntimeSatisfied": 76,
+        "RequiredSatisfied": 67,
+        "EnvironmentDisabledDependency": 1,
+        "ConflictChecked": 1
+      },
+      "relevant_findings": [
+        {
+          "Code": "OptionalSuggestion",
+          "Severity": "Information",
+          "ArtifactVersionId": "sN5qsxEU",
+          "Dependency": "lP9Yrr1E"
+        },
+        {
+          "Code": "RequiredSatisfied",
+          "Severity": "Information",
+          "ArtifactVersionId": "sN5qsxEU",
+          "Dependency": "spell_engine"
+        },
+        {
+          "Code": "EnvironmentDisabledDependency",
+          "Severity": "Information",
+          "ArtifactVersionId": "1yvucvYz",
+          "Dependency": "fabric-rendering-v1"
+        }
+      ]
+    },
+    {
+      "Name": "Wizards: missing transitive Spell Power",
+      "StartedAt": "2026-10-04T02:39:11.1089765+00:00",
+      "CompletedAt": "2026-10-04T02:39:11.2684743+00:00",
+      "Target": {
+        "MinecraftVersion": "1.20.1",
+        "LoaderVersion": "0.19.5",
+        "JavaVersion": "17"
+      },
+      "ExpectedResolved": false,
+      "ActualResolved": false,
+      "Passed": true,
+      "ExpectedFindingCodes": [],
+      "ExpectedFindings": [
+        {
+          "Code": "UnresolvedProjectDependency",
+          "Dependency": "8ooWzSQP"
+        },
+        {
+          "Code": "MissingRequiredDependency",
+          "Dependency": "spell_power"
+        }
+      ],
+      "ExpectedVersionIds": [
+        "sN5qsxEU",
+        "mvZvOSVL",
+        "rvI2dfzR",
+        "2xQdCMyG",
+        "yDqYTUaf",
+        "AHxQGtuC",
+        "y5a2WAp4",
+        "1yvucvYz"
+      ],
+      "ExpectedInstalledCount": 0,
+      "actual_versions": [
+        "1yvucvYz",
+        "2xQdCMyG",
+        "AHxQGtuC",
+        "mvZvOSVL",
+        "rvI2dfzR",
+        "sN5qsxEU",
+        "y5a2WAp4",
+        "yDqYTUaf"
+      ],
+      "actual_installed_count": 0,
+      "finding_counts": {
+        "SelectedArtifact": 1,
+        "TransitiveArtifact": 7,
+        "TransitiveRequired": 10,
+        "OptionalSuggestion": 6,
+        "UnresolvedProjectDependency": 1,
+        "ClientNestedModulesIgnored": 1,
+        "RuntimeSatisfied": 70,
+        "RequiredSatisfied": 64,
+        "MissingRequiredDependency": 1,
+        "EnvironmentDisabledDependency": 1,
+        "ConflictChecked": 1
+      },
+      "relevant_findings": [
+        {
+          "Code": "UnresolvedProjectDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "mvZvOSVL",
+          "Dependency": "8ooWzSQP"
+        },
+        {
+          "Code": "MissingRequiredDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "mvZvOSVL",
+          "Dependency": "spell_power"
+        },
+        {
+          "Code": "EnvironmentDisabledDependency",
+          "Severity": "Information",
+          "ArtifactVersionId": "1yvucvYz",
+          "Dependency": "fabric-rendering-v1"
+        }
+      ]
+    },
+    {
+      "Name": "Wizards: API-required Trinkets remains required despite JAR recommends",
+      "StartedAt": "2026-10-04T02:39:11.2748796+00:00",
+      "CompletedAt": "2026-10-04T02:39:11.4314474+00:00",
+      "Target": {
+        "MinecraftVersion": "1.20.1",
+        "LoaderVersion": "0.19.5",
+        "JavaVersion": "17"
+      },
+      "ExpectedResolved": false,
+      "ActualResolved": false,
+      "Passed": true,
+      "ExpectedFindingCodes": [],
+      "ExpectedFindings": [
+        {
+          "Code": "UnresolvedProjectDependency",
+          "Dependency": "5aaWibi9"
+        }
+      ],
+      "ExpectedVersionIds": [
+        "sN5qsxEU",
+        "mvZvOSVL",
+        "rvI2dfzR",
+        "2xQdCMyG",
+        "7FbHvvWA",
+        "yDqYTUaf",
+        "y5a2WAp4",
+        "1yvucvYz"
+      ],
+      "ExpectedInstalledCount": 0,
+      "actual_versions": [
+        "1yvucvYz",
+        "2xQdCMyG",
+        "7FbHvvWA",
+        "mvZvOSVL",
+        "rvI2dfzR",
+        "sN5qsxEU",
+        "y5a2WAp4",
+        "yDqYTUaf"
+      ],
+      "actual_installed_count": 0,
+      "finding_counts": {
+        "SelectedArtifact": 1,
+        "TransitiveArtifact": 7,
+        "TransitiveRequired": 11,
+        "OptionalSuggestion": 6,
+        "UnresolvedProjectDependency": 1,
+        "ClientNestedModulesIgnored": 1,
+        "RuntimeSatisfied": 72,
+        "RequiredSatisfied": 61,
+        "EnvironmentDisabledDependency": 1,
+        "ConflictChecked": 1
+      },
+      "relevant_findings": [
+        {
+          "Code": "UnresolvedProjectDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "mvZvOSVL",
+          "Dependency": "5aaWibi9"
+        },
+        {
+          "Code": "EnvironmentDisabledDependency",
+          "Severity": "Information",
+          "ArtifactVersionId": "1yvucvYz",
+          "Dependency": "fabric-rendering-v1"
+        }
+      ]
+    },
+    {
+      "Name": "Wizards: wrong Minecraft target",
+      "StartedAt": "2026-10-04T02:39:11.4397914+00:00",
+      "CompletedAt": "2026-10-04T02:39:11.6117982+00:00",
+      "Target": {
+        "MinecraftVersion": "1.21.1",
+        "LoaderVersion": "0.19.5",
+        "JavaVersion": "17"
+      },
+      "ExpectedResolved": false,
+      "ActualResolved": false,
+      "Passed": true,
+      "ExpectedFindingCodes": [
+        "IncompatiblePlatform"
+      ],
+      "ExpectedFindings": [
+        {
+          "Code": "RuntimeMismatch",
+          "Dependency": "minecraft"
+        }
+      ],
+      "ExpectedVersionIds": [
+        "sN5qsxEU",
+        "mvZvOSVL",
+        "rvI2dfzR",
+        "2xQdCMyG",
+        "7FbHvvWA",
+        "yDqYTUaf",
+        "AHxQGtuC",
+        "y5a2WAp4",
+        "1yvucvYz"
+      ],
+      "ExpectedInstalledCount": 0,
+      "actual_versions": [
+        "1yvucvYz",
+        "2xQdCMyG",
+        "7FbHvvWA",
+        "AHxQGtuC",
+        "mvZvOSVL",
+        "rvI2dfzR",
+        "sN5qsxEU",
+        "y5a2WAp4",
+        "yDqYTUaf"
+      ],
+      "actual_installed_count": 0,
+      "finding_counts": {
+        "IncompatiblePlatform": 9,
+        "SelectedArtifact": 1,
+        "TransitiveArtifact": 8,
+        "TransitiveRequired": 12,
+        "OptionalSuggestion": 7,
+        "ClientNestedModulesIgnored": 1,
+        "RuntimeMismatch": 9,
+        "RuntimeSatisfied": 67,
+        "RequiredSatisfied": 67,
+        "EnvironmentDisabledDependency": 1,
+        "ConflictChecked": 1
+      },
+      "relevant_findings": [
+        {
+          "Code": "IncompatiblePlatform",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "sN5qsxEU",
+          "Dependency": null
+        },
+        {
+          "Code": "IncompatiblePlatform",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "mvZvOSVL",
+          "Dependency": null
+        },
+        {
+          "Code": "IncompatiblePlatform",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "y5a2WAp4",
+          "Dependency": null
+        },
+        {
+          "Code": "IncompatiblePlatform",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "rvI2dfzR",
+          "Dependency": null
+        },
+        {
+          "Code": "IncompatiblePlatform",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "1yvucvYz",
+          "Dependency": null
+        },
+        {
+          "Code": "IncompatiblePlatform",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "2xQdCMyG",
+          "Dependency": null
+        },
+        {
+          "Code": "IncompatiblePlatform",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "7FbHvvWA",
+          "Dependency": null
+        },
+        {
+          "Code": "IncompatiblePlatform",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "yDqYTUaf",
+          "Dependency": null
+        },
+        {
+          "Code": "IncompatiblePlatform",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "AHxQGtuC",
+          "Dependency": null
+        },
+        {
+          "Code": "RuntimeMismatch",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "sN5qsxEU",
+          "Dependency": "minecraft"
+        },
+        {
+          "Code": "RuntimeMismatch",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "mvZvOSVL",
+          "Dependency": "minecraft"
+        },
+        {
+          "Code": "RuntimeMismatch",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "y5a2WAp4",
+          "Dependency": "minecraft"
+        },
+        {
+          "Code": "RuntimeMismatch",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "rvI2dfzR",
+          "Dependency": "minecraft"
+        },
+        {
+          "Code": "RuntimeMismatch",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "1yvucvYz",
+          "Dependency": "minecraft"
+        },
+        {
+          "Code": "EnvironmentDisabledDependency",
+          "Severity": "Information",
+          "ArtifactVersionId": "1yvucvYz",
+          "Dependency": "fabric-rendering-v1"
+        },
+        {
+          "Code": "RuntimeMismatch",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "7FbHvvWA",
+          "Dependency": "minecraft"
+        },
+        {
+          "Code": "RuntimeMismatch",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "yDqYTUaf",
+          "Dependency": "minecraft"
+        }
+      ]
+    },
+    {
+      "Name": "Spell Engine: independent pinned six-file closure",
+      "StartedAt": "2026-10-04T02:39:11.622234+00:00",
+      "CompletedAt": "2026-10-04T02:39:11.7503519+00:00",
+      "Target": {
+        "MinecraftVersion": "1.20.1",
+        "LoaderVersion": "0.19.5",
+        "JavaVersion": "17"
+      },
+      "ExpectedResolved": true,
+      "ActualResolved": true,
+      "Passed": true,
+      "ExpectedFindingCodes": [],
+      "ExpectedFindings": [
+        {
+          "Code": "RequiredSatisfied",
+          "Dependency": "spell_power"
+        }
+      ],
+      "ExpectedVersionIds": [
+        "mvZvOSVL",
+        "rvI2dfzR",
+        "2xQdCMyG",
+        "7FbHvvWA",
+        "yDqYTUaf",
+        "AHxQGtuC"
+      ],
+      "ExpectedInstalledCount": 0,
+      "actual_versions": [
+        "2xQdCMyG",
+        "7FbHvvWA",
+        "AHxQGtuC",
+        "mvZvOSVL",
+        "rvI2dfzR",
+        "yDqYTUaf"
+      ],
+      "actual_installed_count": 0,
+      "finding_counts": {
+        "SelectedArtifact": 1,
+        "TransitiveArtifact": 5,
+        "TransitiveRequired": 6,
+        "OptionalSuggestion": 5,
+        "ClientNestedModulesIgnored": 1,
+        "RuntimeSatisfied": 67,
+        "RequiredSatisfied": 61,
+        "ConflictChecked": 1
+      },
+      "relevant_findings": [
+        {
+          "Code": "RequiredSatisfied",
+          "Severity": "Information",
+          "ArtifactVersionId": "mvZvOSVL",
+          "Dependency": "spell_power"
+        }
+      ]
+    },
+    {
+      "Name": "Paladins: embedded Shield present but API-required standalone project unresolved",
+      "StartedAt": "2026-10-04T02:39:11.7638592+00:00",
+      "CompletedAt": "2026-10-04T02:39:11.9131383+00:00",
+      "Target": {
+        "MinecraftVersion": "1.20.1",
+        "LoaderVersion": "0.19.5",
+        "JavaVersion": "17"
+      },
+      "ExpectedResolved": false,
+      "ActualResolved": false,
+      "Passed": true,
+      "ExpectedFindingCodes": [],
+      "ExpectedFindings": [
+        {
+          "Code": "UnresolvedProjectDependency",
+          "Dependency": "y9clIFY4"
+        },
+        {
+          "Code": "RequiredSatisfied",
+          "Dependency": "shield_api"
+        }
+      ],
+      "ExpectedVersionIds": [
+        "1t4iuZkn",
+        "mvZvOSVL",
+        "rvI2dfzR",
+        "2xQdCMyG",
+        "7FbHvvWA",
+        "yDqYTUaf",
+        "AHxQGtuC",
+        "y5a2WAp4",
+        "1yvucvYz"
+      ],
+      "ExpectedInstalledCount": 0,
+      "actual_versions": [
+        "1t4iuZkn",
+        "1yvucvYz",
+        "2xQdCMyG",
+        "7FbHvvWA",
+        "AHxQGtuC",
+        "mvZvOSVL",
+        "rvI2dfzR",
+        "y5a2WAp4",
+        "yDqYTUaf"
+      ],
+      "actual_installed_count": 0,
+      "finding_counts": {
+        "SelectedArtifact": 1,
+        "TransitiveArtifact": 8,
+        "OptionalSuggestion": 7,
+        "TransitiveRequired": 12,
+        "UnresolvedProjectDependency": 1,
+        "ClientNestedModulesIgnored": 1,
+        "RuntimeSatisfied": 79,
+        "RequiredSatisfied": 69,
+        "EnvironmentDisabledDependency": 1,
+        "ConflictChecked": 1
+      },
+      "relevant_findings": [
+        {
+          "Code": "UnresolvedProjectDependency",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "1t4iuZkn",
+          "Dependency": "y9clIFY4"
+        },
+        {
+          "Code": "RequiredSatisfied",
+          "Severity": "Information",
+          "ArtifactVersionId": "1t4iuZkn",
+          "Dependency": "shield_api"
+        },
+        {
+          "Code": "EnvironmentDisabledDependency",
+          "Severity": "Information",
+          "ArtifactVersionId": "1yvucvYz",
+          "Dependency": "fabric-rendering-v1"
+        }
+      ]
+    },
+    {
+      "Name": "Spectrum: current file capacity rejected before download",
+      "StartedAt": "2026-10-04T02:39:11.9249328+00:00",
+      "CompletedAt": "2026-10-04T02:39:11.9260937+00:00",
+      "Target": {
+        "MinecraftVersion": "1.20.1",
+        "LoaderVersion": "0.19.5",
+        "JavaVersion": "17"
+      },
+      "ExpectedResolved": false,
+      "ActualResolved": false,
+      "Passed": true,
+      "ExpectedFindingCodes": [
+        "InvalidFile"
+      ],
+      "ExpectedFindings": [],
+      "ExpectedVersionIds": [],
+      "ExpectedInstalledCount": 0,
+      "actual_versions": [],
+      "actual_installed_count": 0,
+      "finding_counts": {
+        "InvalidFile": 1
+      },
+      "relevant_findings": [
+        {
+          "Code": "InvalidFile",
+          "Severity": "Blocker",
+          "ArtifactVersionId": "mDJAjTuc",
+          "Dependency": null
+        }
+      ]
+    }
+  ],
+  "not_run": [
+    {
+      "item": "Runes C0i3Ewtv",
+      "reason": "Additional API retrieval returned HTTP 403; no retry or alternate route."
+    },
+    {
+      "item": "Standalone Shield API olD4crvG",
+      "reason": "Further downloads stopped; its API-required project is still unresolved. Embedded Shield was independently read in Paladins."
+    },
+    {
+      "item": "Create 8amzvn9x / Ars Nouveau Hw2aD01e / Mekanism uxe1WQp4",
+      "reason": "Version research only; real-file rejection tests were not run in this batch."
+    },
+    {
+      "item": "Large curated modpacks / .mrpack / arbitrary server-pack overrides",
+      "reason": "Not supported or tested by this bounded Fabric JAR inspection path."
+    }
+  ],
+  "sources": [
+    "https://docs.modrinth.com/api/operations/getversion/",
+    "https://wiki.fabricmc.net/documentation:fabric_mod_json_spec",
+    "https://github.com/FabricMC/fabric-loader/blob/0.19.5/src/main/java/net/fabricmc/loader/impl/discovery/ModResolver.java#L57-L76",
+    "https://github.com/FabricMC/fabric-loader/blob/0.19.5/src/main/java/net/fabricmc/loader/impl/discovery/ModDiscoverer.java#L173-L194"
+  ],
+  "limits": [
+    "64 MiB per provider file; 256 MiB total per inspection unchanged. Spectrum size is a capacity boundary, not a safety or suitability judgment.",
+    "Exact environment-disabled dependency compatibility profile is currently limited to Loader 0.19.5 and supported schema 1.",
+    "Different-byte or different-version nested alternatives remain unsupported; no full Fabric SAT solver.",
+    "Client/server declarations are recorded; actual client installation, compatibility, gameplay and recommended hardware were not measured.",
+    "No third-party JAR binaries are included or redistributed.",
+    "Prior 2026-10-03 17-case live report remains separate; its live API checks were not repeated in this batch."
+  ]
+}

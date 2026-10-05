@@ -168,11 +168,11 @@
                                         </Border>
                                     </WrapPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                                        <!-- 停止中: 起動 / 稼働中: 停止+再起動 -->
-                                        <Button Content="▶ 起動" Command="{Binding StartCommand}" Style="{StaticResource PrimaryButton}" Width="110"
-                                                Visibility="{Binding IsRunning, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
-                                        <Button Content="■ 停止" Command="{Binding StopCommand}" Style="{StaticResource DangerButton}" Width="96"
-                                                Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                        <!-- 停止確認できない状態でも、停止の再確認を表示する -->
+                                        <Button Content="{Binding StartButtonLabel}" Command="{Binding StartCommand}" Style="{StaticResource PrimaryButton}" Width="110"
+                                                Visibility="{Binding IsStopped, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                        <Button Content="{Binding StopButtonLabel}" Command="{Binding StopCommand}" Style="{StaticResource DangerButton}" MinWidth="96" Padding="12,8"
+                                                Visibility="{Binding IsStopped, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                                         <Button Content="↻ 再起動" Command="{Binding RestartCommand}" Width="96" Margin="8,0,0,0"
                                                 Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                     </StackPanel>

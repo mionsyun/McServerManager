@@ -6,6 +6,8 @@ using System.Text.Json;
 using WpfApplication = System.Windows.Application;
 using McServerManager.Models;
 using McServerManager.Services;
+using McServerManager.Services.Templates;
+using McServerManager.Services.Modrinth;
 using McServerManager.Utilities;
 using McServerManager.Views;
 
@@ -15,6 +17,10 @@ public sealed class MainViewModel : ObservableObject
 {
     private static readonly TimeSpan UpdateSnoozeDuration = TimeSpan.FromHours(24);
     private readonly AppServices _services;
+    private readonly ITemplateManifestService _templateManifests;
+    private readonly IModrinthInspectionService _modInspection;
+    private readonly McServerManager.Services.VanillaRuntime.IVanillaRuntimeInspectionService? _runtimeInspection;
+    private readonly Func<NewServerWindow>? _newServerWindowFactory;
     private readonly IBackupSchedulerService _backupScheduler;
     private readonly IBedrockServerService _bedrockServer;
     private readonly IBedrockPropertiesService _bedrockProperties;
@@ -30,9 +36,19 @@ public sealed class MainViewModel : ObservableObject
         IBedrockServerService bedrockServer,
         IBedrockPropertiesService bedrockProperties,
         IPortForwardingService portForwarding,
-        IJavaRuntimeInstaller javaInstaller)
+        IJavaRuntimeInstaller javaInstaller,
+        ITemplateManifestService templateManifests,
+        IModrinthInspectionService modInspection,
+        EditionViewModel edition,
+        Func<NewServerWindow>? newServerWindowFactory = null,
+        McServerManager.Services.VanillaRuntime.IVanillaRuntimeInspectionService? runtimeInspection = null)
     {
         _services = services;
+        Edition = edition;
+        _templateManifests = templateManifests;
+        _modInspection = modInspection;
+        _runtimeInspection = runtimeInspection;
+        _newServerWindowFactory = newServerWindowFactory;
         _backupScheduler = backupScheduler;
         _bedrockServer = bedrockServer;
         _bedrockProperties = bedrockProperties;
@@ -67,14 +83,22 @@ public sealed class MainViewModel : ObservableObject
             var nextTheme = value ? ThemeService.DarkTheme : ThemeService.LightTheme;
             if (!string.Equals(_settings.Theme, nextTheme, StringComparison.OrdinalIgnoreCase))
             {
+                try { _services.Settings.Update(s => s.Theme = nextTheme); }
+                catch (AppSettingsStorageException)
+                {
+                    _services.Dialog.Show("設定を安全に保存できなかったため、表示テーマは変更していません。別のアプリを終了して再確認してください。", "設定の保存", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    OnPropertyChanged();
+                    return;
+                }
                 _settings.Theme = nextTheme;
-                _services.Settings.Update(s => s.Theme = nextTheme);
                 _services.Theme.Apply(_settings.Theme);
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(ThemeLabel));
             }
         }
     }
+
+    public EditionViewModel Edition { get; }
 
     public string ThemeLabel => IsDarkTheme ? "ダーク" : "ライト";
     public string AppVersion => ResolveAppVersion();
@@ -228,13 +252,20 @@ public sealed class MainViewModel : ObservableObject
         switch (applyResult.Status)
         {
             case AppUpdateDownloadStatus.Success:
-                ClearDeferredUpdatePrompt();
-                _services.Dialog.Show(
-                    "インストーラーを起動しました。アプリを終了します。",
-                    "アプリ更新",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-                WpfApplication.Current?.Shutdown();
+                // The installer has already launched. Preference cleanup must never turn that
+                // committed outcome into an apparent update failure or prevent required shutdown.
+                var cleanupFailed = false;
+                try { ClearDeferredUpdatePrompt(); }
+                catch (AppSettingsStorageException) { cleanupFailed = true; }
+                try
+                {
+                    _services.Dialog.Show(
+                        cleanupFailed
+                            ? "インストーラーを起動しました。更新通知の設定は保存できませんでしたが、更新のためアプリを終了します。"
+                            : "インストーラーを起動しました。アプリを終了します。",
+                        "アプリ更新", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                finally { WpfApplication.Current?.Shutdown(); }
                 return;
             case AppUpdateDownloadStatus.HashMismatch:
                 _services.Dialog.Show(
@@ -278,13 +309,14 @@ public sealed class MainViewModel : ObservableObject
 
     private void DeferUpdatePrompt(string version)
     {
-        _settings.DeferredAppUpdateVersion = version;
-        _settings.DeferredAppUpdateUntilUtc = DateTime.UtcNow.Add(UpdateSnoozeDuration);
+        var until = DateTime.UtcNow.Add(UpdateSnoozeDuration);
         _services.Settings.Update(s =>
         {
-            s.DeferredAppUpdateVersion = _settings.DeferredAppUpdateVersion;
-            s.DeferredAppUpdateUntilUtc = _settings.DeferredAppUpdateUntilUtc;
+            s.DeferredAppUpdateVersion = version;
+            s.DeferredAppUpdateUntilUtc = until;
         });
+        _settings.DeferredAppUpdateVersion = version;
+        _settings.DeferredAppUpdateUntilUtc = until;
     }
 
     private void ClearDeferredUpdatePrompt()
@@ -294,13 +326,13 @@ public sealed class MainViewModel : ObservableObject
             return;
         }
 
-        _settings.DeferredAppUpdateVersion = null;
-        _settings.DeferredAppUpdateUntilUtc = null;
         _services.Settings.Update(s =>
         {
             s.DeferredAppUpdateVersion = null;
             s.DeferredAppUpdateUntilUtc = null;
         });
+        _settings.DeferredAppUpdateVersion = null;
+        _settings.DeferredAppUpdateUntilUtc = null;
     }
 
     private void OpenTutorialGuideWindow()
@@ -359,12 +391,10 @@ public sealed class MainViewModel : ObservableObject
 
     private void OpenCreateServerWindow()
     {
-        var window = new NewServerWindow
-        {
-            Owner = WpfApplication.Current.MainWindow
-        };
+        var window = _newServerWindowFactory?.Invoke() ?? new NewServerWindow();
+        window.Owner = WpfApplication.Current.MainWindow;
 
-        var vm = new NewServerViewModel(_services, _bedrockServer, Servers.Select(s => s.Name));
+        var vm = new NewServerViewModel(_services, _bedrockServer, Servers.Select(s => s.Name), _templateManifests, _modInspection, _runtimeInspection);
         vm.RequestClose += result =>
         {
             window.DialogResult = result;
@@ -409,10 +439,11 @@ public sealed class MainViewModel : ObservableObject
         if (!runtimeReleased)
         {
             _services.Dialog.Show(
-                "サーバーランタイムの解放に失敗しました。アプリ再起動で解消する場合があります。",
+                "停止状態を確認できないか、別の操作が進行中のため、削除を中止しました。サーバーの状態を確認してください。",
                 "警告",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
+            return;
         }
 
         var directory = target.ServerDirectory;
@@ -812,12 +843,12 @@ public sealed class MainViewModel : ObservableObject
 
         if (!_settings.ServerDirectories.Contains(baseDir, StringComparer.OrdinalIgnoreCase))
         {
-            _settings.ServerDirectories.Add(baseDir);
             _services.Settings.Update(s =>
             {
                 if (!s.ServerDirectories.Contains(baseDir, StringComparer.OrdinalIgnoreCase))
                     s.ServerDirectories.Add(baseDir);
             });
+            _settings.ServerDirectories.Add(baseDir);
         }
     }
 
@@ -886,6 +917,5 @@ public sealed class MainViewModel : ObservableObject
         _services.Dialog.Show(message, "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
     }
 }
-
 
 

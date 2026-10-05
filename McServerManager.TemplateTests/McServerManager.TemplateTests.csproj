@@ -1,0 +1,98 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <MaiPilotEdition Condition="'$(MaiPilotEdition)' == ''">Free</MaiPilotEdition>
+    <DefineConstants Condition="'$(MaiPilotEdition)' == 'Pro'">$(DefineConstants);MAIPILOT_PRO</DefineConstants>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <Target Name="ValidateMaiPilotEdition" BeforeTargets="PrepareForBuild;CoreCompile">
+    <Error Condition="'$(MaiPilotEdition)' != 'Free' And '$(MaiPilotEdition)' != 'Pro'" Text="MaiPilotEdition must be Free or Pro." />
+  </Target>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../McServerManager/Models/Authoring/**/*.cs" Link="Authoring/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Authoring/**/*.cs" Link="Authoring/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/AuthoringFiles/**/*.cs" Link="Authoring/Files/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/ViewModels/Authoring/**/*.cs" Link="Authoring/ViewModels/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/Transactions/**/*.cs" Link="Core/Models/Transactions/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Transactions/**/*.cs" Link="Core/Services/Transactions/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/Fabric/**/*.cs" Link="Core/Models/Fabric/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Fabric/**/*.cs" Link="Core/Services/Fabric/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/Modrinth/**/*.cs" Link="Core/Models/Modrinth/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Modrinth/**/*.cs" Link="Core/Services/Modrinth/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/VanillaRuntime/**/*.cs" Link="Core/Models/VanillaRuntime/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/VanillaRuntime/**/*.cs" Link="Core/Services/VanillaRuntime/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/ViewModels/VanillaRuntimeInspectionViewModel.cs" Link="Core/ViewModels/VanillaRuntimeInspectionViewModel.cs" />
+    <Compile Include="../McServerManager/Models/Templates/**/*.cs" Link="Core/Models/Templates/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Templates/**/*.cs" Link="Core/Services/Templates/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/Dependencies/**/*.cs" Link="Core/Models/Dependencies/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Dependencies/**/*.cs" Link="Core/Services/Dependencies/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/ViewModels/TemplateInspectionViewModel.cs" Link="Core/ViewModels/TemplateInspectionViewModel.cs" Condition="Exists('../McServerManager/ViewModels/TemplateInspectionViewModel.cs')" />
+    <Compile Include="../McServerManager/ViewModels/ModInspectionViewModel.cs" Link="Core/ViewModels/ModInspectionViewModel.cs" />
+    <Compile Include="../McServerManager/Utilities/ObservableObject.cs" Link="Core/Utilities/ObservableObject.cs" />
+    <None Update="Fixtures/**/*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../McServerManager/Models/Editions/**/*.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Editions/**/*.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/AppUpdate*.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/AppUpdateService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Interfaces/IAppUpdateService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/ExternalApiUrls.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Utilities/AuthenticodeVerifier.cs" Link="NewCore/Utilities/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/AppSettings.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/AppPathsService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Interfaces/IAppSettingsService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/AppSettingsService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/SettingsStorage/**/*.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/Participants/**/*.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Participants/**/*.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/ViewModels/EditionViewModel.cs" Link="NewCore/ViewModels/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/ViewModels/ParticipantExportViewModel.cs" Link="NewCore/ViewModels/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/ServerConfig.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/FirewallRuleInfo.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/WorldBackupEntry.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/ArchiveWorldCandidate.cs" Link="NewCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Interfaces/IServerConfigService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Interfaces/IWorldService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Interfaces/IBackupSchedulerService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/Interfaces/IBackupScheduleRestorer.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/BackupSchedulerService.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/BackupScheduleRestorer.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../McServerManager/Models/NewServerOptions.cs" Link="ProvisioningCore/NewServerOptions.cs" />
+    <Compile Include="../McServerManager/Models/ServerProperties.cs" Link="ProvisioningCore/ServerProperties.cs" />
+    <Compile Include="../McServerManager/Models/BedrockServerProperties.cs" Link="ProvisioningCore/BedrockServerProperties.cs" />
+    <Compile Include="../McServerManager/Models/BedrockVersionInfo.cs" Link="ProvisioningCore/BedrockVersionInfo.cs" />
+    <Compile Include="../McServerManager/Models/BedrockAllowlistEntry.cs" Link="ProvisioningCore/BedrockAllowlistEntry.cs" />
+    <Compile Include="../McServerManager/Models/NetworkProtocol.cs" Link="ProvisioningCore/NetworkProtocol.cs" />
+    <Compile Include="../McServerManager/Models/PortRequirement.cs" Link="ProvisioningCore/PortRequirement.cs" />
+    <Compile Include="../McServerManager/Services/ServerProvisioningService.cs" Link="ProvisioningCore/ServerProvisioningService.cs" />
+    <Compile Include="../McServerManager/Services/ServerConfigService.cs" Link="ProvisioningCore/ServerConfigService.cs" />
+    <Compile Include="../McServerManager/Services/BedrockNetworkPlanner.cs" Link="ProvisioningCore/BedrockNetworkPlanner.cs" />
+    <Compile Include="../McServerManager/Services/Interfaces/IServerProvisioningService.cs" Link="ProvisioningCore/IServerProvisioningService.cs" />
+    <Compile Include="../McServerManager/Services/Interfaces/IServerPropertiesService.cs" Link="ProvisioningCore/IServerPropertiesService.cs" />
+    <Compile Include="../McServerManager/Services/Interfaces/IServerJarService.cs" Link="ProvisioningCore/IServerJarService.cs" />
+    <Compile Include="../McServerManager/Services/Interfaces/IBedrockServerService.cs" Link="ProvisioningCore/IBedrockServerService.cs" />
+    <Compile Include="../McServerManager/Services/Interfaces/IBedrockPropertiesService.cs" Link="ProvisioningCore/IBedrockPropertiesService.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../McServerManager/Models/RuntimeLifecycle/**/*.cs" Link="RuntimeCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/RuntimeLifecycle/**/*.cs" Link="RuntimeCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/ServerStatus.cs" Link="RuntimeCore/ServerStatus.cs" />
+    <Compile Include="../McServerManager/Services/ServerRuntimeManager.cs" Link="RuntimeCore/ServerRuntimeManager.cs" />
+    <Compile Include="../McServerManager/Services/Interfaces/IServerRuntimeManager.cs" Link="RuntimeCore/IServerRuntimeManager.cs" />
+    <Compile Include="../McServerManager/Services/ServerEditions.cs" Link="RuntimeCore/ServerEditions.cs" />
+    <Compile Include="../McServerManager/Services/JavaNotFoundException.cs" Link="RuntimeCore/JavaNotFoundException.cs" />
+  </ItemGroup>
+</Project>

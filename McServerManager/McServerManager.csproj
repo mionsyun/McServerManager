@@ -15,7 +15,19 @@
     <AssemblyVersion>2.2.0.0</AssemblyVersion>
     <FileVersion>2.2.0.0</FileVersion>
     <InformationalVersion>2.2.0</InformationalVersion>
+    <!-- Distribution identity is immutable at runtime. An unspecified build remains Free. -->
+    <MaiPilotEdition Condition="'$(MaiPilotEdition)' == ''">Free</MaiPilotEdition>
+    <DefineConstants Condition="'$(MaiPilotEdition)' == 'Pro'">$(DefineConstants);MAIPILOT_PRO</DefineConstants>
   </PropertyGroup>
+
+  <Target Name="ValidateMaiPilotEdition" BeforeTargets="PrepareForBuild;CoreCompile">
+    <Error Condition="'$(MaiPilotEdition)' != 'Free' And '$(MaiPilotEdition)' != 'Pro'"
+           Text="MaiPilotEdition must be Free or Pro. The default is Free." />
+  </Target>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="MaiPilotEdition" Value="$(MaiPilotEdition)" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />

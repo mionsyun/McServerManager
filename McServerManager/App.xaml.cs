@@ -4,7 +4,15 @@ using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using McServerManager.Models;
 using McServerManager.Services;
+using McServerManager.Services.Templates;
+using McServerManager.Services.Authoring;
+using McServerManager.Services.AuthoringFiles;
+using McServerManager.Services.Participants;
+using McServerManager.Services.Modrinth;
+using McServerManager.Services.Fabric;
+using McServerManager.Services.Editions;
 using McServerManager.ViewModels;
+using McServerManager.ViewModels.Authoring;
 using McServerManager.Views;
 
 namespace McServerManager;
@@ -31,9 +39,11 @@ public partial class App : System.Windows.Application
             var appSettings = settingsService.Load();
             themeService.Apply(appSettings.Theme);
 
-            RestoreScheduledBackups(provider);
+            RestoreScheduledBackups(provider, appSettings);
 
-            var mainWindow = new MainWindow
+            var mainWindow = new MainWindow(
+                provider.GetRequiredService<Func<ParticipantExportWindow>>(),
+                provider.GetRequiredService<Func<TemplateAuthoringWindow>>())
             {
                 DataContext = provider.GetRequiredService<MainViewModel>()
             };
@@ -53,7 +63,9 @@ public partial class App : System.Windows.Application
             try
             {
                 System.Windows.MessageBox.Show(
-                    $"Startup failed. Log: {GetLogPath()}",
+                    ex is AppSettingsStorageException
+                        ? "保存済み設定を安全に読み込めないため起動を中止しました。設定は初期化していません。以前のアプリを終了し、設定ファイルとバックアップを保全してから再確認してください。"
+                        : $"Startup failed. Log: {GetLogPath()}",
                     "MaiPilot",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
@@ -79,19 +91,11 @@ public partial class App : System.Windows.Application
         base.OnExit(e);
     }
 
-    private static void RestoreScheduledBackups(ServiceProvider provider)
+    private static void RestoreScheduledBackups(ServiceProvider provider, AppSettings settings)
     {
         try
         {
-            var configService = provider.GetRequiredService<IServerConfigService>();
-            var scheduler = provider.GetRequiredService<IBackupSchedulerService>();
-            foreach (var config in configService.LoadAll())
-            {
-                if (config.ScheduledBackupEnabled)
-                {
-                    scheduler.ApplyConfiguration(config);
-                }
-            }
+            provider.GetRequiredService<IBackupScheduleRestorer>().Restore(settings);
         }
         catch (Exception ex)
         {
@@ -107,11 +111,23 @@ public partial class App : System.Windows.Application
         services.AddSingleton<AppPathsService>();
         services.AddSingleton<IAppSettingsService, AppSettingsService>();
         services.AddSingleton<IServerConfigService, ServerConfigService>();
+        services.AddSingleton<ITemplateManifestService, TemplateManifestService>();
+        services.AddSingleton<Services.VanillaRuntime.IVanillaRuntimeInspectionService, Services.VanillaRuntime.VanillaRuntimeInspectionService>();
+        services.AddSingleton<ITemplateAuthoringService, TemplateAuthoringService>();
+        services.AddSingleton<ITemplateAuthoringFileService, TemplateAuthoringFileService>();
+        services.AddSingleton<IParticipantClientDefinitionService, ParticipantClientDefinitionService>();
+        services.AddSingleton<IParticipantListZipService, ParticipantListZipService>();
+        services.AddSingleton<IParticipantExportFileService, ParticipantExportFileService>();
+        services.AddSingleton<IModrinthProvider, ModrinthProvider>();
+        services.AddSingleton<IFabricJarInspector, FabricJarInspector>();
+        services.AddSingleton<IFabricVersionMatcher, FabricVersionMatcher>();
+        services.AddSingleton<IModrinthInspectionService, ModrinthInspectionService>();
         services.AddSingleton<IServerPropertiesService, ServerPropertiesService>();
         services.AddSingleton<IMinecraftVersionService, MinecraftVersionService>();
         services.AddSingleton<IServerRuntimeManager, ServerRuntimeManager>();
         services.AddSingleton<IWorldService, WorldService>();
         services.AddSingleton<IBackupSchedulerService, BackupSchedulerService>();
+        services.AddSingleton<IBackupScheduleRestorer, BackupScheduleRestorer>();
         services.AddSingleton<IWorldMapService, WorldMapService>();
         services.AddSingleton<IPermissionsService, PermissionsService>();
         services.AddSingleton<IFirewallService, FirewallService>();
@@ -123,6 +139,10 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IJavaRuntimeInstaller, JavaRuntimeInstaller>();
         services.AddSingleton<IAddonManagementService, AddonManagementService>();
         services.AddSingleton<IAddonCatalogService, AddonCatalogService>();
+        services.AddSingleton<IEditionPolicy>(EditionPolicy.Current);
+        services.AddSingleton(ProDistributionLinks.Current);
+        services.AddSingleton<IProStoreNavigation, ProStoreNavigation>();
+        services.AddTransient<EditionViewModel>();
         services.AddSingleton<IAppUpdateService, AppUpdateService>();
         services.AddSingleton<IServerJarService, ServerJarService>();
         services.AddSingleton<IBedrockServerService, BedrockServerService>();
@@ -135,6 +155,18 @@ public partial class App : System.Windows.Application
 
         // プレゼンテーション層
         services.AddTransient<MainViewModel>();
+        services.AddTransient<TemplateInspectionViewModel>();
+        services.AddTransient<ParticipantExportViewModel>();
+        services.AddTransient<TemplateAuthoringViewModel>();
+        services.AddTransient<TemplateAuthoringWindow>();
+        services.AddSingleton<Func<TemplateAuthoringWindow>>(provider =>
+            () => provider.GetRequiredService<TemplateAuthoringWindow>());
+        services.AddTransient<ParticipantExportWindow>();
+        services.AddSingleton<Func<ParticipantExportWindow>>(provider =>
+            () => provider.GetRequiredService<ParticipantExportWindow>());
+        services.AddTransient<NewServerWindow>();
+        services.AddSingleton<Func<NewServerWindow>>(provider =>
+            () => provider.GetRequiredService<NewServerWindow>());
 
         return services.BuildServiceProvider();
     }
@@ -154,8 +186,15 @@ public partial class App : System.Windows.Application
         };
         guide.ShowDialog();
 
-        settings.HasShownFirstRun = true;
-        settingsService.Save(settings);
+        try { settings = settingsService.Update(current => current.HasShownFirstRun = true); }
+        catch (AppSettingsStorageException ex)
+        {
+            LogException("FirstRun.SettingsSave", ex);
+            System.Windows.MessageBox.Show(
+                "初回案内の完了状態を保存できませんでした。設定は初期化していません。アプリはこのまま利用できますが、次回も案内が表示される場合があります。",
+                "設定の保存", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
         StartTutorialIfNeeded(settings, mainWindow);
     }
 
@@ -197,12 +236,15 @@ public partial class App : System.Windows.Application
                     args.Handled = true;
 
                     System.Windows.MessageBox.Show(
-                        $"Unexpected error. Log: {GetLogPath()}",
+                        args.Exception is AppSettingsStorageException
+                            ? "設定の読込または保存を安全に完了できませんでした。設定を初期化せず、この操作を中止しました。以前のアプリを閉じ、設定とバックアップを保全して再確認してください。"
+                            : $"Unexpected error. Log: {GetLogPath()}",
                         "MaiPilot",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
 
-                    Current?.Shutdown(-1);
+                    if (args.Exception is not AppSettingsStorageException)
+                        Current?.Shutdown(-1);
                 }
                 catch (Exception ex)
                 {

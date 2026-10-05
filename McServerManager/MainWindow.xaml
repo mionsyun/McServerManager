@@ -1,4 +1,4 @@
-<Window x:Class="McServerManager.MainWindow"
+﻿<Window x:Class="McServerManager.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:McServerManager.ViewModels"
@@ -36,7 +36,7 @@
                     <Image Source="icon.png" Width="38" Height="38" Stretch="Uniform" VerticalAlignment="Center"/>
                     <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
                         <TextBlock Text="MAIPILOT" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource BrushAccent}"/>
-                        <TextBlock Text="サーバー管理" Style="{StaticResource MutedText}" FontSize="10.5"/>
+                        <TextBlock Text="{Binding Edition.DisplayName}" Style="{StaticResource MutedText}" FontSize="10.5"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -58,9 +58,18 @@
                         </Grid>
                         <WrapPanel Margin="0,8,0,0">
                             <Button Content="ガイド" Command="{Binding StartTutorialCommand}" Style="{StaticResource SmallGhostButton}"/>
-                            <Button Content="更新を確認" Command="{Binding CheckAppUpdateCommand}" Style="{StaticResource SmallGhostButton}"/>
+                            <Button Content="更新を確認" Command="{Binding CheckAppUpdateCommand}" Style="{StaticResource SmallGhostButton}"
+                                    Visibility="{Binding Edition.UsesPublicUpdater, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            <Button Content="ProをBOOTHで購入" Command="{Binding Edition.PurchaseCommand}" Style="{StaticResource SmallGhostButton}"
+                                    Visibility="{Binding Edition.CanPurchase, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            <Button Content="Proの更新先" Command="{Binding Edition.UpdatesCommand}" Style="{StaticResource SmallGhostButton}"
+                                    ToolTip="{Binding Edition.ProUpdateHint}"
+                                    Visibility="{Binding Edition.IsPro, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                             <Button Content="通知" Click="OpenThirdPartyNotices" Style="{StaticResource SmallGhostButton}" ToolTip="サードパーティ通知"/>
                         </WrapPanel>
+                        <TextBlock Text="{Binding Edition.ProUpdateHint}" TextWrapping="Wrap" Style="{StaticResource MutedText}" FontSize="10"
+                                   Visibility="{Binding Edition.IsPro, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <TextBlock Text="{Binding Edition.Status}" TextWrapping="Wrap" Style="{StaticResource MutedText}" FontSize="10"/>
                     </StackPanel>
                 </Border>
 
@@ -104,6 +113,9 @@
                                                             <Setter Property="Fill" Value="{DynamicResource BrushAccent}"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Status}" Value="Stopping">
+                                                            <Setter Property="Fill" Value="{DynamicResource BrushWarning}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Unknown">
                                                             <Setter Property="Fill" Value="{DynamicResource BrushWarning}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
@@ -156,7 +168,25 @@
                                 Style="{StaticResource PrimaryButton}"
                                 HorizontalAlignment="Stretch" Margin="0,8,4,0" Height="38"/>
 
+                        <Button x:Name="ParticipantExportButton" Content="参加者向け案内ZIP"
+                                Click="OpenParticipantExport" Style="{StaticResource BaseButton}"
+                                HorizontalAlignment="Stretch" Margin="0,8,4,0" Height="38"
+                                ToolTip="Free / Pro 共通。参加者用 JSON から MOD 一覧と説明の ZIP を作成します"/>
+
+                        <Button x:Name="TemplateAuthoringButton" Content="テンプレート作成・編集（Pro）"
+                                Click="OpenTemplateAuthoring" IsEnabled="{Binding Edition.IsPro}"
+                                Style="{StaticResource BaseButton}" HorizontalAlignment="Stretch"
+                                Margin="0,8,4,0" Height="38" ToolTipService.ShowOnDisabled="True"
+                                ToolTip="Pro 専用。構成を記入するか、既存テンプレートを編集して新しいファイルに保存します"/>
+
                         <!-- 選択サーバーのナビ -->
+                        <Button Click="OpenRegisteredSettingsTemplate" IsEnabled="{Binding Edition.IsPro}"
+                                Visibility="{Binding SelectedServer, Converter={StaticResource NotNullToVisibilityConverter}}"
+                                Style="{StaticResource BaseButton}" HorizontalAlignment="Stretch"
+                                Margin="0,8,4,0" MinHeight="38" ToolTipService.ShowOnDisabled="True"
+                                ToolTip="一致する作成記録がある Vanilla 正式版のみ。登録設定を参考に下書きを作ります。実ファイル・MOD・ワールドは取得しません">
+                            <TextBlock Text="選択サーバーの登録設定から下書き（Pro）" TextWrapping="Wrap" TextAlignment="Center"/>
+                        </Button>
                         <StackPanel Margin="0,16,0,0"
                                     Visibility="{Binding SelectedServer, Converter={StaticResource NotNullToVisibilityConverter}}">
                             <Grid Margin="0,0,4,6">

@@ -23,6 +23,20 @@
 
   <ItemGroup>
     <ProjectReference Include="..\McServerManager\McServerManager.csproj" />
+    <ProjectReference Include="..\McServerManager.OwnershipTestChild\McServerManager.OwnershipTestChild.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
+
+  <Target Name="CopyOwnershipTestChild" AfterTargets="Build">
+    <MSBuild Projects="..\McServerManager.OwnershipTestChild\McServerManager.OwnershipTestChild.csproj" Targets="GetTargetPath" Properties="Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="OwnershipTestChildTarget" />
+    </MSBuild>
+    <PropertyGroup>
+      <OwnershipTestChildDirectory>@(OwnershipTestChildTarget->'%(RootDir)%(Directory)')</OwnershipTestChildDirectory>
+    </PropertyGroup>
+    <ItemGroup>
+      <OwnershipTestChildFiles Include="$(OwnershipTestChildDirectory)*.dll;$(OwnershipTestChildDirectory)*.json" />
+    </ItemGroup>
+    <Copy SourceFiles="@(OwnershipTestChildFiles)" DestinationFolder="$(TargetDir)OwnershipTestChild" />
+  </Target>
 
 </Project>
