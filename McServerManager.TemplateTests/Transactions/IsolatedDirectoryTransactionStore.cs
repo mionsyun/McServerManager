@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using McServerManager.Models.Transactions;
@@ -148,15 +149,15 @@ internal sealed class IsolatedDirectoryTransactionStore : ITransactionStorage, I
             cancellationToken.ThrowIfCancellationRequested();
             AssertTarget(plan); // Simulated stopped/start-exclusion lock spans verification and rename.
             if (!TreeMatches(entry)) throw new IOException("Staged content or identity changed.");
-            var actualFiles = entry.Files.Where(x => x.Value.Hash is not null).ToArray();
-            if (actualFiles.Length != plan.Artifacts.Length) throw new IOException("Incomplete or foreign staged tree.");
-            foreach (var artifact in plan.Artifacts)
-            {
-                var path = Path.Combine(entry.Path, artifact.Destination);
-                if (!entry.Files.TryGetValue(artifact.Destination, out var file) || file.Hash != artifact.Sha256 ||
-                    new FileInfo(path).Length != artifact.SizeBytes || Hash(File.ReadAllBytes(path)) != artifact.Sha256)
-                    throw new IOException("Staged bytes do not match the approved manifest.");
-            }
+            // TreeMatches establishes the exact journaled namespace/identities in this cooperative
+            // test fixture. Independently reread bytes; never copy the approved hashes into evidence.
+            var snapshot = entry.Files.Select(pair => pair.Value.Hash is null
+                ? new StagedTreeEntry(pair.Key, StagedTreeEntryKind.Directory, 0, null)
+                : new StagedTreeEntry(pair.Key, StagedTreeEntryKind.File,
+                    new FileInfo(Path.Combine(entry.Path, pair.Key)).Length,
+                    Hash(File.ReadAllBytes(Path.Combine(entry.Path, pair.Key))))).ToImmutableArray();
+            if (StagedTreeManifestVerifier.Compare(plan, snapshot) != StagedTreeManifestComparison.ContentMatches)
+                throw new IOException("Staged namespace or bytes do not match the approved manifest.");
             if (!LinuxIdentity.MoveNoReplace(entry.Path, TargetPath(plan))) return Task.FromResult(TransactionPublishDecision.Rejected);
             entry.Published = true; // Sticky publication fact before any injectable post-publication failure/cancellation.
             AfterPublish?.Invoke();

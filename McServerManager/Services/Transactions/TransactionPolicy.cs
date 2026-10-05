@@ -7,6 +7,7 @@ namespace McServerManager.Services.Transactions;
 public static class TransactionPolicy
 {
     public const int MaxArtifacts = 64;
+    public const int MaxPathDepth = 8;
     public const int MaxArtifactBytes = 1024 * 1024;
     public const long MaxTotalBytes = 16L * 1024 * 1024;
     public const int MaxSettings = 32;
@@ -32,6 +33,7 @@ public static class TransactionPolicy
         long total = 0;
         var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var identities = new HashSet<(string, string, string, string)>();
+        var directories = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         foreach (var artifact in plan.Artifacts)
         {
             ArgumentNullException.ThrowIfNull(artifact);
@@ -44,6 +46,15 @@ public static class TransactionPolicy
             if (artifact.SizeBytes is < 1 or > MaxArtifactBytes) throw new ArgumentException("Artifact size is outside policy bounds.");
             total = checked(total + artifact.SizeBytes);
             if (total > MaxTotalBytes) throw new ArgumentException("Total payload size exceeds policy bounds.");
+            // A Windows directory has one spelling in the approved namespace. Distinct files must
+            // not implicitly request both "Mods" and "mods", even on a case-sensitive test host.
+            for (var slash = artifact.Destination.IndexOf('/'); slash >= 0; slash = artifact.Destination.IndexOf('/', slash + 1))
+            {
+                var directory = artifact.Destination[..slash];
+                if (directories.TryGetValue(directory, out var spelling) && spelling != directory)
+                    throw new ArgumentException("Inconsistent directory casing in destinations.");
+                directories[directory] = directory;
+            }
             if (!paths.Add(artifact.Destination)) throw new ArgumentException("Case-insensitive destination collision.");
             if (!identities.Add((artifact.Provider, artifact.ProjectId, artifact.VersionId, artifact.ArtifactId)))
                 throw new ArgumentException("Duplicate artifact identity.");
@@ -72,7 +83,7 @@ public static class TransactionPolicy
     {
         if (string.IsNullOrEmpty(value) || value.Length > 240) throw new ArgumentException("Invalid relative destination.");
         var segments = value.Split('/');
-        if (segments.Length > 8 || singleSegment && segments.Length != 1) throw new ArgumentException("Invalid path depth.");
+        if (segments.Length > MaxPathDepth || singleSegment && segments.Length != 1) throw new ArgumentException("Invalid path depth.");
         foreach (var segment in segments)
         {
             if (segment.Length is < 1 or > 80 || !char.IsAsciiLetterOrDigit(segment[0]) || segment.EndsWith('.') ||
