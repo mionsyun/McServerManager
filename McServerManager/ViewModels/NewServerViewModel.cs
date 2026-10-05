@@ -55,10 +55,11 @@ public sealed class NewServerViewModel : ObservableObject
     public const string EditionBedrock = "bedrock";
     public const string RouteBedrock = "bedrock";
 
-    public NewServerViewModel(AppServices services, IBedrockServerService bedrockServer, IEnumerable<string> existingNames, ITemplateManifestService templateManifests, IModrinthInspectionService modInspection)
+    public NewServerViewModel(AppServices services, IBedrockServerService bedrockServer, IEnumerable<string> existingNames, ITemplateManifestService templateManifests, IModrinthInspectionService modInspection,
+        McServerManager.Services.VanillaRuntime.IVanillaRuntimeInspectionService? runtimeInspection = null)
     {
         _services = services;
-        TemplateInspection = new TemplateInspectionViewModel(templateManifests);
+        TemplateInspection = new TemplateInspectionViewModel(templateManifests, runtimeInspection);
         ModInspection = new ModInspectionViewModel(modInspection);
         Bedrock = new NewBedrockServerViewModel(bedrockServer);
         PropertyChanged += (_, e) => ClearValidationErrorOnInput(e.PropertyName);

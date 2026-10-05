@@ -162,6 +162,17 @@ public partial class NewServerWindow : Window
         if (DataContext is NewServerViewModel viewModel) viewModel.ModInspection.Cancel();
     }
 
+    private async void OnInspectVanillaRuntime(object sender, RoutedEventArgs e)
+    {
+        if (!_isClosed && !_isInspectingTemplate && !_participantReviewOpen && DataContext is NewServerViewModel { Route: "import" } viewModel)
+            await viewModel.TemplateInspection.RuntimeInspection.InspectAsync();
+    }
+
+    private void OnCancelVanillaRuntime(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is NewServerViewModel viewModel) viewModel.TemplateInspection.RuntimeInspection.Cancel();
+    }
+
     protected override void OnClosed(EventArgs e)
     {
         _isClosed = true;

@@ -29,6 +29,9 @@
     <Compile Include="../McServerManager/Services/Fabric/**/*.cs" Link="Core/Services/Fabric/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="../McServerManager/Models/Modrinth/**/*.cs" Link="Core/Models/Modrinth/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="../McServerManager/Services/Modrinth/**/*.cs" Link="Core/Services/Modrinth/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Models/VanillaRuntime/**/*.cs" Link="Core/Models/VanillaRuntime/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/Services/VanillaRuntime/**/*.cs" Link="Core/Services/VanillaRuntime/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../McServerManager/ViewModels/VanillaRuntimeInspectionViewModel.cs" Link="Core/ViewModels/VanillaRuntimeInspectionViewModel.cs" />
     <Compile Include="../McServerManager/Models/Templates/**/*.cs" Link="Core/Models/Templates/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="../McServerManager/Services/Templates/**/*.cs" Link="Core/Services/Templates/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="../McServerManager/Models/Dependencies/**/*.cs" Link="Core/Models/Dependencies/%(RecursiveDir)%(Filename)%(Extension)" />

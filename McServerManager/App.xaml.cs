@@ -112,6 +112,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IAppSettingsService, AppSettingsService>();
         services.AddSingleton<IServerConfigService, ServerConfigService>();
         services.AddSingleton<ITemplateManifestService, TemplateManifestService>();
+        services.AddSingleton<Services.VanillaRuntime.IVanillaRuntimeInspectionService, Services.VanillaRuntime.VanillaRuntimeInspectionService>();
         services.AddSingleton<ITemplateAuthoringService, TemplateAuthoringService>();
         services.AddSingleton<ITemplateAuthoringFileService, TemplateAuthoringFileService>();
         services.AddSingleton<IParticipantClientDefinitionService, ParticipantClientDefinitionService>();

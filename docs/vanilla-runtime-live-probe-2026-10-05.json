@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "minecraftVersion": "1.21.1",
+  "startedUtc": "2026-10-05T13:05:03.4924891+00:00",
+  "completedUtc": "2026-10-05T13:05:13.5356847+00:00",
+  "implementation": "VanillaRuntimeInspectionService default production transport",
+  "lastProgressStage": "Manifest",
+  "status": "Unavailable",
+  "code": "RequestTimeout",
+  "evidence": null,
+  "versionManifestReached": false,
+  "serverJarTransferReached": false,
+  "liveVerificationPassed": false,
+  "installedOrExecuted": false,
+  "notes": "The official index request timed out. No runtime verification, native Windows behavior, installation, or launch success is claimed."
+}

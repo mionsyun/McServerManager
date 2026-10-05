@@ -5,7 +5,7 @@ using McServerManager.Utilities;
 
 namespace McServerManager.ViewModels;
 
-/// <summary>Read-only preview. No provisioning, provider or runtime service is reachable here.</summary>
+/// <summary>Read-only preview with an explicitly triggered runtime-file check. No provisioning or execution.</summary>
 public sealed class TemplateInspectionViewModel : ObservableObject
 {
     private readonly ITemplateManifestService _manifests;
@@ -17,7 +17,14 @@ public sealed class TemplateInspectionViewModel : ObservableObject
     private ParticipantClientDefinition? _clientDefinition;
     private string? _originalManifestSha256;
 
-    public TemplateInspectionViewModel(ITemplateManifestService manifests) => _manifests = manifests;
+    public TemplateInspectionViewModel(ITemplateManifestService manifests,
+        McServerManager.Services.VanillaRuntime.IVanillaRuntimeInspectionService? runtimeInspection = null)
+    {
+        _manifests = manifests;
+        RuntimeInspection = new(runtimeInspection);
+    }
+
+    public VanillaRuntimeInspectionViewModel RuntimeInspection { get; }
 
     public bool IsBusy
     {
@@ -70,6 +77,7 @@ public sealed class TemplateInspectionViewModel : ObservableObject
                 + $"PvP: {(settings.Pvp.HasValue ? (settings.Pvp.Value ? "有効" : "無効") : "指定なし")} / スポーン保護: {settings.SpawnProtection?.ToString() ?? "指定なし"}\n"
                 + "\n取得元・互換性・動作はまだ確認していません。ファイルは変更していません。";
             SetParticipantDefinition(manifest.ClientDefinition, result.ManifestSha256);
+            RuntimeInspection.SetTemplate(runtime, result.ManifestSha256);
             ParticipantDefinitionStatus = manifest.ClientDefinition is null
                 ? "参加者用の構成定義がありません。サーバーの MOD 一覧からは推測せず、このテンプレートから案内は作れません。管理者にクライアント定義付きテンプレートを依頼してください。"
                 : !IsManifestHash(result.ManifestSha256)
@@ -104,6 +112,7 @@ public sealed class TemplateInspectionViewModel : ObservableObject
 
     public void Cancel()
     {
+        RuntimeInspection.Clear();
         ++_generation;
         _cancellation?.Cancel();
         _cancellation = null;

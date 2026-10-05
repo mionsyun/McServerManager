@@ -475,6 +475,25 @@
                         <ProgressBar x:Name="TemplateReadProgress" IsIndeterminate="True" Height="6" Margin="0,8,0,0"
                                      Visibility="Collapsed" AutomationProperties.Name="テンプレートの読み込みと形式の確認中"/>
                         <TextBlock Text="{Binding Summary}" TextWrapping="Wrap" Margin="0,16,0,0"/>
+                        <Border Style="{StaticResource SurfacePanel}" Margin="0,16,0,0" DataContext="{Binding RuntimeInspection}">
+                            <StackPanel>
+                                <TextBlock Text="Vanilla 本体ファイルの確認" Style="{StaticResource SectionHeading}"/>
+                                <TextBlock Text="ボタンを押すと公式サーバー JAR（最大128 MiB）と配布情報を取得し、サイズとハッシュを照合します。ディスクへの保存・実行・サーバー作成はしません。追加 MOD・互換性の検証とは別です。"
+                                           TextWrapping="Wrap" Style="{StaticResource MutedText}" Margin="0,8,0,0"/>
+                                <WrapPanel Margin="0,12,0,0">
+                                    <Button Content="本体を取得して確認（通信）" Click="OnInspectVanillaRuntime"
+                                            IsEnabled="{Binding CanInspect}" Padding="16,8" Margin="0,0,8,8"/>
+                                    <Button Content="本体の確認を取り消す" Click="OnCancelVanillaRuntime"
+                                            IsEnabled="{Binding IsBusy}" Padding="16,8" Margin="0,0,0,8"/>
+                                </WrapPanel>
+                                <TextBlock Text="{Binding Summary}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+                                <TextBlock Text="{Binding ProgressText}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                                <ProgressBar Value="{Binding ProgressPercent}" Minimum="0" Maximum="100" Height="6" Margin="0,8,0,0"
+                                             Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                             AutomationProperties.Name="Vanilla サーバー本体の取得と照合"/>
+                                <TextBlock Text="{Binding Details}" TextWrapping="Wrap" Margin="0,8,0,0" FontSize="11"/>
+                            </StackPanel>
+                        </Border>
                         <Border Style="{StaticResource SurfacePanel}" Margin="0,16,0,0">
                             <StackPanel>
                                 <TextBlock Text="参加者向けの案内" Style="{StaticResource SectionHeading}"/>
