@@ -19,6 +19,7 @@ public sealed partial class TemplateAuthoringViewModel : ObservableObject
     private byte[]? _exportSnapshot;
     private bool _editingCompleted;
     private string _name = "", _description = "", _clientName = "", _sourceFileName = "";
+    private string _draftSourceDescription = "フォームで新規作成";
     private string _summary = "新しく作るか、編集するテンプレートを選んでください。", _details = "";
     private bool _hasClientDefinition, _isDirty, _isReviewing, _acknowledgedLimitations, _hasExportBytes;
     private long _revision;
@@ -48,6 +49,7 @@ public sealed partial class TemplateAuthoringViewModel : ObservableObject
     public string Summary { get => _summary; private set => SetProperty(ref _summary, value); }
     public string Details { get => _details; private set => SetProperty(ref _details, value); }
     public string SourceFileName => _sourceFileName;
+    public string DraftSourceDescription => _draftSourceDescription;
     public string? OriginalManifestSha256 => _session?.ImportedManifestSha256;
     public string? OutputManifestSha256 => _prepared?.ManifestSha256;
     public string ServerAddonsSummary => DescribeServerAddons();
@@ -109,6 +111,25 @@ public sealed partial class TemplateAuthoringViewModel : ObservableObject
         catch (InvalidOperationException) { return DenyEdition(); }
     }
 
+    public bool CreateFromRegisteredSettings(RegisteredServerTemplateSource source, bool discardChanges = false)
+    {
+        if (!CanCreate) return DenyEdition();
+        if (!MayReplace(discardChanges)) return false;
+        InvalidateReview();
+        try
+        {
+            var result = _service.CreateFromRegisteredSettings(source);
+            if (!result.IsValid || result.Session is null || result.Draft is null) return ReportIssues(result.Issues);
+            ApplyDraft(result.Session, result.Draft, "");
+            _draftSourceDescription = $"登録設定を参考に作成（入力開始時の作成記録: Vanilla {source.MinecraftVersion}）";
+            OnPropertyChanged(nameof(DraftSourceDescription));
+            IsDirty = true;
+            Summary = "登録設定を下書きにコピーしました。現在の実ファイル・MOD・ワールドは取得していません。内容を編集し、確認してから保存してください。";
+            return true;
+        }
+        catch (InvalidOperationException) { return DenyEdition(); }
+    }
+
     public bool AddClientMod()
     {
         if (!CanEdit) return DenyEdition();
@@ -136,6 +157,7 @@ public sealed partial class TemplateAuthoringViewModel : ObservableObject
         _session = null;
         _editingCompleted = false;
         _name = _description = _clientName = _sourceFileName = "";
+        _draftSourceDescription = "フォームで新規作成";
         _hasClientDefinition = false;
         _clientMods.Clear();
         ServerRuntime = NewServerRuntime(new TemplateRuntime { Type = "vanilla", MinecraftVersion = "" });
@@ -209,6 +231,7 @@ public sealed partial class TemplateAuthoringViewModel : ObservableObject
         _session = session;
         _editingCompleted = false;
         _sourceFileName = sourceName;
+        _draftSourceDescription = sourceName.Length == 0 ? "フォームで新規作成" : "テンプレートファイルを読み込み";
         _name = draft.Name;
         _description = draft.Description;
         _hasClientDefinition = draft.ClientDefinition is not null;
@@ -226,6 +249,7 @@ public sealed partial class TemplateAuthoringViewModel : ObservableObject
     {
         foreach (var name in new[] { nameof(Name), nameof(Description), nameof(ClientName), nameof(HasClientDefinition),
             nameof(ServerRuntime), nameof(Settings), nameof(ClientRuntime), nameof(SourceFileName), nameof(OriginalManifestSha256),
+            nameof(DraftSourceDescription),
             nameof(ServerAddonsSummary), nameof(IsServerRuntimeLocked), nameof(HasDraft) }) OnPropertyChanged(name);
         NotifyActions();
     }

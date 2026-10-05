@@ -193,10 +193,20 @@ internal sealed class ManualRuntimeDelay
         var request = new DelayRequest(duration, token);
         using var registration = token.Register(() => request.CancellationObserved.TrySetResult());
         Scheduled.TrySetResult(request);
-        if (IgnoreCancellation)
-            await request.Release.Task.ConfigureAwait(false);
-        else
-            await request.Release.Task.WaitAsync(token).ConfigureAwait(false);
+        try
+        {
+            if (IgnoreCancellation)
+                await request.Release.Task.ConfigureAwait(false);
+            else
+                await request.Release.Task.WaitAsync(token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            // WaitAsync's newer cancellation callback can resume this method and dispose
+            // the older registration before that callback runs. Cancellation was still observed.
+            request.CancellationObserved.TrySetResult();
+            throw;
+        }
     }
 
     internal sealed record DelayRequest(TimeSpan Duration, CancellationToken Token)

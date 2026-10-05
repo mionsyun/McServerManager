@@ -523,6 +523,7 @@ public sealed class TemplateAuthoringViewModelTests
     {
         public int Calls { get; private set; }
         public TemplateAuthoringOpenResult CreateNew(CancellationToken cancellationToken = default) { Calls++; throw new InvalidOperationException(); }
+        public TemplateAuthoringOpenResult CreateFromRegisteredSettings(RegisteredServerTemplateSource source, CancellationToken cancellationToken = default) { Calls++; throw new InvalidOperationException(); }
         public TemplateAuthoringOpenResult OpenForEdit(ReadOnlyMemory<byte> bytes, CancellationToken cancellationToken = default) { Calls++; throw new InvalidOperationException(); }
         public TemplateAuthoringValidationResult PrepareExport(TemplateAuthoringSession session, TemplateAuthoringDraft draft, CancellationToken cancellationToken = default) { Calls++; throw new InvalidOperationException(); }
         public byte[] Export(TemplateAuthoringSession session, TemplateAuthoringDraft draft, TemplateAuthoringPreparedExport prepared, CancellationToken cancellationToken = default) { Calls++; throw new InvalidOperationException(); }

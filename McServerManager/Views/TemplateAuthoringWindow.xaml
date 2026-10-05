@@ -41,8 +41,8 @@
                 </Border>
                 <Border Style="{StaticResource WarnBanner}" Margin="0,0,0,14">
                     <StackPanel>
-                        <TextBlock Text="サーバーから取得した構成ではありません" FontWeight="SemiBold" Foreground="{DynamicResource BrushWarning}"/>
-                        <TextBlock Text="入力した構成、または読み込んだテンプレートの申告内容を保存します。既存サーバー、ワールド、接続情報、秘密情報を自動取得する機能ではありません。"
+                        <TextBlock Text="現在のサーバーファイルを取得・検証する機能ではありません" FontWeight="SemiBold" Foreground="{DynamicResource BrushWarning}"/>
+                        <TextBlock Text="手動入力、テンプレートの申告内容、または明示的に選んだ登録設定を下書きにします。登録設定と現在の実ファイルの一致は未確認です。MOD・ワールド・接続情報・秘密情報は自動取得しません。"
                                    TextWrapping="Wrap" Margin="0,5,0,0"/>
                         <TextBlock Text="確認できるのは入力形式のみです。提供元の実在・公開状態、依存 MOD の不足、サーバーとクライアントの互換性・動作は未確認です。ダウンロード・導入・サーバーへの適用は行いません。"
                                    TextWrapping="Wrap" Margin="0,5,0,0"/>
@@ -66,6 +66,8 @@
                             <TextBlock Text="{Binding SourceFileName, StringFormat=読み込み元: {0}}"
                                        TextWrapping="Wrap" Margin="0,8,0,0"
                                        Visibility="{Binding SourceFileName, Converter={StaticResource NullOrEmptyToCollapsedConverter}}"/>
+                            <TextBlock Text="{Binding DraftSourceDescription, StringFormat=入力元: {0}}"
+                                       TextWrapping="Wrap" Margin="0,8,0,0"/>
                         </StackPanel>
                     </Border>
 

@@ -67,6 +67,23 @@
     <Compile Include="../McServerManager/Services/BackupScheduleRestorer.cs" Link="NewCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="../McServerManager/Models/NewServerOptions.cs" Link="ProvisioningCore/NewServerOptions.cs" />
+    <Compile Include="../McServerManager/Models/ServerProperties.cs" Link="ProvisioningCore/ServerProperties.cs" />
+    <Compile Include="../McServerManager/Models/BedrockServerProperties.cs" Link="ProvisioningCore/BedrockServerProperties.cs" />
+    <Compile Include="../McServerManager/Models/BedrockVersionInfo.cs" Link="ProvisioningCore/BedrockVersionInfo.cs" />
+    <Compile Include="../McServerManager/Models/BedrockAllowlistEntry.cs" Link="ProvisioningCore/BedrockAllowlistEntry.cs" />
+    <Compile Include="../McServerManager/Models/NetworkProtocol.cs" Link="ProvisioningCore/NetworkProtocol.cs" />
+    <Compile Include="../McServerManager/Models/PortRequirement.cs" Link="ProvisioningCore/PortRequirement.cs" />
+    <Compile Include="../McServerManager/Services/ServerProvisioningService.cs" Link="ProvisioningCore/ServerProvisioningService.cs" />
+    <Compile Include="../McServerManager/Services/ServerConfigService.cs" Link="ProvisioningCore/ServerConfigService.cs" />
+    <Compile Include="../McServerManager/Services/BedrockNetworkPlanner.cs" Link="ProvisioningCore/BedrockNetworkPlanner.cs" />
+    <Compile Include="../McServerManager/Services/Interfaces/IServerProvisioningService.cs" Link="ProvisioningCore/IServerProvisioningService.cs" />
+    <Compile Include="../McServerManager/Services/Interfaces/IServerPropertiesService.cs" Link="ProvisioningCore/IServerPropertiesService.cs" />
+    <Compile Include="../McServerManager/Services/Interfaces/IServerJarService.cs" Link="ProvisioningCore/IServerJarService.cs" />
+    <Compile Include="../McServerManager/Services/Interfaces/IBedrockServerService.cs" Link="ProvisioningCore/IBedrockServerService.cs" />
+    <Compile Include="../McServerManager/Services/Interfaces/IBedrockPropertiesService.cs" Link="ProvisioningCore/IBedrockPropertiesService.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="../McServerManager/Models/RuntimeLifecycle/**/*.cs" Link="RuntimeCore/Models/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="../McServerManager/Services/RuntimeLifecycle/**/*.cs" Link="RuntimeCore/Services/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="../McServerManager/Models/ServerStatus.cs" Link="RuntimeCore/ServerStatus.cs" />

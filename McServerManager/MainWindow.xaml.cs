@@ -74,6 +74,29 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OpenRegisteredSettingsTemplate(object sender, RoutedEventArgs e)
+    {
+        if (_templateAuthoringOpen || _templateAuthoringWindowFactory is null
+            || DataContext is not MainViewModel { Edition.IsPro: true, SelectedServer: { } target }) return;
+        if (target.HasPendingChanges)
+        {
+            System.Windows.MessageBox.Show(this, "未保存のサーバー設定があります。保存または取り消してから登録設定をコピーしてください。",
+                "登録設定から下書き", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        // Capture the action target once. No directory reads, leases, or runtime operations occur here.
+        var source = target.GetTemplateDraftSource();
+        _templateAuthoringOpen = true;
+        try
+        {
+            var window = _templateAuthoringWindowFactory();
+            window.Owner = this;
+            window.LoadRegisteredSettings(source);
+            window.ShowDialog();
+        }
+        finally { _templateAuthoringOpen = false; }
+    }
+
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         BindTutorial();

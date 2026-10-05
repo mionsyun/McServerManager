@@ -180,6 +180,13 @@
                                 ToolTip="Pro 専用。構成を記入するか、既存テンプレートを編集して新しいファイルに保存します"/>
 
                         <!-- 選択サーバーのナビ -->
+                        <Button Click="OpenRegisteredSettingsTemplate" IsEnabled="{Binding Edition.IsPro}"
+                                Visibility="{Binding SelectedServer, Converter={StaticResource NotNullToVisibilityConverter}}"
+                                Style="{StaticResource BaseButton}" HorizontalAlignment="Stretch"
+                                Margin="0,8,4,0" MinHeight="38" ToolTipService.ShowOnDisabled="True"
+                                ToolTip="一致する作成記録がある Vanilla 正式版のみ。登録設定を参考に下書きを作ります。実ファイル・MOD・ワールドは取得しません">
+                            <TextBlock Text="選択サーバーの登録設定から下書き（Pro）" TextWrapping="Wrap" TextAlignment="Center"/>
+                        </Button>
                         <StackPanel Margin="0,16,0,0"
                                     Visibility="{Binding SelectedServer, Converter={StaticResource NotNullToVisibilityConverter}}">
                             <Grid Margin="0,0,4,6">

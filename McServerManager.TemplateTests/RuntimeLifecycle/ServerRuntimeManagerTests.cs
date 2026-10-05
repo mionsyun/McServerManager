@@ -569,6 +569,21 @@ public sealed class ServerRuntimeManagerTests
     }
 
     [Fact]
+    public async Task ManualDelayReportsCancellationEvenWhenItsAwaitUnwindsBeforeCallback()
+    {
+        for (var attempt = 0; attempt < 200; attempt++)
+        {
+            using var cancellation = new CancellationTokenSource();
+            var delay = new ManualRuntimeDelay();
+            var waiting = delay.DelayAsync(TimeSpan.FromSeconds(1), cancellation.Token);
+            var request = await delay.Scheduled.Task.WaitAsync(RuntimeTestDirectory.Timeout);
+            await Task.Run(cancellation.Cancel);
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => waiting);
+            Assert.True(request.CancellationObserved.Task.IsCompletedSuccessfully);
+        }
+    }
+
+    [Fact]
     public async Task CurrentOutputMarksStartupCompleteWithoutGrantingStoppedTreeProof()
     {
         using var directory = new RuntimeTestDirectory();

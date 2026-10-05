@@ -5,6 +5,9 @@ namespace McServerManager.Services.Authoring;
 public interface ITemplateAuthoringService
 {
     TemplateAuthoringOpenResult CreateNew(CancellationToken cancellationToken = default);
+    /// <summary>Seeds a new declaration from explicit creation-time metadata and registered settings; not server capture.</summary>
+    TemplateAuthoringOpenResult CreateFromRegisteredSettings(RegisteredServerTemplateSource source,
+        CancellationToken cancellationToken = default);
     TemplateAuthoringOpenResult OpenForEdit(ReadOnlyMemory<byte> utf8Json, CancellationToken cancellationToken = default);
     TemplateAuthoringValidationResult PrepareExport(TemplateAuthoringSession session, TemplateAuthoringDraft draft,
         CancellationToken cancellationToken = default);

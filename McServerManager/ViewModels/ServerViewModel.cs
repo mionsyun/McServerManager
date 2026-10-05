@@ -222,6 +222,9 @@ public sealed class ServerViewModel : ObservableObject, IDisposable
     // ─── 識別情報 ────────────────────────────────────────────────
     public string Name => _config.Name;
     public string ServerId => _config.ServerId;
+    /// <summary>Registration values only, copied on the UI thread; not a live filesystem capture.</summary>
+    public Models.Authoring.RegisteredServerTemplateSource GetTemplateDraftSource() =>
+        Services.Authoring.RegisteredServerTemplateSourceFactory.Create(_config);
     public string ServerType => _config.Type;
     public string Version => _config.Version;
     public int Port => _config.Port;

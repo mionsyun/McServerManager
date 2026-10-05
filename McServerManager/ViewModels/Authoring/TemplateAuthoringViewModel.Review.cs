@@ -105,7 +105,9 @@ public sealed partial class TemplateAuthoringViewModel
 
     private bool ReportIssues(IReadOnlyList<TemplateValidationIssue> issues)
     {
-        Summary = "入力形式を確認できません。次の項目を直してください。入力内容は残っています。";
+        Summary = issues.Any(issue => issue.Code == "CreationDeclarationUnavailable")
+            ? "この登録から下書きを作れません。手動で新規作成するか、対応する登録を選んでください。入力内容は残っています。"
+            : "入力形式を確認できません。次の項目を直してください。入力内容は残っています。";
         Details = string.Join("\n", issues.Select(issue => $"{DescribeIssue(issue.Code)} [{issue.Code}] {issue.Path}"));
         return false;
     }
@@ -121,7 +123,8 @@ public sealed partial class TemplateAuthoringViewModel
             text.AppendLine($"編集元ファイル: {SourceFileName}");
             text.AppendLine($"編集元 SHA-256: {OriginalManifestSha256}");
         }
-        else text.AppendLine("入力元: フォームで新規作成");
+        else text.AppendLine($"入力元: {DraftSourceDescription}");
+        text.AppendLine("登録設定を参照した場合も、編集後の版・現在の実ファイル・server.properties との一致は未検証です。");
         text.AppendLine($"新しい出力 SHA-256（入力形式のみ確認）: {prepared.ManifestSha256}");
         text.AppendLine($"テンプレート ID: {prepared.TemplateId:D} / 出力の版: {prepared.Revision}");
         text.AppendLine($"出力サイズ: {prepared.ByteCount} バイト\n");
@@ -173,6 +176,8 @@ public sealed partial class TemplateAuthoringViewModel
     private static string Display(string? value) => value ?? "指定なし";
     private static string DescribeIssue(string code) => code switch
     {
+        "CreationDeclarationUnavailable" => "一致する Vanilla 正式版の作成記録がありません。記録のない既存サーバー・複製・版変更・他の種類は推測せず、手動入力を使用してください。",
+        "InvalidRegisteredSettings" => "登録設定の難易度またはゲームモードが不正です。設定を確認するか、手動入力を使用してください。",
         "MissingRuntimePin" or "InvalidRuntimePin" or "InvalidPin" or "UnpinnedVersion" => "実行環境・MOD の正確な固定バージョンを指定してください。",
         "ClientMinecraftVersionMismatch" => "サーバーと参加者用の Minecraft バージョンを一致させてください。",
         "InvalidLength" => "名前・説明・識別子の文字数を確認してください。",

@@ -33,6 +33,12 @@ public partial class TemplateAuthoringWindow : Window
         if (_viewModel.CreateNew(discardChanges: true)) ContentScroll.ScrollToTop();
     }
 
+    public void LoadRegisteredSettings(McServerManager.Models.Authoring.RegisteredServerTemplateSource source)
+    {
+        if (_isWorking || _isClosed || !_viewModel.CanCreate || !ConfirmDiscard()) return;
+        if (_viewModel.CreateFromRegisteredSettings(source, discardChanges: true)) ContentScroll.ScrollToTop();
+    }
+
     private async void OnLoad(object sender, RoutedEventArgs e)
     {
         if (_isWorking || _isClosed || !_viewModel.CanLoad) return;

@@ -68,6 +68,45 @@ public sealed class TemplateAuthoringService(IEditionPolicy editionPolicy, ITemp
         };
     }
 
+    public TemplateAuthoringOpenResult CreateFromRegisteredSettings(RegisteredServerTemplateSource source,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        RequireCapability(EditionCapability.TemplateCreate);
+        ArgumentNullException.ThrowIfNull(source);
+        if (!ServerCreationRuntimeDeclarationPolicy.IsMatching(source.CreationDeclaration,
+                source.ServerId, source.ServerType, source.MinecraftVersion))
+            return new()
+            {
+                IsValid = false,
+                Issues = Issue("CreationDeclarationUnavailable", "$.runtime",
+                    "この登録には一致する Vanilla 正式版の作成記録がありません。既存・複製・版変更済みのサーバーや他の種類は推測せず、手動入力を使用してください。")
+            };
+        if (source.Difficulty is null || source.GameMode is null)
+            return new() { IsValid = false, Issues = Issue("InvalidRegisteredSettings", "$.settings", "登録設定の難易度またはゲームモードが不正です。") };
+        var draft = new TemplateAuthoringDraft
+        {
+            Name = source.Name,
+            Runtime = new() { Type = "vanilla", MinecraftVersion = source.MinecraftVersion },
+            Settings = new()
+            {
+                Difficulty = source.Difficulty, Gamemode = source.GameMode, MaxPlayers = source.MaxPlayers,
+                ViewDistance = source.ViewDistance, Pvp = source.Pvp, SpawnProtection = source.SpawnProtection
+            }
+        };
+        var session = new TemplateAuthoringSession(Guid.NewGuid(), 0, 1, false, null,
+            Array.AsReadOnly(Array.Empty<TemplateAddon>()));
+        byte[] bytes;
+        try { bytes = TemplateAuthoringSerializer.Serialize(session, draft, cancellationToken); }
+        catch (TemplateAuthoringSerializationException exception)
+        { return new() { IsValid = false, Issues = Issue(exception.Code, exception.Path, exception.Message) }; }
+        var parsed = _manifestService.Parse(bytes);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!parsed.IsValid || parsed.Manifest is null) return new() { IsValid = false, Issues = parsed.Issues };
+        _sessions.Add(session, new(null));
+        return new() { IsValid = true, Session = session, Draft = draft, Issues = Array.Empty<TemplateValidationIssue>() };
+    }
+
     public TemplateAuthoringValidationResult PrepareExport(TemplateAuthoringSession session, TemplateAuthoringDraft draft,
         CancellationToken cancellationToken = default)
     {
