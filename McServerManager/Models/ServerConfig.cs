@@ -1,3 +1,5 @@
+using McServerManager.Models.Authoring;
+
 namespace McServerManager.Models;
 
 public sealed class ServerConfig
@@ -6,6 +8,7 @@ public sealed class ServerConfig
     public string Name { get; set; } = string.Empty;
     public string Type { get; set; } = "Vanilla";
     public string Version { get; set; } = "latest";
+    public ServerCreationRuntimeDeclaration? CreationRuntimeDeclaration { get; set; }
     public string DirectoryPath { get; set; } = string.Empty;
     public string JavaPath { get; set; } = string.Empty;
     public string JavaExtraArguments { get; set; } = string.Empty;

@@ -1,5 +1,7 @@
 using System.Net;
 using McServerManager.Models;
+using McServerManager.Models.Editions;
+using McServerManager.Services.Editions;
 using McServerManager.Services;
 using McServerManager.Tests.TestInfrastructure;
 
@@ -27,7 +29,7 @@ public sealed class AppUpdateServiceTests
             return new HttpResponseMessage(HttpStatusCode.NotFound);
         });
         using var client = new HttpClient(handler);
-        var service = new AppUpdateService(client);
+        var service = new AppUpdateService(client, new EditionPolicy(AppEdition.Free));
 
         var result = await service.CheckForUpdatesAsync();
 
@@ -56,7 +58,7 @@ public sealed class AppUpdateServiceTests
             return new HttpResponseMessage(HttpStatusCode.NotFound);
         });
         using var client = new HttpClient(handler);
-        var service = new AppUpdateService(client);
+        var service = new AppUpdateService(client, new EditionPolicy(AppEdition.Free));
 
         var result = await service.CheckForUpdatesAsync();
 
@@ -82,7 +84,7 @@ public sealed class AppUpdateServiceTests
             return new HttpResponseMessage(HttpStatusCode.NotFound);
         });
         using var client = new HttpClient(handler);
-        var service = new AppUpdateService(client);
+        var service = new AppUpdateService(client, new EditionPolicy(AppEdition.Free));
         var manifest = new AppUpdateManifest
         {
             Version = "9.9.9",

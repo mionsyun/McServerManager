@@ -34,7 +34,7 @@ public sealed class AppSettingsServiceTests
     }
 
     [Fact]
-    public void Load_WhenJsonIsBroken_ReturnsDefaultSettings()
+    public void Load_WhenJsonIsBroken_RejectsWithoutResettingSettings()
     {
         using var appData = new TemporaryAppDataScope();
         var paths = new AppPathsService();
@@ -42,12 +42,10 @@ public sealed class AppSettingsServiceTests
         File.WriteAllText(paths.AppSettingsPath, "{ this is invalid json");
         var service = new AppSettingsService(paths);
 
-        var loaded = service.Load();
-
-        Assert.False(loaded.HasShownFirstRun);
-        Assert.False(loaded.HasCompletedTutorial);
-        Assert.Equal(ThemeService.DarkTheme, loaded.Theme);
-        Assert.Empty(loaded.ServerDirectories);
+        var error = Assert.Throws<AppSettingsStorageException>(() => service.Load());
+        Assert.Equal(AppSettingsStorageError.InvalidData, error.Reason);
+        Assert.Throws<AppSettingsStorageException>(() => service.Save(new AppSettings()));
+        Assert.Equal("{ this is invalid json", File.ReadAllText(paths.AppSettingsPath));
     }
 
     [Fact]

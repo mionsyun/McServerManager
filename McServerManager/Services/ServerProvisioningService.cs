@@ -1,4 +1,5 @@
 using McServerManager.Models;
+using McServerManager.Services.Authoring;
 
 namespace McServerManager.Services;
 
@@ -34,6 +35,10 @@ public sealed class ServerProvisioningService : IServerProvisioningService
             throw new InvalidOperationException("EULAに同意してください。");
         }
 
+        // Capture the selected runtime before callbacks or asynchronous installation can
+        // mutate options. The declaration must describe the same request we installed.
+        var serverType = options.Type;
+        var minecraftVersion = options.Version;
         var serverId = Guid.NewGuid().ToString("N");
         var baseDirectory = string.IsNullOrWhiteSpace(options.DirectoryPath)
             ? _pathsService.ServersPath
@@ -46,13 +51,13 @@ public sealed class ServerProvisioningService : IServerProvisioningService
         Directory.CreateDirectory(serverDirectory);
         Directory.CreateDirectory(Path.Combine(serverDirectory, "logs"));
 
-        if (ServerEditions.IsBedrock(options.Type))
+        if (ServerEditions.IsBedrock(serverType))
         {
-            return await CreateBedrockAsync(options, serverId, serverDirectory, progress).ConfigureAwait(false);
+            return await CreateBedrockAsync(options, minecraftVersion, serverId, serverDirectory, progress).ConfigureAwait(false);
         }
 
         var jarPath = Path.Combine(serverDirectory, "server.jar");
-        await _jarService.DownloadAsync(options.Type, options.Version, jarPath, options.JavaPath, progress).ConfigureAwait(false);
+        await _jarService.DownloadAsync(serverType, minecraftVersion, jarPath, options.JavaPath, progress).ConfigureAwait(false);
 
         progress?.Report("設定ファイルを書き込み中...");
         File.WriteAllText(Path.Combine(serverDirectory, "eula.txt"), "eula=true");
@@ -61,8 +66,8 @@ public sealed class ServerProvisioningService : IServerProvisioningService
         {
             ServerId = serverId,
             Name = options.Name,
-            Type = options.Type,
-            Version = options.Version,
+            Type = serverType,
+            Version = minecraftVersion,
             DirectoryPath = serverDirectory,
             JavaPath = options.JavaPath,
             JavaExtraArguments = string.Empty,
@@ -103,6 +108,7 @@ public sealed class ServerProvisioningService : IServerProvisioningService
         };
 
         _propertiesService.Save(serverDirectory, props);
+        config.CreationRuntimeDeclaration = ServerCreationRuntimeDeclarationPolicy.Create(serverId, serverType, minecraftVersion);
         _configService.SaveToDirectory(config, serverDirectory);
 
         progress?.Report("サーバー作成が完了しました。");
@@ -112,6 +118,7 @@ public sealed class ServerProvisioningService : IServerProvisioningService
 
     private async Task<ServerConfig> CreateBedrockAsync(
         NewServerOptions options,
+        string minecraftVersion,
         string serverId,
         string serverDirectory,
         IProgress<string>? progress)
@@ -137,7 +144,7 @@ public sealed class ServerProvisioningService : IServerProvisioningService
             ServerId = serverId,
             Name = options.Name,
             Type = ServerEditions.BedrockType,
-            Version = options.Version,
+            Version = minecraftVersion,
             DirectoryPath = serverDirectory,
             LaunchModeOverride = "Auto",
             Port = options.Port,

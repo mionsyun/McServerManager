@@ -4,6 +4,8 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text.Json;
 using McServerManager.Models;
+using McServerManager.Models.Editions;
+using McServerManager.Services.Editions;
 using McServerManager.Utilities;
 
 namespace McServerManager.Services;
@@ -21,9 +23,13 @@ public sealed class AppUpdateService : IAppUpdateService
     };
 
     private readonly HttpClient _httpClient;
+    private readonly AppEdition _edition;
+    private const string ProUpdateMessage = "Pro 版は無料版の自動更新を利用できません。Pro の更新配布先をご確認ください。";
 
-    public AppUpdateService(HttpClient? httpClient = null)
+    public AppUpdateService(HttpClient? httpClient = null, IEditionPolicy? editionPolicy = null)
     {
+        // Snapshot the build identity once. No mutable setting can switch this updater to another edition.
+        _edition = (editionPolicy ?? EditionPolicy.Current).Edition;
         _httpClient = httpClient ?? new HttpClient
         {
             Timeout = TimeSpan.FromSeconds(5)
@@ -32,6 +38,9 @@ public sealed class AppUpdateService : IAppUpdateService
 
     public async Task<AppUpdateCheckResult> CheckForUpdatesAsync(CancellationToken cancellationToken = default)
     {
+        // Guard before even constructing a request: the public channel only distributes Free installers.
+        if (_edition != AppEdition.Free) return AppUpdateCheckResult.Failed(ProUpdateMessage);
+
         try
         {
             using var request = new HttpRequestMessage(HttpMethod.Get, BuildManifestUrl());
@@ -49,6 +58,10 @@ public sealed class AppUpdateService : IAppUpdateService
             response.EnsureSuccessStatusCode();
 
             var manifestJson = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            if (!HasCompatibleEditionMetadata(manifestJson))
+            {
+                return AppUpdateCheckResult.Failed("update.json の edition が Free 版と一致しません。");
+            }
             var manifest = JsonSerializer.Deserialize<AppUpdateManifest>(manifestJson, JsonOptions);
             if (!TryNormalizeManifest(manifest, out var normalizedManifest, out var manifestError))
             {
@@ -93,6 +106,10 @@ public sealed class AppUpdateService : IAppUpdateService
         AppUpdateManifest manifest,
         CancellationToken cancellationToken = default)
     {
+        // This public entry point must be safe even without a preceding update check.
+        // Fail before HTTP, directory creation, writing a file or starting any installer.
+        if (_edition != AppEdition.Free) return AppUpdateDownloadResult.DownloadFailed(ProUpdateMessage);
+
         if (!TryNormalizeManifest(manifest, out var normalizedManifest, out var manifestError))
         {
             return AppUpdateDownloadResult.DownloadFailed(manifestError ?? "update.json の形式が不正です。");
@@ -191,6 +208,13 @@ public sealed class AppUpdateService : IAppUpdateService
             return false;
         }
 
+        if (manifest.Edition is not null &&
+            !string.Equals(manifest.Edition, nameof(AppEdition.Free), StringComparison.OrdinalIgnoreCase))
+        {
+            errorMessage = "update.json の edition が Free 版と一致しません。";
+            return false;
+        }
+
         var version = manifest.Version?.Trim();
         var installerUrl = manifest.InstallerUrl?.Trim();
         var sha256 = manifest.Sha256?.Trim();
@@ -226,6 +250,7 @@ public sealed class AppUpdateService : IAppUpdateService
 
         normalizedManifest = new AppUpdateManifest
         {
+            Edition = manifest.Edition is null ? null : nameof(AppEdition.Free),
             Version = version,
             InstallerUrl = installerUrl,
             Sha256 = sha256.ToLowerInvariant(),
@@ -233,6 +258,23 @@ public sealed class AppUpdateService : IAppUpdateService
             ReleaseNotesUrl = string.IsNullOrWhiteSpace(releaseNotesUrl) ? null : releaseNotesUrl
         };
 
+        return true;
+    }
+
+    private static bool HasCompatibleEditionMetadata(string manifestJson)
+    {
+        using var document = JsonDocument.Parse(manifestJson);
+        if (document.RootElement.ValueKind != JsonValueKind.Object) return false;
+        var seenEdition = false;
+        foreach (var property in document.RootElement.EnumerateObject())
+        {
+            if (!property.Name.Equals("edition", StringComparison.OrdinalIgnoreCase)) continue;
+            // Explicit nulls, invalid values and duplicate/case-aliased metadata fail closed.
+            if (seenEdition || property.Value.ValueKind != JsonValueKind.String ||
+                !string.Equals(property.Value.GetString(), nameof(AppEdition.Free), StringComparison.OrdinalIgnoreCase))
+                return false;
+            seenEdition = true;
+        }
         return true;
     }
 

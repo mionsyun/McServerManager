@@ -133,8 +133,8 @@
                             <StackPanel>
                                 <TextBlock Text="⇩" FontSize="30" HorizontalAlignment="Center" Foreground="{DynamicResource BrushAccent}"/>
                                 <TextBlock Text="取り込み" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,8,0,0"/>
-                                <TextBlock Text=".mrpack / サーバーpack zip から取り込み。" Style="{StaticResource MutedText}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,6,0,0"/>
-                                <TextBlock Text="ファイル → 名前 → 作成" Style="{StaticResource MutedText}" FontSize="10.5" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                                <TextBlock Text="テンプレートファイルの形式と設定を確認。" Style="{StaticResource MutedText}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,6,0,0"/>
+                                <TextBlock Text="ファイル → 内容の確認（作成は未対応）" Style="{StaticResource MutedText}" FontSize="10.5" HorizontalAlignment="Center" Margin="0,10,0,0"/>
                             </StackPanel>
                         </Button>
                     </UniformGrid>
@@ -461,14 +461,87 @@
             <!-- ════ 取り込み(近日対応) ════ -->
             <Border Style="{StaticResource Card}" VerticalAlignment="Top"
                     Visibility="{Binding Route, Converter={StaticResource EqualsToVisibilityConverter}, ConverterParameter=import}">
-                <StackPanel HorizontalAlignment="Center" Margin="0,30">
-                    <TextBlock Text="⇩" FontSize="40" HorizontalAlignment="Center" Foreground="{DynamicResource BrushTextMuted}"/>
-                    <TextBlock Text="ファイルからの取り込みは近日対応予定です" FontWeight="SemiBold" FontSize="15" HorizontalAlignment="Center" Margin="0,12,0,0"/>
-                    <TextBlock TextWrapping="Wrap" TextAlignment="Center" Style="{StaticResource MutedText}" MaxWidth="420" Margin="0,8,0,0"
-                               Text=".mrpack(Modrinth)やサーバーpack zip の取り込みに対応予定です。現在は「詳細設定」から手動で作成してください。"/>
-                    <Button Content="詳細設定で作成 →" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Center" Margin="0,16,0,0"
-                            Command="{Binding SelectRouteCommand}" CommandParameter="advanced"/>
-                </StackPanel>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="20" DataContext="{Binding TemplateInspection}">
+                        <TextBlock Text="テンプレートの内容を確認" Style="{StaticResource SectionHeading}"/>
+                        <TextBlock Text=".maipilot-template.json の形式を確認し、参加者用のクライアント定義があれば案内を確認・保存できます。テンプレートからのサーバー作成、MODの取得・追加はまだできません。" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                            <Button x:Name="TemplateImportButton" Content="テンプレートを選ぶ…" Click="OnInspectTemplate" Padding="16,8"/>
+                            <Button x:Name="CancelTemplateInspectionButton" Content="確認を取り消す" Click="OnCancelTemplateInspection"
+                                    IsEnabled="False" Margin="10,0,0,0" Padding="16,8"/>
+                        </StackPanel>
+                        <TextBlock x:Name="TemplateReadStatus" Text="テンプレートを読み込んでいます…" Visibility="Collapsed"
+                                   TextWrapping="Wrap" Margin="0,12,0,0" AutomationProperties.LiveSetting="Polite"/>
+                        <ProgressBar x:Name="TemplateReadProgress" IsIndeterminate="True" Height="6" Margin="0,8,0,0"
+                                     Visibility="Collapsed" AutomationProperties.Name="テンプレートの読み込みと形式の確認中"/>
+                        <TextBlock Text="{Binding Summary}" TextWrapping="Wrap" Margin="0,16,0,0"/>
+                        <Border Style="{StaticResource SurfacePanel}" Margin="0,16,0,0" DataContext="{Binding RuntimeInspection}">
+                            <StackPanel>
+                                <TextBlock Text="Vanilla 本体ファイルの確認" Style="{StaticResource SectionHeading}"/>
+                                <TextBlock Text="ボタンを押すと公式サーバー JAR（最大128 MiB）と配布情報を取得し、サイズとハッシュを照合します。ディスクへの保存・実行・サーバー作成はしません。追加 MOD・互換性の検証とは別です。"
+                                           TextWrapping="Wrap" Style="{StaticResource MutedText}" Margin="0,8,0,0"/>
+                                <WrapPanel Margin="0,12,0,0">
+                                    <Button Content="本体を取得して確認（通信）" Click="OnInspectVanillaRuntime"
+                                            IsEnabled="{Binding CanInspect}" Padding="16,8" Margin="0,0,8,8"/>
+                                    <Button Content="本体の確認を取り消す" Click="OnCancelVanillaRuntime"
+                                            IsEnabled="{Binding IsBusy}" Padding="16,8" Margin="0,0,0,8"/>
+                                </WrapPanel>
+                                <TextBlock Text="{Binding Summary}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+                                <TextBlock Text="{Binding ProgressText}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                                <ProgressBar Value="{Binding ProgressPercent}" Minimum="0" Maximum="100" Height="6" Margin="0,8,0,0"
+                                             Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                             AutomationProperties.Name="Vanilla サーバー本体の取得と照合"/>
+                                <TextBlock Text="{Binding Details}" TextWrapping="Wrap" Margin="0,8,0,0" FontSize="11"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource SurfacePanel}" Margin="0,16,0,0">
+                            <StackPanel>
+                                <TextBlock Text="参加者向けの案内" Style="{StaticResource SectionHeading}"/>
+                                <TextBlock Text="{Binding ParticipantDefinitionStatus}" TextWrapping="Wrap" Margin="0,8,0,0"
+                                           AutomationProperties.LiveSetting="Polite"/>
+                                <StackPanel x:Name="ParticipantReviewControls" Margin="0,12,0,0">
+                                    <Button Content="参加者向け案内を確認" Click="OnReviewTemplateParticipants"
+                                            IsEnabled="{Binding CanReviewParticipantDefinition}" HorizontalAlignment="Left"
+                                            Style="{StaticResource PrimaryButton}" Padding="16,9"/>
+                                </StackPanel>
+                                <TextBlock Text="Free / Pro 共通。テンプレートに明記されたクライアント構成だけを使います。MOD 本体は含まず、提供元・依存関係・互換性は未検証です。"
+                                           Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,9,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <TextBlock Text="作成したい場合は、入口に戻って「おまかせ」または「詳細設定」を選んでください。確認したテンプレートは自動で適用されません。" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,20,0,0"/>
+                        <Expander Header="実際のMODと前提MODを確認（Fabric / Modrinth）" Margin="0,20,0,0"
+                                  DataContext="{Binding DataContext.ModInspection, RelativeSource={RelativeSource AncestorType=Window}}">
+                            <StackPanel Margin="0,12,0,0">
+                                <TextBlock Text="選んだJARのハッシュをModrinthへ照会し、配布情報・実ファイルの宣言を確認します。必要な正規ファイルを一時取得しますが、MODの導入・実行はしません。" TextWrapping="Wrap" Style="{StaticResource MutedText}"/>
+                                <WrapPanel Margin="0,10,0,0">
+                                    <Button Content="確認するMODを選ぶ…" Click="OnSelectInspectionMods" Padding="12,6"/>
+                                    <Button Content="導入済みMODと比較…" Click="OnSelectInstalledMods" Padding="12,6" Margin="8,0,0,0"/>
+                                    <Button Content="ファイル選択を解除" Click="OnClearInspectionMods" Padding="12,6" Margin="8,0,0,0"/>
+                                </WrapPanel>
+                                <TextBlock Text="{Binding FileSelection}" Margin="0,8,0,0"/>
+                                <TextBlock Text="または、確認するModrinth固定版ID（複数はカンマ区切り）" Margin="0,12,0,0"/>
+                                <TextBox Text="{Binding VersionIds, UpdateSourceTrigger=PropertyChanged}" MaxLength="4096"/>
+                                <TextBlock Text="配布元APIが要求する前提MODの固定版ID（必要な場合のみ。最新版を自動選択しません）" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                                <TextBox Text="{Binding DependencyVersionIds, UpdateSourceTrigger=PropertyChanged}" MaxLength="4096"/>
+                                <TextBlock Text="確認対象の版（例示の初期値です。実際の環境に合わせて変更してください）" TextWrapping="Wrap" Margin="0,12,0,0"/>
+                                <UniformGrid Columns="3" Margin="0,4,0,0">
+                                    <StackPanel Margin="0,0,8,0"><TextBlock Text="Minecraft"/><TextBox Text="{Binding MinecraftVersion, UpdateSourceTrigger=PropertyChanged}" MaxLength="96"/></StackPanel>
+                                    <StackPanel Margin="0,0,8,0"><TextBlock Text="Fabric Loader"/><TextBox Text="{Binding LoaderVersion, UpdateSourceTrigger=PropertyChanged}" MaxLength="96"/></StackPanel>
+                                    <StackPanel><TextBlock Text="Java"/><TextBox Text="{Binding JavaVersion, UpdateSourceTrigger=PropertyChanged}" MaxLength="96"/></StackPanel>
+                                </UniformGrid>
+                                <WrapPanel Margin="0,12,0,0">
+                                    <Button Content="配布元と実ファイルを確認" Click="OnInspectMods" Padding="16,8"/>
+                                    <Button Content="確認を取り消す" Click="OnCancelModInspection" IsEnabled="{Binding IsBusy}" Padding="16,8" Margin="8,0,0,0"/>
+                                </WrapPanel>
+                                <ProgressBar IsIndeterminate="True" Height="6" Margin="0,10,0,0" Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                <TextBlock Text="{Binding Summary}" TextWrapping="Wrap" Margin="0,12,0,0"/>
+                                <Expander Header="検出内容・依存経路・ファイル識別情報" Margin="0,8,0,0">
+                                    <TextBox Text="{Binding Details, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" MaxHeight="400" VerticalScrollBarVisibility="Auto"/>
+                                </Expander>
+                            </StackPanel>
+                        </Expander>
+                    </StackPanel>
+                </ScrollViewer>
             </Border>
         </Grid>
 

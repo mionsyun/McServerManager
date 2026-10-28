@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using McServerManager.ViewModels;
+using McServerManager.Views;
 using WpfPoint = System.Windows.Point;
 using WpfRect = System.Windows.Rect;
 
@@ -12,13 +13,88 @@ namespace McServerManager;
 public partial class MainWindow : Window
 {
     private TutorialViewModel? _tutorial;
+    private readonly Func<ParticipantExportWindow>? _participantExportWindowFactory;
+    private bool _participantExportOpen;
+    private readonly Func<TemplateAuthoringWindow>? _templateAuthoringWindowFactory;
+    private bool _templateAuthoringOpen;
 
     public MainWindow()
     {
         InitializeComponent();
+        ParticipantExportButton.IsEnabled = false;
         Loaded += OnLoaded;
         SizeChanged += (_, _) => UpdateTutorialLayout();
         DataContextChanged += (_, _) => BindTutorial();
+    }
+
+    public MainWindow(Func<ParticipantExportWindow> participantExportWindowFactory) : this()
+    {
+        _participantExportWindowFactory = participantExportWindowFactory
+            ?? throw new ArgumentNullException(nameof(participantExportWindowFactory));
+        ParticipantExportButton.IsEnabled = true;
+    }
+
+    public MainWindow(Func<ParticipantExportWindow> participantExportWindowFactory,
+        Func<TemplateAuthoringWindow> templateAuthoringWindowFactory) : this(participantExportWindowFactory)
+    {
+        _templateAuthoringWindowFactory = templateAuthoringWindowFactory
+            ?? throw new ArgumentNullException(nameof(templateAuthoringWindowFactory));
+    }
+
+    private void OpenTemplateAuthoring(object sender, RoutedEventArgs e)
+    {
+        if (_templateAuthoringOpen || _templateAuthoringWindowFactory is null
+            || DataContext is not MainViewModel { Edition.IsPro: true }) return;
+        _templateAuthoringOpen = true;
+        try
+        {
+            var window = _templateAuthoringWindowFactory();
+            window.Owner = this;
+            window.ShowDialog();
+        }
+        finally
+        {
+            _templateAuthoringOpen = false;
+        }
+    }
+
+    private void OpenParticipantExport(object sender, RoutedEventArgs e)
+    {
+        if (_participantExportOpen || _participantExportWindowFactory is null) return;
+        _participantExportOpen = true;
+        try
+        {
+            var window = _participantExportWindowFactory();
+            window.Owner = this;
+            window.ShowDialog();
+        }
+        finally
+        {
+            _participantExportOpen = false;
+        }
+    }
+
+    private void OpenRegisteredSettingsTemplate(object sender, RoutedEventArgs e)
+    {
+        if (_templateAuthoringOpen || _templateAuthoringWindowFactory is null
+            || DataContext is not MainViewModel { Edition.IsPro: true, SelectedServer: { } target }) return;
+        if (target.HasPendingChanges)
+        {
+            System.Windows.MessageBox.Show(this, "未保存のサーバー設定があります。保存または取り消してから登録設定をコピーしてください。",
+                "登録設定から下書き", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        // Capture the action target once. No directory reads, leases, or runtime operations occur here.
+        var source = target.GetTemplateDraftSource();
+        _templateAuthoringOpen = true;
+        try
+        {
+            var window = _templateAuthoringWindowFactory();
+            window.Owner = this;
+            window.LoadRegisteredSettings(source);
+            window.ShowDialog();
+        }
+        finally { _templateAuthoringOpen = false; }
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)

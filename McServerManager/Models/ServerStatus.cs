@@ -5,5 +5,6 @@ public enum ServerStatus
     Stopped,
     Starting,
     Running,
-    Stopping
+    Stopping,
+    Unknown
 }

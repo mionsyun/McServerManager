@@ -1,10 +1,13 @@
 using McServerManager.Models;
+using McServerManager.Services.RuntimeLifecycle;
 
 namespace McServerManager.Services;
 
 public interface IServerRuntimeManager
 {
     event Action<ServerConfig, int?>? ServerCrashed;
+
+    IRuntimeOperationCoordinator Operations { get; }
 
     ServerRuntime GetOrCreate(ServerConfig config);
     bool TryRelease(string serverId);

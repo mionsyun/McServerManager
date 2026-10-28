@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using WpfPoint = System.Windows.Point;
 using WpfRect = System.Windows.Rect;
 using McServerManager.Models;
@@ -323,10 +323,10 @@ public sealed class TutorialViewModel : ObservableObject
 
     public void Finish()
     {
-        IsActive = false;
-        _settings.HasCompletedTutorial = true;
-        // _settings は起動直後に読んだもの。丸ごと保存すると初回案内の表示済みフラグなどを戻してしまう
+        // Persist first so a failed save does not pretend that onboarding was retained.
         _settingsService.Update(s => s.HasCompletedTutorial = true);
+        _settings.HasCompletedTutorial = true;
+        IsActive = false;
     }
 
     private void Next()
